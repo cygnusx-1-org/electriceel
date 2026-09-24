@@ -37,6 +37,7 @@ public class BackupAndRestoreManager implements MotherActivity.OnPermissions {
     private final BackupAndRestoreHelper mHelper;
     private final boolean mForceApi30;
     private Runnable mPendingHandler;
+    private Runnable mPendingDeniedHandler;
     private Disposable mZipAction;
 
     public interface OnBackupNames {
@@ -305,7 +306,11 @@ public class BackupAndRestoreManager implements MotherActivity.OnPermissions {
                     mPendingHandler.run();
                     mPendingHandler = null;
                 }
+            } else if (mPendingDeniedHandler != null) {
+                mPendingDeniedHandler.run();
             }
+
+            mPendingDeniedHandler = null;
         }
     }
 
@@ -322,7 +327,12 @@ public class BackupAndRestoreManager implements MotherActivity.OnPermissions {
     }
 
     public String getRestoreRootPath() {
-        // NOTE: Android 11+ only restore through the file manager (no shared dir)
+        // NOTE: Android 11+ restores the zips made by the backup
+        if (hasAccessOnlyToAppFolders() && VERSION.SDK_INT > 29) {
+            return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).getAbsolutePath()
+                    + "/" + BackupAndRestoreHelper.BACKUP_FOLDER_NAME;
+        }
+
         if (hasAccessOnlyToAppFolders()) {
             return getExternalStorageDirectory().toString();
         }
@@ -342,6 +352,54 @@ public class BackupAndRestoreManager implements MotherActivity.OnPermissions {
                 mPendingHandler = () -> callback.onBackupNames(getBackupNames());
                 verifyStoragePermissionsAndReturn();
             }
+        }
+    }
+
+    /**
+     * Android 11+: backup zips from Documents/SmartTubeBackup (empty list on older versions)
+     */
+    public void getBackupZipNames(OnBackupNames callback) {
+        if (!hasAccessOnlyToAppFolders() || VERSION.SDK_INT < 29) {
+            callback.onBackupNames(new ArrayList<>());
+            return;
+        }
+
+        // Without access only this app's own zips are visible (MediaStore)
+        Runnable showZips = () -> callback.onBackupNames(mHelper.getBackupZipNames());
+
+        if (mHelper.hasBackupDirAccess()) {
+            showZips.run();
+        } else if (mHelper.hasLegacyStorage()) {
+            // targetSdk < 29: the storage permission is enough
+            if (!PermissionHelpers.hasStoragePermissions(mContext) && mContext instanceof MotherActivity) {
+                mPendingHandler = showZips;
+                mPendingDeniedHandler = showZips;
+                verifyStoragePermissionsAndReturn();
+            } else {
+                showZips.run();
+            }
+        } else if (!mHelper.requestAllFilesAccess(showZips)) {
+            showZips.run();
+        }
+    }
+
+    public void restoreZip(String zipName) {
+        if (!mHelper.unpackBackupZip(zipName)) {
+            MessageHelpers.showLongMessage(mContext, "Oops. Can't read the backup: " + zipName);
+            return;
+        }
+
+        // The unpacked zip replaces the app dirs found before
+        mBackupDirs.clear();
+        List<String> names = getBackupNames();
+        String zipPackage = BackupAndRestoreHelper.getZipPackageName(zipName);
+
+        if (names.contains(zipPackage)) {
+            restoreData(zipPackage);
+        } else if (!names.isEmpty()) {
+            restoreData(names.get(0));
+        } else {
+            MessageHelpers.showLongMessage(mContext, "Oops. Backup folder is empty.");
         }
     }
 

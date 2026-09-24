@@ -1,13 +1,18 @@
 package com.liskovsoft.smartyoutubetv2.common.misc;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build.VERSION;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.provider.OpenableColumns;
+import android.provider.Settings;
 
 import com.liskovsoft.sharedutils.helpers.DateHelper;
 import com.liskovsoft.sharedutils.helpers.FileHelpers;
@@ -22,12 +27,23 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class BackupAndRestoreHelper implements OnResult {
     public static final String BACKUP_FOLDER_NAME = "SmartTubeBackup";
     private static final int REQ_PICK_FILES = 1001;
+    private static final int REQ_ALL_FILES_ACCESS = 1002;
+    // <app_id>_<yyyyMMdd-HHmmss>.zip
+    private static final Pattern BACKUP_ZIP_PATTERN = Pattern.compile("^([A-Za-z]\\w*(?:\\.[A-Za-z]\\w*)+)_(\\d{8}-\\d{6})\\.zip$");
     private final Context mContext;
     private Runnable mOnSuccess;
+    private Runnable mOnAllFilesAccess;
     private final String[] mPreferredFileManagers = {
             "com.ghisler.android.TotalCommander",
             "com.lonelycatgames.Xplore",
@@ -145,7 +161,68 @@ public class BackupAndRestoreHelper implements OnResult {
             }
 
             unpackTempZip(uri, () -> mOnSuccess.run(), null);
+        } else if (requestCode == REQ_ALL_FILES_ACCESS) {
+            // The settings page always returns RESULT_CANCELED. Show what we have either way.
+            Runnable onDone = mOnAllFilesAccess;
+            mOnAllFilesAccess = null;
+            if (onDone != null) {
+                onDone.run();
+            }
         }
+    }
+
+    /**
+     * Every app id's zips in Documents/SmartTubeBackup are readable as plain files
+     */
+    public boolean hasBackupDirAccess() {
+        return hasAllFilesAccess() || hasLegacyBackupDirAccess();
+    }
+
+    /**
+     * Android 11+: Settings - Apps - Special app access - All files access
+     */
+    public boolean hasAllFilesAccess() {
+        return VERSION.SDK_INT >= 30 && Environment.isExternalStorageManager();
+    }
+
+    /**
+     * Opens the "All files access" settings page of this app
+     * @return false if the page couldn't be shown (onDone won't be called)
+     */
+    public boolean requestAllFilesAccess(Runnable onDone) {
+        if (VERSION.SDK_INT < 30 || !(mContext instanceof MotherActivity)) {
+            return false;
+        }
+
+        Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.fromParts("package", mContext.getPackageName(), null));
+
+        if (intent.resolveActivity(mContext.getPackageManager()) == null) {
+            return false;
+        }
+
+        mOnAllFilesAccess = onDone;
+        ((MotherActivity) mContext).addOnResult(this);
+
+        try {
+            ((Activity) mContext).startActivityForResult(intent, REQ_ALL_FILES_ACCESS);
+        } catch (ActivityNotFoundException e) {
+            mOnAllFilesAccess = null;
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Legacy storage (targetSdk &lt; 29) + the storage permission
+     */
+    public boolean hasLegacyBackupDirAccess() {
+        return hasLegacyStorage() && (VERSION.SDK_INT < 23 ||
+                mContext.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
+    }
+
+    public boolean hasLegacyStorage() {
+        return VERSION.SDK_INT < 29 || Environment.isExternalStorageLegacy();
     }
 
     public void handleIncomingZip(Intent intent) {
@@ -282,6 +359,99 @@ public class BackupAndRestoreHelper implements OnResult {
             return name;
         }
         return null;
+    }
+
+    /**
+     * Backup zips in Documents/SmartTubeBackup named &lt;app_id&gt;_&lt;timestamp&gt;.zip (any app id), newest first
+     */
+    public List<String> getBackupZipNames() {
+        Map<String, Long> zips = new HashMap<>();
+
+        // Direct access (All files access or legacy storage): sees zips of every app id
+        File[] files = getBackupZipDir().listFiles();
+
+        if (files != null) {
+            for (File file : files) {
+                if (isRestorableZip(file.getName())) {
+                    zips.put(file.getName(), file.lastModified());
+                }
+            }
+        }
+
+        // MediaStore: always sees zips made by this app id
+        if (VERSION.SDK_INT >= 29) {
+            String[] projection = { MediaStore.MediaColumns.DISPLAY_NAME, MediaStore.MediaColumns.DATE_MODIFIED };
+            String selection = MediaStore.MediaColumns.RELATIVE_PATH + "=?";
+            String[] selectionArgs = { Environment.DIRECTORY_DOCUMENTS + "/" + BACKUP_FOLDER_NAME + "/" };
+
+            try (Cursor cursor = mContext.getContentResolver().query(
+                    MediaStore.Files.getContentUri("external"), projection, selection, selectionArgs, null)) {
+                while (cursor != null && cursor.moveToNext()) {
+                    String name = cursor.getString(0);
+                    if (isRestorableZip(name) && !zips.containsKey(name)) {
+                        zips.put(name, cursor.getLong(1) * 1_000);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        List<String> result = new ArrayList<>(zips.keySet());
+        Collections.sort(result, (a, b) -> Long.compare(zips.get(b), zips.get(a)));
+
+        return result;
+    }
+
+    /**
+     * Unpack a zip from Documents/SmartTubeBackup into /Android/media/&lt;package&gt;/data
+     */
+    public boolean unpackBackupZip(String zipName) {
+        File tempZip = new File(FileHelpers.getExternalMediaDirectory(mContext), zipName);
+        File source = new File(getBackupZipDir(), zipName);
+
+        if (tempZip.exists()) {
+            tempZip.delete();
+        }
+
+        try {
+            if (source.canRead()) {
+                FileHelpers.copy(source, tempZip);
+            } else if (VERSION.SDK_INT >= 29) {
+                new MediaStoreFile(mContext, zipName, BACKUP_FOLDER_NAME).copyTo(tempZip);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (!tempZip.exists()) {
+            return false;
+        }
+
+        unpackTempZip(tempZip);
+
+        return true;
+    }
+
+    /**
+     * Zip name format: &lt;app_id&gt;_&lt;timestamp&gt;.zip, e.g. org.smarttube.stable_20260923-211959.zip
+     */
+    public static String getZipPackageName(String zipName) {
+        if (zipName == null) {
+            return null;
+        }
+
+        Matcher matcher = BACKUP_ZIP_PATTERN.matcher(zipName);
+
+        return matcher.matches() ? matcher.group(1) : null;
+    }
+
+    private static boolean isRestorableZip(String name) {
+        return getZipPackageName(name) != null;
+    }
+
+    private static File getBackupZipDir() {
+        return new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), BACKUP_FOLDER_NAME);
     }
 
     private GeneralData getGeneralData() {

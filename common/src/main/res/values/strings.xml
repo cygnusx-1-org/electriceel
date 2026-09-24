@@ -354,6 +354,11 @@
     <string name="player_seek_confirmation_pause">With confirmation (pause while seeking)</string>
     <string name="player_seek_confirmation_play">With confirmation (play while seeking)</string>
     <string name="hide_shorts_from_home">Hide shorts from Home</string>
+    <string name="hide_music_from_home">Hide music videos from Home</string>
+    <string name="hide_gaming_from_home">Hide gaming videos from Home</string>
+    <string name="hide_sports_from_home">Hide sports videos from Home</string>
+    <string name="hide_news_from_home">Hide news videos from Home</string>
+    <string name="hide_tech_from_home">Hide science and tech videos from Home</string>
     <string name="finish_on_disconnect">Close the app after disconnecting the phone/tablet</string>
     <string name="update_error">Update error</string>
     <string name="hide_shorts_from_search">Hide shorts from the search result</string>

@@ -152,6 +152,26 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
                 option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_SHORTS_HOME, option.isSelected()),
                 mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_SHORTS_HOME)));
 
+        options.add(UiOptionItem.from(getContext().getString(R.string.hide_music_from_home),
+                option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_MUSIC_HOME, option.isSelected()),
+                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_MUSIC_HOME)));
+
+        options.add(UiOptionItem.from(getContext().getString(R.string.hide_gaming_from_home),
+                option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_GAMING_HOME, option.isSelected()),
+                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_GAMING_HOME)));
+
+        options.add(UiOptionItem.from(getContext().getString(R.string.hide_sports_from_home),
+                option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_SPORTS_HOME, option.isSelected()),
+                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_SPORTS_HOME)));
+
+        options.add(UiOptionItem.from(getContext().getString(R.string.hide_news_from_home),
+                option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_NEWS_HOME, option.isSelected()),
+                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_NEWS_HOME)));
+
+        options.add(UiOptionItem.from(getContext().getString(R.string.hide_tech_from_home),
+                option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_TECH_HOME, option.isSelected()),
+                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_TECH_HOME)));
+
         options.add(UiOptionItem.from(getContext().getString(R.string.hide_shorts_channel),
                 option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_SHORTS_CHANNEL, option.isSelected()),
                 mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_SHORTS_CHANNEL)));

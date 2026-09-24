@@ -54,7 +54,7 @@ android {
     
     defaultConfig {
         // values linked with applicationId: searchable.searchSuggestAuthority, searchable.searchSuggestIntentData, VideoContract.CONTENT_AUTHORITY
-        applicationId "app.smarttube"
+        applicationId "org.cygnusx1.electriceel"
         minSdkVersion project.properties.minSdkVersion
         targetSdkVersion project.properties.targetSdkVersion
         versionCode 2446
@@ -123,7 +123,7 @@ android {
     // https://stackoverflow.com/questions/18332474/how-to-set-versionname-in-apk-filename-using-gradle
     applicationVariants.all { variant ->
         variant.outputs.all { output ->
-            def project = "SmartTube"
+            def project = "ElectricEel"
             def flavor = variant.productFlavors[-1].name.substring(2) // remove st prefix
             def buildType = variant.buildType.name.take(1)
             def version = variant.versionName
@@ -160,22 +160,10 @@ android {
     // NOTE: The main goal of prefixing a flavor is to group flavors' folders together
     productFlavors {
         stbeta {
-            applicationId "org.smarttube.beta"
-            targetSdkVersion project.properties.compileSdkVersion
+            applicationId "org.cygnusx1.electriceel.beta"
         }
         ststable {
-            applicationId "org.smarttube.stable"
-            targetSdkVersion project.properties.compileSdkVersion
-        }
-        stfdroid {
-            applicationId "app.smarttube.fdroid"
-            minSdkVersion 21
-            targetSdkVersion project.properties.compileSdkVersion
-
-            // The content of Universal apk
-            ndk {
-                abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86'
-            }
+            applicationId "org.cygnusx1.electriceel.stable"
         }
     }
 }

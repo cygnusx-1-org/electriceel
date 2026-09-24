@@ -1,5 +1,5 @@
 <resources translatable="false">
-    <string name="search_label">SmartTube</string>
-    <string name="settings_description">SmartTube Videos</string>
+    <string name="search_label">Electric Eel</string>
+    <string name="settings_description">Electric Eel Videos</string>
     <string name="search_authority">app.smarttube.fdroid.search_provider</string>
 </resources>

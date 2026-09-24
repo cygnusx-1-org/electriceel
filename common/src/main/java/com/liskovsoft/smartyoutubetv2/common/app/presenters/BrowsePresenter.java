@@ -42,6 +42,7 @@ import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager.AccountChangeListener;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AccountsData;
 import com.liskovsoft.smartyoutubetv2.common.misc.AiSListManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
@@ -735,7 +736,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
 
         AtomicInteger groupIndex = new AtomicInteger(-1);
 
-        Disposable updateAction = groups
+        Disposable updateAction = VideoCategoryManager.instance(getContext()).resolveGroups(groups)
                 .subscribe(
                         mediaGroups -> {
                             getView().showProgressBar(false);
@@ -792,7 +793,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
             return;
         }
 
-        Disposable updateAction = group
+        Disposable updateAction = VideoCategoryManager.instance(getContext()).resolveGroup(group)
                 .subscribe(
                         mediaGroup -> {
                             getView().showProgressBar(false);
@@ -855,7 +856,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         //    continuation = getContentService().continueGroupObserve(mediaGroup);
         //}
 
-        continuation = getContentService().continueGroupObserve(mediaGroup);
+        continuation = VideoCategoryManager.instance(getContext()).resolveGroup(getContentService().continueGroupObserve(mediaGroup));
 
         Disposable continueAction = continuation
                 .subscribe(

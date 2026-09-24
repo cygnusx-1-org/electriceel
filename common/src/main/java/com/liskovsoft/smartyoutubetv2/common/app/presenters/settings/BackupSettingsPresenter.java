@@ -199,9 +199,16 @@ public class BackupSettingsPresenter extends BasePresenter<Void> {
         options.add(UiOptionItem.from(
                 backupPath == null ? getContext().getString(R.string.app_restore) :
                     String.format("%s:\n%s", getContext().getString(R.string.app_restore), restorePath),
-                hasFullStorageAccess ? null : getContext().getString(R.string.app_restore_desc),
+                null,
                 option -> {
-                    backupManager.getBackupNames(names -> showLocalRestoreDialog(backupManager, names));
+                    backupManager.getBackupZipNames(zipNames -> {
+                        if (zipNames.isEmpty()) {
+                            // No zips (or Android 10 and older): the unpacked backup dirs
+                            backupManager.getBackupNames(names -> showLocalRestoreDialog(backupManager, names));
+                        } else {
+                            showZipRestoreSelectorDialog(zipNames, backupManager);
+                        }
+                    });
                 }));
     }
 
@@ -215,6 +222,22 @@ public class BackupSettingsPresenter extends BasePresenter<Void> {
         } else {
             MessageHelpers.showLongMessage(getContext(), R.string.nothing_found);
         }
+    }
+
+    private void showZipRestoreSelectorDialog(List<String> zipNames, BackupAndRestoreManager backupManager) {
+        AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
+        List<OptionItem> options = new ArrayList<>();
+
+        for (String name : zipNames) {
+            options.add(UiOptionItem.from(name, optionItem -> {
+                AppDialogUtil.showConfirmationDialog(getContext(), getContext().getString(R.string.app_restore), () -> {
+                    backupManager.restoreZip(name);
+                });
+            }));
+        }
+
+        dialog.appendStringsCategory(getContext().getString(R.string.app_restore), options);
+        dialog.showDialog();
     }
 
     private void showLocalRestoreSelectorDialog(List<String> backups, BackupAndRestoreManager backupManager) {

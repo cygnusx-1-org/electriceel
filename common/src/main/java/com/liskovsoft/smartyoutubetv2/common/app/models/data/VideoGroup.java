@@ -9,6 +9,7 @@ import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.service.VideoStateService;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.service.VideoStateService.State;
 import com.liskovsoft.smartyoutubetv2.common.misc.AiSListManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
 
 import java.util.ArrayList;
@@ -455,7 +456,7 @@ public class VideoGroup {
     }
 
     public void add(int idx, Video video) {
-        if (video == null || video.isEmpty() || isChannelBlocked(video) || isAiListed(video) || isWatchedSuggestion(video)) {
+        if (video == null || video.isEmpty() || isChannelBlocked(video) || isAiListed(video) || isHiddenCategory(video) || isWatchedSuggestion(video)) {
             return;
         }
 
@@ -527,6 +528,33 @@ public class VideoGroup {
         video.aiMarkList = manager.getMarkedList(video.channelHandle, section);
 
         return false;
+    }
+
+    /**
+     * The categories are looked up before the group is created (see VideoCategoryManager)
+     */
+    private boolean isHiddenCategory(Video video) {
+        // No context before the app is initialized (GlobalPreferences)
+        if (video.isChapter || video.videoId == null || GlobalPreferences.context() == null) {
+            return false;
+        }
+
+        VideoCategoryManager manager = VideoCategoryManager.instance(GlobalPreferences.context());
+
+        if (!manager.isGroupEnabled(getType())) {
+            return false;
+        }
+
+        String category = manager.getCachedCategory(video.videoId);
+        boolean isHidden = manager.isHidden(category);
+
+        // CATDBG: temporary logging
+        if (isHidden || category == null) {
+            Log.d(TAG, "CATDBG add %s '%s' row '%s': category %s -> %s", video.videoId, video.getTitle(), getTitle(), category,
+                    isHidden ? "HIDDEN" : "SHOWN (no category)");
+        }
+
+        return isHidden;
     }
 
     public int getAiSListSection() {
