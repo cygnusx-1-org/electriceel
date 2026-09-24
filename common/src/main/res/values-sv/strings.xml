@@ -756,4 +756,27 @@
     <item quantity="one">%s sekund</item>
     <item quantity="other">%s sekunder</item>
   </plurals>
+    <string name="header_blocked_ai_channels">Blockerade AI-kanaler</string>
+    <string name="aislist_mark_videos">Markera videor</string>
+    <string name="aislist_mark_off">Av</string>
+    <string name="aislist_mark_in_mark_only">Markera videor endast i avsnitten \"endast markering\"</string>
+    <string name="aislist_mark_instead_of_hide">Markera videor i stället för att dölja dem</string>
+    <string name="aislist_mark_instead_of_hide_desc">Listade videor stannar kvar i flödena med etiketten \"AI\" och läggs inte till i Blockerade AI-kanaler</string>
+    <string name="aislist_mark">AI</string>
+    <string name="aislist_mark_color">Markeringsfärg</string>
+    <string name="aislist_sections">Avsnitt</string>
+    <string name="aislist_watch_later">Titta senare</string>
+    <string name="aislist_mark_only">%s (endast markering)</string>
+    <string name="aislist_everything">Allt</string>
+    <string name="aislist_mark_color_off">Av (samma som korttexten)</string>
+    <string name="aislist_color_red">Röd</string>
+    <string name="aislist_color_orange">Orange</string>
+    <string name="aislist_color_yellow">Gul</string>
+    <string name="aislist_color_green">Grön</string>
+    <string name="aislist_color_blue">Blå</string>
+    <string name="aislist_blocklist">Blocklista (hög säkerhet)</string>
+    <string name="aislist_warnlist">Varningslista (måttlig säkerhet)</string>
+    <string name="aislist_status">Listade kanaler: %1$d på blocklistan, %2$d på varningslistan</string>
+    <string name="aislist_status_not_loaded">Laddar ner listorna…</string>
+    <string name="aislist_about">Om AiSList (communitylista, CC BY-NC 4.0)</string>
 </resources>

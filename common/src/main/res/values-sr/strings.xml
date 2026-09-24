@@ -710,4 +710,27 @@
     <string name="dont_resize_video_to_fit_dialog">Не мењај величину видеа да би се уклопио у дијалог</string>
     <string name="typing_corrections">Онемогући аутоматско исправљање приликом куцања текста</string>
     <string name="suggestions_horizontally_scrolled">Хоризонтално померани предлози</string>
+    <string name="header_blocked_ai_channels">Блокирани ВИ канали</string>
+    <string name="aislist_mark_videos">Означи видео снимке</string>
+    <string name="aislist_mark_off">Искључено</string>
+    <string name="aislist_mark_in_mark_only">Означи видео снимке само у одељцима \"само ознака\"</string>
+    <string name="aislist_mark_instead_of_hide">Означи видео снимке уместо да их сакријеш</string>
+    <string name="aislist_mark_instead_of_hide_desc">Видео снимке са листе остају у фидовима са ознаком \"ВИ\" и не додају се у блокиране ВИ канале</string>
+    <string name="aislist_mark">ВИ</string>
+    <string name="aislist_mark_color">Боја ознаке</string>
+    <string name="aislist_sections">Одељци</string>
+    <string name="aislist_watch_later">Гледај касније</string>
+    <string name="aislist_mark_only">%s (само ознака)</string>
+    <string name="aislist_everything">Све</string>
+    <string name="aislist_mark_color_off">Искључено (као текст картице)</string>
+    <string name="aislist_color_red">Црвена</string>
+    <string name="aislist_color_orange">Наранџаста</string>
+    <string name="aislist_color_yellow">Жута</string>
+    <string name="aislist_color_green">Зелена</string>
+    <string name="aislist_color_blue">Плава</string>
+    <string name="aislist_blocklist">Листа блокирања (висока поузданост)</string>
+    <string name="aislist_warnlist">Листа упозорења (умерена поузданост)</string>
+    <string name="aislist_status">Канали на листама: %1$d на листи блокирања, %2$d на листи упозорења</string>
+    <string name="aislist_status_not_loaded">Преузимање листа…</string>
+    <string name="aislist_about">О AiSList (листа заједнице, CC BY-NC 4.0)</string>
 </resources>

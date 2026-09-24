@@ -713,4 +713,27 @@
   <string name="channel_unblocked">차단 해제됨</string>
   <string name="header_blocked_channels">차단된 채널</string>
   <string name="msg_no_blocked_channels">차단된 채널 없음</string>
+    <string name="header_blocked_ai_channels">차단된 AI 채널</string>
+    <string name="aislist_mark_videos">동영상 표시</string>
+    <string name="aislist_mark_off">끄기</string>
+    <string name="aislist_mark_in_mark_only">\"표시만\" 섹션에서만 동영상 표시</string>
+    <string name="aislist_mark_instead_of_hide">숨기는 대신 동영상 표시</string>
+    <string name="aislist_mark_instead_of_hide_desc">목록에 있는 동영상은 \"AI\" 라벨과 함께 피드에 남으며 차단된 AI 채널에 추가되지 않습니다</string>
+    <string name="aislist_mark">AI</string>
+    <string name="aislist_mark_color">표시 색상</string>
+    <string name="aislist_sections">섹션</string>
+    <string name="aislist_watch_later">나중에 볼 동영상</string>
+    <string name="aislist_mark_only">%s (표시만)</string>
+    <string name="aislist_everything">전체</string>
+    <string name="aislist_mark_color_off">끄기 (카드 텍스트와 동일)</string>
+    <string name="aislist_color_red">빨간색</string>
+    <string name="aislist_color_orange">주황색</string>
+    <string name="aislist_color_yellow">노란색</string>
+    <string name="aislist_color_green">초록색</string>
+    <string name="aislist_color_blue">파란색</string>
+    <string name="aislist_blocklist">차단 목록 (높은 신뢰도)</string>
+    <string name="aislist_warnlist">경고 목록 (보통 신뢰도)</string>
+    <string name="aislist_status">목록에 있는 채널: 차단 목록 %1$d개, 경고 목록 %2$d개</string>
+    <string name="aislist_status_not_loaded">목록을 다운로드하는 중…</string>
+    <string name="aislist_about">AiSList 정보 (커뮤니티 목록, CC BY-NC 4.0)</string>
 </resources>

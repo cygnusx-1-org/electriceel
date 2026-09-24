@@ -708,4 +708,27 @@
   <string name="card_unlocalized_titles">Ikke-lokaliserede videotitler</string>
   <string name="dont_resize_video_to_fit_dialog">Skaler ikke video til at passe dialog</string>
   <string name="typing_corrections">Deaktiver autokorrektion under indtastning</string>
+    <string name="header_blocked_ai_channels">Blokerede AI-kanaler</string>
+    <string name="aislist_mark_videos">Markér videoer</string>
+    <string name="aislist_mark_off">Fra</string>
+    <string name="aislist_mark_in_mark_only">Markér kun videoer i sektionerne \"kun markering\"</string>
+    <string name="aislist_mark_instead_of_hide">Markér videoer i stedet for at skjule dem</string>
+    <string name="aislist_mark_instead_of_hide_desc">Listede videoer bliver i feeds med etiketten \"AI\" og føjes ikke til Blokerede AI-kanaler</string>
+    <string name="aislist_mark">AI</string>
+    <string name="aislist_mark_color">Markeringsfarve</string>
+    <string name="aislist_sections">Sektioner</string>
+    <string name="aislist_watch_later">Se senere</string>
+    <string name="aislist_mark_only">%s (kun markering)</string>
+    <string name="aislist_everything">Alt</string>
+    <string name="aislist_mark_color_off">Fra (samme som kortets tekst)</string>
+    <string name="aislist_color_red">Rød</string>
+    <string name="aislist_color_orange">Orange</string>
+    <string name="aislist_color_yellow">Gul</string>
+    <string name="aislist_color_green">Grøn</string>
+    <string name="aislist_color_blue">Blå</string>
+    <string name="aislist_blocklist">Blokeringsliste (høj sikkerhed)</string>
+    <string name="aislist_warnlist">Advarselsliste (moderat sikkerhed)</string>
+    <string name="aislist_status">Listede kanaler: %1$d på blokeringslisten, %2$d på advarselslisten</string>
+    <string name="aislist_status_not_loaded">Downloader listerne…</string>
+    <string name="aislist_about">Om AiSList (fællesskabsliste, CC BY-NC 4.0)</string>
 </resources>

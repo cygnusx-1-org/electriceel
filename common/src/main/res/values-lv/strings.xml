@@ -119,4 +119,27 @@
     <string name="sorting_by_new_content">Jauns saturs</string>
     <string name="sorting_alphabetically">Alfabētiski</string>
     <string name="sorting_last_viewed">Pēdējais skatītais</string>
+    <string name="header_blocked_ai_channels">Bloķētie MI kanāli</string>
+    <string name="aislist_mark_videos">Atzīmēt videoklipus</string>
+    <string name="aislist_mark_off">Izslēgts</string>
+    <string name="aislist_mark_in_mark_only">Atzīmēt videoklipus tikai sadaļās \"tikai atzīme\"</string>
+    <string name="aislist_mark_instead_of_hide">Atzīmēt videoklipus, nevis tos paslēpt</string>
+    <string name="aislist_mark_instead_of_hide_desc">Sarakstā iekļautie videoklipi paliek plūsmās ar atzīmi \"MI\" un netiek pievienoti bloķētajiem MI kanāliem</string>
+    <string name="aislist_mark">MI</string>
+    <string name="aislist_mark_color">Atzīmes krāsa</string>
+    <string name="aislist_sections">Sadaļas</string>
+    <string name="aislist_watch_later">Skatīties vēlāk</string>
+    <string name="aislist_mark_only">%s (tikai atzīme)</string>
+    <string name="aislist_everything">Viss</string>
+    <string name="aislist_mark_color_off">Izslēgts (kā kartītes teksts)</string>
+    <string name="aislist_color_red">Sarkana</string>
+    <string name="aislist_color_orange">Oranža</string>
+    <string name="aislist_color_yellow">Dzeltena</string>
+    <string name="aislist_color_green">Zaļa</string>
+    <string name="aislist_color_blue">Zila</string>
+    <string name="aislist_blocklist">Bloķēšanas saraksts (augsta ticamība)</string>
+    <string name="aislist_warnlist">Brīdinājumu saraksts (mērena ticamība)</string>
+    <string name="aislist_status">Kanāli sarakstos: %1$d bloķēšanas sarakstā, %2$d brīdinājumu sarakstā</string>
+    <string name="aislist_status_not_loaded">Lejupielādē sarakstus…</string>
+    <string name="aislist_about">Par AiSList (kopienas saraksts, CC BY-NC 4.0)</string>
 </resources>

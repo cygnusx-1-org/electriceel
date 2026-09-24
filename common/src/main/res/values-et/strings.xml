@@ -617,4 +617,27 @@
   <string name="disable_remote_history">Keela ajalugu kaugjuhtimise kasutamisel</string>
   <string name="keyboard_fix">Klaviatuuri kuvamise parandamine klahvivajutusega OK (G20s ja teised)</string>
   <string name="nothing_found">Midagi ei leitud</string>
+    <string name="header_blocked_ai_channels">Blokeeritud TI-kanalid</string>
+    <string name="aislist_mark_videos">Märgista videod</string>
+    <string name="aislist_mark_off">Väljas</string>
+    <string name="aislist_mark_in_mark_only">Märgista videod ainult jaotistes \"ainult märgis\"</string>
+    <string name="aislist_mark_instead_of_hide">Märgista videod peitmise asemel</string>
+    <string name="aislist_mark_instead_of_hide_desc">Loendis olevad videod jäävad voogudesse sildiga \"TI\" ja neid ei lisata blokeeritud TI-kanalite hulka</string>
+    <string name="aislist_mark">TI</string>
+    <string name="aislist_mark_color">Märgise värv</string>
+    <string name="aislist_sections">Jaotised</string>
+    <string name="aislist_watch_later">Vaata hiljem</string>
+    <string name="aislist_mark_only">%s (ainult märgis)</string>
+    <string name="aislist_everything">Kõik</string>
+    <string name="aislist_mark_color_off">Väljas (nagu kaardi tekst)</string>
+    <string name="aislist_color_red">Punane</string>
+    <string name="aislist_color_orange">Oranž</string>
+    <string name="aislist_color_yellow">Kollane</string>
+    <string name="aislist_color_green">Roheline</string>
+    <string name="aislist_color_blue">Sinine</string>
+    <string name="aislist_blocklist">Blokeerimisloend (kõrge kindlus)</string>
+    <string name="aislist_warnlist">Hoiatusloend (mõõdukas kindlus)</string>
+    <string name="aislist_status">Kanaleid loendites: %1$d blokeerimisloendis, %2$d hoiatusloendis</string>
+    <string name="aislist_status_not_loaded">Loendite allalaadimine…</string>
+    <string name="aislist_about">Teave AiSListi kohta (kogukonna loend, CC BY-NC 4.0)</string>
 </resources>

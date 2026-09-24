@@ -716,4 +716,27 @@
   <string name="channel_unblocked">Canal desbloqueado</string>
   <string name="header_blocked_channels">Canales bloqueados</string>
   <string name="msg_no_blocked_channels">No hay canales bloqueados</string>
+    <string name="header_blocked_ai_channels">Canales de IA bloqueados</string>
+    <string name="aislist_mark_videos">Marcar los vídeos</string>
+    <string name="aislist_mark_off">Desactivado</string>
+    <string name="aislist_mark_in_mark_only">Marcar los vídeos solo en las secciones \"solo marcar\"</string>
+    <string name="aislist_mark_instead_of_hide">Marcar los vídeos en lugar de ocultarlos</string>
+    <string name="aislist_mark_instead_of_hide_desc">Los vídeos listados permanecen en los feeds con la etiqueta \"IA\" y no se añaden a Canales de IA bloqueados</string>
+    <string name="aislist_mark">IA</string>
+    <string name="aislist_mark_color">Color del marcador</string>
+    <string name="aislist_sections">Secciones</string>
+    <string name="aislist_watch_later">Ver más tarde</string>
+    <string name="aislist_mark_only">%s (solo marcar)</string>
+    <string name="aislist_everything">Todo</string>
+    <string name="aislist_mark_color_off">Desactivado (igual que el texto de la tarjeta)</string>
+    <string name="aislist_color_red">Rojo</string>
+    <string name="aislist_color_orange">Naranja</string>
+    <string name="aislist_color_yellow">Amarillo</string>
+    <string name="aislist_color_green">Verde</string>
+    <string name="aislist_color_blue">Azul</string>
+    <string name="aislist_blocklist">Lista de bloqueo (confianza alta)</string>
+    <string name="aislist_warnlist">Lista de advertencia (confianza moderada)</string>
+    <string name="aislist_status">Canales listados: %1$d en la lista de bloqueo, %2$d en la lista de advertencia</string>
+    <string name="aislist_status_not_loaded">Descargando las listas…</string>
+    <string name="aislist_about">Acerca de AiSList (lista comunitaria, CC BY-NC 4.0)</string>
 </resources>

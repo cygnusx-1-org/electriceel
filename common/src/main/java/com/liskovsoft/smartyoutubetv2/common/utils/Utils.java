@@ -85,6 +85,7 @@ import com.liskovsoft.smartyoutubetv2.common.misc.MotherActivity;
 import com.liskovsoft.smartyoutubetv2.common.misc.RemoteControlService;
 import com.liskovsoft.smartyoutubetv2.common.misc.RemoteControlWorker;
 import com.liskovsoft.smartyoutubetv2.common.misc.ScreensaverManager;
+import com.liskovsoft.smartyoutubetv2.common.prefs.AiSListFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.HiddenPrefs;
@@ -1357,5 +1358,6 @@ public class Utils {
         MediaServiceData mediaServiceData = MediaServiceData.instance();
         mediaServiceData.persistNow();
         BlockedChannelData.instance(context).persistNow();
+        AiSListFilterData.instance(context).persistNow();
     }
 }

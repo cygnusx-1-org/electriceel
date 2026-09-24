@@ -748,4 +748,27 @@
   <string name="network_settings">Paramètres réseau</string>
   <string name="comments_disabled">Les commentaires sont désactivés pour cette vidéo</string>
   <string name="remove_video_to_watch_later">Supprimer de \"À regarder plus tard\"</string>
+    <string name="header_blocked_ai_channels">Chaînes IA sur liste noire</string>
+    <string name="aislist_mark_videos">Marquer les vidéos</string>
+    <string name="aislist_mark_off">Désactivé</string>
+    <string name="aislist_mark_in_mark_only">Marquer les vidéos uniquement dans les sections \"marquage uniquement\"</string>
+    <string name="aislist_mark_instead_of_hide">Marquer les vidéos au lieu de les masquer</string>
+    <string name="aislist_mark_instead_of_hide_desc">Les vidéos listées restent dans les flux avec l\'étiquette \"IA\" et ne sont pas ajoutées aux chaînes IA sur liste noire</string>
+    <string name="aislist_mark">IA</string>
+    <string name="aislist_mark_color">Couleur du marqueur</string>
+    <string name="aislist_sections">Sections</string>
+    <string name="aislist_watch_later">À regarder plus tard</string>
+    <string name="aislist_mark_only">%s (marquage uniquement)</string>
+    <string name="aislist_everything">Tout</string>
+    <string name="aislist_mark_color_off">Désactivé (comme le texte de la carte)</string>
+    <string name="aislist_color_red">Rouge</string>
+    <string name="aislist_color_orange">Orange</string>
+    <string name="aislist_color_yellow">Jaune</string>
+    <string name="aislist_color_green">Vert</string>
+    <string name="aislist_color_blue">Bleu</string>
+    <string name="aislist_blocklist">Liste noire (confiance élevée)</string>
+    <string name="aislist_warnlist">Liste d\'avertissement (confiance modérée)</string>
+    <string name="aislist_status">Chaînes listées : %1$d sur la liste noire, %2$d sur la liste d\'avertissement</string>
+    <string name="aislist_status_not_loaded">Téléchargement des listes…</string>
+    <string name="aislist_about">À propos d\'AiSList (liste communautaire, CC BY-NC 4.0)</string>
 </resources>

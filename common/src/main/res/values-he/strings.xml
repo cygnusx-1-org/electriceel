@@ -749,4 +749,27 @@ So, make a copy of values-he and name it values-iw. Keep both in your structure.
         <item quantity="one">שנייה אחת</item>
         <item quantity="other">%s שניות</item>
     </plurals>
+    <string name="header_blocked_ai_channels">ערוצי AI חסומים</string>
+    <string name="aislist_mark_videos">סימון סרטונים</string>
+    <string name="aislist_mark_off">כבוי</string>
+    <string name="aislist_mark_in_mark_only">סימון סרטונים רק במדורים \"סימון בלבד\"</string>
+    <string name="aislist_mark_instead_of_hide">סימון סרטונים במקום הסתרתם</string>
+    <string name="aislist_mark_instead_of_hide_desc">סרטונים ברשימה נשארים בפידים עם התווית \"AI\" ולא נוספים לערוצי AI חסומים</string>
+    <string name="aislist_mark">AI</string>
+    <string name="aislist_mark_color">צבע הסימון</string>
+    <string name="aislist_sections">מדורים</string>
+    <string name="aislist_watch_later">לצפייה בהמשך</string>
+    <string name="aislist_mark_only">%s (סימון בלבד)</string>
+    <string name="aislist_everything">הכול</string>
+    <string name="aislist_mark_color_off">כבוי (כמו טקסט הכרטיס)</string>
+    <string name="aislist_color_red">אדום</string>
+    <string name="aislist_color_orange">כתום</string>
+    <string name="aislist_color_yellow">צהוב</string>
+    <string name="aislist_color_green">ירוק</string>
+    <string name="aislist_color_blue">כחול</string>
+    <string name="aislist_blocklist">רשימת חסימה (ודאות גבוהה)</string>
+    <string name="aislist_warnlist">רשימת אזהרה (ודאות בינונית)</string>
+    <string name="aislist_status">ערוצים ברשימות: %1$d ברשימת החסימה, %2$d ברשימת האזהרה</string>
+    <string name="aislist_status_not_loaded">מוריד את הרשימות…</string>
+    <string name="aislist_about">אודות AiSList (רשימה קהילתית, CC BY-NC 4.0)</string>
 </resources>

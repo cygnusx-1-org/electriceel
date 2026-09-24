@@ -746,4 +746,27 @@
   <string name="network_settings">Verkkoasetukset</string>
   <string name="comments_disabled">Kommentit on poistettu käytöstä tässä videossa</string>
   <string name="enable_conscrypt">Ota Conscrypt käyttöön</string>
+    <string name="header_blocked_ai_channels">Estetyt tekoälykanavat</string>
+    <string name="aislist_mark_videos">Merkitse videot</string>
+    <string name="aislist_mark_off">Pois</string>
+    <string name="aislist_mark_in_mark_only">Merkitse videot vain \"vain merkintä\" -osioissa</string>
+    <string name="aislist_mark_instead_of_hide">Merkitse videot piilottamisen sijaan</string>
+    <string name="aislist_mark_instead_of_hide_desc">Listatut videot jäävät syötteisiin \"AI\"-merkinnällä, eikä niitä lisätä estettyihin tekoälykanaviin</string>
+    <string name="aislist_mark">AI</string>
+    <string name="aislist_mark_color">Merkinnän väri</string>
+    <string name="aislist_sections">Osiot</string>
+    <string name="aislist_watch_later">Katso myöhemmin</string>
+    <string name="aislist_mark_only">%s (vain merkintä)</string>
+    <string name="aislist_everything">Kaikki</string>
+    <string name="aislist_mark_color_off">Pois (sama kuin kortin teksti)</string>
+    <string name="aislist_color_red">Punainen</string>
+    <string name="aislist_color_orange">Oranssi</string>
+    <string name="aislist_color_yellow">Keltainen</string>
+    <string name="aislist_color_green">Vihreä</string>
+    <string name="aislist_color_blue">Sininen</string>
+    <string name="aislist_blocklist">Estolista (korkea varmuus)</string>
+    <string name="aislist_warnlist">Varoituslista (kohtalainen varmuus)</string>
+    <string name="aislist_status">Listatut kanavat: %1$d estolistalla, %2$d varoituslistalla</string>
+    <string name="aislist_status_not_loaded">Ladataan listoja…</string>
+    <string name="aislist_about">Tietoja AiSLististä (yhteisön lista, CC BY-NC 4.0)</string>
 </resources>

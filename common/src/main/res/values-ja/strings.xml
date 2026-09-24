@@ -754,4 +754,27 @@
     <plurals name="seconds">
         <item quantity="other">%s 秒</item>
     </plurals>
+    <string name="header_blocked_ai_channels">ブロックしたAIチャンネル</string>
+    <string name="aislist_mark_videos">動画にマークを付ける</string>
+    <string name="aislist_mark_off">オフ</string>
+    <string name="aislist_mark_in_mark_only">「マークのみ」のセクションでのみマークする</string>
+    <string name="aislist_mark_instead_of_hide">非表示にせずにマークする</string>
+    <string name="aislist_mark_instead_of_hide_desc">リストに載った動画は「AI」ラベル付きでフィードに残り、ブロックしたAIチャンネルには追加されません</string>
+    <string name="aislist_mark">AI</string>
+    <string name="aislist_mark_color">マーカーの色</string>
+    <string name="aislist_sections">セクション</string>
+    <string name="aislist_watch_later">後で見る</string>
+    <string name="aislist_mark_only">%s（マークのみ）</string>
+    <string name="aislist_everything">すべて</string>
+    <string name="aislist_mark_color_off">オフ（カードの文字色と同じ）</string>
+    <string name="aislist_color_red">レッド</string>
+    <string name="aislist_color_orange">オレンジ</string>
+    <string name="aislist_color_yellow">イエロー</string>
+    <string name="aislist_color_green">グリーン</string>
+    <string name="aislist_color_blue">ブルー</string>
+    <string name="aislist_blocklist">ブロックリスト（信頼度：高）</string>
+    <string name="aislist_warnlist">警告リスト（信頼度：中）</string>
+    <string name="aislist_status">リスト掲載チャンネル: ブロックリスト %1$d件、警告リスト %2$d件</string>
+    <string name="aislist_status_not_loaded">リストをダウンロードしています…</string>
+    <string name="aislist_about">AiSListについて（コミュニティリスト、CC BY-NC 4.0）</string>
 </resources>

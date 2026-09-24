@@ -14,15 +14,24 @@ import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.smartyoutubetv2.tv.R;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.ChatPreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.CommentsPreference;
+import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.DependentListPreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.StringListPreference;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class AppPreferenceManager {
     private final Context mContext;
     private final Runnable mOnChange;
+    // A switch or a radio option -> the preferences that are enabled only while it's on (see OptionItem.setRequired)
+    private final Map<OptionItem, List<Preference>> mDependents = new HashMap<>();
+    // A preference -> the items it requires, any one of them enables it
+    private final Map<Preference, OptionItem[]> mRequirements = new HashMap<>();
 
     public static class ListPreferenceData {
         public final CharSequence[] entries;
@@ -48,6 +57,77 @@ public class AppPreferenceManager {
     }
 
     public Preference createPreference(OptionCategory category) {
+        Preference pref = createPreferenceInt(category);
+        bindRequiredSwitch(category, pref);
+        return pref;
+    }
+
+    /**
+     * Grey out a preference while none of the switches or radio options its items require is on.<br/>
+     * Checkbox lists keep their per item check instead.
+     */
+    private void bindRequiredSwitch(OptionCategory category, Preference pref) {
+        if (pref == null || category.type == OptionCategory.TYPE_CHECKBOX_LIST || category.options == null || category.options.isEmpty()) {
+            return;
+        }
+
+        OptionItem[] required = category.options.get(0).getRequired();
+
+        if (required == null || required.length == 0 || required[0] == null) {
+            return;
+        }
+
+        mRequirements.put(pref, required);
+        pref.setEnabled(isAnySelected(required, null, null));
+
+        for (OptionItem requiredItem : required) {
+            List<Preference> dependents = mDependents.get(requiredItem);
+
+            if (dependents == null) {
+                dependents = new ArrayList<>();
+                mDependents.put(requiredItem, dependents);
+            }
+
+            dependents.add(pref);
+        }
+    }
+
+    /**
+     * Re-check the preferences that require the changed items
+     * @param radioOptions the radio list the change came from (its options keep a stale selection) or null
+     * @param radioValue the newly selected radio option
+     */
+    private void updateDependents(List<OptionItem> changedItems, List<OptionItem> radioOptions, Object radioValue) {
+        for (OptionItem changedItem : changedItems) {
+            List<Preference> dependents = mDependents.get(changedItem);
+
+            if (dependents == null) {
+                continue;
+            }
+
+            for (Preference dependent : dependents) {
+                dependent.setEnabled(isAnySelected(mRequirements.get(dependent), radioOptions, radioValue));
+            }
+        }
+    }
+
+    private static boolean isAnySelected(OptionItem[] items, List<OptionItem> radioOptions, Object radioValue) {
+        if (items == null) {
+            return true;
+        }
+
+        for (OptionItem item : items) {
+            boolean isSelected = radioOptions != null && radioOptions.contains(item) ? radioValue.equals(item.toString()) : item.isSelected();
+
+            if (isSelected) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private Preference createPreferenceInt(OptionCategory category) {
         switch (category.type) {
             case OptionCategory.TYPE_CHECKBOX_LIST:
                 return createCheckedListPreference(category);
@@ -140,6 +220,9 @@ public class AppPreferenceManager {
             preference.setDefaultValue(item.isSelected());
             preference.setOnPreferenceChangeListener((pref, newValue) -> {
                 item.onSelect((boolean) newValue);
+
+                updateDependents(Collections.singletonList(item), null, null);
+
                 return true;
             });
 
@@ -158,11 +241,29 @@ public class AppPreferenceManager {
     }
 
     public Preference createCheckedListPreference(OptionCategory category) {
-        MultiSelectListPreference pref = new MultiSelectListPreference(mContext);
+        MultiSelectListPreference pref = hasDependentItems(category) ? new DependentListPreference(mContext) : new MultiSelectListPreference(mContext);
 
         initMultiSelectListPreference(category, pref);
 
+        if (pref instanceof DependentListPreference) {
+            for (OptionItem item : category.options) {
+                if (item.getDisabledBy() != null) {
+                    ((DependentListPreference) pref).setDisabledBy(item.toString(), item.getDisabledBy().toString());
+                }
+            }
+        }
+
         return pref;
+    }
+
+    private static boolean hasDependentItems(OptionCategory category) {
+        for (OptionItem item : category.options) {
+            if (item.getDisabledBy() != null) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void initSingleSelectListPreference(OptionCategory category, ListPreference pref) {
@@ -181,6 +282,8 @@ public class AppPreferenceManager {
                     break;
                 }
             }
+
+            updateDependents(category.options, category.options, newValue);
 
             return true;
         });

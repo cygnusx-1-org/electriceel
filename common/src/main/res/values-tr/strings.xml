@@ -754,4 +754,27 @@
         <item quantity="one">%s saniye</item>
         <item quantity="other">%s saniye</item>
     </plurals>
+    <string name="header_blocked_ai_channels">Engellenen YZ Kanalları</string>
+    <string name="aislist_mark_videos">Videoları işaretle</string>
+    <string name="aislist_mark_off">Kapalı</string>
+    <string name="aislist_mark_in_mark_only">Videoları yalnızca \"yalnızca işaret\" bölümlerinde işaretle</string>
+    <string name="aislist_mark_instead_of_hide">Videoları gizlemek yerine işaretle</string>
+    <string name="aislist_mark_instead_of_hide_desc">Listedeki videolar akışlarda \"YZ\" etiketiyle kalır ve Engellenen YZ Kanalları\'na eklenmez</string>
+    <string name="aislist_mark">YZ</string>
+    <string name="aislist_mark_color">İşaret rengi</string>
+    <string name="aislist_sections">Bölümler</string>
+    <string name="aislist_watch_later">Daha sonra izle</string>
+    <string name="aislist_mark_only">%s (yalnızca işaret)</string>
+    <string name="aislist_everything">Her şey</string>
+    <string name="aislist_mark_color_off">Kapalı (kart metniyle aynı)</string>
+    <string name="aislist_color_red">Kırmızı</string>
+    <string name="aislist_color_orange">Turuncu</string>
+    <string name="aislist_color_yellow">Sarı</string>
+    <string name="aislist_color_green">Yeşil</string>
+    <string name="aislist_color_blue">Mavi</string>
+    <string name="aislist_blocklist">Engelleme listesi (yüksek güven)</string>
+    <string name="aislist_warnlist">Uyarı listesi (orta güven)</string>
+    <string name="aislist_status">Listelenen kanallar: engelleme listesinde %1$d, uyarı listesinde %2$d</string>
+    <string name="aislist_status_not_loaded">Listeler indiriliyor…</string>
+    <string name="aislist_about">AiSList hakkında (topluluk listesi, CC BY-NC 4.0)</string>
 </resources>

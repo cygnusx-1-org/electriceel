@@ -728,4 +728,27 @@
     <string name="channel_unblocked">Kanál odblokovaný</string>
     <string name="header_blocked_channels">Zablokované kanály</string>
     <string name="msg_no_blocked_channels">Žiadne zablokované kanály</string>
+    <string name="header_blocked_ai_channels">Zablokované AI kanály</string>
+    <string name="aislist_mark_videos">Označiť videá</string>
+    <string name="aislist_mark_off">Vypnuté</string>
+    <string name="aislist_mark_in_mark_only">Označiť videá iba v sekciách \"iba označiť\"</string>
+    <string name="aislist_mark_instead_of_hide">Označiť videá namiesto skrytia</string>
+    <string name="aislist_mark_instead_of_hide_desc">Videá zo zoznamu zostanú v prehľadoch so štítkom \"AI\" a nepridajú sa do zablokovaných AI kanálov</string>
+    <string name="aislist_mark">AI</string>
+    <string name="aislist_mark_color">Farba označenia</string>
+    <string name="aislist_sections">Sekcie</string>
+    <string name="aislist_watch_later">Pozrieť neskôr</string>
+    <string name="aislist_mark_only">%s (iba označiť)</string>
+    <string name="aislist_everything">Všetko</string>
+    <string name="aislist_mark_color_off">Vypnuté (ako text karty)</string>
+    <string name="aislist_color_red">Červená</string>
+    <string name="aislist_color_orange">Oranžová</string>
+    <string name="aislist_color_yellow">Žltá</string>
+    <string name="aislist_color_green">Zelená</string>
+    <string name="aislist_color_blue">Modrá</string>
+    <string name="aislist_blocklist">Zoznam blokovaných (vysoká spoľahlivosť)</string>
+    <string name="aislist_warnlist">Zoznam upozornení (stredná spoľahlivosť)</string>
+    <string name="aislist_status">Kanály v zoznamoch: %1$d v zozname blokovaných, %2$d v zozname upozornení</string>
+    <string name="aislist_status_not_loaded">Sťahovanie zoznamov…</string>
+    <string name="aislist_about">O AiSList (komunitný zoznam, CC BY-NC 4.0)</string>
 </resources>

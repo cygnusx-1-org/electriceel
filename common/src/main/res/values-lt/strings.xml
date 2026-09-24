@@ -410,4 +410,27 @@
     <string name="skip_codec_profile_check_desc">Pradedant leisti vaizdo įrašą netikrinti, ar kodekas yra palaikomas. Gali padėti, jei programinėje įrangoje yra klaidų.</string>
     <string name="force_sw_codec">Naudoti programinį vaizdo dekoderį</string>
     <string name="force_sw_codec_desc">Gali atkurti beveik bet kurį vaizdo įrašą, bet atkūrimo sparta yra labai maža.</string>
+    <string name="header_blocked_ai_channels">Užblokuoti DI kanalai</string>
+    <string name="aislist_mark_videos">Žymėti vaizdo įrašus</string>
+    <string name="aislist_mark_off">Išjungta</string>
+    <string name="aislist_mark_in_mark_only">Žymėti vaizdo įrašus tik skiltyse \"tik žymėjimas\"</string>
+    <string name="aislist_mark_instead_of_hide">Žymėti vaizdo įrašus, užuot juos slėpus</string>
+    <string name="aislist_mark_instead_of_hide_desc">Sąraše esantys vaizdo įrašai lieka sklaidos kanaluose su žyma \"DI\" ir nepridedami prie užblokuotų DI kanalų</string>
+    <string name="aislist_mark">DI</string>
+    <string name="aislist_mark_color">Žymos spalva</string>
+    <string name="aislist_sections">Skiltys</string>
+    <string name="aislist_watch_later">Žiūrėti vėliau</string>
+    <string name="aislist_mark_only">%s (tik žymėjimas)</string>
+    <string name="aislist_everything">Viskas</string>
+    <string name="aislist_mark_color_off">Išjungta (kaip kortelės tekstas)</string>
+    <string name="aislist_color_red">Raudona</string>
+    <string name="aislist_color_orange">Oranžinė</string>
+    <string name="aislist_color_yellow">Geltona</string>
+    <string name="aislist_color_green">Žalia</string>
+    <string name="aislist_color_blue">Mėlyna</string>
+    <string name="aislist_blocklist">Blokavimo sąrašas (didelis patikimumas)</string>
+    <string name="aislist_warnlist">Įspėjimų sąrašas (vidutinis patikimumas)</string>
+    <string name="aislist_status">Kanalai sąrašuose: %1$d blokavimo sąraše, %2$d įspėjimų sąraše</string>
+    <string name="aislist_status_not_loaded">Atsisiunčiami sąrašai…</string>
+    <string name="aislist_about">Apie AiSList (bendruomenės sąrašas, CC BY-NC 4.0)</string>
 </resources>

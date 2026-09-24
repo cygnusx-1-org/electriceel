@@ -569,4 +569,27 @@
   <string name="header_shorts">शॉर्ट्स</string>
   <string name="unlock_high_bitrate_formats">उच्च बिटरेट 1080p VP9 प्रारूप अनलॉक करें</string>
   <string name="unlock_high_bitrate_audio_formats">उच्च बिटरेट mp4a प्रारूप अनलॉक करें</string>
+    <string name="header_blocked_ai_channels">ब्लॉक किए गए AI चैनल</string>
+    <string name="aislist_mark_videos">वीडियो चिह्नित करें</string>
+    <string name="aislist_mark_off">बंद</string>
+    <string name="aislist_mark_in_mark_only">वीडियो केवल \"केवल चिह्नित\" अनुभागों में चिह्नित करें</string>
+    <string name="aislist_mark_instead_of_hide">वीडियो छिपाने के बजाय चिह्नित करें</string>
+    <string name="aislist_mark_instead_of_hide_desc">सूची वाले वीडियो \"AI\" लेबल के साथ फ़ीड में बने रहते हैं और ब्लॉक किए गए AI चैनल में नहीं जोड़े जाते</string>
+    <string name="aislist_mark">AI</string>
+    <string name="aislist_mark_color">मार्कर का रंग</string>
+    <string name="aislist_sections">अनुभाग</string>
+    <string name="aislist_watch_later">बाद में देखें</string>
+    <string name="aislist_mark_only">%s (केवल चिह्नित)</string>
+    <string name="aislist_everything">सब कुछ</string>
+    <string name="aislist_mark_color_off">बंद (कार्ड के टेक्स्ट जैसा)</string>
+    <string name="aislist_color_red">लाल</string>
+    <string name="aislist_color_orange">नारंगी</string>
+    <string name="aislist_color_yellow">पीला</string>
+    <string name="aislist_color_green">हरा</string>
+    <string name="aislist_color_blue">नीला</string>
+    <string name="aislist_blocklist">ब्लॉकलिस्ट (उच्च विश्वास)</string>
+    <string name="aislist_warnlist">चेतावनी सूची (मध्यम विश्वास)</string>
+    <string name="aislist_status">सूचीबद्ध चैनल: ब्लॉकलिस्ट में %1$d, चेतावनी सूची में %2$d</string>
+    <string name="aislist_status_not_loaded">सूचियाँ डाउनलोड हो रही हैं…</string>
+    <string name="aislist_about">AiSList के बारे में (समुदाय सूची, CC BY-NC 4.0)</string>
 </resources>

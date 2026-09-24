@@ -756,6 +756,29 @@
         <item quantity="one">%s sekunda</item>
         <item quantity="other">%s sekund</item>
     </plurals>
+    <string name="header_blocked_ai_channels">Blokované AI kanály</string>
+    <string name="aislist_mark_videos">Označit videa</string>
+    <string name="aislist_mark_off">Vypnuto</string>
+    <string name="aislist_mark_in_mark_only">Označit videa jen v sekcích \"jen označit\"</string>
+    <string name="aislist_mark_instead_of_hide">Označit videa místo skrytí</string>
+    <string name="aislist_mark_instead_of_hide_desc">Videa ze seznamu zůstanou v přehledech se štítkem \"AI\" a nepřidají se do blokovaných AI kanálů</string>
+    <string name="aislist_mark">AI</string>
+    <string name="aislist_mark_color">Barva označení</string>
+    <string name="aislist_sections">Sekce</string>
+    <string name="aislist_watch_later">Na později</string>
+    <string name="aislist_mark_only">%s (jen označit)</string>
+    <string name="aislist_everything">Vše</string>
+    <string name="aislist_mark_color_off">Vypnuto (jako text karty)</string>
+    <string name="aislist_color_red">Červená</string>
+    <string name="aislist_color_orange">Oranžová</string>
+    <string name="aislist_color_yellow">Žlutá</string>
+    <string name="aislist_color_green">Zelená</string>
+    <string name="aislist_color_blue">Modrá</string>
+    <string name="aislist_blocklist">Seznam blokovaných (vysoká spolehlivost)</string>
+    <string name="aislist_warnlist">Seznam varování (střední spolehlivost)</string>
+    <string name="aislist_status">Kanály na seznamech: %1$d na seznamu blokovaných, %2$d na seznamu varování</string>
+    <string name="aislist_status_not_loaded">Stahování seznamů…</string>
+    <string name="aislist_about">O AiSList (komunitní seznam, CC BY-NC 4.0)</string>
 </resources>
 
 

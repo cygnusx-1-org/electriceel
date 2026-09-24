@@ -720,4 +720,27 @@
     <string name="msg_no_blocked_channels">Bloklanmış kanal yoxdur</string>
     <string name="player_time_stretching">Audio vaxtını uzatmaq</string>
     <string name="player_time_stretching_desc">Sürəti dəyişdirərkən səsi təbii saxlayır. Bəzi cihazlarda məhsuldarlığı əhəmiyyətli dərəcədə azalda bilər.</string>
+    <string name="header_blocked_ai_channels">Bloklanmış Sİ Kanalları</string>
+    <string name="aislist_mark_videos">Videoları işarələ</string>
+    <string name="aislist_mark_off">Söndürülüb</string>
+    <string name="aislist_mark_in_mark_only">Videoları yalnız \"yalnız işarə\" bölmələrində işarələ</string>
+    <string name="aislist_mark_instead_of_hide">Videoları gizlətmək əvəzinə işarələ</string>
+    <string name="aislist_mark_instead_of_hide_desc">Siyahıdakı videolar lentlərdə \"Sİ\" etiketi ilə qalır və Bloklanmış Sİ Kanallarına əlavə edilmir</string>
+    <string name="aislist_mark">Sİ</string>
+    <string name="aislist_mark_color">İşarə rəngi</string>
+    <string name="aislist_sections">Bölmələr</string>
+    <string name="aislist_watch_later">Sonra izlə</string>
+    <string name="aislist_mark_only">%s (yalnız işarə)</string>
+    <string name="aislist_everything">Hər şey</string>
+    <string name="aislist_mark_color_off">Söndürülüb (kart mətni kimi)</string>
+    <string name="aislist_color_red">Qırmızı</string>
+    <string name="aislist_color_orange">Narıncı</string>
+    <string name="aislist_color_yellow">Sarı</string>
+    <string name="aislist_color_green">Yaşıl</string>
+    <string name="aislist_color_blue">Göy</string>
+    <string name="aislist_blocklist">Bloklama siyahısı (yüksək etibarlılıq)</string>
+    <string name="aislist_warnlist">Xəbərdarlıq siyahısı (orta etibarlılıq)</string>
+    <string name="aislist_status">Siyahıdakı kanallar: bloklama siyahısında %1$d, xəbərdarlıq siyahısında %2$d</string>
+    <string name="aislist_status_not_loaded">Siyahılar yüklənir…</string>
+    <string name="aislist_about">AiSList haqqında (icma siyahısı, CC BY-NC 4.0)</string>
 </resources>

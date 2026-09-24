@@ -494,4 +494,27 @@
     <string name="auto_frame_rate_modes">Podržani načini</string>
     <string name="loading">Učitavanje…</string>
     <string name="hide_streams">Sakrij strujanja iz Pretplata</string>
+    <string name="header_blocked_ai_channels">Blokirani UI kanali</string>
+    <string name="aislist_mark_videos">Označi videozapise</string>
+    <string name="aislist_mark_off">Isključeno</string>
+    <string name="aislist_mark_in_mark_only">Označi videozapise samo u odjeljcima \"samo oznaka\"</string>
+    <string name="aislist_mark_instead_of_hide">Označi videozapise umjesto skrivanja</string>
+    <string name="aislist_mark_instead_of_hide_desc">Videozapisi s popisa ostaju u feedovima s oznakom \"UI\" i ne dodaju se u blokirane UI kanale</string>
+    <string name="aislist_mark">UI</string>
+    <string name="aislist_mark_color">Boja oznake</string>
+    <string name="aislist_sections">Odjeljci</string>
+    <string name="aislist_watch_later">Pogledaj kasnije</string>
+    <string name="aislist_mark_only">%s (samo oznaka)</string>
+    <string name="aislist_everything">Sve</string>
+    <string name="aislist_mark_color_off">Isključeno (kao tekst kartice)</string>
+    <string name="aislist_color_red">Crvena</string>
+    <string name="aislist_color_orange">Narančasta</string>
+    <string name="aislist_color_yellow">Žuta</string>
+    <string name="aislist_color_green">Zelena</string>
+    <string name="aislist_color_blue">Plava</string>
+    <string name="aislist_blocklist">Popis blokiranja (visoka pouzdanost)</string>
+    <string name="aislist_warnlist">Popis upozorenja (umjerena pouzdanost)</string>
+    <string name="aislist_status">Kanali na popisima: %1$d na popisu blokiranja, %2$d na popisu upozorenja</string>
+    <string name="aislist_status_not_loaded">Preuzimanje popisa…</string>
+    <string name="aislist_about">O AiSList (popis zajednice, CC BY-NC 4.0)</string>
 </resources>

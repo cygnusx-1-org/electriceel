@@ -746,4 +746,27 @@
   <string name="comments_disabled">Τα σχόλια είναι απενεργοποιημένα για αυτό το βίντεο</string>
   <string name="remove_from_search_history">Αφαίρεση από το ιστορικό αναζήτησης</string>
   <string name="player_unexpected_error">Απροσδόκητο σφάλμα αναπαραγωγής</string>
+    <string name="header_blocked_ai_channels">Αποκλεισμένα κανάλια ΤΝ</string>
+    <string name="aislist_mark_videos">Σήμανση βίντεο</string>
+    <string name="aislist_mark_off">Απενεργοποιημένο</string>
+    <string name="aislist_mark_in_mark_only">Σήμανση βίντεο μόνο στις ενότητες \"μόνο σήμανση\"</string>
+    <string name="aislist_mark_instead_of_hide">Σήμανση βίντεο αντί για απόκρυψη</string>
+    <string name="aislist_mark_instead_of_hide_desc">Τα βίντεο της λίστας παραμένουν στις ροές με την ετικέτα \"ΤΝ\" και δεν προστίθενται στα αποκλεισμένα κανάλια ΤΝ</string>
+    <string name="aislist_mark">ΤΝ</string>
+    <string name="aislist_mark_color">Χρώμα σήμανσης</string>
+    <string name="aislist_sections">Ενότητες</string>
+    <string name="aislist_watch_later">Παρακολούθηση αργότερα</string>
+    <string name="aislist_mark_only">%s (μόνο σήμανση)</string>
+    <string name="aislist_everything">Όλα</string>
+    <string name="aislist_mark_color_off">Απενεργοποιημένο (όπως το κείμενο της κάρτας)</string>
+    <string name="aislist_color_red">Κόκκινο</string>
+    <string name="aislist_color_orange">Πορτοκαλί</string>
+    <string name="aislist_color_yellow">Κίτρινο</string>
+    <string name="aislist_color_green">Πράσινο</string>
+    <string name="aislist_color_blue">Μπλε</string>
+    <string name="aislist_blocklist">Λίστα αποκλεισμού (υψηλή βεβαιότητα)</string>
+    <string name="aislist_warnlist">Λίστα προειδοποίησης (μέτρια βεβαιότητα)</string>
+    <string name="aislist_status">Κανάλια στις λίστες: %1$d στη λίστα αποκλεισμού, %2$d στη λίστα προειδοποίησης</string>
+    <string name="aislist_status_not_loaded">Λήψη των λιστών…</string>
+    <string name="aislist_about">Σχετικά με το AiSList (λίστα κοινότητας, CC BY-NC 4.0)</string>
 </resources>

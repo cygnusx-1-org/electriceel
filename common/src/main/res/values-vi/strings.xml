@@ -736,4 +736,27 @@
   <string name="ignore_short_segments">Bỏ qua các đoạn ngắn</string>
   <string name="card_unlocalized_titles">Tiêu đề video chưa được bản địa hóa</string>
   <string name="remove_video_to_watch_later">Xóa khỏi Xem sau</string>
+    <string name="header_blocked_ai_channels">Kênh AI đã chặn</string>
+    <string name="aislist_mark_videos">Đánh dấu video</string>
+    <string name="aislist_mark_off">Tắt</string>
+    <string name="aislist_mark_in_mark_only">Chỉ đánh dấu video trong các mục \"chỉ đánh dấu\"</string>
+    <string name="aislist_mark_instead_of_hide">Đánh dấu video thay vì ẩn</string>
+    <string name="aislist_mark_instead_of_hide_desc">Video trong danh sách vẫn ở trong nguồn cấp với nhãn \"AI\" và không được thêm vào Kênh AI đã chặn</string>
+    <string name="aislist_mark">AI</string>
+    <string name="aislist_mark_color">Màu đánh dấu</string>
+    <string name="aislist_sections">Mục</string>
+    <string name="aislist_watch_later">Xem sau</string>
+    <string name="aislist_mark_only">%s (chỉ đánh dấu)</string>
+    <string name="aislist_everything">Tất cả</string>
+    <string name="aislist_mark_color_off">Tắt (giống chữ trên thẻ)</string>
+    <string name="aislist_color_red">Đỏ</string>
+    <string name="aislist_color_orange">Cam</string>
+    <string name="aislist_color_yellow">Vàng</string>
+    <string name="aislist_color_green">Xanh lá</string>
+    <string name="aislist_color_blue">Xanh biển</string>
+    <string name="aislist_blocklist">Danh sách chặn (độ tin cậy cao)</string>
+    <string name="aislist_warnlist">Danh sách cảnh báo (độ tin cậy trung bình)</string>
+    <string name="aislist_status">Kênh trong danh sách: %1$d trong danh sách chặn, %2$d trong danh sách cảnh báo</string>
+    <string name="aislist_status_not_loaded">Đang tải xuống danh sách…</string>
+    <string name="aislist_about">Giới thiệu AiSList (danh sách cộng đồng, CC BY-NC 4.0)</string>
 </resources>

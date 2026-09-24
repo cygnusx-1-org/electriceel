@@ -236,6 +236,11 @@ public final class SimpleMediaItem implements MediaItem {
     }
 
     @Override
+    public String getChannelHandle() {
+        return null;
+    }
+
+    @Override
     public String getVideoPreviewUrl() {
         return mVideoPreviewUrl;
     }

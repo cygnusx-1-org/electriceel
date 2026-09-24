@@ -20,6 +20,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.BootDialogPr
 import com.liskovsoft.smartyoutubetv2.common.app.views.BrowseView;
 import com.liskovsoft.smartyoutubetv2.common.app.views.SplashView;
 import com.liskovsoft.smartyoutubetv2.common.app.views.ViewManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.AiSListManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.GDriveBackupWorker;
 import com.liskovsoft.smartyoutubetv2.common.misc.LocalDriveBackupWorker;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
@@ -93,6 +94,7 @@ public class SplashPresenter extends BasePresenter<SplashView> {
             initProxy();
             initVideoStateService();
             initStreamReminderService();
+            initAiSList();
         }
     }
 
@@ -145,6 +147,11 @@ public class SplashPresenter extends BasePresenter<SplashView> {
         if (getContext() != null) {
             VideoStateService.instance(getContext());
         }
+    }
+
+    private void initAiSList() {
+        // Load cached lists early so the first Home rows are filtered
+        AiSListManager.instance(getContext());
     }
 
     private void initStreamReminderService() {

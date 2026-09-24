@@ -145,4 +145,27 @@
     <string name="player_seek_preview_carousel_slow">Կարուսել (դանդաղ)</string>
     <string name="player_seek_preview_carousel_fast">Կարուսել (արագ)</string>
     <string name="unsubscribe_from_channel">Ապաբաժանորդագրվել ալիքից</string>
+    <string name="header_blocked_ai_channels">Արգելափակված AI ալիքներ</string>
+    <string name="aislist_mark_videos">Նշել տեսանյութերը</string>
+    <string name="aislist_mark_off">Անջատված</string>
+    <string name="aislist_mark_in_mark_only">Նշել տեսանյութերը միայն \"միայն նշում\" բաժիններում</string>
+    <string name="aislist_mark_instead_of_hide">Նշել տեսանյութերը՝ թաքցնելու փոխարեն</string>
+    <string name="aislist_mark_instead_of_hide_desc">Ցուցակի տեսանյութերը մնում են լրահոսերում \"AI\" պիտակով և չեն ավելացվում արգելափակված AI ալիքներին</string>
+    <string name="aislist_mark">AI</string>
+    <string name="aislist_mark_color">Նշիչի գույնը</string>
+    <string name="aislist_sections">Բաժիններ</string>
+    <string name="aislist_watch_later">Դիտել ավելի ուշ</string>
+    <string name="aislist_mark_only">%s (միայն նշում)</string>
+    <string name="aislist_everything">Ամեն ինչ</string>
+    <string name="aislist_mark_color_off">Անջատված (ինչպես քարտի տեքստը)</string>
+    <string name="aislist_color_red">Կարմիր</string>
+    <string name="aislist_color_orange">Նարնջագույն</string>
+    <string name="aislist_color_yellow">Դեղին</string>
+    <string name="aislist_color_green">Կանաչ</string>
+    <string name="aislist_color_blue">Կապույտ</string>
+    <string name="aislist_blocklist">Արգելափակման ցուցակ (բարձր վստահություն)</string>
+    <string name="aislist_warnlist">Զգուշացման ցուցակ (չափավոր վստահություն)</string>
+    <string name="aislist_status">Ցուցակված ալիքներ՝ %1$d արգելափակման ցուցակում, %2$d զգուշացման ցուցակում</string>
+    <string name="aislist_status_not_loaded">Ցուցակները ներբեռնվում են…</string>
+    <string name="aislist_about">AiSList-ի մասին (համայնքային ցուցակ, CC BY-NC 4.0)</string>
 </resources>

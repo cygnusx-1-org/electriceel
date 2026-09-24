@@ -323,4 +323,27 @@
     <string name="update_error">อัปเดตข้อผิดพลาด</string>
     <string name="hide_shorts_from_history">ซ่อน shorts จากประวัติการเข้าชม</string>
     <string name="disable_screensaver">Disable screensaver</string>
+    <string name="header_blocked_ai_channels">ช่อง AI ที่บล็อก</string>
+    <string name="aislist_mark_videos">ทำเครื่องหมายวิดีโอ</string>
+    <string name="aislist_mark_off">ปิด</string>
+    <string name="aislist_mark_in_mark_only">ทำเครื่องหมายวิดีโอเฉพาะในส่วน \"ทำเครื่องหมายเท่านั้น\"</string>
+    <string name="aislist_mark_instead_of_hide">ทำเครื่องหมายวิดีโอแทนการซ่อน</string>
+    <string name="aislist_mark_instead_of_hide_desc">วิดีโอในรายการจะยังอยู่ในฟีดพร้อมป้าย \"AI\" และไม่ถูกเพิ่มลงในช่อง AI ที่บล็อก</string>
+    <string name="aislist_mark">AI</string>
+    <string name="aislist_mark_color">สีเครื่องหมาย</string>
+    <string name="aislist_sections">ส่วน</string>
+    <string name="aislist_watch_later">ดูภายหลัง</string>
+    <string name="aislist_mark_only">%s (ทำเครื่องหมายเท่านั้น)</string>
+    <string name="aislist_everything">ทั้งหมด</string>
+    <string name="aislist_mark_color_off">ปิด (เหมือนข้อความบนการ์ด)</string>
+    <string name="aislist_color_red">แดง</string>
+    <string name="aislist_color_orange">ส้ม</string>
+    <string name="aislist_color_yellow">เหลือง</string>
+    <string name="aislist_color_green">เขียว</string>
+    <string name="aislist_color_blue">น้ำเงิน</string>
+    <string name="aislist_blocklist">รายการบล็อก (ความมั่นใจสูง)</string>
+    <string name="aislist_warnlist">รายการเตือน (ความมั่นใจปานกลาง)</string>
+    <string name="aislist_status">ช่องในรายการ: %1$d ในรายการบล็อก, %2$d ในรายการเตือน</string>
+    <string name="aislist_status_not_loaded">กำลังดาวน์โหลดรายการ…</string>
+    <string name="aislist_about">เกี่ยวกับ AiSList (รายการจากชุมชน, CC BY-NC 4.0)</string>
 </resources>

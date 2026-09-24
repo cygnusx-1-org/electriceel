@@ -753,4 +753,27 @@
         <item quantity="other">%s Sekunden</item>
     </plurals>
     <string name="remove_from_search_history">Aus Suchverlauf entfernen</string>
+    <string name="header_blocked_ai_channels">Blockierte KI-Kanäle</string>
+    <string name="aislist_mark_videos">Videos markieren</string>
+    <string name="aislist_mark_off">Aus</string>
+    <string name="aislist_mark_in_mark_only">Videos nur in den Bereichen \"nur markieren\" markieren</string>
+    <string name="aislist_mark_instead_of_hide">Videos markieren statt ausblenden</string>
+    <string name="aislist_mark_instead_of_hide_desc">Gelistete Videos bleiben mit der Markierung \"KI\" in den Feeds und werden nicht zu den blockierten KI-Kanälen hinzugefügt</string>
+    <string name="aislist_mark">KI</string>
+    <string name="aislist_mark_color">Markierungsfarbe</string>
+    <string name="aislist_sections">Bereiche</string>
+    <string name="aislist_watch_later">Später ansehen</string>
+    <string name="aislist_mark_only">%s (nur markieren)</string>
+    <string name="aislist_everything">Alles</string>
+    <string name="aislist_mark_color_off">Aus (wie der Kartentext)</string>
+    <string name="aislist_color_red">Rot</string>
+    <string name="aislist_color_orange">Orange</string>
+    <string name="aislist_color_yellow">Gelb</string>
+    <string name="aislist_color_green">Grün</string>
+    <string name="aislist_color_blue">Blau</string>
+    <string name="aislist_blocklist">Sperrliste (hohe Sicherheit)</string>
+    <string name="aislist_warnlist">Warnliste (mittlere Sicherheit)</string>
+    <string name="aislist_status">Gelistete Kanäle: %1$d auf der Sperrliste, %2$d auf der Warnliste</string>
+    <string name="aislist_status_not_loaded">Listen werden heruntergeladen…</string>
+    <string name="aislist_about">Über AiSList (Community-Liste, CC BY-NC 4.0)</string>
 </resources>

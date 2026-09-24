@@ -748,4 +748,27 @@
   <string name="network_settings">Ustawienia sieciowe</string>
   <string name="comments_disabled">Komentarze do tego wideo są wyłączone</string>
   <string name="remove_video_to_watch_later">Usuń z listy Do obejrzenia</string>
+    <string name="header_blocked_ai_channels">Zablokowane kanały AI</string>
+    <string name="aislist_mark_videos">Oznaczaj filmy</string>
+    <string name="aislist_mark_off">Wyłączone</string>
+    <string name="aislist_mark_in_mark_only">Oznaczaj filmy tylko w sekcjach \"tylko oznaczanie\"</string>
+    <string name="aislist_mark_instead_of_hide">Oznaczaj filmy zamiast je ukrywać</string>
+    <string name="aislist_mark_instead_of_hide_desc">Filmy z listy pozostają w feedach z etykietą \"AI\" i nie są dodawane do Zablokowanych kanałów AI</string>
+    <string name="aislist_mark">AI</string>
+    <string name="aislist_mark_color">Kolor oznaczenia</string>
+    <string name="aislist_sections">Sekcje</string>
+    <string name="aislist_watch_later">Do obejrzenia</string>
+    <string name="aislist_mark_only">%s (tylko oznaczanie)</string>
+    <string name="aislist_everything">Wszystko</string>
+    <string name="aislist_mark_color_off">Wyłączony (jak tekst karty)</string>
+    <string name="aislist_color_red">Czerwony</string>
+    <string name="aislist_color_orange">Pomarańczowy</string>
+    <string name="aislist_color_yellow">Żółty</string>
+    <string name="aislist_color_green">Zielony</string>
+    <string name="aislist_color_blue">Niebieski</string>
+    <string name="aislist_blocklist">Lista blokowanych (wysoka pewność)</string>
+    <string name="aislist_warnlist">Lista ostrzeżeń (umiarkowana pewność)</string>
+    <string name="aislist_status">Kanały na listach: %1$d na liście blokowanych, %2$d na liście ostrzeżeń</string>
+    <string name="aislist_status_not_loaded">Pobieranie list…</string>
+    <string name="aislist_about">O AiSList (lista społeczności, CC BY-NC 4.0)</string>
 </resources>

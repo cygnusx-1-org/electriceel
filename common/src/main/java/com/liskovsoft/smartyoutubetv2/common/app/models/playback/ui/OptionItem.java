@@ -11,6 +11,11 @@ public interface OptionItem {
     OptionItem[] getRequired();
     void setRadio(OptionItem... items);
     OptionItem[] getRadio();
+    /**
+     * Grey out this item (and ignore clicks) while the other item of the same checked list is selected
+     */
+    void setDisabledBy(OptionItem item);
+    OptionItem getDisabledBy();
     ChatReceiver getChatReceiver();
     CommentsReceiver getCommentsReceiver();
 }

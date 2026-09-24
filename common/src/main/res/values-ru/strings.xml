@@ -748,4 +748,27 @@
         <item quantity="many">%s секунд</item>
         <item quantity="other">%s секунды</item>
     </plurals>
+    <string name="header_blocked_ai_channels">Заблокированные ИИ-каналы</string>
+    <string name="aislist_mark_videos">Помечать видео</string>
+    <string name="aislist_mark_off">Выкл.</string>
+    <string name="aislist_mark_in_mark_only">Помечать видео только в разделах \"только метка\"</string>
+    <string name="aislist_mark_instead_of_hide">Помечать видео вместо скрытия</string>
+    <string name="aislist_mark_instead_of_hide_desc">Видео из списка остаются в лентах с меткой \"ИИ\" и не добавляются в заблокированные ИИ-каналы</string>
+    <string name="aislist_mark">ИИ</string>
+    <string name="aislist_mark_color">Цвет метки</string>
+    <string name="aislist_sections">Разделы</string>
+    <string name="aislist_watch_later">Смотреть позже</string>
+    <string name="aislist_mark_only">%s (только метка)</string>
+    <string name="aislist_everything">Всё</string>
+    <string name="aislist_mark_color_off">Выкл. (как текст карточки)</string>
+    <string name="aislist_color_red">Красный</string>
+    <string name="aislist_color_orange">Оранжевый</string>
+    <string name="aislist_color_yellow">Жёлтый</string>
+    <string name="aislist_color_green">Зелёный</string>
+    <string name="aislist_color_blue">Синий</string>
+    <string name="aislist_blocklist">Чёрный список (высокая уверенность)</string>
+    <string name="aislist_warnlist">Список предупреждений (умеренная уверенность)</string>
+    <string name="aislist_status">Каналов в списках: %1$d в чёрном списке, %2$d в списке предупреждений</string>
+    <string name="aislist_status_not_loaded">Загрузка списков…</string>
+    <string name="aislist_about">Об AiSList (список сообщества, CC BY-NC 4.0)</string>
 </resources>

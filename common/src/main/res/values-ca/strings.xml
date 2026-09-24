@@ -504,4 +504,27 @@
   <string name="hide_shorts_from_trending">Amaga els curts de la tendència</string>
   <string name="disable_history">Desactiva l\'historial</string>
   <string name="enable_history">Activeu l\'historial</string>
+    <string name="header_blocked_ai_channels">Canals d\'IA bloquejats</string>
+    <string name="aislist_mark_videos">Marca els vídeos</string>
+    <string name="aislist_mark_off">Desactivat</string>
+    <string name="aislist_mark_in_mark_only">Marca els vídeos només a les seccions \"només marcar\"</string>
+    <string name="aislist_mark_instead_of_hide">Marca els vídeos en lloc d\'amagar-los</string>
+    <string name="aislist_mark_instead_of_hide_desc">Els vídeos llistats es mantenen als feeds amb l\'etiqueta \"IA\" i no s\'afegeixen a Canals d\'IA bloquejats</string>
+    <string name="aislist_mark">IA</string>
+    <string name="aislist_mark_color">Color del marcador</string>
+    <string name="aislist_sections">Seccions</string>
+    <string name="aislist_watch_later">Mira-ho més tard</string>
+    <string name="aislist_mark_only">%s (només marcar)</string>
+    <string name="aislist_everything">Tot</string>
+    <string name="aislist_mark_color_off">Desactivat (igual que el text de la targeta)</string>
+    <string name="aislist_color_red">Vermell</string>
+    <string name="aislist_color_orange">Taronja</string>
+    <string name="aislist_color_yellow">Groc</string>
+    <string name="aislist_color_green">Verd</string>
+    <string name="aislist_color_blue">Blau</string>
+    <string name="aislist_blocklist">Llista de bloqueig (confiança alta)</string>
+    <string name="aislist_warnlist">Llista d\'avís (confiança moderada)</string>
+    <string name="aislist_status">Canals llistats: %1$d a la llista de bloqueig, %2$d a la llista d\'avís</string>
+    <string name="aislist_status_not_loaded">S\'estan baixant les llistes…</string>
+    <string name="aislist_about">Quant a AiSList (llista comunitària, CC BY-NC 4.0)</string>
 </resources>

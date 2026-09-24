@@ -693,4 +693,27 @@
   <string name="context_menu_sorting">مرتب‌سازی منوی زمینه</string>
   <string name="player_audio_focus">تمرکز صوتی (مکث در صورت شناسایی سایر پخش‌کننده‌ها)</string>
   <string name="paid_content_notification">اعلان محتوای پولی</string>
+    <string name="header_blocked_ai_channels">کانال‌های هوش مصنوعی مسدودشده</string>
+    <string name="aislist_mark_videos">علامت‌گذاری ویدیوها</string>
+    <string name="aislist_mark_off">خاموش</string>
+    <string name="aislist_mark_in_mark_only">علامت‌گذاری ویدیوها فقط در بخش‌های \"فقط علامت‌گذاری\"</string>
+    <string name="aislist_mark_instead_of_hide">علامت‌گذاری ویدیوها به‌جای پنهان کردن</string>
+    <string name="aislist_mark_instead_of_hide_desc">ویدیوهای فهرست‌شده با برچسب \"AI\" در فیدها می‌مانند و به کانال‌های هوش مصنوعی مسدودشده اضافه نمی‌شوند</string>
+    <string name="aislist_mark">AI</string>
+    <string name="aislist_mark_color">رنگ نشانگر</string>
+    <string name="aislist_sections">بخش‌ها</string>
+    <string name="aislist_watch_later">تماشا در آینده</string>
+    <string name="aislist_mark_only">%s (فقط علامت‌گذاری)</string>
+    <string name="aislist_everything">همه</string>
+    <string name="aislist_mark_color_off">خاموش (مانند متن کارت)</string>
+    <string name="aislist_color_red">قرمز</string>
+    <string name="aislist_color_orange">نارنجی</string>
+    <string name="aislist_color_yellow">زرد</string>
+    <string name="aislist_color_green">سبز</string>
+    <string name="aislist_color_blue">آبی</string>
+    <string name="aislist_blocklist">فهرست مسدود (اطمینان بالا)</string>
+    <string name="aislist_warnlist">فهرست هشدار (اطمینان متوسط)</string>
+    <string name="aislist_status">کانال‌های فهرست‌شده: %1$d در فهرست مسدود، %2$d در فهرست هشدار</string>
+    <string name="aislist_status_not_loaded">در حال بارگیری فهرست‌ها…</string>
+    <string name="aislist_about">درباره AiSList (فهرست جامعه، CC BY-NC 4.0)</string>
 </resources>

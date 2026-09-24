@@ -3,8 +3,14 @@ package com.liskovsoft.smartyoutubetv2.tv.presenter;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Build.VERSION;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +27,7 @@ import com.bumptech.glide.request.target.Target;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
+import com.liskovsoft.smartyoutubetv2.common.prefs.AiSListFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.utils.ClickbaitRemover;
 import com.liskovsoft.smartyoutubetv2.tv.R;
@@ -71,6 +78,7 @@ public class VideoCardPresenter extends LongClickPresenter {
             @Override
             public void setSelected(boolean selected) {
                 updateCardBackgroundColor(this, selected);
+                updateAiMarkShade(this, selected);
                 super.setSelected(selected);
             }
         };
@@ -126,7 +134,7 @@ public class VideoCardPresenter extends LongClickPresenter {
         Context context = cardView.getContext();
 
         cardView.setTitleText(video.getTitle());
-        cardView.setContentText(video.getSecondTitle());
+        cardView.setContentText(video.aiMarkList != -1 ? addAiMark(context, video.getSecondTitle(), video.aiMarkList, cardView.isSelected()) : video.getSecondTitle());
         // Count progress that very close to zero. E.g. when user closed video immediately.
         cardView.setProgress(video.percentWatched > 0 && video.percentWatched < 1 ? 1 : Math.round(video.percentWatched));
         cardView.setBadgeText(
@@ -185,6 +193,61 @@ public class VideoCardPresenter extends LongClickPresenter {
 
         // Cleanup Glide resources. https://chatgpt.com/share/682120c5-e428-8010-b848-371b2dec0cd5
         Glide.with(cardView.getContext().getApplicationContext()).clear(cardView.getMainImageView());
+    }
+
+    private static CharSequence addAiMark(Context context, CharSequence secondTitle, int list, boolean selected) {
+        SpannableString mark = new SpannableString(context.getString(R.string.aislist_mark));
+        mark.setSpan(new StyleSpan(Typeface.BOLD), 0, mark.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        int markColor = AiSListFilterData.instance(context).getMarkColor(list);
+
+        if (markColor != AiSListFilterData.MARK_COLOR_OFF) {
+            mark.setSpan(new AiMarkSpan(markColor, selected), 0, mark.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        return secondTitle != null ? TextUtils.concat(mark, " " + Video.TERTIARY_TEXT_DELIM + " ", secondTitle) : mark;
+    }
+
+    /**
+     * The selected card has a light background, so the marker switches to its darker shade
+     */
+    private static void updateAiMarkShade(ComplexImageCardView view, boolean selected) {
+        CharSequence text = view.getContentText();
+
+        if (!(text instanceof Spanned)) {
+            return;
+        }
+
+        Spanned spanned = (Spanned) text;
+        AiMarkSpan[] spans = spanned.getSpans(0, spanned.length(), AiMarkSpan.class);
+
+        if (spans.length == 0 || spans[0].mSelected == selected) {
+            return;
+        }
+
+        SpannableString result = new SpannableString(text);
+
+        for (AiMarkSpan span : spans) {
+            int start = result.getSpanStart(span);
+            int end = result.getSpanEnd(span);
+            result.removeSpan(span);
+            result.setSpan(new AiMarkSpan(span.mColor, selected), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        view.setContentText(result);
+    }
+
+    /**
+     * Colors the "AI" marker with the shade of the saved color that suits the card background
+     */
+    private static class AiMarkSpan extends ForegroundColorSpan {
+        private final int mColor;
+        private final boolean mSelected;
+
+        AiMarkSpan(int color, boolean selected) {
+            super(AiSListFilterData.getMarkShade(color, selected));
+            mColor = color;
+            mSelected = selected;
+        }
     }
 
     private void updateDimensions(Context context) {

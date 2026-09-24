@@ -218,7 +218,7 @@ dependencies {
 
     testImplementation 'junit:junit:' + junitVersion
     testImplementation 'org.robolectric:robolectric:' + robolectricVersion
-    androidTestImplementation 'androidx.test.ext:junit:' + testXSupportVersion
+    androidTestImplementation 'androidx.test.ext:junit:' + testXExtJunitVersion
     androidTestImplementation 'androidx.test.ext:truth:' + testXSupportVersion
     androidTestImplementation 'androidx.test:runner:' + testXSupportVersion
     androidTestImplementation 'androidx.test:rules:' + testXSupportVersion

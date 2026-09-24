@@ -746,4 +746,27 @@
         <item quantity="many">%s секунд</item>
         <item quantity="other">%s секунди</item>
     </plurals>
+    <string name="header_blocked_ai_channels">Заблоковані ШІ-канали</string>
+    <string name="aislist_mark_videos">Позначати відео</string>
+    <string name="aislist_mark_off">Вимк.</string>
+    <string name="aislist_mark_in_mark_only">Позначати відео лише в розділах \"лише мітка\"</string>
+    <string name="aislist_mark_instead_of_hide">Позначати відео замість приховування</string>
+    <string name="aislist_mark_instead_of_hide_desc">Відео зі списку залишаються у стрічках з міткою \"ШІ\" і не додаються до заблокованих ШІ-каналів</string>
+    <string name="aislist_mark">ШІ</string>
+    <string name="aislist_mark_color">Колір мітки</string>
+    <string name="aislist_sections">Розділи</string>
+    <string name="aislist_watch_later">Переглянути пізніше</string>
+    <string name="aislist_mark_only">%s (лише мітка)</string>
+    <string name="aislist_everything">Усе</string>
+    <string name="aislist_mark_color_off">Вимк. (як текст картки)</string>
+    <string name="aislist_color_red">Червоний</string>
+    <string name="aislist_color_orange">Помаранчевий</string>
+    <string name="aislist_color_yellow">Жовтий</string>
+    <string name="aislist_color_green">Зелений</string>
+    <string name="aislist_color_blue">Синій</string>
+    <string name="aislist_blocklist">Чорний список (висока впевненість)</string>
+    <string name="aislist_warnlist">Список попереджень (помірна впевненість)</string>
+    <string name="aislist_status">Каналів у списках: %1$d у чорному списку, %2$d у списку попереджень</string>
+    <string name="aislist_status_not_loaded">Завантаження списків…</string>
+    <string name="aislist_about">Про AiSList (список спільноти, CC BY-NC 4.0)</string>
 </resources>

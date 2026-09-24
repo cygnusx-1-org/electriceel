@@ -748,4 +748,27 @@
   <string name="enable_conscrypt_desc">改進某些裝置 HTTPS、TLS 和 VPN 的相容性，但偶爾可能會導致播放問題或降低網路效能</string>
   <string name="comments_disabled">此影片已關閉留言</string>
   <string name="color_scheme_dark_blue_oled">深藍色 (OLED)</string>
+    <string name="header_blocked_ai_channels">封鎖的 AI 頻道</string>
+    <string name="aislist_mark_videos">標記影片</string>
+    <string name="aislist_mark_off">關閉</string>
+    <string name="aislist_mark_in_mark_only">僅在「僅標記」區塊中標記影片</string>
+    <string name="aislist_mark_instead_of_hide">標記影片而非隱藏</string>
+    <string name="aislist_mark_instead_of_hide_desc">清單中的影片會帶「AI」標籤留在動態中，且不會加入封鎖的 AI 頻道</string>
+    <string name="aislist_mark">AI</string>
+    <string name="aislist_mark_color">標記顏色</string>
+    <string name="aislist_sections">區塊</string>
+    <string name="aislist_watch_later">稍後觀看</string>
+    <string name="aislist_mark_only">%s（僅標記）</string>
+    <string name="aislist_everything">全部</string>
+    <string name="aislist_mark_color_off">關閉（與卡片文字相同）</string>
+    <string name="aislist_color_red">紅色</string>
+    <string name="aislist_color_orange">橙色</string>
+    <string name="aislist_color_yellow">黃色</string>
+    <string name="aislist_color_green">綠色</string>
+    <string name="aislist_color_blue">藍色</string>
+    <string name="aislist_blocklist">封鎖清單（高可信度）</string>
+    <string name="aislist_warnlist">警告清單（中等可信度）</string>
+    <string name="aislist_status">已列出的頻道：封鎖清單 %1$d 個，警告清單 %2$d 個</string>
+    <string name="aislist_status_not_loaded">正在下載清單…</string>
+    <string name="aislist_about">關於 AiSList（社群清單，CC BY-NC 4.0）</string>
 </resources>

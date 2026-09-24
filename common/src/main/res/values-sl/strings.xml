@@ -296,4 +296,27 @@
   <string name="content_block_outro"></string>
   <string name="action_playlist_add">Dodaj na seznam predvajanja</string>
   <string name="keyboard_auto_show">Samodejno prikaži tipkovnico</string>
+    <string name="header_blocked_ai_channels">Blokirani kanali UI</string>
+    <string name="aislist_mark_videos">Označi videoposnetke</string>
+    <string name="aislist_mark_off">Izklopljeno</string>
+    <string name="aislist_mark_in_mark_only">Označi videoposnetke samo v razdelkih \"samo oznaka\"</string>
+    <string name="aislist_mark_instead_of_hide">Označi videoposnetke namesto skrivanja</string>
+    <string name="aislist_mark_instead_of_hide_desc">Videoposnetki s seznama ostanejo v virih z oznako \"UI\" in niso dodani med blokirane kanale UI</string>
+    <string name="aislist_mark">UI</string>
+    <string name="aislist_mark_color">Barva oznake</string>
+    <string name="aislist_sections">Razdelki</string>
+    <string name="aislist_watch_later">Za poznejši ogled</string>
+    <string name="aislist_mark_only">%s (samo oznaka)</string>
+    <string name="aislist_everything">Vse</string>
+    <string name="aislist_mark_color_off">Izklopljeno (kot besedilo kartice)</string>
+    <string name="aislist_color_red">Rdeča</string>
+    <string name="aislist_color_orange">Oranžna</string>
+    <string name="aislist_color_yellow">Rumena</string>
+    <string name="aislist_color_green">Zelena</string>
+    <string name="aislist_color_blue">Modra</string>
+    <string name="aislist_blocklist">Seznam blokiranih (visoka zanesljivost)</string>
+    <string name="aislist_warnlist">Seznam opozoril (zmerna zanesljivost)</string>
+    <string name="aislist_status">Kanali na seznamih: %1$d na seznamu blokiranih, %2$d na seznamu opozoril</string>
+    <string name="aislist_status_not_loaded">Prenašanje seznamov…</string>
+    <string name="aislist_about">O AiSList (seznam skupnosti, CC BY-NC 4.0)</string>
 </resources>

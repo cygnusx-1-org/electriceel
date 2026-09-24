@@ -8,6 +8,7 @@ import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.service.VideoStateService;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.service.VideoStateService.State;
+import com.liskovsoft.smartyoutubetv2.common.misc.AiSListManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
 
 import java.util.ArrayList;
@@ -454,7 +455,7 @@ public class VideoGroup {
     }
 
     public void add(int idx, Video video) {
-        if (video == null || video.isEmpty() || isChannelBlocked(video) || isWatchedSuggestion(video)) {
+        if (video == null || video.isEmpty() || isChannelBlocked(video) || isAiListed(video) || isWatchedSuggestion(video)) {
             return;
         }
 
@@ -491,6 +492,45 @@ public class VideoGroup {
         String channelName = video.getAuthor();
 
         return blockedChannelData.containsChannel(channelId, channelName);
+    }
+
+    /**
+     * Also marks the video when the marking is enabled instead of hiding
+     */
+    private boolean isAiListed(Video video) {
+        // Channel cards and chapters aren't filtered
+        if (video.isChapter || video.videoId == null) {
+            return false;
+        }
+
+        int section = getAiSListSection();
+        AiSListManager manager = AiSListManager.instance(GlobalPreferences.context());
+
+        if (!manager.isSectionEnabled(section)) {
+            return false;
+        }
+
+        if (video.channelHandle == null) {
+            // Most TV cards have only the channel name. The handle might be found earlier (see AiSListProcessor).
+            video.channelHandle = manager.getCachedHandle(AiSListManager.getLookupKey(video));
+        }
+
+        if (video.channelHandle == null) {
+            return false;
+        }
+
+        if (manager.isHidden(video.channelHandle, section)) {
+            manager.onHidden(video);
+            return true;
+        }
+
+        video.aiMarkList = manager.getMarkedList(video.channelHandle, section);
+
+        return false;
+    }
+
+    public int getAiSListSection() {
+        return AiSListManager.getSection(getType(), getSection() != null, getMediaGroup() != null ? getMediaGroup().getChannelId() : null);
     }
 
     private boolean isWatchedSuggestion(Video video) {

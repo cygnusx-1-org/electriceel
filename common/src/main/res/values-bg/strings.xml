@@ -593,4 +593,27 @@
   <string name="disable_search_history">Деактивиране на историята на търсенето</string>
   <string name="unlock_high_bitrate_formats">Отключване на формати с висок битрейт 1080p vp9</string>
   <string name="unlock_high_bitrate_audio_formats">Отключване на формати mp4a с висок битрейт</string>
+    <string name="header_blocked_ai_channels">Блокирани ИИ канали</string>
+    <string name="aislist_mark_videos">Отбелязване на видеоклиповете</string>
+    <string name="aislist_mark_off">Изкл.</string>
+    <string name="aislist_mark_in_mark_only">Отбелязване на видеоклиповете само в разделите \"само маркиране\"</string>
+    <string name="aislist_mark_instead_of_hide">Отбелязване на видеоклиповете вместо скриването им</string>
+    <string name="aislist_mark_instead_of_hide_desc">Видеоклиповете от списъка остават в емисиите с етикет \"ИИ\" и не се добавят към блокираните ИИ канали</string>
+    <string name="aislist_mark">ИИ</string>
+    <string name="aislist_mark_color">Цвят на маркера</string>
+    <string name="aislist_sections">Раздели</string>
+    <string name="aislist_watch_later">Гледай по-късно</string>
+    <string name="aislist_mark_only">%s (само маркиране)</string>
+    <string name="aislist_everything">Всичко</string>
+    <string name="aislist_mark_color_off">Изкл. (като текста на картата)</string>
+    <string name="aislist_color_red">Червен</string>
+    <string name="aislist_color_orange">Оранжев</string>
+    <string name="aislist_color_yellow">Жълт</string>
+    <string name="aislist_color_green">Зелен</string>
+    <string name="aislist_color_blue">Син</string>
+    <string name="aislist_blocklist">Черен списък (висока сигурност)</string>
+    <string name="aislist_warnlist">Списък с предупреждения (умерена сигурност)</string>
+    <string name="aislist_status">Канали в списъците: %1$d в черния списък, %2$d в списъка с предупреждения</string>
+    <string name="aislist_status_not_loaded">Изтегляне на списъците…</string>
+    <string name="aislist_about">За AiSList (списък на общността, CC BY-NC 4.0)</string>
 </resources>

@@ -748,4 +748,27 @@
   <string name="network_settings">Setelan jaringan</string>
   <string name="comments_disabled">Komentar dimatikan</string>
   <string name="remove_video_to_watch_later">Hapus dari Tonton nanti</string>
+    <string name="header_blocked_ai_channels">Channel AI Diblokir</string>
+    <string name="aislist_mark_videos">Tandai video</string>
+    <string name="aislist_mark_off">Mati</string>
+    <string name="aislist_mark_in_mark_only">Tandai video hanya di bagian \"hanya tandai\"</string>
+    <string name="aislist_mark_instead_of_hide">Tandai video alih-alih menyembunyikannya</string>
+    <string name="aislist_mark_instead_of_hide_desc">Video dalam daftar tetap berada di feed dengan label \"AI\" dan tidak ditambahkan ke Channel AI Diblokir</string>
+    <string name="aislist_mark">AI</string>
+    <string name="aislist_mark_color">Warna penanda</string>
+    <string name="aislist_sections">Bagian</string>
+    <string name="aislist_watch_later">Tonton nanti</string>
+    <string name="aislist_mark_only">%s (hanya tandai)</string>
+    <string name="aislist_everything">Semua</string>
+    <string name="aislist_mark_color_off">Mati (sama dengan teks kartu)</string>
+    <string name="aislist_color_red">Merah</string>
+    <string name="aislist_color_orange">Oranye</string>
+    <string name="aislist_color_yellow">Kuning</string>
+    <string name="aislist_color_green">Hijau</string>
+    <string name="aislist_color_blue">Biru</string>
+    <string name="aislist_blocklist">Daftar blokir (keyakinan tinggi)</string>
+    <string name="aislist_warnlist">Daftar peringatan (keyakinan sedang)</string>
+    <string name="aislist_status">Channel terdaftar: %1$d di daftar blokir, %2$d di daftar peringatan</string>
+    <string name="aislist_status_not_loaded">Mengunduh daftar…</string>
+    <string name="aislist_about">Tentang AiSList (daftar komunitas, CC BY-NC 4.0)</string>
 </resources>

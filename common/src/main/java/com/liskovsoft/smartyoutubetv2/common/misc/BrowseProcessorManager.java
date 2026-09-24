@@ -10,9 +10,17 @@ public class BrowseProcessorManager implements BrowseProcessor {
     private final ArrayList<BrowseProcessor> mProcessors;
 
     public BrowseProcessorManager(Context context, OnItemReady onItemReady) {
+        this(context, onItemReady, null);
+    }
+
+    /**
+     * @param onItemRemoved removes a card from the view (null if the view can't do that)
+     */
+    public BrowseProcessorManager(Context context, OnItemReady onItemReady, OnItemRemoved onItemRemoved) {
         mProcessors = new ArrayList<>();
         mProcessors.add(new DeArrowProcessor(context, onItemReady));
         mProcessors.add(new UnlocalizedTitleProcessor(context, onItemReady));
+        mProcessors.add(new AiSListProcessor(context, onItemReady, onItemRemoved));
     }
 
     @Override

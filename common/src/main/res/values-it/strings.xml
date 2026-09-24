@@ -756,4 +756,27 @@
         <item quantity="one">%s secondo</item>
         <item quantity="other">%s secondi</item>
     </plurals>
+    <string name="header_blocked_ai_channels">Canali IA bloccati</string>
+    <string name="aislist_mark_videos">Contrassegna i video</string>
+    <string name="aislist_mark_off">Disattivato</string>
+    <string name="aislist_mark_in_mark_only">Contrassegna i video solo nelle sezioni \"solo contrassegno\"</string>
+    <string name="aislist_mark_instead_of_hide">Contrassegna i video invece di nasconderli</string>
+    <string name="aislist_mark_instead_of_hide_desc">I video elencati restano nei feed con l\'etichetta \"IA\" e non vengono aggiunti a Canali IA bloccati</string>
+    <string name="aislist_mark">IA</string>
+    <string name="aislist_mark_color">Colore del contrassegno</string>
+    <string name="aislist_sections">Sezioni</string>
+    <string name="aislist_watch_later">Guarda più tardi</string>
+    <string name="aislist_mark_only">%s (solo contrassegno)</string>
+    <string name="aislist_everything">Tutto</string>
+    <string name="aislist_mark_color_off">Disattivato (come il testo della scheda)</string>
+    <string name="aislist_color_red">Rosso</string>
+    <string name="aislist_color_orange">Arancione</string>
+    <string name="aislist_color_yellow">Giallo</string>
+    <string name="aislist_color_green">Verde</string>
+    <string name="aislist_color_blue">Blu</string>
+    <string name="aislist_blocklist">Lista di blocco (affidabilità alta)</string>
+    <string name="aislist_warnlist">Lista di avviso (affidabilità moderata)</string>
+    <string name="aislist_status">Canali elencati: %1$d nella lista di blocco, %2$d nella lista di avviso</string>
+    <string name="aislist_status_not_loaded">Download delle liste in corso…</string>
+    <string name="aislist_about">Informazioni su AiSList (lista della community, CC BY-NC 4.0)</string>
 </resources>

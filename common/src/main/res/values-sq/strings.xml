@@ -709,4 +709,27 @@
   <string name="remove_playlist_fmt">Do ta fshish %s përgjithmonë?</string>
   <string name="player_chapter_notification2">Kalo te kapitulli tjetër duke klikuar mbi njoftimin</string>
   <string name="suggestions_horizontally_scrolled">Sugjerime të lëvizura horizontalisht</string>
+    <string name="header_blocked_ai_channels">Kanale IA të bllokuara</string>
+    <string name="aislist_mark_videos">Shëno videot</string>
+    <string name="aislist_mark_off">Joaktiv</string>
+    <string name="aislist_mark_in_mark_only">Shëno videot vetëm në seksionet \"vetëm shënim\"</string>
+    <string name="aislist_mark_instead_of_hide">Shëno videot në vend që t\'i fshehësh</string>
+    <string name="aislist_mark_instead_of_hide_desc">Videot e listuara mbeten në rrjedha me etiketën \"IA\" dhe nuk shtohen te Kanalet IA të bllokuara</string>
+    <string name="aislist_mark">IA</string>
+    <string name="aislist_mark_color">Ngjyra e shënjuesit</string>
+    <string name="aislist_sections">Seksionet</string>
+    <string name="aislist_watch_later">Shiko më vonë</string>
+    <string name="aislist_mark_only">%s (vetëm shënim)</string>
+    <string name="aislist_everything">Gjithçka</string>
+    <string name="aislist_mark_color_off">Joaktiv (si teksti i kartës)</string>
+    <string name="aislist_color_red">E kuqe</string>
+    <string name="aislist_color_orange">Portokalli</string>
+    <string name="aislist_color_yellow">E verdhë</string>
+    <string name="aislist_color_green">E gjelbër</string>
+    <string name="aislist_color_blue">Blu</string>
+    <string name="aislist_blocklist">Lista e bllokimit (besueshmëri e lartë)</string>
+    <string name="aislist_warnlist">Lista e paralajmërimit (besueshmëri mesatare)</string>
+    <string name="aislist_status">Kanale të listuara: %1$d në listën e bllokimit, %2$d në listën e paralajmërimit</string>
+    <string name="aislist_status_not_loaded">Po shkarkohen listat…</string>
+    <string name="aislist_about">Rreth AiSList (listë e komunitetit, CC BY-NC 4.0)</string>
 </resources>

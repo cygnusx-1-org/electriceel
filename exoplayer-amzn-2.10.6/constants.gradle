@@ -36,6 +36,7 @@ project.ext {
     //protobufVersion = '4.32.1'
     protobufVersion = '3.17.3' // the latest for Android 4
     androidXTestVersion = project.properties.testXSupportVersion
+    androidXTestExtJunitVersion = project.properties.testXExtJunitVersion
     modulePrefix = ':'
     if (gradle.ext.has('exoplayerModulePrefix')) {
         modulePrefix += gradle.ext.exoplayerModulePrefix

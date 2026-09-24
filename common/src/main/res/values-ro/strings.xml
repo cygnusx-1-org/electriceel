@@ -664,4 +664,27 @@
   <string name="local_backup">Copie de rezervă locală</string>
   <string name="auto_backup">Copie de rezervă automată (o dată pe zi)</string>
   <string name="repeat_mode_reverse_list">Redă lista de redare sau videoclipurile canalului în ordine inversă</string>
+    <string name="header_blocked_ai_channels">Canale IA blocate</string>
+    <string name="aislist_mark_videos">Marchează videoclipurile</string>
+    <string name="aislist_mark_off">Dezactivat</string>
+    <string name="aislist_mark_in_mark_only">Marchează videoclipurile doar în secțiunile \"doar marcare\"</string>
+    <string name="aislist_mark_instead_of_hide">Marchează videoclipurile în loc să le ascunzi</string>
+    <string name="aislist_mark_instead_of_hide_desc">Videoclipurile listate rămân în fluxuri cu eticheta \"IA\" și nu sunt adăugate la Canale IA blocate</string>
+    <string name="aislist_mark">IA</string>
+    <string name="aislist_mark_color">Culoarea marcajului</string>
+    <string name="aislist_sections">Secțiuni</string>
+    <string name="aislist_watch_later">Vizionează mai târziu</string>
+    <string name="aislist_mark_only">%s (doar marcare)</string>
+    <string name="aislist_everything">Tot</string>
+    <string name="aislist_mark_color_off">Dezactivat (la fel ca textul cardului)</string>
+    <string name="aislist_color_red">Roșu</string>
+    <string name="aislist_color_orange">Portocaliu</string>
+    <string name="aislist_color_yellow">Galben</string>
+    <string name="aislist_color_green">Verde</string>
+    <string name="aislist_color_blue">Albastru</string>
+    <string name="aislist_blocklist">Listă de blocare (încredere ridicată)</string>
+    <string name="aislist_warnlist">Listă de avertizare (încredere moderată)</string>
+    <string name="aislist_status">Canale listate: %1$d pe lista de blocare, %2$d pe lista de avertizare</string>
+    <string name="aislist_status_not_loaded">Se descarcă listele…</string>
+    <string name="aislist_about">Despre AiSList (listă a comunității, CC BY-NC 4.0)</string>
 </resources>

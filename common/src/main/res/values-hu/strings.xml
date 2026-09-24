@@ -748,4 +748,27 @@
   <string name="enable_conscrypt_desc">Javítja a HTTPS, TLS - és VPN-kompatibilitást egyes eszközökön, de esetenként lejátszási problémákat vagy lassabb hálózati teljesítményt okozhat</string>
   <string name="network_settings">Hálózati beállítások</string>
   <string name="comments_disabled">A komment szakasz letiltva</string>
+    <string name="header_blocked_ai_channels">Blokkolt MI-csatornák</string>
+    <string name="aislist_mark_videos">Videók megjelölése</string>
+    <string name="aislist_mark_off">Ki</string>
+    <string name="aislist_mark_in_mark_only">Videók megjelölése csak a \"csak jelölés\" szakaszokban</string>
+    <string name="aislist_mark_instead_of_hide">Videók megjelölése elrejtés helyett</string>
+    <string name="aislist_mark_instead_of_hide_desc">A listán szereplő videók \"MI\" címkével a hírfolyamokban maradnak, és nem kerülnek a blokkolt MI-csatornák közé</string>
+    <string name="aislist_mark">MI</string>
+    <string name="aislist_mark_color">Jelölés színe</string>
+    <string name="aislist_sections">Szakaszok</string>
+    <string name="aislist_watch_later">Megnézendő</string>
+    <string name="aislist_mark_only">%s (csak jelölés)</string>
+    <string name="aislist_everything">Minden</string>
+    <string name="aislist_mark_color_off">Ki (mint a kártya szövege)</string>
+    <string name="aislist_color_red">Piros</string>
+    <string name="aislist_color_orange">Narancs</string>
+    <string name="aislist_color_yellow">Sárga</string>
+    <string name="aislist_color_green">Zöld</string>
+    <string name="aislist_color_blue">Kék</string>
+    <string name="aislist_blocklist">Tiltólista (magas megbízhatóság)</string>
+    <string name="aislist_warnlist">Figyelmeztető lista (mérsékelt megbízhatóság)</string>
+    <string name="aislist_status">Listázott csatornák: %1$d a tiltólistán, %2$d a figyelmeztető listán</string>
+    <string name="aislist_status_not_loaded">Listák letöltése…</string>
+    <string name="aislist_about">Az AiSList névjegye (közösségi lista, CC BY-NC 4.0)</string>
 </resources>

@@ -36,6 +36,8 @@ import androidx.preference.MultiSelectListPreference;
 import androidx.recyclerview.widget.RecyclerView;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.PlaybackPresenter;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
+import com.liskovsoft.smartyoutubetv2.tv.R;
+import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.DependentListPreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.mod.clickable.LinkifyCompat;
 import com.liskovsoft.smartyoutubetv2.tv.ui.mod.clickable.LinkifyCompat.LinkifyClickHandler;
 
@@ -57,6 +59,9 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
     private static final String SAVE_STATE_INITIAL_SELECTION =
             "LeanbackListPreferenceDialogFragment.initialSelection";
 
+    private static final float DISABLED_ALPHA = 0.4f; // MOD: see DependentListPreference
+    private static final int VIEW_TYPE_CHECKBOX = 0;
+    private static final int VIEW_TYPE_SWITCH = 1;
     private boolean mMulti;
     protected CharSequence[] mEntries;
     protected CharSequence[] mEntryValues;
@@ -295,9 +300,19 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-            final View view = inflater.inflate(androidx.leanback.preference.R.layout.leanback_list_preference_item_multi, parent,
-                    false);
+            // MOD: switch rows (see DependentListPreference)
+            final View view = inflater.inflate(viewType == VIEW_TYPE_SWITCH ?
+                            R.layout.dialog_list_preference_item_switch : androidx.leanback.preference.R.layout.leanback_list_preference_item_multi,
+                    parent, false);
             return new ViewHolder(view, this);
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            DialogPreference preference = getPreference();
+
+            return preference instanceof DependentListPreference
+                    && ((DependentListPreference) preference).isToggle(mEntryValues[position].toString()) ? VIEW_TYPE_SWITCH : VIEW_TYPE_CHECKBOX;
         }
 
         @Override
@@ -305,6 +320,15 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
             holder.getWidgetView().setChecked(
                     mSelections.contains(mEntryValues[position].toString()));
             holder.getTitleView().setText(mEntries[position]);
+            // MOD: grey out entries that depend on another checked entry
+            holder.itemView.setAlpha(isDisabled(position) ? DISABLED_ALPHA : 1f);
+        }
+
+        private boolean isDisabled(int position) {
+            DialogPreference preference = getPreference();
+
+            return preference instanceof DependentListPreference
+                    && ((DependentListPreference) preference).isDisabled(mEntryValues[position].toString(), mSelections);
         }
 
         @Override
@@ -315,7 +339,7 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
         @Override
         public void onItemClick(ViewHolder viewHolder) {
             final int index = viewHolder.getAdapterPosition();
-            if (index == RecyclerView.NO_POSITION) {
+            if (index == RecyclerView.NO_POSITION || isDisabled(index)) {
                 return;
             }
             final String entry = mEntryValues[index].toString();

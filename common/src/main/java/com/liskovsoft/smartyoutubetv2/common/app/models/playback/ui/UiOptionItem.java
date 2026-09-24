@@ -15,6 +15,7 @@ public class UiOptionItem implements OptionItem {
     private Object mData;
     private OptionItem[] mRequiredItems;
     private OptionItem[] mRadioItems;
+    private OptionItem mDisabledBy;
     private ChatReceiver mChatReceiver;
     private CommentsReceiver mCommentsReceiver;
 
@@ -175,6 +176,16 @@ public class UiOptionItem implements OptionItem {
     @Override
     public OptionItem[] getRadio() {
         return mRadioItems;
+    }
+
+    @Override
+    public void setDisabledBy(OptionItem item) {
+        mDisabledBy = item;
+    }
+
+    @Override
+    public OptionItem getDisabledBy() {
+        return mDisabledBy;
     }
 
     @Override

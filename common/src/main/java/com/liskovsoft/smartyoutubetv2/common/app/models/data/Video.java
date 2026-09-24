@@ -21,6 +21,8 @@ import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.service.VideoStateService;
+import com.liskovsoft.smartyoutubetv2.common.misc.AiSListManager;
+import com.liskovsoft.smartyoutubetv2.common.prefs.AiSListFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
 import com.liskovsoft.googlecommon.common.helpers.ServiceHelper;
@@ -50,6 +52,8 @@ public final class Video {
     public String category;
     public int itemType = -1;
     public String channelId;
+    public String channelHandle;
+    public int aiMarkList = -1; // AiSListFilterData.LIST_* the channel is marked for, or -1
     public String videoId;
     public String playlistId;
     public String remotePlaylistId;
@@ -141,6 +145,7 @@ public final class Video {
         video.itemType = item.getType();
         video.videoId = item.getVideoId();
         video.channelId = item.getChannelId();
+        video.channelHandle = item.getChannelHandle();
         video.bgImageUrl = item.getBackgroundImageUrl();
         video.cardImageUrl = item.getCardImageUrl();
         video.author = item.getAuthor();
@@ -175,6 +180,8 @@ public final class Video {
         video.secondTitle = item.secondTitle;
         video.videoId = item.videoId;
         video.channelId = item.channelId;
+        video.channelHandle = item.channelHandle;
+        video.aiMarkList = item.aiMarkList;
         video.bgImageUrl = item.bgImageUrl;
         video.cardImageUrl = item.cardImageUrl;
         video.author = item.author;
@@ -857,8 +864,13 @@ public final class Video {
             if (suggestions != null && suggestions.size() > 1) {
                 List<MediaItem> mediaItems = suggestions.get(1).getMediaItems();
                 BlockedChannelData blockedChannelData = BlockedChannelData.instance(GlobalPreferences.context());
+                AiSListManager aiSListManager = AiSListManager.instance(GlobalPreferences.context());
                 nextVideo = Helpers.findFirst(mediaItems,
                         item -> {
+                            if (aiSListManager.isHidden(item.getChannelHandle(), AiSListFilterData.SECTION_SUGGESTIONS)) {
+                                return false;
+                            }
+
                             if (blockedChannelData.isEmpty()) {
                                 return item.getVideoId() != null;
                             }

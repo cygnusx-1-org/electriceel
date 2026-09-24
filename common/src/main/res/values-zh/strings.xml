@@ -749,4 +749,27 @@
   <string name="network_settings">网络设置</string>
   <string name="comments_disabled">此视频已关闭评论</string>
   <string name="remove_video_to_watch_later">从稍后观看移除</string>
+    <string name="header_blocked_ai_channels">被屏蔽的 AI 频道</string>
+    <string name="aislist_mark_videos">标记视频</string>
+    <string name="aislist_mark_off">关闭</string>
+    <string name="aislist_mark_in_mark_only">仅在“仅标记”分区中标记视频</string>
+    <string name="aislist_mark_instead_of_hide">标记视频而不是隐藏</string>
+    <string name="aislist_mark_instead_of_hide_desc">列表中的视频会带“AI”标签留在信息流中，且不会加入被屏蔽的 AI 频道</string>
+    <string name="aislist_mark">AI</string>
+    <string name="aislist_mark_color">标记颜色</string>
+    <string name="aislist_sections">分区</string>
+    <string name="aislist_watch_later">稍后观看</string>
+    <string name="aislist_mark_only">%s（仅标记）</string>
+    <string name="aislist_everything">全部</string>
+    <string name="aislist_mark_color_off">关闭（与卡片文字相同）</string>
+    <string name="aislist_color_red">红色</string>
+    <string name="aislist_color_orange">橙色</string>
+    <string name="aislist_color_yellow">黄色</string>
+    <string name="aislist_color_green">绿色</string>
+    <string name="aislist_color_blue">蓝色</string>
+    <string name="aislist_blocklist">屏蔽列表（高可信度）</string>
+    <string name="aislist_warnlist">警告列表（中等可信度）</string>
+    <string name="aislist_status">已列出的频道：屏蔽列表 %1$d 个，警告列表 %2$d 个</string>
+    <string name="aislist_status_not_loaded">正在下载列表…</string>
+    <string name="aislist_about">关于 AiSList（社区列表，CC BY-NC 4.0）</string>
 </resources>
