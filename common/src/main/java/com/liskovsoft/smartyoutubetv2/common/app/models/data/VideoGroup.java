@@ -545,16 +545,7 @@ public class VideoGroup {
             return false;
         }
 
-        String category = manager.getCachedCategory(video.videoId);
-        boolean isHidden = manager.isHidden(category);
-
-        // CATDBG: temporary logging
-        if (isHidden || category == null) {
-            Log.d(TAG, "CATDBG add %s '%s' row '%s': category %s -> %s", video.videoId, video.getTitle(), getTitle(), category,
-                    isHidden ? "HIDDEN" : "SHOWN (no category)");
-        }
-
-        return isHidden;
+        return manager.isVideoHidden(video.videoId);
     }
 
     public int getAiSListSection() {

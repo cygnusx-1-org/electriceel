@@ -359,6 +359,11 @@
     <string name="hide_sports_from_home">Hide sports videos from Home</string>
     <string name="hide_news_from_home">Hide news videos from Home</string>
     <string name="hide_tech_from_home">Hide science and tech videos from Home</string>
+    <string name="api_keys">API keys</string>
+    <string name="data_api_key">YouTube Data API key</string>
+    <string name="data_api_key_hint">Free key from console.cloud.google.com</string>
+    <string name="data_api_key_works">The YouTube Data API key works</string>
+    <string name="data_api_key_fails">The YouTube Data API key doesn\'t work: %s</string>
     <string name="finish_on_disconnect">Close the app after disconnecting the phone/tablet</string>
     <string name="update_error">Update error</string>
     <string name="hide_shorts_from_search">Hide shorts from the search result</string>

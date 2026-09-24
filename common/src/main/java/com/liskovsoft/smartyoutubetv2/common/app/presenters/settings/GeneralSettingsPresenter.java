@@ -7,6 +7,7 @@ import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.sharedutils.okhttp.OkHttpManager;
+import com.liskovsoft.sharedutils.rx.RxHelper;
 import com.liskovsoft.smartyoutubetv2.common.R;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.manager.PlayerConstants;
@@ -85,6 +86,7 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
         appendInternetCensorship(settingsPresenter);
         appendHistoryCategory(settingsPresenter);
         appendMiscCategory(settingsPresenter);
+        appendApiKeysCategory(settingsPresenter);
 
         settingsPresenter.showDialog(getContext().getString(R.string.settings_general), mOnFinish);
     }
@@ -653,6 +655,28 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendCheckedCategory(getContext().getString(R.string.player_other), options);
     }
 
+    private void appendApiKeysCategory(AppDialogPresenter settingsPresenter) {
+        settingsPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.api_keys), optionItem -> {
+            AppDialogPresenter presenter = AppDialogPresenter.instance(getContext());
+            appendDataApiKeySwitch(presenter);
+            // A lone category is opened directly, and a switch can't be: show the list
+            presenter.enableExpandable(false);
+            presenter.showDialog(getContext().getString(R.string.api_keys));
+        }));
+    }
+
+    private void appendDataApiKeySwitch(AppDialogPresenter settingsPresenter) {
+        settingsPresenter.appendSingleSwitch(UiOptionItem.from(getContext().getString(R.string.data_api_key),
+                option -> {
+                    if (option.isSelected()) {
+                        showDataApiKeyDialog(settingsPresenter);
+                    } else {
+                        mMediaServiceData.setDataApiKey(null);
+                    }
+                },
+                mMediaServiceData.getDataApiKey() != null));
+    }
+
     private void appendInternetCensorship(AppDialogPresenter settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
@@ -758,6 +782,33 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
                     }
                     return true;
                 });
+    }
+
+    private void showDataApiKeyDialog(AppDialogPresenter settingsPresenter) {
+        settingsPresenter.closeDialog();
+        SimpleEditDialog.show(
+                getContext(),
+                getContext().getString(R.string.data_api_key),
+                getContext().getString(R.string.data_api_key_hint),
+                mMediaServiceData.getDataApiKey(),
+                newValue -> {
+                    mMediaServiceData.setDataApiKey(newValue);
+                    checkDataApiKey(mMediaServiceData.getDataApiKey());
+                    return true;
+                });
+    }
+
+    private void checkDataApiKey(String key) {
+        if (key == null) {
+            return;
+        }
+
+        Context context = getContext();
+
+        RxHelper.execute(getMediaItemService().checkDataApiKeyObserve(key),
+                reason -> MessageHelpers.showLongMessage(context, reason.isEmpty() ?
+                        context.getString(R.string.data_api_key_works) : context.getString(R.string.data_api_key_fails, reason)),
+                error -> MessageHelpers.showLongMessage(context, context.getString(R.string.data_api_key_fails, error.getMessage())));
     }
 
     private void showMasterPasswordDialog(AppDialogPresenter settingsPresenter, Runnable onSuccess) {

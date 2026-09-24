@@ -20,7 +20,12 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import com.liskovsoft.sharedutils.helpers.FileHelpers;
+
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -38,6 +43,10 @@ public class VideoCategoryManagerTest {
     private static final String TECH_ID = "tech";
     private static final String SPORTS_ID = "sports";
     private static final String NEWS_ID = "news";
+    private static final String MUSIC_MIX_ID = "musicMix"; // People & Blogs, YouTube's topics say music
+    private static final String GAME_VLOG_ID = "gameVlog"; // People & Blogs, YouTube's topics say gaming
+    private static final String VLOG_ID = "vlog"; // People & Blogs, other topics
+    private static final String PLAYER_VLOG_ID = "playerVlog"; // People & Blogs, found by the player (no topics)
 
     @Before
     public void setUp() {
@@ -58,6 +67,10 @@ public class VideoCategoryManagerTest {
         manager.setCategoryForTesting(GAMING_ID + 2, "Gaming");
         manager.setCategoryForTesting(SPORTS_ID, "Sports");
         manager.setCategoryForTesting(NEWS_ID, "News & Politics");
+        manager.setCategoryForTesting(MUSIC_MIX_ID, "People & Blogs", Arrays.asList("Electronic_music", "Music"));
+        manager.setCategoryForTesting(GAME_VLOG_ID, "People & Blogs", Arrays.asList("Video_game_culture", "Action_game"));
+        manager.setCategoryForTesting(VLOG_ID, "People & Blogs", Collections.singletonList("Lifestyle_(sociology)"));
+        manager.setCategoryForTesting(PLAYER_VLOG_ID, "People & Blogs");
     }
 
     @After
@@ -67,7 +80,104 @@ public class VideoCategoryManagerTest {
         setHidden(MediaServiceData.CONTENT_SPORTS_HOME, false);
         setHidden(MediaServiceData.CONTENT_NEWS_HOME, false);
         setHidden(MediaServiceData.CONTENT_TECH_HOME, false);
+        MediaServiceData.instance().setDataApiKey(null);
         Utils.sHandler.removeCallbacksAndMessages(null);
+    }
+
+    @Test
+    public void videoWithHiddenTopicIsHiddenWhateverItsCategory() {
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME);
+        home.add(createVideo(MUSIC_MIX_ID));
+        assertEquals(1, home.getSize());
+
+        setHidden(MediaServiceData.CONTENT_MUSIC_HOME, true);
+        home = createGroup(MediaGroup.TYPE_HOME);
+
+        home.add(createVideo(MUSIC_MIX_ID));
+        home.add(createVideo(GAME_VLOG_ID));
+        home.add(createVideo(VLOG_ID));
+
+        assertEquals(2, home.getSize());
+        assertFalse(contains(home, MUSIC_MIX_ID));
+    }
+
+    @Test
+    public void eachToggleMatchesItsOwnTopic() {
+        VideoCategoryManager manager = getManager();
+        int[] contents = {MediaServiceData.CONTENT_MUSIC_HOME, MediaServiceData.CONTENT_GAMING_HOME, MediaServiceData.CONTENT_SPORTS_HOME,
+                MediaServiceData.CONTENT_NEWS_HOME, MediaServiceData.CONTENT_TECH_HOME};
+        String[] topics = {"Music", "Video_game_culture", "Sport", "Politics", "Technology"};
+
+        for (int i = 0; i < contents.length; i++) {
+            for (int j = 0; j < topics.length; j++) {
+                setHidden(contents[i], true);
+                assertEquals(contents[i] + " " + topics[j], i == j, manager.isHidden("People & Blogs", Collections.singletonList(topics[j])));
+                setHidden(contents[i], false);
+            }
+        }
+
+        // Only the parent topics: sub-genres and look-alikes don't match on their own
+        setHidden(MediaServiceData.CONTENT_SPORTS_HOME, true);
+        setHidden(MediaServiceData.CONTENT_NEWS_HOME, true);
+        assertFalse(manager.isHidden("People & Blogs", Arrays.asList("Sports_game", "Society")));
+    }
+
+    @Test
+    public void rowRulesCountTopicMatches() {
+        setHidden(MediaServiceData.CONTENT_GAMING_HOME, true);
+        VideoCategoryManager manager = getManager();
+
+        // A game genre row whose gaming videos are all People & Blogs
+        assertTrue(manager.isRowHidden(new TestMediaGroup(MediaGroup.TYPE_HOME, MediaGroup.TOPIC_NONE, GAME_VLOG_ID, GAMING_ID, VLOG_ID)));
+        assertFalse(manager.isRowHidden(new TestMediaGroup(MediaGroup.TYPE_HOME, MediaGroup.TOPIC_NONE, GAME_VLOG_ID, VLOG_ID, TECH_ID)));
+    }
+
+    @Test
+    public void videosWithoutTopicsAreLookedUpOnceWithKey() {
+        setHidden(MediaServiceData.CONTENT_MUSIC_HOME, true);
+        VideoCategoryManager manager = getManager();
+        TestMediaGroup row = new TestMediaGroup(MediaGroup.TYPE_HOME, MediaGroup.TOPIC_NONE,
+                PLAYER_VLOG_ID, MUSIC_MIX_ID, MUSIC_ID, UNKNOWN_ID);
+
+        // Without a key only the unknown video is looked up
+        assertEquals(Collections.singletonList(UNKNOWN_ID), manager.getUnknownVideoIdsForTesting(row));
+
+        MediaServiceData.instance().setDataApiKey("key");
+
+        // The player found its category, the topics are missing. The music video is hidden by its category anyway.
+        assertEquals(Arrays.asList(UNKNOWN_ID, PLAYER_VLOG_ID), manager.getUnknownVideoIdsForTesting(row));
+        // Not again this session (e.g. the key is out of quota)
+        assertEquals(Collections.singletonList(UNKNOWN_ID), manager.getUnknownVideoIdsForTesting(row));
+    }
+
+    @Test
+    public void topicsSurviveRestart() {
+        VideoCategoryManager manager = getManager();
+        File file = manager.getCategoriesFileForTesting();
+
+        manager.saveCategoriesForTesting();
+        manager.restoreCategoriesForTesting();
+
+        setHidden(MediaServiceData.CONTENT_MUSIC_HOME, true);
+        assertTrue(manager.isVideoHidden(MUSIC_MIX_ID));
+        assertTrue(manager.isVideoHidden(MUSIC_ID));
+        assertFalse(manager.isVideoHidden(VLOG_ID));
+        assertEquals("People & Blogs", manager.getCachedCategory(PLAYER_VLOG_ID));
+
+        // Lines saved before the topics existed: video id and category only
+        FileHelpers.stringToFile("old\tMusic\nbroken\n\tMusic\n", file);
+        manager.restoreCategoriesForTesting();
+
+        assertTrue(manager.isVideoHidden("old"));
+        assertNull(manager.getCachedCategory("broken"));
+        assertNull(manager.getCachedCategory(MUSIC_MIX_ID));
+
+        // The topic-less old line is looked up again once there's a key
+        MediaServiceData.instance().setDataApiKey("key");
+        setHidden(MediaServiceData.CONTENT_MUSIC_HOME, false);
+        setHidden(MediaServiceData.CONTENT_GAMING_HOME, true);
+        assertEquals(Collections.singletonList("old"),
+                manager.getUnknownVideoIdsForTesting(new TestMediaGroup(MediaGroup.TYPE_HOME, MediaGroup.TOPIC_NONE, "old")));
     }
 
     @Test
