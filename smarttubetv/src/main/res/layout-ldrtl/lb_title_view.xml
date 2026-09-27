@@ -43,8 +43,23 @@
             android:transitionGroup="true"
             android:layout_marginStart="@dimen/search_bar_right_items_margin"
             android:nextFocusRight="@id/title_orb"
-            android:nextFocusLeft="@id/language_orb"
+            android:nextFocusLeft="@id/old_videos_orb"
             app:searchOrbIcon="@drawable/browse_title_account"
+            app:searchOrbColor="@color/orb_color"
+            app:searchOrbBrightColor="@color/orb_bright_color"
+            app:searchOrbIconColor="@color/orb_icon_color"
+            android:visibility="gone" />
+
+        <!-- Quick toggle of Hide videos older than (Hide content settings) -->
+        <androidx.leanback.widget.SearchOrbView
+            android:id="@+id/old_videos_orb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:transitionGroup="true"
+            android:layout_marginStart="@dimen/search_bar_right_items_margin"
+            android:nextFocusRight="@id/account_orb"
+            android:nextFocusLeft="@id/language_orb"
+            app:searchOrbIcon="@drawable/browse_title_old_videos_off"
             app:searchOrbColor="@color/orb_color"
             app:searchOrbBrightColor="@color/orb_bright_color"
             app:searchOrbIconColor="@color/orb_icon_color"
@@ -56,7 +71,7 @@
             android:layout_height="wrap_content"
             android:transitionGroup="true"
             android:layout_marginStart="@dimen/search_bar_right_items_margin"
-            android:nextFocusRight="@id/account_orb"
+            android:nextFocusRight="@id/old_videos_orb"
             android:nextFocusLeft="@id/exit_pip"
             app:searchOrbIcon="@drawable/search_bar_language_orb"
             app:searchOrbColor="@color/orb_color"

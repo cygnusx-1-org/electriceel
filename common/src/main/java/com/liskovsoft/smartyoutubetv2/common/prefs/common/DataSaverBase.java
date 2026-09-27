@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs;
+import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs.ProfileChangeListener;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
 import java.util.ArrayList;
@@ -13,9 +14,11 @@ import java.util.List;
 public abstract class DataSaverBase extends DataChangeBase {
     private final AppPrefs mAppPrefs;
     private final boolean mPersistImmediately;
+    private final boolean mIsProfileData;
     private final String mDataKey;
     private final List<Object> mValues;
     private final Runnable mPersistStateInt = this::persistStateInt;
+    private final ProfileChangeListener mOnProfileChanged = this::onProfileChanged;
 
     private interface Converter {
         Object convert(String input);
@@ -26,11 +29,23 @@ public abstract class DataSaverBase extends DataChangeBase {
     }
 
     public DataSaverBase(Context context, boolean persistImmediately) {
+        this(context, persistImmediately, false);
+    }
+
+    /**
+     * @param isProfileData each account has its own values while "Use separate settings per each account" is on
+     */
+    public DataSaverBase(Context context, boolean persistImmediately, boolean isProfileData) {
         mAppPrefs = AppPrefs.instance(context);
         mPersistImmediately = persistImmediately;
+        mIsProfileData = isProfileData;
         mDataKey = this.getClass().getSimpleName();
         mValues = new ArrayList<>();
         restoreState();
+
+        if (isProfileData) {
+            mAppPrefs.addListener(mOnProfileChanged);
+        }
     }
 
     protected boolean getBoolean(int index) {
@@ -89,7 +104,7 @@ public abstract class DataSaverBase extends DataChangeBase {
     }
 
     private void restoreState() {
-        String data = mAppPrefs.getData(mDataKey);
+        String data = mIsProfileData ? mAppPrefs.getProfileData(mDataKey) : mAppPrefs.getData(mDataKey);
 
         String[] split = Helpers.splitData(data);
 
@@ -113,8 +128,23 @@ public abstract class DataSaverBase extends DataChangeBase {
     }
 
     private void persistStateInt() {
-        mAppPrefs.setData(mDataKey, Helpers.mergeData(
-                mValues.toArray()
-        ));
+        String data = Helpers.mergeData(mValues.toArray());
+
+        if (mIsProfileData) {
+            mAppPrefs.setProfileData(mDataKey, data);
+        } else {
+            mAppPrefs.setData(mDataKey, data);
+        }
+    }
+
+    /**
+     * The account (or the per account switch) has changed, the values are the new account's
+     */
+    private void onProfileChanged() {
+        // Already the new account: a pending save would put the old values there
+        Utils.removeCallbacks(mPersistStateInt);
+        mValues.clear();
+        restoreState();
+        onDataChange();
     }
 }

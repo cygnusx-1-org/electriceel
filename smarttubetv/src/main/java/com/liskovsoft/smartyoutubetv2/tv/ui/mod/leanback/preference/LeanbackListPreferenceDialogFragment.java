@@ -62,6 +62,8 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
     private static final float DISABLED_ALPHA = 0.4f; // MOD: see DependentListPreference
     private static final int VIEW_TYPE_CHECKBOX = 0;
     private static final int VIEW_TYPE_SWITCH = 1;
+    private static final int VIEW_TYPE_MENU = 2;
+    private static final int VIEW_TYPE_RADIO = 3;
     private boolean mMulti;
     protected CharSequence[] mEntries;
     protected CharSequence[] mEntryValues;
@@ -300,10 +302,24 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-            // MOD: switch rows (see DependentListPreference)
-            final View view = inflater.inflate(viewType == VIEW_TYPE_SWITCH ?
-                            R.layout.dialog_list_preference_item_switch : androidx.leanback.preference.R.layout.leanback_list_preference_item_multi,
-                    parent, false);
+            // MOD: switch, menu and radio rows (see DependentListPreference)
+            final int layoutResId;
+            switch (viewType) {
+                case VIEW_TYPE_SWITCH:
+                    layoutResId = R.layout.dialog_list_preference_item_switch;
+                    break;
+                case VIEW_TYPE_MENU:
+                    layoutResId = R.layout.dialog_list_preference_item_menu;
+                    break;
+                case VIEW_TYPE_RADIO:
+                    // The checkbox row with a radio button
+                    layoutResId = androidx.leanback.preference.R.layout.leanback_list_preference_item_single;
+                    break;
+                default:
+                    layoutResId = androidx.leanback.preference.R.layout.leanback_list_preference_item_multi;
+                    break;
+            }
+            final View view = inflater.inflate(layoutResId, parent, false);
             return new ViewHolder(view, this);
         }
 
@@ -311,8 +327,21 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
         public int getItemViewType(int position) {
             DialogPreference preference = getPreference();
 
-            return preference instanceof DependentListPreference
-                    && ((DependentListPreference) preference).isToggle(mEntryValues[position].toString()) ? VIEW_TYPE_SWITCH : VIEW_TYPE_CHECKBOX;
+            if (!(preference instanceof DependentListPreference)) {
+                return VIEW_TYPE_CHECKBOX;
+            }
+
+            String entryValue = mEntryValues[position].toString();
+
+            if (((DependentListPreference) preference).isMenu(entryValue)) {
+                return VIEW_TYPE_MENU;
+            }
+
+            if (((DependentListPreference) preference).isRadio(entryValue)) {
+                return VIEW_TYPE_RADIO;
+            }
+
+            return ((DependentListPreference) preference).isToggle(entryValue) ? VIEW_TYPE_SWITCH : VIEW_TYPE_CHECKBOX;
         }
 
         @Override
@@ -343,16 +372,26 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
                 return;
             }
             final String entry = mEntryValues[index].toString();
+            final DialogPreference preference = getPreference();
+            // MOD: a menu entry is never checked (see DependentListPreference)
+            if (preference instanceof DependentListPreference && ((DependentListPreference) preference).isMenu(entry)) {
+                ((DependentListPreference) preference).openMenu(entry);
+                return;
+            }
             if (mSelections.contains(entry)) {
                 mSelections.remove(entry);
             } else {
                 mSelections.add(entry);
             }
             final MultiSelectListPreference multiSelectListPreference
-                    = (MultiSelectListPreference) getPreference();
+                    = (MultiSelectListPreference) preference;
             // Pass copies of the set to callChangeListener and setValues to avoid mutations
             // MOD: npe fix
             if (multiSelectListPreference != null && multiSelectListPreference.callChangeListener(new HashSet<>(mSelections))) {
+                // MOD: uncheck the radio entries only now, the listener tells the change by the one new entry
+                if (preference instanceof DependentListPreference && mSelections.contains(entry)) {
+                    mSelections.removeAll(((DependentListPreference) preference).getRadio(entry));
+                }
                 multiSelectListPreference.setValues(new HashSet<>(mSelections));
                 mInitialSelections = mSelections;
             } else {

@@ -19,8 +19,11 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.liskovsoft.mediaserviceinterfaces.oauth.Account;
+import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.sharedutils.locale.LocaleUtility;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.BrowseSection;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.BrowsePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.PlaybackPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.AccountSelectionPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.AccountSettingsPresenter;
@@ -29,9 +32,11 @@ import com.liskovsoft.smartyoutubetv2.common.app.views.PlaybackView;
 import com.liskovsoft.smartyoutubetv2.common.app.views.ViewManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager.AccountChangeListener;
+import com.liskovsoft.smartyoutubetv2.common.misc.OldVideoFilter;
 import com.liskovsoft.smartyoutubetv2.common.prefs.common.DataChangeBase.OnDataChange;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.OldVideosData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.smartyoutubetv2.tv.R;
 import com.liskovsoft.smartyoutubetv2.tv.ui.mod.leanback.playerglue.tooltips.TooltipCompatHandler;
@@ -53,6 +58,7 @@ import static androidx.leanback.widget.TitleViewAdapter.SEARCH_VIEW_VISIBLE;
  */
 public class NavigateTitleView extends TitleView implements OnDataChange, AccountChangeListener {
     private LongClickSearchOrbView mAccountView;
+    private SearchOrbView mOldVideosView;
     private SearchOrbView mLanguageView;
     private SearchOrbView mExitPip;
     private TextView mPipTitle;
@@ -67,8 +73,11 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
     private int mIconHeight;
     private boolean mIsSearchOrbEnabled;
     private boolean mIsAccountViewEnabled;
+    private boolean mIsOldVideosViewEnabled;
     private boolean mIsLanguageViewEnabled;
     private boolean mIsGlobalClockEnabled;
+    // Held here, the data keeps its listeners weakly. Doesn't reload the other buttons (e.g. the flag).
+    private final OnDataChange mOnOldVideosChange = this::onOldVideosChange;
 
     public NavigateTitleView(Context context) {
         super(context);
@@ -156,6 +165,10 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
             mAccountView.setVisibility(mSearchVisibility);
         }
 
+        if (mIsOldVideosViewEnabled) {
+            mOldVideosView.setVisibility(mSearchVisibility);
+        }
+
         if (mIsLanguageViewEnabled) {
             mLanguageView.setVisibility(mSearchVisibility);
         }
@@ -186,6 +199,8 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
         MainUIData mainUIData = MainUIData.instance(getContext());
         mainUIData.setOnChange(this);
 
+        OldVideosData.instance(getContext()).setOnChange(mOnOldVideosChange);
+
         mInitDone = true;
     }
 
@@ -201,6 +216,9 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
             return true;
         });
         TooltipCompatHandler.setTooltipText(mAccountView, getContext().getString(R.string.settings_accounts));
+
+        mOldVideosView = findViewById(R.id.old_videos_orb);
+        mOldVideosView.setOnOrbClickedListener(v -> toggleOldVideos());
 
         mLanguageView = findViewById(R.id.language_orb);
         mLanguageView.setOnOrbClickedListener(v -> LanguageSettingsPresenter.instance(getContext()).show());
@@ -228,11 +246,13 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
 
         mIsSearchOrbEnabled = !mainUIData.isTopButtonEnabled(MainUIData.TOP_BUTTON_SEARCH);
         mIsAccountViewEnabled = mainUIData.isTopButtonEnabled(MainUIData.TOP_BUTTON_BROWSE_ACCOUNTS);
+        mIsOldVideosViewEnabled = OldVideosData.instance(getContext()).isQuickToggleEnabled();
         mIsLanguageViewEnabled = mainUIData.isTopButtonEnabled(MainUIData.TOP_BUTTON_CHANGE_LANGUAGE);
         mIsGlobalClockEnabled = GeneralData.instance(getContext()).isGlobalClockEnabled();
 
         mSearchOrbView.setVisibility(mIsSearchOrbEnabled ? View.VISIBLE : View.GONE);
         mAccountView.setVisibility(mIsAccountViewEnabled ? View.VISIBLE : View.GONE);
+        mOldVideosView.setVisibility(mIsOldVideosViewEnabled ? View.VISIBLE : View.GONE);
         mLanguageView.setVisibility(mIsLanguageViewEnabled ? View.VISIBLE : View.GONE);
         mGlobalClock.setVisibility(mIsGlobalClockEnabled ? View.VISIBLE : View.GONE);
         mGlobalDate.setVisibility(mIsGlobalClockEnabled ? View.VISIBLE : View.GONE);
@@ -240,6 +260,7 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
         Utils.postDelayed(this::updateAccountIcon, 1_000); // give a time to engine to fetch an updated icon url
         //updateAccountIcon();
         updateLanguageIcon();
+        updateOldVideosIcon();
     }
 
     @Override
@@ -296,6 +317,46 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
             mAccountView.setOrbIcon(ContextCompat.getDrawable(getContext(), R.drawable.browse_title_account));
             TooltipCompatHandler.setTooltipText(mAccountView, getContext().getString(R.string.dialog_account_none));
         }
+    }
+
+    private void onOldVideosChange() {
+        mIsOldVideosViewEnabled = OldVideosData.instance(getContext()).isQuickToggleEnabled();
+        mOldVideosView.setVisibility(mIsOldVideosViewEnabled ? mSearchVisibility : View.GONE);
+        updateOldVideosIcon();
+    }
+
+    /**
+     * Same orb in both states, only the icon changes
+     */
+    private void updateOldVideosIcon() {
+        if (!mIsOldVideosViewEnabled) {
+            return;
+        }
+
+        OldVideosData data = OldVideosData.instance(getContext());
+        mOldVideosView.setOrbIcon(ContextCompat.getDrawable(getContext(),
+                data.isEnabled() ? R.drawable.browse_title_old_videos_on : R.drawable.browse_title_old_videos_off));
+        TooltipCompatHandler.setTooltipText(mOldVideosView, getOldVideosState(data));
+    }
+
+    private void toggleOldVideos() {
+        OldVideosData data = OldVideosData.instance(getContext());
+        data.setEnabled(!data.isEnabled());
+        MessageHelpers.showMessage(getContext(), getOldVideosState(data));
+
+        // Keep the focus on the button, so it can be pressed again
+        BrowsePresenter presenter = BrowsePresenter.instance(getContext());
+        BrowseSection section = presenter.getCurrentSection();
+
+        if (section != null && data.isSectionEnabled(section.getId())) {
+            presenter.refresh(false);
+        }
+    }
+
+    private String getOldVideosState(OldVideosData data) {
+        return data.isEnabled() ?
+                getContext().getString(R.string.hide_old_videos_on, OldVideoFilter.getPeriodTitle(getContext(), data.getPeriodMonths())) :
+                getContext().getString(R.string.hide_old_videos_off);
     }
 
     private void updateLanguageIcon() {

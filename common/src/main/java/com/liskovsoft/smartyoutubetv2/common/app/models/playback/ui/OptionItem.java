@@ -16,6 +16,11 @@ public interface OptionItem {
      */
     void setDisabledBy(OptionItem item);
     OptionItem getDisabledBy();
+    /**
+     * Show this item of a checked list as a row that opens a menu: no checkbox, selecting it calls the callback and leaves it unchecked
+     */
+    void setMenu(boolean isMenu);
+    boolean isMenu();
     ChatReceiver getChatReceiver();
     CommentsReceiver getCommentsReceiver();
 }

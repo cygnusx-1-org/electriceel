@@ -2,6 +2,7 @@ apply from: gradle.ext.sharedModulesConstants
 apply plugin: 'com.android.library'
 
 android {
+    namespace 'com.r0adkll.slidr'
     compileSdkVersion project.properties.compileSdkVersion
 
     defaultConfig {

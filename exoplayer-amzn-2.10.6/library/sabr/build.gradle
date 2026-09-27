@@ -19,6 +19,7 @@ apply from: '../../constants.gradle'
 apply plugin: 'com.android.library'
 
 android {
+    namespace 'com.google.android.exoplayer2.source.sabr'
     compileSdkVersion project.ext.compileSdkVersion
 
     compileOptions {

@@ -21,10 +21,12 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.provide
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.providers.ContextMenuProvider;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.SidebarService;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.OldVideoFilter;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.NetworkData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.OldVideosData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.SearchData;
@@ -115,6 +117,10 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
     private void appendHideContent(AppDialogPresenter settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
+        OptionItem oldVideos = UiOptionItem.from(getContext().getString(R.string.hide_old_videos), option -> showOldVideosMenu());
+        oldVideos.setMenu(true);
+        options.add(oldVideos);
+
         options.add(UiOptionItem.from(getContext().getString(R.string.hide_shorts_everywhere),
                 option -> {
                     mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_SHORTS_ALL, option.isSelected());
@@ -203,6 +209,73 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
                 mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_UPCOMING_CHANNEL)));
 
         settingsPresenter.appendCheckedCategory(getContext().getString(R.string.hide_unwanted_content), options);
+    }
+
+    /**
+     * The periods are radio buttons. Pressing the checked one turns the filter off and keeps the period for the quick toggle.
+     */
+    private void showOldVideosMenu() {
+        AppDialogPresenter presenter = AppDialogPresenter.instance(getContext());
+        OldVideosData data = OldVideosData.instance(getContext());
+
+        List<OptionItem> periods = new ArrayList<>();
+
+        for (int months : OldVideosData.PERIODS_MONTHS) {
+            periods.add(UiOptionItem.from(OldVideoFilter.getPeriodTitle(getContext(), months),
+                    option -> {
+                        if (option.isSelected()) {
+                            data.setPeriodMonths(months);
+                            data.setEnabled(true);
+                        } else if (data.getPeriodMonths() == months) {
+                            // Unchecked, or another period is being checked (it turns the filter back on)
+                            data.setEnabled(false);
+                        }
+                    },
+                    data.isEnabled() && data.getPeriodMonths() == months));
+        }
+
+        for (OptionItem period : periods) {
+            List<OptionItem> others = new ArrayList<>(periods);
+            others.remove(period);
+            period.setRadio(others.toArray(new OptionItem[0]));
+        }
+
+        List<OptionItem> options = new ArrayList<>(periods);
+
+        options.add(UiOptionItem.from(getContext().getString(R.string.hide_old_videos_quick_toggle),
+                option -> data.setQuickToggleEnabled(option.isSelected()),
+                data.isQuickToggleEnabled()));
+
+        OptionItem sections = UiOptionItem.from(getContext().getString(R.string.hide_old_videos_sections), option -> showOldVideosSectionsMenu());
+        sections.setMenu(true);
+        options.add(sections);
+
+        String title = getContext().getString(R.string.hide_old_videos);
+        presenter.appendCheckedCategory(title, options);
+        presenter.showDialog(title);
+    }
+
+    private void showOldVideosSectionsMenu() {
+        AppDialogPresenter presenter = AppDialogPresenter.instance(getContext());
+        OldVideosData data = OldVideosData.instance(getContext());
+
+        List<OptionItem> options = new ArrayList<>();
+
+        for (Entry<Integer, Integer> section : mSidebarService.getDefaultSections().entrySet()) {
+            int sectionId = section.getValue();
+
+            if (!OldVideoFilter.isSupportedSection(sectionId)) {
+                continue;
+            }
+
+            options.add(UiOptionItem.from(getContext().getString(section.getKey()),
+                    option -> data.setSectionEnabled(sectionId, option.isSelected()),
+                    data.isSectionEnabled(sectionId)));
+        }
+
+        String title = getContext().getString(R.string.hide_old_videos_sections);
+        presenter.appendCheckedCategory(title, options);
+        presenter.showDialog(title);
     }
 
     private void appendContextMenuItemsCategory(AppDialogPresenter settingsPresenter) {

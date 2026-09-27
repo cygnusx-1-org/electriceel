@@ -16,6 +16,7 @@ public class UiOptionItem implements OptionItem {
     private OptionItem[] mRequiredItems;
     private OptionItem[] mRadioItems;
     private OptionItem mDisabledBy;
+    private boolean mIsMenu;
     private ChatReceiver mChatReceiver;
     private CommentsReceiver mCommentsReceiver;
 
@@ -186,6 +187,16 @@ public class UiOptionItem implements OptionItem {
     @Override
     public OptionItem getDisabledBy() {
         return mDisabledBy;
+    }
+
+    @Override
+    public void setMenu(boolean isMenu) {
+        mIsMenu = isMenu;
+    }
+
+    @Override
+    public boolean isMenu() {
+        return mIsMenu;
     }
 
     @Override

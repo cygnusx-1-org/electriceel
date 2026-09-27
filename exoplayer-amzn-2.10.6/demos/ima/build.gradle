@@ -15,6 +15,7 @@ apply from: '../../constants.gradle'
 apply plugin: 'com.android.application'
 
 android {
+    namespace 'com.google.android.exoplayer2.imademo'
     compileSdkVersion project.ext.compileSdkVersion
 
     compileOptions {
@@ -33,7 +34,7 @@ android {
         release {
             shrinkResources true
             minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt')
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt')
         }
         debug {
             jniDebuggable = true

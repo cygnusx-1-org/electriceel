@@ -246,9 +246,26 @@ public class AppPreferenceManager {
         initMultiSelectListPreference(category, pref);
 
         if (pref instanceof DependentListPreference) {
+            DependentListPreference dependentPref = (DependentListPreference) pref;
+
             for (OptionItem item : category.options) {
                 if (item.getDisabledBy() != null) {
-                    ((DependentListPreference) pref).setDisabledBy(item.toString(), item.getDisabledBy().toString());
+                    dependentPref.setDisabledBy(item.toString(), item.getDisabledBy().toString());
+                }
+
+                if (item.isMenu()) {
+                    // Stays unchecked, the list tells a change by the checked state
+                    dependentPref.setMenu(item.toString(), () -> item.onSelect(false));
+                }
+
+                if (item.getRadio() != null) {
+                    Set<String> radioValues = new HashSet<>();
+
+                    for (OptionItem radioItem : item.getRadio()) {
+                        radioValues.add(radioItem.toString());
+                    }
+
+                    dependentPref.setRadio(item.toString(), radioValues);
                 }
             }
         }
@@ -258,7 +275,7 @@ public class AppPreferenceManager {
 
     private static boolean hasDependentItems(OptionCategory category) {
         for (OptionItem item : category.options) {
-            if (item.getDisabledBy() != null) {
+            if (item.getDisabledBy() != null || item.isMenu() || item.getRadio() != null) {
                 return true;
             }
         }

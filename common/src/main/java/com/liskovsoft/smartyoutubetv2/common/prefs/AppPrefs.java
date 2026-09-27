@@ -57,8 +57,11 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
         return sInstance;
     }
 
+    /**
+     * On by default. An account without its own settings yet starts from the shared ones (see getProfileData).
+     */
     public boolean isMultiProfilesEnabled() {
-        return getBoolean(MULTI_PROFILES, false);
+        return getBoolean(MULTI_PROFILES, true);
     }
 
     public void enableMultiProfiles(boolean enabled) {
@@ -110,12 +113,12 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
     }
 
     public String getProfileData(String key) {
-        //String data = getData(getProfileKey(key, isMultiProfilesEnabled()));
+        String profileKey = getProfileKey(key, isMultiProfilesEnabled());
+        String data = getData(profileKey);
 
-        // Fallback to non-profile settings
-        //return data != null ? data : getData(key);
-
-        return getData(getProfileKey(key, isMultiProfilesEnabled()));
+        // Fallback to non-profile settings: the account has none of its own yet (e.g. the separate settings were just turned on).
+        // They're saved for the account from its first change.
+        return TextUtils.isEmpty(data) && !profileKey.equals(key) ? getData(key) : data;
     }
 
     public void setProfileData(String key, String data) {

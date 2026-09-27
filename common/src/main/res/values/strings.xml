@@ -359,6 +359,11 @@
     <string name="hide_sports_from_home">Hide sports videos from Home</string>
     <string name="hide_news_from_home">Hide news videos from Home</string>
     <string name="hide_tech_from_home">Hide science and tech videos from Home</string>
+    <string name="hide_old_videos">Hide videos older than</string>
+    <string name="hide_old_videos_quick_toggle">Quick toggle on the main screen</string>
+    <string name="hide_old_videos_sections">Sections</string>
+    <string name="hide_old_videos_on">Hiding videos older than %s</string>
+    <string name="hide_old_videos_off">Showing videos of any age</string>
     <string name="api_keys">API keys</string>
     <string name="data_api_key">YouTube Data API key</string>
     <string name="data_api_key_hint">Free key from console.cloud.google.com</string>
@@ -788,5 +793,13 @@
     <plurals name="seconds">
         <item quantity="one">%s second</item>
         <item quantity="other">%s seconds</item>
+    </plurals>
+    <plurals name="months">
+        <item quantity="one">%s month</item>
+        <item quantity="other">%s months</item>
+    </plurals>
+    <plurals name="years">
+        <item quantity="one">%s year</item>
+        <item quantity="other">%s years</item>
     </plurals>
 </resources>

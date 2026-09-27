@@ -749,7 +749,14 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
                                     continue;
                                 }
 
-                                VideoGroup videoGroup = VideoGroup.from(mediaGroup, section, groupIndex.incrementAndGet());
+                                VideoGroup videoGroup = VideoGroup.from(mediaGroup, section, groupIndex.get() + 1);
+
+                                // A card alone says nothing, e.g. "More music" of a row that lost its videos to Hide content
+                                if (videoGroup.hasOnlyHiddenVideos()) {
+                                    continue;
+                                }
+
+                                groupIndex.incrementAndGet();
 
                                 if (TextUtils.isEmpty(videoGroup.getTitle())) {
                                     videoGroup.setTitle(getContext().getString(R.string.suggestions));

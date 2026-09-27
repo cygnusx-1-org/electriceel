@@ -1,8 +1,9 @@
 apply from: gradle.ext.sharedModulesConstants
-apply plugin: 'kotlin-android'
+apply plugin: 'com.android.built-in-kotlin'
 apply plugin: 'com.android.library'
 
 android {
+    namespace 'com.github.vkay94.dtpv'
     compileSdkVersion project.properties.compileSdkVersion
     buildToolsVersion project.properties.buildToolsVersion
 

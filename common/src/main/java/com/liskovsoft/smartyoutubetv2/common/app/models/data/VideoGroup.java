@@ -9,6 +9,7 @@ import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.service.VideoStateService;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.service.VideoStateService.State;
 import com.liskovsoft.smartyoutubetv2.common.misc.AiSListManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.OldVideoFilter;
 import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
 
@@ -42,6 +43,7 @@ public class VideoGroup {
     private int mPosition = -1;
     private int mAction = ACTION_APPEND;
     private int mType = -1;
+    private int mHiddenVideoCount;
     public boolean isQueue;
 
     public static VideoGroup from(BrowseSection section) {
@@ -432,6 +434,23 @@ public class VideoGroup {
         }
     }
 
+    /**
+     * Every video was hidden and only cards without a video are left (e.g. "More music" of a music row)
+     */
+    public boolean hasOnlyHiddenVideos() {
+        if (mHiddenVideoCount == 0 || isEmpty()) {
+            return false;
+        }
+
+        for (Video video : mVideos) {
+            if (video.videoId != null) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public boolean isEmpty() {
         try {
             return mVideos == null || mVideos.isEmpty();
@@ -456,7 +475,15 @@ public class VideoGroup {
     }
 
     public void add(int idx, Video video) {
-        if (video == null || video.isEmpty() || isChannelBlocked(video) || isAiListed(video) || isHiddenCategory(video) || isWatchedSuggestion(video)) {
+        if (video == null || video.isEmpty()) {
+            return;
+        }
+
+        if (isChannelBlocked(video) || isAiListed(video) || isHiddenCategory(video) || isOld(video) || isWatchedSuggestion(video)) {
+            if (video.videoId != null) {
+                mHiddenVideoCount++;
+            }
+
             return;
         }
 
@@ -546,6 +573,18 @@ public class VideoGroup {
         }
 
         return manager.isVideoHidden(video.videoId);
+    }
+
+    /**
+     * Older than the period of the Hide content setting, only in the sections picked there
+     */
+    private boolean isOld(Video video) {
+        // No context before the app is initialized (GlobalPreferences)
+        if (video.isChapter || video.videoId == null || getSection() == null || GlobalPreferences.context() == null) {
+            return false;
+        }
+
+        return OldVideoFilter.isHidden(GlobalPreferences.context(), getSection().getId(), video.getSecondTitle());
     }
 
     public int getAiSListSection() {

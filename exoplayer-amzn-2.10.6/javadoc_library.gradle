@@ -13,6 +13,11 @@
 // limitations under the License.
 apply from: "${buildscript.sourceFile.parentFile}/javadoc_util.gradle"
 
+// MOD: AGP 9 dropped the old variant API. The Javadoc task is only for publishing ExoPlayer, the app doesn't need it.
+if (!android.hasProperty('libraryVariants')) {
+    return
+}
+
 android.libraryVariants.all { variant ->
     def name = variant.buildType.name
     if (!name.equals("release")) {
