@@ -18,8 +18,8 @@ android {
     namespace 'com.google.android.exoplayer2'
     // MOD: FIX warning: source value 7 is obsolete and will be removed in a future release
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_24
+        targetCompatibility JavaVersion.VERSION_24
     }
 
     compileSdkVersion project.ext.compileSdkVersion
