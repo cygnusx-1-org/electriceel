@@ -9,7 +9,6 @@ import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.sharedutils.okhttp.OkHttpManager;
 import com.liskovsoft.sharedutils.rx.RxHelper;
 import com.liskovsoft.smartyoutubetv2.common.R;
-import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.manager.PlayerConstants;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionCategory;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
@@ -17,16 +16,11 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.BrowsePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
-import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.providers.ContextMenuManager;
-import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.providers.ContextMenuProvider;
-import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.SidebarService;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
-import com.liskovsoft.smartyoutubetv2.common.misc.OldVideoFilter;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.NetworkData;
-import com.liskovsoft.smartyoutubetv2.common.prefs.OldVideosData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.SearchData;
@@ -34,14 +28,11 @@ import com.liskovsoft.smartyoutubetv2.common.proxy.ProxyManager;
 import com.liskovsoft.smartyoutubetv2.common.proxy.WebProxyDialog;
 import com.liskovsoft.smartyoutubetv2.common.utils.AppDialogUtil;
 import com.liskovsoft.smartyoutubetv2.common.utils.SimpleEditDialog;
+import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 public class GeneralSettingsPresenter extends BasePresenter<Void> {
     private final GeneralData mGeneralData;
@@ -50,7 +41,6 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
     private final MainUIData mMainUIData;
     private final MediaServiceData mMediaServiceData;
     private final NetworkData mNetworkData;
-    private final SidebarService mSidebarService;
     private boolean mRestartApp;
     private final Runnable mOnFinish = () -> {
         if (mRestartApp) {
@@ -67,333 +57,229 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
         mMainUIData = MainUIData.instance(context);
         mMediaServiceData = MediaServiceData.instance();
         mNetworkData = NetworkData.instance(context);
-        mSidebarService = SidebarService.instance(context);
     }
 
     public static GeneralSettingsPresenter instance(Context context) {
         return new GeneralSettingsPresenter(context);
     }
 
-    public void show() {
+    /**
+     * The Background playback card of the System settings, in General (was in the General panel)
+     */
+    public void showBackgroundPlayback() {
         AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
 
-        appendBootToSection(settingsPresenter);
-        appendEnabledSections(settingsPresenter);
-        appendContextMenuItemsCategory(settingsPresenter);
-        appendHideContent(settingsPresenter);
-        appendAppExitCategory(settingsPresenter);
         appendBackgroundPlaybackCategory(settingsPresenter);
-        appendScreenDimmingCategory(settingsPresenter);
-        appendKeyRemappingCategory(settingsPresenter);
-        appendInternetCensorship(settingsPresenter);
-        appendHistoryCategory(settingsPresenter);
-        appendMiscCategory(settingsPresenter);
-        appendApiKeysCategory(settingsPresenter);
 
-        settingsPresenter.showDialog(getContext().getString(R.string.settings_general), mOnFinish);
-    }
-
-    private void appendEnabledSections(AppDialogPresenter settingsPresenter) {
-        List<OptionItem> options = new ArrayList<>();
-
-        Map<Integer, Integer> sections = mSidebarService.getDefaultSections();
-
-        for (Entry<Integer, Integer> section : sections.entrySet()) {
-            int sectionResId = section.getKey();
-            int sectionId = section.getValue();
-
-            if (sectionId == MediaGroup.TYPE_SETTINGS) {
-                continue;
-            }
-
-            options.add(UiOptionItem.from(getContext().getString(sectionResId), optionItem -> {
-                BrowsePresenter.instance(getContext()).enableSection(sectionId, optionItem.isSelected());
-            }, mSidebarService.isSectionPinned(sectionId)));
-        }
-
-        settingsPresenter.appendCheckedCategory(getContext().getString(R.string.side_panel_sections), options);
-    }
-
-    private void appendHideContent(AppDialogPresenter settingsPresenter) {
-        List<OptionItem> options = new ArrayList<>();
-
-        OptionItem oldVideos = UiOptionItem.from(getContext().getString(R.string.hide_old_videos), option -> showOldVideosMenu());
-        oldVideos.setMenu(true);
-        options.add(oldVideos);
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.hide_shorts_everywhere),
-                option -> {
-                    mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_SHORTS_ALL, option.isSelected());
-                    BrowsePresenter.instance(getContext()).enableSection(MediaGroup.TYPE_SHORTS, !option.isSelected());
-                },
-                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_SHORTS_ALL)));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.hide_mixes),
-                option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_MIXES, option.isSelected()),
-                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_MIXES)));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.hide_watched_from_watch_later),
-                option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_WATCHED_WATCH_LATER, option.isSelected()),
-                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_WATCHED_WATCH_LATER)));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.hide_watched_from_home),
-                option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_WATCHED_HOME, option.isSelected()),
-                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_WATCHED_HOME)));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.hide_watched_from_subscriptions),
-                option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_WATCHED_SUBSCRIPTIONS, option.isSelected()),
-                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_WATCHED_SUBSCRIPTIONS)));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.hide_watched_from_notifications),
-                option -> mGeneralData.setHideWatchedFromNotificationsEnabled(option.isSelected()),
-                mGeneralData.isHideWatchedFromNotificationsEnabled()));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.hide_shorts),
-                option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_SHORTS_SUBSCRIPTIONS, option.isSelected()),
-                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_SHORTS_SUBSCRIPTIONS)));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.hide_shorts_from_search),
-                option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_SHORTS_SEARCH, option.isSelected()),
-                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_SHORTS_SEARCH)));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.hide_shorts_from_home),
-                option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_SHORTS_HOME, option.isSelected()),
-                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_SHORTS_HOME)));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.hide_music_from_home),
-                option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_MUSIC_HOME, option.isSelected()),
-                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_MUSIC_HOME)));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.hide_gaming_from_home),
-                option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_GAMING_HOME, option.isSelected()),
-                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_GAMING_HOME)));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.hide_sports_from_home),
-                option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_SPORTS_HOME, option.isSelected()),
-                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_SPORTS_HOME)));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.hide_news_from_home),
-                option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_NEWS_HOME, option.isSelected()),
-                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_NEWS_HOME)));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.hide_tech_from_home),
-                option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_TECH_HOME, option.isSelected()),
-                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_TECH_HOME)));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.hide_shorts_channel),
-                option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_SHORTS_CHANNEL, option.isSelected()),
-                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_SHORTS_CHANNEL)));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.hide_shorts_from_history),
-                option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_SHORTS_HISTORY, option.isSelected()),
-                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_SHORTS_HISTORY)));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.hide_shorts_from_trending),
-                option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_SHORTS_TRENDING, option.isSelected()),
-                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_SHORTS_TRENDING)));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.hide_streams),
-                option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_STREAMS_SUBSCRIPTIONS, option.isSelected()),
-                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_STREAMS_SUBSCRIPTIONS)));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.hide_upcoming),
-                option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_UPCOMING_SUBSCRIPTIONS, option.isSelected()),
-                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_UPCOMING_SUBSCRIPTIONS)));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.hide_upcoming_home),
-                option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_UPCOMING_HOME, option.isSelected()),
-                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_UPCOMING_HOME)));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.hide_upcoming_channel),
-                option -> mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_UPCOMING_CHANNEL, option.isSelected()),
-                mMediaServiceData.isContentHidden(MediaServiceData.CONTENT_UPCOMING_CHANNEL)));
-
-        settingsPresenter.appendCheckedCategory(getContext().getString(R.string.hide_unwanted_content), options);
+        settingsPresenter.showDialog(getContext().getString(R.string.category_background_playback), mOnFinish);
     }
 
     /**
-     * The periods are radio buttons. Pressing the checked one turns the filter off and keeps the period for the quick toggle.
+     * The Screen dimming card of the System settings, in General (was in the General panel)
      */
-    private void showOldVideosMenu() {
-        AppDialogPresenter presenter = AppDialogPresenter.instance(getContext());
-        OldVideosData data = OldVideosData.instance(getContext());
+    public void showScreenDimming() {
+        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
 
-        List<OptionItem> periods = new ArrayList<>();
+        appendScreenDimmingAmountCategory(settingsPresenter);
+        appendScreenDimmingTimeoutCategory(settingsPresenter);
 
-        for (int months : OldVideosData.PERIODS_MONTHS) {
-            periods.add(UiOptionItem.from(OldVideoFilter.getPeriodTitle(getContext(), months),
-                    option -> {
-                        if (option.isSelected()) {
-                            data.setPeriodMonths(months);
-                            data.setEnabled(true);
-                        } else if (data.getPeriodMonths() == months) {
-                            // Unchecked, or another period is being checked (it turns the filter back on)
-                            data.setEnabled(false);
-                        }
-                    },
-                    data.isEnabled() && data.getPeriodMonths() == months));
-        }
-
-        for (OptionItem period : periods) {
-            List<OptionItem> others = new ArrayList<>(periods);
-            others.remove(period);
-            period.setRadio(others.toArray(new OptionItem[0]));
-        }
-
-        List<OptionItem> options = new ArrayList<>(periods);
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.hide_old_videos_quick_toggle),
-                option -> data.setQuickToggleEnabled(option.isSelected()),
-                data.isQuickToggleEnabled()));
-
-        OptionItem sections = UiOptionItem.from(getContext().getString(R.string.hide_old_videos_sections), option -> showOldVideosSectionsMenu());
-        sections.setMenu(true);
-        options.add(sections);
-
-        String title = getContext().getString(R.string.hide_old_videos);
-        presenter.appendCheckedCategory(title, options);
-        presenter.showDialog(title);
+        settingsPresenter.showDialog(getContext().getString(R.string.screen_dimming), mOnFinish);
     }
 
-    private void showOldVideosSectionsMenu() {
-        AppDialogPresenter presenter = AppDialogPresenter.instance(getContext());
-        OldVideosData data = OldVideosData.instance(getContext());
+    /**
+     * The Key remapping card of the System settings, in General (was in the General panel)
+     */
+    public void showKeyRemapping() {
+        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+
+        appendKeyRemappingCategory(settingsPresenter);
+
+        settingsPresenter.showDialog(getContext().getString(R.string.key_remapping), mOnFinish);
+    }
+
+    /**
+     * The Network settings card of the System settings, in General (was in the General panel)
+     */
+    public void showNetwork() {
+        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+
+        appendInternetCensorship(settingsPresenter);
+
+        settingsPresenter.showDialog(getContext().getString(R.string.network_settings), mOnFinish);
+    }
+
+    /**
+     * The History card of the System settings, in General (was in the General panel)
+     */
+    public void showHistory() {
+        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+
+        appendHistoryCategory(settingsPresenter);
+
+        settingsPresenter.showDialog(getContext().getString(R.string.header_history), mOnFinish);
+    }
+
+    /**
+     * The API keys card of the System settings, in General (was in the General panel)
+     */
+    public void showApiKeys() {
+        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+
+        appendDataApiKeySwitch(settingsPresenter);
+        // A lone category is opened directly, and a switch can't be: show the list
+        settingsPresenter.enableExpandable(false);
+
+        settingsPresenter.showDialog(getContext().getString(R.string.api_keys), mOnFinish);
+    }
+
+    /**
+     * The DNS card of the System settings (was Prefers in the Player settings)
+     */
+    public void showDns() {
+        List<OptionItem> options = new ArrayList<>();
+
+        options.add(UiOptionItem.from(getContext().getString(R.string.prefer_ipv4),
+                getContext().getString(R.string.prefer_ipv4_desc),
+                option -> {
+                    // OkHttp is the only engine that supports custom DNS
+                    mPlayerTweaksData.setPlayerDataSource(option.isSelected() ? PlayerTweaksData.PLAYER_DATA_SOURCE_OKHTTP : Utils.getFasterDataSource());
+                    mPlayerTweaksData.setPreferredDnsType(option.isSelected() ? PlayerTweaksData.DNS_TYPE_IPV4 : PlayerTweaksData.DNS_TYPE_SYSTEM);
+                    mRestartApp = true;
+                },
+                mPlayerTweaksData.getPreferredDnsType() == PlayerTweaksData.DNS_TYPE_IPV4));
+
+        options.add(UiOptionItem.from(getContext().getString(R.string.prefer_google_dns),
+                getContext().getString(R.string.prefer_ipv4_desc),
+                option -> {
+                    // OkHttp is the only engine that supports custom DNS
+                    mPlayerTweaksData.setPlayerDataSource(option.isSelected() ? PlayerTweaksData.PLAYER_DATA_SOURCE_OKHTTP : Utils.getFasterDataSource());
+                    mPlayerTweaksData.setPreferredDnsType(option.isSelected() ? PlayerTweaksData.DNS_TYPE_GOOGLE : PlayerTweaksData.DNS_TYPE_SYSTEM);
+                    mRestartApp = true;
+                },
+                mPlayerTweaksData.getPreferredDnsType() == PlayerTweaksData.DNS_TYPE_GOOGLE));
+
+        showOptions(R.string.settings_dns, options);
+    }
+
+    /**
+     * The Misc options card of the System settings, in General (was Misc in the General panel)
+     */
+    public void showMisc() {
+        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+
+        appendMiscCategory(settingsPresenter);
+
+        settingsPresenter.showDialog(getContext().getString(R.string.settings_misc_options), mOnFinish);
+    }
+
+    /**
+     * The Remember options card of the System settings, in General (was in the General panel)
+     */
+    public void showRemember() {
+        List<OptionItem> options = new ArrayList<>();
+
+        options.add(UiOptionItem.from(getContext().getString(R.string.remember_position_subscriptions),
+                option -> mGeneralData.setRememberSubscriptionsPositionEnabled(option.isSelected()),
+                mGeneralData.isRememberSubscriptionsPositionEnabled()));
+
+        options.add(UiOptionItem.from(getContext().getString(R.string.remember_position_pinned),
+                option -> mGeneralData.setRememberPinnedPositionEnabled(option.isSelected()),
+                mGeneralData.isRememberPinnedPositionEnabled()));
+
+        showOptions(R.string.settings_remember_options, options);
+    }
+
+    /**
+     * The Disable options card of the System settings, in General (was in the General panel)
+     */
+    public void showDisable() {
+        List<OptionItem> options = new ArrayList<>();
+
+        options.add(UiOptionItem.from(getContext().getString(R.string.disable_screensaver),
+                option -> mGeneralData.setScreensaverDisabled(option.isSelected()),
+                mGeneralData.isScreensaverDisabled()));
+
+        // Disable long press on buggy controllers.
+        options.add(UiOptionItem.from(getContext().getString(R.string.disable_ok_long_press),
+                getContext().getString(R.string.disable_ok_long_press_desc),
+                option -> mGeneralData.setOkButtonLongPressDisabled(option.isSelected()),
+                mGeneralData.isOkButtonLongPressDisabled()));
+
+        showOptions(R.string.settings_disable_options, options);
+    }
+
+    private void showOptions(int titleResId, List<OptionItem> options) {
+        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+
+        String title = getContext().getString(titleResId);
+        settingsPresenter.appendCheckedCategory(title, options);
+        settingsPresenter.showDialog(title, mOnFinish);
+    }
+
+    /**
+     * The Password options card of the System settings, in General (was in the General panel)
+     */
+    public void showPasswords() {
+        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
 
         List<OptionItem> options = new ArrayList<>();
 
-        for (Entry<Integer, Integer> section : mSidebarService.getDefaultSections().entrySet()) {
-            int sectionId = section.getValue();
+        options.add(UiOptionItem.from(getContext().getString(R.string.protect_settings_with_password),
+                option -> {
+                    if (option.isSelected()) {
+                        showPasswordDialog(settingsPresenter, null);
+                    } else {
+                        mGeneralData.setSettingsPassword(null);
+                    }
+                },
+                mGeneralData.getSettingsPassword() != null));
 
-            if (!OldVideoFilter.isSupportedSection(sectionId)) {
-                continue;
-            }
+        options.add(UiOptionItem.from(getContext().getString(R.string.enable_master_password),
+                option -> {
+                    if (option.isSelected()) {
+                        showMasterPasswordDialog(settingsPresenter, null);
+                    } else {
+                        mGeneralData.setMasterPassword(null);
+                    }
+                },
+                mGeneralData.getMasterPassword() != null));
 
-            options.add(UiOptionItem.from(getContext().getString(section.getKey()),
-                    option -> data.setSectionEnabled(sectionId, option.isSelected()),
-                    data.isSectionEnabled(sectionId)));
-        }
-
-        String title = getContext().getString(R.string.hide_old_videos_sections);
-        presenter.appendCheckedCategory(title, options);
-        presenter.showDialog(title);
+        String title = getContext().getString(R.string.settings_password_options);
+        settingsPresenter.appendCheckedCategory(title, options);
+        settingsPresenter.showDialog(title, mOnFinish);
     }
 
-    private void appendContextMenuItemsCategory(AppDialogPresenter settingsPresenter) {
-        List<OptionItem> options = new ArrayList<>();
-
-        Map<Long, Integer> menuNames = getMenuNames();
-
-        for (Long menuItem : mMainUIData.getMenuItemsOrdered()) {
-            Integer nameResId = menuNames.get(menuItem);
-
-            if (nameResId == null) {
-                continue;
-            }
-
-            options.add(UiOptionItem.from(getContext().getString(nameResId), optionItem -> {
-                if (optionItem.isSelected()) {
-                    mMainUIData.setMenuItemEnabled(menuItem);
-                    showMenuItemOrderDialog(menuItem);
-                } else {
-                    mMainUIData.setMenuItemDisabled(menuItem);
-                }
-            }, mMainUIData.isMenuItemEnabled(menuItem)));
-        }
-
-        settingsPresenter.appendCheckedCategory(getContext().getString(R.string.context_menu), options);
-    }
-
-    private void appendContextMenuSortingCategory(AppDialogPresenter settingsPresenter) {
-        List<OptionItem> options = new ArrayList<>();
-
-        Map<Long, Integer> menuNames = getMenuNames();
-
-        for (Long menuItem : mMainUIData.getMenuItemsOrdered()) {
-            Integer nameResId = menuNames.get(menuItem);
-
-            if (nameResId == null || !mMainUIData.isMenuItemEnabled(menuItem)) {
-                continue;
-            }
-
-            options.add(UiOptionItem.from(getContext().getString(nameResId), optionItem ->
-                    showMenuItemOrderDialog(menuItem), false));
-        }
-
-        settingsPresenter.appendRadioCategory(getContext().getString(R.string.context_menu_sorting), options);
-    }
-
-    private void showMenuItemOrderDialog(Long menuItem) {
-        AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
+    /**
+     * The Exit from options card of the System settings, in General (was in the General panel): one list, the app exit opens from it
+     */
+    public void showExit() {
+        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
 
         List<OptionItem> options = new ArrayList<>();
 
-        Map<Long, Integer> menuNames = getMenuNames();
+        OptionItem appExit = UiOptionItem.from(getContext().getString(R.string.app_exit_shortcut), option -> showAppExitMenu());
+        appExit.setMenu(true);
+        options.add(appExit);
 
-        Integer currentNameResId = menuNames.get(menuItem);
+        options.add(UiOptionItem.from( getContext().getString(R.string.player_exit_shortcut) + ": " + getContext().getString(R.string.app_double_back_exit),
+                option -> mGeneralData.setPlayerExitShortcut(option.isSelected() ? GeneralData.EXIT_DOUBLE_BACK : GeneralData.EXIT_SINGLE_BACK),
+                mGeneralData.getPlayerExitShortcut() == GeneralData.EXIT_DOUBLE_BACK));
 
-        if (currentNameResId == null) {
-            return;
-        }
+        options.add(UiOptionItem.from(getContext().getString(R.string.search_exit_shortcut) + ": " + getContext().getString(R.string.app_double_back_exit),
+                option -> mGeneralData.setSearchExitShortcut(option.isSelected() ? GeneralData.EXIT_DOUBLE_BACK : GeneralData.EXIT_SINGLE_BACK),
+                mGeneralData.getSearchExitShortcut() == GeneralData.EXIT_DOUBLE_BACK));
 
-        List<Long> menuItemsOrdered = mMainUIData.getMenuItemsOrdered();
-        int size = menuItemsOrdered.size();
-        int currentIndex = mMainUIData.getMenuItemIndex(menuItem);
-        int counter = 0;
-
-        for (int i = 0; i < size; i++) {
-            Long item = menuItemsOrdered.get(i);
-            Integer nameResId = menuNames.get(item);
-
-            if (nameResId == null || !mMainUIData.isMenuItemEnabled(item)) {
-                continue;
-            }
-
-            final int index = i;
-            options.add(UiOptionItem.from((counter + 1) + " " + getContext().getString(nameResId), optionItem -> {
-                if (optionItem.isSelected()) {
-                    mMainUIData.setMenuItemIndex(index, menuItem);
-                    dialog.goBack();
-                }
-            }, currentIndex == i));
-            counter++;
-        }
-
-        String itemName = getContext().getString(currentNameResId);
-        dialog.appendRadioCategory(getContext().getString(R.string.item_postion) + " " + itemName, options);
-
-        dialog.showDialog();
+        String title = getContext().getString(R.string.settings_exit_options);
+        settingsPresenter.appendCheckedCategory(title, options);
+        settingsPresenter.showDialog(title, mOnFinish);
     }
 
-    private void appendBootToSection(AppDialogPresenter settingsPresenter) {
-        List<OptionItem> options = new ArrayList<>();
+    private void showAppExitMenu() {
+        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
 
-        Map<Integer, Integer> sections = mSidebarService.getDefaultSections();
+        appendAppExitCategory(settingsPresenter);
 
-        for (Entry<Integer, Integer> section : sections.entrySet()) {
-            options.add(
-                    UiOptionItem.from(
-                            getContext().getString(section.getKey()),
-                            optionItem -> mSidebarService.setBootSectionId(section.getValue()),
-                            section.getValue().equals(mSidebarService.getBootSectionId())
-                    )
-            );
-        }
-
-        Collection<Video> pinnedItems = mSidebarService.getPinnedItems();
-
-        for (Video item : pinnedItems) {
-            if (item != null && item.getTitle() != null) {
-                options.add(
-                        UiOptionItem.from(
-                                item.getTitle(),
-                                optionItem -> mSidebarService.setBootSectionId(item.getId()),
-                                item.hashCode() == mSidebarService.getBootSectionId()
-                        )
-                );
-            }
-        }
-
-        settingsPresenter.appendRadioCategory(getContext().getString(R.string.boot_to_section), options);
+        settingsPresenter.showDialog(getContext().getString(R.string.app_exit_shortcut));
     }
 
     private void appendAppExitCategory(AppDialogPresenter settingsPresenter) {
@@ -547,15 +433,6 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendCheckedCategory(getContext().getString(R.string.key_remapping), options);
     }
 
-    private void appendScreenDimmingCategory(AppDialogPresenter settingsPresenter) {
-        settingsPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.screen_dimming), optionItem -> {
-            AppDialogPresenter presenter = AppDialogPresenter.instance(getContext());
-            appendScreenDimmingAmountCategory(presenter);
-            appendScreenDimmingTimeoutCategory(presenter);
-            presenter.showDialog(getContext().getString(R.string.screen_dimming));
-        }));
-    }
-
     private void appendScreenDimmingAmountCategory(AppDialogPresenter settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
@@ -649,36 +526,12 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
     private void appendMiscCategory(AppDialogPresenter settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
-        options.add(UiOptionItem.from(getContext().getString(R.string.disable_screensaver),
-                option -> mGeneralData.setScreensaverDisabled(option.isSelected()),
-                mGeneralData.isScreensaverDisabled()));
-
         options.add(UiOptionItem.from(getContext().getString(R.string.multi_profiles),
                 option -> {
                     AppPrefs.instance(getContext()).enableMultiProfiles(option.isSelected());
                     BrowsePresenter.instance(getContext()).updateSections();
                 },
                 AppPrefs.instance(getContext()).isMultiProfilesEnabled()));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.protect_settings_with_password),
-                option -> {
-                    if (option.isSelected()) {
-                        showPasswordDialog(settingsPresenter, null);
-                    } else {
-                        mGeneralData.setSettingsPassword(null);
-                    }
-                },
-                mGeneralData.getSettingsPassword() != null));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.enable_master_password),
-                option -> {
-                    if (option.isSelected()) {
-                        showMasterPasswordDialog(settingsPresenter, null);
-                    } else {
-                        mGeneralData.setMasterPassword(null);
-                    }
-                },
-                mGeneralData.getMasterPassword() != null));
 
         options.add(UiOptionItem.from(getContext().getString(R.string.child_mode),
                 getContext().getString(R.string.child_mode_desc),
@@ -695,47 +548,15 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
                 },
                 mGeneralData.isChildModeEnabled()));
 
-        // Disable long press on buggy controllers.
-        options.add(UiOptionItem.from(getContext().getString(R.string.disable_ok_long_press),
-                getContext().getString(R.string.disable_ok_long_press_desc),
-                option -> mGeneralData.setOkButtonLongPressDisabled(option.isSelected()),
-                mGeneralData.isOkButtonLongPressDisabled()));
-
-        options.add(UiOptionItem.from( getContext().getString(R.string.player_exit_shortcut) + ": " + getContext().getString(R.string.app_double_back_exit),
-                option -> mGeneralData.setPlayerExitShortcut(option.isSelected() ? GeneralData.EXIT_DOUBLE_BACK : GeneralData.EXIT_SINGLE_BACK),
-                mGeneralData.getPlayerExitShortcut() == GeneralData.EXIT_DOUBLE_BACK));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.search_exit_shortcut) + ": " + getContext().getString(R.string.app_double_back_exit),
-                option -> mGeneralData.setSearchExitShortcut(option.isSelected() ? GeneralData.EXIT_DOUBLE_BACK : GeneralData.EXIT_SINGLE_BACK),
-                mGeneralData.getSearchExitShortcut() == GeneralData.EXIT_DOUBLE_BACK));
-
         options.add(UiOptionItem.from(getContext().getString(R.string.return_to_launcher),
                 option -> mGeneralData.setReturnToLauncherEnabled(option.isSelected()),
                 mGeneralData.isReturnToLauncherEnabled()));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.remember_position_subscriptions),
-                option -> mGeneralData.setRememberSubscriptionsPositionEnabled(option.isSelected()),
-                mGeneralData.isRememberSubscriptionsPositionEnabled()));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.remember_position_pinned),
-                option -> mGeneralData.setRememberPinnedPositionEnabled(option.isSelected()),
-                mGeneralData.isRememberPinnedPositionEnabled()));
 
         options.add(UiOptionItem.from(getContext().getString(R.string.select_channel_section),
                 option -> mGeneralData.setSelectChannelSectionEnabled(option.isSelected()),
                 mGeneralData.isSelectChannelSectionEnabled()));
 
-        settingsPresenter.appendCheckedCategory(getContext().getString(R.string.player_other), options);
-    }
-
-    private void appendApiKeysCategory(AppDialogPresenter settingsPresenter) {
-        settingsPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.api_keys), optionItem -> {
-            AppDialogPresenter presenter = AppDialogPresenter.instance(getContext());
-            appendDataApiKeySwitch(presenter);
-            // A lone category is opened directly, and a switch can't be: show the list
-            presenter.enableExpandable(false);
-            presenter.showDialog(getContext().getString(R.string.api_keys));
-        }));
+        settingsPresenter.appendCheckedCategory(getContext().getString(R.string.settings_misc_options), options);
     }
 
     private void appendDataApiKeySwitch(AppDialogPresenter settingsPresenter) {
@@ -904,54 +725,5 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
                     }
                     return true;
                 });
-    }
-
-    private Map<Long, Integer> getMenuNames() {
-        Map<Long, Integer> menuNames = new HashMap<>();
-        menuNames.put(MainUIData.MENU_ITEM_EXIT_FROM_PIP, R.string.return_to_background_video);
-        menuNames.put(MainUIData.MENU_ITEM_EXCLUDE_FROM_CONTENT_BLOCK, R.string.content_block_exclude_channel);
-        menuNames.put(MainUIData.MENU_ITEM_MARK_AS_WATCHED, R.string.mark_as_watched);
-        menuNames.put(MainUIData.MENU_ITEM_OPEN_CHANNEL, R.string.open_channel);
-        menuNames.put(MainUIData.MENU_ITEM_UPDATE_CHECK, R.string.check_for_updates);
-        menuNames.put(MainUIData.MENU_ITEM_CLEAR_HISTORY, R.string.clear_history);
-        menuNames.put(MainUIData.MENU_ITEM_TOGGLE_HISTORY, R.string.pause_history);
-        menuNames.put(MainUIData.MENU_ITEM_PLAYLIST_ORDER, R.string.playlist_order);
-        menuNames.put(MainUIData.MENU_ITEM_PLAY_NEXT, R.string.play_next);
-        menuNames.put(MainUIData.MENU_ITEM_ADD_TO_QUEUE, R.string.add_remove_from_playback_queue);
-        menuNames.put(MainUIData.MENU_ITEM_SHOW_QUEUE, R.string.action_playback_queue);
-        menuNames.put(MainUIData.MENU_ITEM_STREAM_REMINDER, R.string.set_stream_reminder);
-        menuNames.put(MainUIData.MENU_ITEM_SUBSCRIBE, R.string.subscribe_unsubscribe_from_channel);
-        menuNames.put(MainUIData.MENU_ITEM_SAVE_REMOVE_PLAYLIST, R.string.save_remove_playlist);
-        menuNames.put(MainUIData.MENU_ITEM_CREATE_PLAYLIST, R.string.create_playlist);
-        menuNames.put(MainUIData.MENU_ITEM_RENAME_PLAYLIST, R.string.rename_playlist);
-        menuNames.put(MainUIData.MENU_ITEM_ADD_TO_WATCH_LATER, R.string.add_video_to_watch_later);
-        menuNames.put(MainUIData.MENU_ITEM_ADD_TO_NEW_PLAYLIST, R.string.add_video_to_new_playlist);
-        menuNames.put(MainUIData.MENU_ITEM_ADD_TO_PLAYLIST, R.string.dialog_add_to_playlist);
-        menuNames.put(MainUIData.MENU_ITEM_RECENT_PLAYLIST, R.string.add_remove_from_recent_playlist);
-        menuNames.put(MainUIData.MENU_ITEM_PLAY_VIDEO, R.string.play_video);
-        menuNames.put(MainUIData.MENU_ITEM_PLAY_VIDEO_INCOGNITO, R.string.play_video_incognito);
-        menuNames.put(MainUIData.MENU_ITEM_PLAY_FROM_START, R.string.play_from_start);
-        menuNames.put(MainUIData.MENU_ITEM_NOT_INTERESTED, R.string.not_interested);
-        menuNames.put(MainUIData.MENU_ITEM_NOT_RECOMMEND_CHANNEL, R.string.not_recommend_channel);
-        menuNames.put(MainUIData.MENU_ITEM_REMOVE_FROM_HISTORY, R.string.remove_from_history);
-        menuNames.put(MainUIData.MENU_ITEM_REMOVE_FROM_SUBSCRIPTIONS, R.string.remove_from_subscriptions);
-        menuNames.put(MainUIData.MENU_ITEM_PIN_TO_SIDEBAR, R.string.pin_unpin_from_sidebar);
-        menuNames.put(MainUIData.MENU_ITEM_SHARE_LINK, R.string.share_link);
-        menuNames.put(MainUIData.MENU_ITEM_SHARE_EMBED_LINK, R.string.share_embed_link);
-        menuNames.put(MainUIData.MENU_ITEM_SHARE_QR_LINK, R.string.share_qr_link);
-        menuNames.put(MainUIData.MENU_ITEM_SELECT_ACCOUNT, R.string.dialog_account_list);
-        menuNames.put(MainUIData.MENU_ITEM_MOVE_SECTION_UP, R.string.move_section_up);
-        menuNames.put(MainUIData.MENU_ITEM_MOVE_SECTION_DOWN, R.string.move_section_down);
-        menuNames.put(MainUIData.MENU_ITEM_RENAME_SECTION, R.string.rename_section);
-        menuNames.put(MainUIData.MENU_ITEM_OPEN_DESCRIPTION, R.string.action_video_info);
-        menuNames.put(MainUIData.MENU_ITEM_OPEN_COMMENTS, R.string.open_comments);
-        menuNames.put(MainUIData.MENU_ITEM_OPEN_PLAYLIST, R.string.open_playlist);
-        menuNames.put(MainUIData.MENU_ITEM_BLOCK_CHANNEL, R.string.dialog_block_channel);
-
-        for (ContextMenuProvider provider : new ContextMenuManager(getContext()).getProviders()) {
-            menuNames.put(provider.getId(), provider.getTitleResId());
-        }
-
-        return menuNames;
     }
 }

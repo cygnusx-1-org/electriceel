@@ -204,6 +204,18 @@
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|layoutDirection"
             android:screenOrientation="unspecified"/>
 
+        <activity
+            android:name="com.liskovsoft.smartyoutubetv2.tv.ui.settingscards.SettingsCardsActivity"
+            android:launchMode="singleInstance"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|layoutDirection"
+            android:screenOrientation="unspecified"/>
+
+        <activity
+            android:name="com.liskovsoft.smartyoutubetv2.tv.ui.keywords.KeywordWordsActivity"
+            android:launchMode="singleInstance"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|layoutDirection"
+            android:screenOrientation="unspecified"/>
+
         <!-- BEGIN Launchers (used inside tvQuickActions. Don't rename them or move!) -->
 
         <activity

@@ -21,6 +21,11 @@ public interface OptionItem {
      */
     void setMenu(boolean isMenu);
     boolean isMenu();
+    /**
+     * Show this item of a checked list as a switch instead of a checkbox
+     */
+    void setToggle(boolean isToggle);
+    boolean isToggle();
     ChatReceiver getChatReceiver();
     CommentsReceiver getCommentsReceiver();
 }

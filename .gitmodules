@@ -1,6 +1,0 @@
-[submodule "SharedModules"]
-	path = SharedModules
-	url = https://github.com/cygnusx-1-org/SharedModules
-[submodule "MediaServiceCore"]
-	path = MediaServiceCore
-	url = https://github.com/cygnusx-1-org/MediaServiceCore

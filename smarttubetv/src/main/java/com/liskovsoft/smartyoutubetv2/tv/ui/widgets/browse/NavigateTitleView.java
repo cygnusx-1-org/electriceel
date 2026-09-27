@@ -19,20 +19,17 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.liskovsoft.mediaserviceinterfaces.oauth.Account;
-import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.sharedutils.locale.LocaleUtility;
-import com.liskovsoft.smartyoutubetv2.common.app.models.data.BrowseSection;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
-import com.liskovsoft.smartyoutubetv2.common.app.presenters.BrowsePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.PlaybackPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.AccountSelectionPresenter;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.QuickTogglePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.AccountSettingsPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.LanguageSettingsPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.PlaybackView;
 import com.liskovsoft.smartyoutubetv2.common.app.views.ViewManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager.AccountChangeListener;
-import com.liskovsoft.smartyoutubetv2.common.misc.OldVideoFilter;
 import com.liskovsoft.smartyoutubetv2.common.prefs.common.DataChangeBase.OnDataChange;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
@@ -58,7 +55,7 @@ import static androidx.leanback.widget.TitleViewAdapter.SEARCH_VIEW_VISIBLE;
  */
 public class NavigateTitleView extends TitleView implements OnDataChange, AccountChangeListener {
     private LongClickSearchOrbView mAccountView;
-    private SearchOrbView mOldVideosView;
+    private SearchOrbView mQuickToggleView;
     private SearchOrbView mLanguageView;
     private SearchOrbView mExitPip;
     private TextView mPipTitle;
@@ -73,11 +70,11 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
     private int mIconHeight;
     private boolean mIsSearchOrbEnabled;
     private boolean mIsAccountViewEnabled;
-    private boolean mIsOldVideosViewEnabled;
+    private boolean mIsQuickToggleViewEnabled;
     private boolean mIsLanguageViewEnabled;
     private boolean mIsGlobalClockEnabled;
     // Held here, the data keeps its listeners weakly. Doesn't reload the other buttons (e.g. the flag).
-    private final OnDataChange mOnOldVideosChange = this::onOldVideosChange;
+    private final OnDataChange mOnOldVideosChange = this::updateQuickToggle;
 
     public NavigateTitleView(Context context) {
         super(context);
@@ -165,8 +162,8 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
             mAccountView.setVisibility(mSearchVisibility);
         }
 
-        if (mIsOldVideosViewEnabled) {
-            mOldVideosView.setVisibility(mSearchVisibility);
+        if (mIsQuickToggleViewEnabled) {
+            mQuickToggleView.setVisibility(mSearchVisibility);
         }
 
         if (mIsLanguageViewEnabled) {
@@ -217,8 +214,11 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
         });
         TooltipCompatHandler.setTooltipText(mAccountView, getContext().getString(R.string.settings_accounts));
 
-        mOldVideosView = findViewById(R.id.old_videos_orb);
-        mOldVideosView.setOnOrbClickedListener(v -> toggleOldVideos());
+        mQuickToggleView = findViewById(R.id.quick_toggle_orb);
+        mQuickToggleView.setOnOrbClickedListener(v -> {
+            QuickTogglePresenter.instance(getContext()).onClick();
+            updateQuickToggleIcon();
+        });
 
         mLanguageView = findViewById(R.id.language_orb);
         mLanguageView.setOnOrbClickedListener(v -> LanguageSettingsPresenter.instance(getContext()).show());
@@ -246,13 +246,13 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
 
         mIsSearchOrbEnabled = !mainUIData.isTopButtonEnabled(MainUIData.TOP_BUTTON_SEARCH);
         mIsAccountViewEnabled = mainUIData.isTopButtonEnabled(MainUIData.TOP_BUTTON_BROWSE_ACCOUNTS);
-        mIsOldVideosViewEnabled = OldVideosData.instance(getContext()).isQuickToggleEnabled();
+        mIsQuickToggleViewEnabled = QuickTogglePresenter.instance(getContext()).isEnabled();
         mIsLanguageViewEnabled = mainUIData.isTopButtonEnabled(MainUIData.TOP_BUTTON_CHANGE_LANGUAGE);
         mIsGlobalClockEnabled = GeneralData.instance(getContext()).isGlobalClockEnabled();
 
         mSearchOrbView.setVisibility(mIsSearchOrbEnabled ? View.VISIBLE : View.GONE);
         mAccountView.setVisibility(mIsAccountViewEnabled ? View.VISIBLE : View.GONE);
-        mOldVideosView.setVisibility(mIsOldVideosViewEnabled ? View.VISIBLE : View.GONE);
+        mQuickToggleView.setVisibility(mIsQuickToggleViewEnabled ? View.VISIBLE : View.GONE);
         mLanguageView.setVisibility(mIsLanguageViewEnabled ? View.VISIBLE : View.GONE);
         mGlobalClock.setVisibility(mIsGlobalClockEnabled ? View.VISIBLE : View.GONE);
         mGlobalDate.setVisibility(mIsGlobalClockEnabled ? View.VISIBLE : View.GONE);
@@ -260,7 +260,7 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
         Utils.postDelayed(this::updateAccountIcon, 1_000); // give a time to engine to fetch an updated icon url
         //updateAccountIcon();
         updateLanguageIcon();
-        updateOldVideosIcon();
+        updateQuickToggleIcon();
     }
 
     @Override
@@ -278,6 +278,8 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
 
         if (hasWindowFocus) { // pip window closed, dialog closed
             applyPipParameters();
+            // The Shorts quick toggle is changed in the settings and in the panel of the button
+            updateQuickToggle();
         }
     }
 
@@ -319,44 +321,44 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
         }
     }
 
-    private void onOldVideosChange() {
-        mIsOldVideosViewEnabled = OldVideosData.instance(getContext()).isQuickToggleEnabled();
-        mOldVideosView.setVisibility(mIsOldVideosViewEnabled ? mSearchVisibility : View.GONE);
-        updateOldVideosIcon();
-    }
-
     /**
-     * Same orb in both states, only the icon changes
+     * Shown while a filter has its quick toggle enabled
      */
-    private void updateOldVideosIcon() {
-        if (!mIsOldVideosViewEnabled) {
+    private void updateQuickToggle() {
+        if (mQuickToggleView == null) {
             return;
         }
 
-        OldVideosData data = OldVideosData.instance(getContext());
-        mOldVideosView.setOrbIcon(ContextCompat.getDrawable(getContext(),
-                data.isEnabled() ? R.drawable.browse_title_old_videos_on : R.drawable.browse_title_old_videos_off));
-        TooltipCompatHandler.setTooltipText(mOldVideosView, getOldVideosState(data));
+        mIsQuickToggleViewEnabled = QuickTogglePresenter.instance(getContext()).isEnabled();
+        mQuickToggleView.setVisibility(mIsQuickToggleViewEnabled ? mSearchVisibility : View.GONE);
+        updateQuickToggleIcon();
     }
 
-    private void toggleOldVideos() {
-        OldVideosData data = OldVideosData.instance(getContext());
-        data.setEnabled(!data.isEnabled());
-        MessageHelpers.showMessage(getContext(), getOldVideosState(data));
-
-        // Keep the focus on the button, so it can be pressed again
-        BrowsePresenter presenter = BrowsePresenter.instance(getContext());
-        BrowseSection section = presenter.getCurrentSection();
-
-        if (section != null && data.isSectionEnabled(section.getId())) {
-            presenter.refresh(false);
+    /**
+     * Same orb in all the states, only the icon changes: the state of its filter, or the panel with both
+     */
+    private void updateQuickToggleIcon() {
+        if (!mIsQuickToggleViewEnabled) {
+            return;
         }
-    }
 
-    private String getOldVideosState(OldVideosData data) {
-        return data.isEnabled() ?
-                getContext().getString(R.string.hide_old_videos_on, OldVideoFilter.getPeriodTitle(getContext(), data.getPeriodMonths())) :
-                getContext().getString(R.string.hide_old_videos_off);
+        QuickTogglePresenter presenter = QuickTogglePresenter.instance(getContext());
+        int iconResId;
+        String tooltip;
+
+        if (presenter.isOldVideosEnabled() && presenter.isShortsEnabled()) {
+            iconResId = R.drawable.browse_title_quick_toggles;
+            tooltip = getContext().getString(R.string.quick_toggles);
+        } else if (presenter.isOldVideosEnabled()) {
+            iconResId = OldVideosData.instance(getContext()).isEnabled() ? R.drawable.browse_title_old_videos_on : R.drawable.browse_title_old_videos_off;
+            tooltip = presenter.getOldVideosState();
+        } else {
+            iconResId = presenter.isShortsHiding() ? R.drawable.browse_title_shorts_on : R.drawable.browse_title_shorts_off;
+            tooltip = presenter.getShortsState();
+        }
+
+        mQuickToggleView.setOrbIcon(ContextCompat.getDrawable(getContext(), iconResId));
+        TooltipCompatHandler.setTooltipText(mQuickToggleView, tooltip);
     }
 
     private void updateLanguageIcon() {

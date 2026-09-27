@@ -27,6 +27,7 @@ import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.StreamReminderService;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AccountsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.LocaleData;
 import com.liskovsoft.smartyoutubetv2.common.proxy.ProxyManager;
 import com.liskovsoft.smartyoutubetv2.common.utils.IntentExtractor;
 import com.liskovsoft.smartyoutubetv2.common.utils.SimpleEditDialog;
@@ -91,6 +92,7 @@ public class SplashPresenter extends BasePresenter<SplashView> {
             sRunOnce = true;
             RxHelper.setupGlobalErrorHandler();
             initGlobalPrefs();
+            initLocaleData();
             initProxy();
             initVideoStateService();
             initStreamReminderService();
@@ -172,6 +174,15 @@ public class SplashPresenter extends BasePresenter<SplashView> {
             // 1) Auth token storage init
             // 2) Media service language setup (I assume that context has proper language)
             GlobalPreferences.instance(getContext());
+        }
+    }
+
+    /**
+     * Before an account change: it puts the account's language and country in use
+     */
+    private void initLocaleData() {
+        if (getContext() != null) {
+            LocaleData.instance(getContext());
         }
     }
 

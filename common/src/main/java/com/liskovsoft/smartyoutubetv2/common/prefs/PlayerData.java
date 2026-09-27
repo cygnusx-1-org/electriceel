@@ -815,9 +815,9 @@ public class PlayerData extends DataChangeBase implements PlayerConstants, Profi
         mIsQualityInfoEnabled = Helpers.parseBoolean(split, 28, true);
         mIsSpeedPerVideoEnabled = Helpers.parseBoolean(split, 29, false);
         mAspectRatio = Helpers.parseFloat(split, 30, PlayerEngine.ASPECT_RATIO_DEFAULT);
-        mIsGlobalClockEnabled = Helpers.parseBoolean(split, 31, false);
+        mIsGlobalClockEnabled = Helpers.parseBoolean(split, 31, true);
         mIsTimeCorrectionEnabled = Helpers.parseBoolean(split, 32, true);
-        mIsGlobalEndingTimeEnabled = Helpers.parseBoolean(split, 33, false);
+        mIsGlobalEndingTimeEnabled = Helpers.parseBoolean(split, 33, true);
         mIsEndingTimeEnabled = Helpers.parseBoolean(split, 34, false);
         mIsDoubleRefreshRateEnabled = Helpers.parseBoolean(split, 35, true);
         mIsSeekConfirmPlayEnabled = Helpers.parseBoolean(split, 36, false);

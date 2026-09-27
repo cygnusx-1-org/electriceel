@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Material "view module" icon. White like the other settings icons.
+     The viewport is cropped to the icon so it fills the card like the other settings icons. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="17"
+    android:viewportHeight="17">
+    <group
+        android:translateX="-4"
+        android:translateY="-3">
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M4,11h5L9,5L4,5v6zM4,18h5v-6L4,12v6zM10,18h5v-6h-5v6zM16,18h5v-6h-5v6zM10,11h5L15,5h-5v6zM16,5v6h5L21,5h-5z" />
+    </group>
+</vector>

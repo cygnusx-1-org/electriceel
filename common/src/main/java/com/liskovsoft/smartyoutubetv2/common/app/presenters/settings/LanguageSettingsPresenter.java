@@ -3,13 +3,13 @@ package com.liskovsoft.smartyoutubetv2.common.app.presenters.settings;
 import android.content.Context;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
-import com.liskovsoft.sharedutils.locale.LocaleUpdater;
 import com.liskovsoft.sharedutils.locale.LocaleUtility;
 import com.liskovsoft.smartyoutubetv2.common.R;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
+import com.liskovsoft.smartyoutubetv2.common.prefs.LocaleData;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public class LanguageSettingsPresenter extends BasePresenter<Void> {
-    private final LocaleUpdater mLangUpdater;
+    private final LocaleData mLocaleData;
     private boolean mRestartApp;
     private final Runnable mOnFinish = () -> {
         if (mRestartApp) {
@@ -29,7 +29,7 @@ public class LanguageSettingsPresenter extends BasePresenter<Void> {
 
     public LanguageSettingsPresenter(Context context) {
         super(context);
-        mLangUpdater = new LocaleUpdater(context);
+        mLocaleData = LocaleData.instance(context);
     }
 
     public static LanguageSettingsPresenter instance(Context context) {
@@ -45,9 +45,31 @@ public class LanguageSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.showDialog(getContext().getString(R.string.settings_language_country), mOnFinish);
     }
 
+    /**
+     * The Language card of the User interface settings
+     */
+    public void showLanguage() {
+        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+
+        appendLanguageCategory(settingsPresenter);
+
+        settingsPresenter.showDialog(getContext().getString(R.string.dialog_select_language), mOnFinish);
+    }
+
+    /**
+     * The Country card of the User interface settings
+     */
+    public void showCountry() {
+        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+
+        appendCountryCategory(settingsPresenter);
+
+        settingsPresenter.showDialog(getContext().getString(R.string.dialog_select_country), mOnFinish);
+    }
+
     private void appendLanguageCategory(AppDialogPresenter settingsPresenter) {
         Map<String, String> languages = getSupportedLanguages();
-        String language = mLangUpdater.getPreferredLanguage();
+        String language = mLocaleData.getLanguage();
         String languageTitle = "";
 
         List<OptionItem> options = new ArrayList<>();
@@ -60,7 +82,7 @@ public class LanguageSettingsPresenter extends BasePresenter<Void> {
             options.add(UiOptionItem.from(
                     entry.getKey(),
                     option -> {
-                        mLangUpdater.setPreferredLanguage(entry.getValue());
+                        mLocaleData.setLanguage(entry.getValue());
                         mRestartApp = true;
                         //settingsPresenter.closeDialog(); // sometimes cause crashes
                     },
@@ -73,7 +95,7 @@ public class LanguageSettingsPresenter extends BasePresenter<Void> {
 
     private void appendCountryCategory(AppDialogPresenter settingsPresenter) {
         Map<String, String> countries = getSupportedCountries();
-        String country = mLangUpdater.getPreferredCountry();
+        String country = mLocaleData.getCountry();
         String countryTitle = "";
 
         List<OptionItem> options = new ArrayList<>();
@@ -86,7 +108,7 @@ public class LanguageSettingsPresenter extends BasePresenter<Void> {
             options.add(UiOptionItem.from(
                     entry.getKey(),
                     option -> {
-                        mLangUpdater.setPreferredCountry(entry.getValue());
+                        mLocaleData.setCountry(entry.getValue());
                         mRestartApp = true;
                         //settingsPresenter.closeDialog(); // sometimes cause crashes
                     },

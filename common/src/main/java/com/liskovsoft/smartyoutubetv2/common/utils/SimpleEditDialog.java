@@ -2,6 +2,7 @@ package com.liskovsoft.smartyoutubetv2.common.utils;
 
 import android.content.Context;
 import android.text.InputType;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -68,16 +69,20 @@ public class SimpleEditDialog {
             configDialog.setOnDismissListener(dialog -> onDismiss.run());
         }
 
+        // Enter presses OK, whether the keyboard sends an action or the Enter key itself (e.g. a hardware keyboard)
         editField.setOnEditorActionListener((v, actionId, event) -> {
-            switch (actionId) {
-                case EditorInfo.IME_ACTION_NEXT:
-                    configDialog.getButton(AlertDialog.BUTTON_POSITIVE).requestFocus();
-                    return true;
-                case EditorInfo.IME_ACTION_DONE:
-                    configDialog.getButton(AlertDialog.BUTTON_POSITIVE).performClick();
-                    return true;
+            boolean isEnterKey = event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER;
+
+            if (actionId != EditorInfo.IME_ACTION_DONE && actionId != EditorInfo.IME_ACTION_NEXT && !isEnterKey) {
+                return false;
             }
-            return false;
+
+            // Once per press: the key comes down and up, and a keyboard might send the action and the key both
+            if ((event == null || event.getAction() == KeyEvent.ACTION_DOWN) && configDialog.isShowing()) {
+                configDialog.getButton(AlertDialog.BUTTON_POSITIVE).performClick();
+            }
+
+            return true;
         });
 
         try {

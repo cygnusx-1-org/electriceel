@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Material "menu" icon. White like the other settings icons.
+     The viewport is cropped to the icon so it fills the card like the other settings icons. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="18"
+    android:viewportHeight="18">
+    <group
+        android:translateX="-3"
+        android:translateY="-3">
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M3,18h18v-2H3v2zM3,13h18v-2H3v2zM3,6v2h18V6H3z" />
+    </group>
+</vector>

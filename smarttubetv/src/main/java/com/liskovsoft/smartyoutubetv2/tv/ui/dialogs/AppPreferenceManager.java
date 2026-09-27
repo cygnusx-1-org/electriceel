@@ -15,6 +15,7 @@ import com.liskovsoft.smartyoutubetv2.tv.R;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.ChatPreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.CommentsPreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.DependentListPreference;
+import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.ImagePreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.StringListPreference;
 
 import java.util.ArrayList;
@@ -145,6 +146,8 @@ public class AppPreferenceManager {
                 return createChatPreference(category);
             case OptionCategory.TYPE_COMMENTS:
                 return createCommentsPreference(category);
+            case OptionCategory.TYPE_IMAGE:
+                return createImagePreference(category);
         }
 
         throw  new IllegalStateException("Can't find matched preference for type: " + category.type);
@@ -186,6 +189,15 @@ public class AppPreferenceManager {
         pref.setCommentsReceiver(optionItem.getCommentsReceiver());
 
         initDialogPreference(category, pref);
+
+        return pref;
+    }
+
+    private Preference createImagePreference(OptionCategory category) {
+        ImagePreference pref = new ImagePreference(mContext);
+        pref.setPersistent(false);
+        pref.setTitle(category.title);
+        pref.setImageUrl(category.imageUrl);
 
         return pref;
     }
@@ -258,6 +270,10 @@ public class AppPreferenceManager {
                     dependentPref.setMenu(item.toString(), () -> item.onSelect(false));
                 }
 
+                if (item.isToggle()) {
+                    dependentPref.setToggle(item.toString());
+                }
+
                 if (item.getRadio() != null) {
                     Set<String> radioValues = new HashSet<>();
 
@@ -275,7 +291,7 @@ public class AppPreferenceManager {
 
     private static boolean hasDependentItems(OptionCategory category) {
         for (OptionItem item : category.options) {
-            if (item.getDisabledBy() != null || item.isMenu() || item.getRadio() != null) {
+            if (item.getDisabledBy() != null || item.isMenu() || item.isToggle() || item.getRadio() != null) {
                 return true;
             }
         }

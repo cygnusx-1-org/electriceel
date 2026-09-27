@@ -68,4 +68,8 @@
     <color name="lb_speech_orb_not_recording">@color/orb_color</color>
     <color name="lb_speech_orb_not_recording_pulsed">@color/orb_bright_color</color>
     <color name="lb_speech_orb_not_recording_icon">@color/orb_icon_color</color>
+
+    <!-- Keyword filtering: the words of a feed on the whole screen -->
+    <color name="keyword_words_dim_text">#B3FFFFFF</color>
+    <color name="keyword_word_background">#1AFFFFFF</color>
 </resources>

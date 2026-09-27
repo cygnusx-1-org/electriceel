@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Material "fast forward" icon. White like the other settings icons.
+     The viewport is cropped to the icon so it fills the card like the other settings icons. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="17.45"
+    android:viewportHeight="17.45">
+    <group
+        android:translateX="-4"
+        android:translateY="-3.28">
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M4,18l8.5,-6L4,6v12zM13,6v12l8.5,-6L13,6z" />
+    </group>
+</vector>

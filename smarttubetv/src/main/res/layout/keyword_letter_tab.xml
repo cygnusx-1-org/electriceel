@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The same size in every state: only the colors and the underline visibility change -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/keyword_letter_tab_width"
+    android:layout_height="@dimen/keyword_letter_tab_height"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
+
+    <TextView
+        android:id="@+id/keyword_letter"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:singleLine="true"
+        android:textSize="@dimen/keyword_letter_text_size" />
+
+    <View
+        android:id="@+id/keyword_letter_underline"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/keyword_letter_underline_height"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="@dimen/keyword_letter_underline_margin"
+        android:layout_marginEnd="@dimen/keyword_letter_underline_margin"
+        android:visibility="invisible" />
+
+</FrameLayout>

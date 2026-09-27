@@ -235,10 +235,13 @@ SmartTube is developed single-handedly; there is no larger team or company behin
 **NOTE: OpenJDK 14 or older (!) is required. Newer JDK could cause app crash!**  
 To build and install debug version, run these commands:
 
+The app and its two libraries are cloned next to each other in the same folder.
+
 ```
-git clone https://github.com/yuliskov/SmartTube.git
-cd SmartTube
-git submodule update --init
+git clone https://github.com/cygnusx-1-org/electriceel.git
+git clone https://github.com/cygnusx-1-org/MediaServiceCore.git
+git clone https://github.com/cygnusx-1-org/SharedModules.git
+cd electriceel
 adb connect <device_ip_address>
 gradlew clean installStstableDebug
 ```

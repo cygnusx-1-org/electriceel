@@ -959,6 +959,40 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         return mCurrentSection;
     }
 
+    /**
+     * The sidebar sections with videos from YouTube (e.g. not Channels, Settings or the playback queue)
+     */
+    public List<BrowseSection> getVideoSections() {
+        List<BrowseSection> result = new ArrayList<>();
+
+        for (BrowseSection section : mSections) { // contains sections and pinned items!
+            int sectionId = section.getId();
+
+            if (section.isEnabled() && sectionId != MediaGroup.TYPE_CHANNEL_UPLOADS &&
+                    (mRowMapping.containsKey(sectionId) || mGridMapping.containsKey(sectionId))) {
+                result.add(section);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * The rows of a section from {@link #getVideoSections}, in parts. A grid is one row, only its first page.
+     */
+    @Nullable
+    public Observable<List<MediaGroup>> getSectionContentObserve(int sectionId) {
+        Observable<List<MediaGroup>> rows = mRowMapping.get(sectionId);
+
+        if (rows != null) {
+            return rows;
+        }
+
+        Observable<MediaGroup> grid = mGridMapping.get(sectionId);
+
+        return grid != null ? grid.map(Collections::singletonList) : null;
+    }
+
     private BrowseSection findSectionById(int sectionId) {
         for (BrowseSection section : mErrorSections) {
             if (section.getId() == sectionId) {

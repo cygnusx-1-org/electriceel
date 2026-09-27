@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.leanback.preference.LeanbackPreferenceFragment;
 import androidx.leanback.preference.LeanbackSettingsFragment;
+import androidx.preference.DialogPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.MultiSelectListPreference;
 import androidx.preference.Preference;
@@ -34,6 +35,7 @@ import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.StringListPreferenceDi
 import com.liskovsoft.smartyoutubetv2.tv.ui.mod.leanback.preference.LeanbackListPreferenceDialogFragment;
 import com.liskovsoft.smartyoutubetv2.tv.util.ViewUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("deprecation")
@@ -45,6 +47,9 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
     private boolean mIsOverlay;
     private boolean mIsPaused;
     private int mId;
+    // The title (without its parent) of each list on the stack: the next one is titled "<Parent> - <Title>"
+    private final List<CharSequence> mBaseTitles = new ArrayList<>();
+    private boolean mIsNestedTitles;
 
     private static final String PREFERENCE_FRAGMENT_TAG =
             "androidx.leanback.preference.LeanbackSettingsFragment.PREFERENCE_FRAGMENT";
@@ -56,6 +61,9 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
         mPresenter = AppDialogPresenter.instance(getActivity());
         mPresenter.setView(this);
         mManager = new AppPreferenceManager(getActivity());
+
+        // Back closes the top list, its title goes with it
+        getChildFragmentManager().addOnBackStackChangedListener(this::syncBaseTitles);
     }
 
     @Override
@@ -140,8 +148,41 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
                 onPreferenceDisplayDialog(null, mManager.createPreference(category));
             }
         } else {
-            AppPreferenceFragment fragment = buildPreferenceFragment(categories, title);
+            AppPreferenceFragment fragment = buildPreferenceFragment(categories, createTitle(title));
             startPreferenceFragment(fragment);
+            mBaseTitles.add(title);
+        }
+    }
+
+    /**
+     * The first list: "<prefix> - <title>" when the dialog has a prefix (e.g. "Player - Video").
+     * The next ones: "<parent> - <title>" when the dialog titles them (e.g. "General - Playback mode").
+     */
+    private CharSequence createTitle(CharSequence baseTitle) {
+        if (baseTitle == null) {
+            return null;
+        }
+
+        CharSequence parentTitle;
+
+        if (mBaseTitles.isEmpty()) {
+            parentTitle = mPresenter.getTitlePrefix();
+            mIsNestedTitles = mPresenter.isNestedTitlesEnabled();
+        } else {
+            parentTitle = mIsNestedTitles ? mBaseTitles.get(mBaseTitles.size() - 1) : null;
+        }
+
+        return parentTitle != null ? String.format("%s - %s", parentTitle, baseTitle) : baseTitle;
+    }
+
+    /**
+     * A list per back stack entry, plus the first one
+     */
+    private void syncBaseTitles() {
+        int size = getChildFragmentManager().getBackStackEntryCount() + 1;
+
+        while (mBaseTitles.size() > size) {
+            mBaseTitles.remove(mBaseTitles.size() - 1);
         }
     }
 
@@ -153,6 +194,12 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
             return false;
         }
 
+        CharSequence baseTitle = pref.getTitle();
+
+        if (pref instanceof DialogPreference) {
+            ((DialogPreference) pref).setDialogTitle(createTitle(baseTitle));
+        }
+
         if (pref instanceof StringListPreference) {
             StringListPreference listPreference = (StringListPreference) pref;
             StringListPreferenceDialogFragment f = StringListPreferenceDialogFragment.newInstanceStringList(listPreference.getKey());
@@ -160,6 +207,7 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
             f.setTargetFragment(caller, 0);
             f.setPreference(pref);
             startPreferenceFragment(f);
+            mBaseTitles.add(baseTitle);
 
             return true;
         } else if (pref instanceof ListPreference) {
@@ -169,6 +217,7 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
             f.setTargetFragment(caller, 0);
             f.setPreference(pref);
             startPreferenceFragment(f);
+            mBaseTitles.add(baseTitle);
 
             return true;
         } else if (pref instanceof ChatPreference) {
@@ -178,6 +227,7 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
             f.setTargetFragment(caller, 0);
             f.setPreference(pref);
             startPreferenceFragment(f);
+            mBaseTitles.add(baseTitle);
 
             return true;
         } else if (pref instanceof CommentsPreference) {
@@ -188,6 +238,7 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
             f.setTargetFragment(caller, 0);
             f.setPreference(pref);
             startPreferenceFragment(f);
+            mBaseTitles.add(baseTitle);
 
             return true;
         } else if (pref instanceof MultiSelectListPreference) {
@@ -196,6 +247,7 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
             f.setTargetFragment(caller, 0);
             f.setPreference(pref);
             startPreferenceFragment(f);
+            mBaseTitles.add(baseTitle);
         }
         // TODO
         // else if (pref instanceof EditTextPreference) {
@@ -258,6 +310,7 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
     public void clearBackstack() {
         // this manager holds entire back stack
         Helpers.setField(this, "mChildFragmentManager", null);
+        mBaseTitles.clear();
     }
 
     @Override

@@ -6,7 +6,11 @@ import android.graphics.Rect;
 import android.os.Build.VERSION;
 import android.util.DisplayMetrics;
 import android.util.Pair;
+import android.view.KeyEvent;
 import android.view.WindowManager;
+
+import androidx.leanback.widget.VerticalGridView;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.VideoGroup;
@@ -186,5 +190,43 @@ public class GridFragmentHelper {
                 && (Helpers.equals(lastGroup.getTitle(), group.getTitle())
                     || lastGroup.getTitle() == null); // we could set title to null in the previous iteration
         return matchedRowFound;
+    }
+
+    /**
+     * Down on a card with no card below it goes to the last card of the next row, when that row is shorter
+     * (e.g. from the 3rd to 5th card of a row of five onto a row of two). The grid ignores it otherwise.
+     */
+    public static void enableDownToShorterRow(VerticalGridView grid, int numColumns) {
+        if (grid == null || numColumns <= 1) {
+            return;
+        }
+
+        grid.setOnKeyInterceptListener(event -> {
+            if (event.getKeyCode() != KeyEvent.KEYCODE_DPAD_DOWN) {
+                return false;
+            }
+
+            RecyclerView.Adapter<?> adapter = grid.getAdapter();
+            int selected = grid.getSelectedPosition();
+
+            if (adapter == null || selected < 0) {
+                return false;
+            }
+
+            int count = adapter.getItemCount();
+            boolean hasCardBelow = selected + numColumns < count;
+            boolean isLastRow = selected / numColumns >= (count - 1) / numColumns;
+
+            if (hasCardBelow || isLastRow) {
+                return false;
+            }
+
+            // The key comes down and up: move once, swallow both
+            if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                grid.setSelectedPositionSmooth(count - 1);
+            }
+
+            return true;
+        });
     }
 }

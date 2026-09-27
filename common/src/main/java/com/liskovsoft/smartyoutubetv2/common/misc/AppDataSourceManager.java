@@ -7,18 +7,12 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.AboutSettingsPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.AboutSimpleSettingsPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.AccountSettingsPresenter;
-import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.AutoFrameRateSettingsPresenter;
-import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.BackupSettingsPresenter;
-import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.SponsorBlockSettingsPresenter;
-import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.AiSListSettingsPresenter;
-import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.DeArrowSettingsPresenter;
-import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.GeneralSettingsPresenter;
-import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.LanguageSettingsPresenter;
-import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.MainUISettingsPresenter;
-import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.PlayerSettingsPresenter;
-import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.RemoteControlSettingsPresenter;
-import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.SearchSettingsPresenter;
-import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.SubtitleSettingsPresenter;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.ContentFilteringSettingsPresenter;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.MainUISectionSettingsPresenter;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.PlayerSectionSettingsPresenter;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.SearchSectionSettingsPresenter;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.SystemSectionSettingsPresenter;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.UpdatesSettingsPresenter;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem.VideoPreset;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
@@ -45,31 +39,18 @@ public class AppDataSourceManager {
         settingItems.add(new SettingsItem(
                 context.getString(R.string.settings_accounts), () -> AccountSettingsPresenter.instance(context).show(), R.drawable.settings_account));
         settingItems.add(new SettingsItem(
-                context.getString(R.string.settings_remote_control), () -> RemoteControlSettingsPresenter.instance(context).show(), R.drawable.settings_cast));
+                context.getString(R.string.settings_system), () -> SystemSectionSettingsPresenter.instance(context).show(), R.drawable.settings_app));
         settingItems.add(new SettingsItem(
-                context.getString(R.string.settings_language_country), () -> LanguageSettingsPresenter.instance(context).show(), R.drawable.settings_language));
+                context.getString(R.string.settings_main_ui), () -> MainUISectionSettingsPresenter.instance(context).show(), R.drawable.settings_main_ui));
         settingItems.add(new SettingsItem(
-                context.getString(R.string.settings_general), () -> GeneralSettingsPresenter.instance(context).show(), R.drawable.settings_app));
+                context.getString(R.string.settings_content_filtering), () -> ContentFilteringSettingsPresenter.instance(context).show(), R.drawable.settings_content_filtering));
         settingItems.add(new SettingsItem(
-                context.getString(R.string.settings_main_ui), () -> MainUISettingsPresenter.instance(context).show(), R.drawable.settings_main_ui));
+                context.getString(R.string.settings_player), () -> PlayerSectionSettingsPresenter.instance(context).show(), R.drawable.settings_player));
         settingItems.add(new SettingsItem(
-                context.getString(R.string.settings_player), () -> PlayerSettingsPresenter.instance(context).show(), R.drawable.settings_player));
-        // Don't add afr support check here.
-        // Users want even fake afr settings.
+                context.getString(R.string.settings_search), () -> SearchSectionSettingsPresenter.instance(context).show(), R.drawable.settings_search));
+
         settingItems.add(new SettingsItem(
-                context.getString(R.string.auto_frame_rate), () -> AutoFrameRateSettingsPresenter.instance(context).show(), R.drawable.settings_afr));
-        settingItems.add(new SettingsItem(
-                context.getString(R.string.subtitle_category_title), () -> SubtitleSettingsPresenter.instance(context).show(), R.drawable.settings_subtitles));
-        settingItems.add(new SettingsItem(
-                context.getString(R.string.settings_search), () -> SearchSettingsPresenter.instance(context).show(), R.drawable.settings_search));
-        settingItems.add(new SettingsItem(
-                context.getString(R.string.content_block_provider), () -> SponsorBlockSettingsPresenter.instance(context).show(), R.drawable.settings_block));
-        settingItems.add(new SettingsItem(
-                context.getString(R.string.dearrow_provider), () -> DeArrowSettingsPresenter.instance(context).show(), R.drawable.settings_dearrow));
-        settingItems.add(new SettingsItem(
-                context.getString(R.string.aislist_provider), () -> AiSListSettingsPresenter.instance(context).show(), R.drawable.settings_aislist));
-        settingItems.add(new SettingsItem(
-                context.getString(R.string.app_backup_restore), () -> BackupSettingsPresenter.instance(context).show(), R.drawable.settings_backup));
+                context.getString(R.string.settings_updates), () -> UpdatesSettingsPresenter.instance(context).show(), R.drawable.settings_updates));
 
         if (Helpers.equalsAny(context.getPackageName(), Utils.KNOWN_PACKAGES)) {
             settingItems.add(new SettingsItem(

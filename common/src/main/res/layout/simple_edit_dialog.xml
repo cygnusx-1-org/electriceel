@@ -15,7 +15,7 @@
         android:autofillHints=""
         android:ems="10"
         android:hint="@string/simple_edit_value_hint"
-        android:imeOptions="actionNext"
+        android:imeOptions="actionDone"
         android:inputType="textUri|textPersonName"
         android:textColor="@color/dialog_text_color"
         android:textCursorDrawable="@null"

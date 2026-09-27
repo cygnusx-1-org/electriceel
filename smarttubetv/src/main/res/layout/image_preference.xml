@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A picture with its title above it, e.g. a QR code (see ImagePreference).
+     The title is placed like the title of the other rows (see leanback_preference of leanback-preference). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="@dimen/lb_preference_item_padding_start"
+    android:paddingEnd="@dimen/lb_preference_item_padding_end">
+
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="@dimen/lb_preference_item_text_space_top" />
+
+    <TextView
+        android:id="@android:id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/lb_preference_item_primary_text_margin_bottom"
+        android:fontFamily="sans-serif"
+        android:textColor="@color/lb_preference_item_primary_text_color"
+        android:textSize="@dimen/lb_preference_item_primary_text_size" />
+
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="@dimen/lb_preference_item_text_space_bottom" />
+
+    <!-- A fixed size: the row doesn't change while the picture loads -->
+    <ImageView
+        android:id="@+id/image_preference_image"
+        android:layout_width="@dimen/image_preference_image_size"
+        android:layout_height="@dimen/image_preference_image_size"
+        android:scaleType="fitCenter"
+        android:importantForAccessibility="no" />
+
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="@dimen/lb_preference_item_text_space_bottom" />
+
+</LinearLayout>

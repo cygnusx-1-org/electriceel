@@ -29,6 +29,13 @@ public class OptionCategory {
         return new OptionCategory(title, Collections.singletonList(item), TYPE_COMMENTS);
     }
 
+    /**
+     * A picture with its title above it, e.g. a QR code. Nothing to press.
+     */
+    public static OptionCategory image(CharSequence title, String imageUrl) {
+        return new OptionCategory(title, Collections.<OptionItem>emptyList(), TYPE_IMAGE, -1, imageUrl);
+    }
+
     public static OptionCategory singleSwitch(OptionItem item) {
         ArrayList<OptionItem> items = new ArrayList<>();
         items.add(item);
@@ -54,10 +61,15 @@ public class OptionCategory {
     }
 
     private OptionCategory(CharSequence title, List<OptionItem> options, int type, int id) {
+        this(title, options, type, id, null);
+    }
+
+    private OptionCategory(CharSequence title, List<OptionItem> options, int type, int id, String imageUrl) {
         this.id = id;
         this.type = type;
         this.title = title;
         this.options = options;
+        this.imageUrl = imageUrl;
     }
 
     public static final int TYPE_RADIO_LIST = 0;
@@ -68,8 +80,10 @@ public class OptionCategory {
     public static final int TYPE_LONG_TEXT = 5;
     public static final int TYPE_CHAT = 6;
     public static final int TYPE_COMMENTS = 7;
+    public static final int TYPE_IMAGE = 8;
     public final int id;
     public final int type;
     public final CharSequence title;
     public final List<OptionItem> options;
+    public final String imageUrl;
 }

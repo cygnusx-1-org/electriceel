@@ -5,6 +5,7 @@ import androidx.preference.MultiSelectListPreference;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,6 +17,7 @@ public class DependentListPreference extends MultiSelectListPreference {
     private final Map<String, String> mDisabledBy = new HashMap<>(); // entry value -> entry value
     private final Map<String, Runnable> mMenus = new HashMap<>(); // entry value -> opens the menu
     private final Map<String, Set<String>> mRadio = new HashMap<>(); // entry value -> entry values unchecked by it
+    private final Set<String> mToggles = new HashSet<>(); // entry values shown as a switch
 
     public DependentListPreference(Context context) {
         super(context);
@@ -25,11 +27,15 @@ public class DependentListPreference extends MultiSelectListPreference {
         mDisabledBy.put(entryValue, masterEntryValue);
     }
 
+    public void setToggle(String entryValue) {
+        mToggles.add(entryValue);
+    }
+
     /**
-     * An entry that disables others is shown as a switch
+     * Shown as a switch: set so, or an entry that disables others
      */
     public boolean isToggle(String entryValue) {
-        return mDisabledBy.containsValue(entryValue);
+        return mToggles.contains(entryValue) || mDisabledBy.containsValue(entryValue);
     }
 
     public boolean isDisabled(String entryValue, Set<String> selections) {

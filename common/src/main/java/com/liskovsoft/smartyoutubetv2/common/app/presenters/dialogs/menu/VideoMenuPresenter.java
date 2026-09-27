@@ -13,6 +13,7 @@ import com.liskovsoft.sharedutils.rx.RxHelper;
 import com.liskovsoft.smartyoutubetv2.common.R;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Playlist;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.VideoGroup;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers.CommentsController;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.manager.PlayerUI;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.service.VideoStateService;
@@ -25,8 +26,10 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.ChannelUploadsPresen
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.PlaybackPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.providers.ContextMenuManager;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.providers.ContextMenuProvider;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.KeywordFilterSettingsPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.ChannelUploadsView;
 import com.liskovsoft.smartyoutubetv2.common.app.views.PlaybackView;
+import com.liskovsoft.smartyoutubetv2.common.misc.KeywordFilter;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.StreamReminderService;
 import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
@@ -56,6 +59,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
     private boolean mIsNotInterestedButtonEnabled;
     private boolean mIsNotRecommendChannelEnabled;
     private boolean mIsBlockChannelEnabled;
+    private boolean mIsHideKeywordsEnabled;
     private boolean mIsRemoveFromHistoryButtonEnabled;
     private boolean mIsRemoveFromSubscriptionsButtonEnabled;
     private boolean mIsOpenChannelButtonEnabled;
@@ -480,6 +484,35 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
                     mDialogPresenter.closeDialog();
                     showHideBlockedChannelsSection(blockedChannelData);
                 }));
+    }
+
+    /**
+     * The words of the title to hide the videos with (see KeywordFilter)
+     */
+    private void appendHideKeywordsButton() {
+        if (mVideo == null || mVideo.isChapter || !mVideo.hasVideo() || !mIsHideKeywordsEnabled) {
+            return;
+        }
+
+        List<String> words = KeywordFilter.getTitleWords(mVideo.getTitle());
+
+        if (words.isEmpty()) {
+            return;
+        }
+
+        Video video = mVideo;
+        VideoMenuCallback callback = mCallback;
+        String title = getContext().getString(R.string.keyword_filter_hide_words);
+
+        mDialogPresenter.appendSingleButton(
+                UiOptionItem.from(title, optionItem -> KeywordFilterSettingsPresenter.instance(getContext()).showWords(title, words, () -> {
+                    // Like Block channel: the video goes now, the others with the word on the next load
+                    VideoGroup group = video.getGroup();
+
+                    if (callback != null && group != null && group.hasHiddenKeyword(video)) {
+                        callback.onItemAction(video, VideoMenuCallback.ACTION_REMOVE);
+                    }
+                })));
     }
 
     private void showHideBlockedChannelsSection(BlockedChannelData blockedChannelData) {
@@ -1009,6 +1042,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
         mIsNotInterestedButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_NOT_INTERESTED);
         mIsNotRecommendChannelEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_NOT_RECOMMEND_CHANNEL);
         mIsBlockChannelEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_BLOCK_CHANNEL);
+        mIsHideKeywordsEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_HIDE_KEYWORDS);
         mIsRemoveFromHistoryButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_REMOVE_FROM_HISTORY);
         mIsRemoveFromSubscriptionsButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_REMOVE_FROM_SUBSCRIPTIONS);
         mIsOpenDescriptionButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_OPEN_DESCRIPTION);
@@ -1041,6 +1075,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
         mMenuMapping.put(MainUIData.MENU_ITEM_NOT_RECOMMEND_CHANNEL, new MenuAction(this::appendNotRecommendChannelButton, true));
         mMenuMapping.put(MainUIData.MENU_ITEM_REMOVE_FROM_SUBSCRIPTIONS, new MenuAction(() -> { appendRemoveFromSubscriptionsButton(); appendRemoveFromNotificationsButton(); }, true));
         mMenuMapping.put(MainUIData.MENU_ITEM_BLOCK_CHANNEL, new MenuAction(this::appendBlockChannelButton, false));
+        mMenuMapping.put(MainUIData.MENU_ITEM_HIDE_KEYWORDS, new MenuAction(this::appendHideKeywordsButton, false));
         mMenuMapping.put(MainUIData.MENU_ITEM_MARK_AS_WATCHED, new MenuAction(this::appendMarkAsWatchedButton, false));
         mMenuMapping.put(MainUIData.MENU_ITEM_PLAYLIST_ORDER, new MenuAction(this::appendPlaylistOrderButton, true));
         mMenuMapping.put(MainUIData.MENU_ITEM_ADD_TO_QUEUE, new MenuAction(() -> { appendAddToPlaybackQueueButton(); appendRemoveFromPlaybackQueueButton(); }, false));

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The same size checked or not: the check is invisible, not gone -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/keyword_word_height"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="@dimen/keyword_word_padding_horizontal"
+    android:paddingEnd="@dimen/keyword_word_padding_horizontal"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:clickable="true">
+
+    <ImageView
+        android:id="@+id/keyword_word_check"
+        android:layout_width="@dimen/keyword_word_check_size"
+        android:layout_height="@dimen/keyword_word_check_size"
+        android:src="@drawable/keyword_word_check"
+        android:visibility="invisible"
+        android:importantForAccessibility="no" />
+
+    <TextView
+        android:id="@+id/keyword_word"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="@dimen/keyword_word_check_margin"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:textSize="@dimen/keyword_word_text_size" />
+
+</LinearLayout>

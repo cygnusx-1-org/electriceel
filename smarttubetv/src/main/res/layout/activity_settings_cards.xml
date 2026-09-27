@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The grid fills the screen like the Settings grid in Browse (expanded while the cards have focus), so the cards land on
+     the same pixels: its padding places them (see Widget.Leanback.GridItems.VerticalGridView). The title sits in the top padding. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <fragment
+        android:id="@+id/settings_cards_fragment"
+        android:name="com.liskovsoft.smartyoutubetv2.tv.ui.settingscards.SettingsCardsFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Starts where the first card starts -->
+    <TextView
+        android:id="@+id/settings_cards_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="?attr/browsePaddingStart"
+        android:paddingEnd="?attr/browsePaddingEnd"
+        android:paddingTop="?attr/browsePaddingTop"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:textColor="@color/white"
+        android:textSize="@dimen/keyword_words_title_text_size" />
+
+</FrameLayout>

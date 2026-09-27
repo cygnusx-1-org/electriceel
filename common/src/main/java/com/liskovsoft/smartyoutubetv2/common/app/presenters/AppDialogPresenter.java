@@ -30,6 +30,8 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
     private List<OptionCategory> mCategories;
     private boolean mIsExpandable = true;
     private int mId;
+    private CharSequence mTitlePrefix;
+    private boolean mIsNestedTitlesEnabled;
 
     private CharSequence mBackupTitle;
     private List<OptionCategory> mBackupCategories;
@@ -37,6 +39,8 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
     private boolean mBackupIsTransparent;
     private boolean mBackupIsOverlay;
     private boolean mBackupIsExpandable;
+    private CharSequence mBackupTitlePrefix;
+    private boolean mBackupIsNestedTitlesEnabled;
 
     public AppDialogPresenter(Context context) {
         super(context);
@@ -83,6 +87,8 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
         mBackupIsExpandable = mIsExpandable;
         mBackupIsTransparent = mIsTransparent;
         mBackupIsOverlay = mIsOverlay;
+        mBackupTitlePrefix = mTitlePrefix;
+        mBackupIsNestedTitlesEnabled = mIsNestedTitlesEnabled;
     }
 
     private void resetData() {
@@ -135,6 +141,36 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
         getViewManager().startView(AppDialogView.class, true);
 
         setupTimeout();
+    }
+
+    /**
+     * The next dialog is titled "<prefix> - <title>", e.g. "Player - Video" for the Video card of the Player settings.
+     * Null stops it.
+     */
+    public void setTitlePrefix(CharSequence prefix) {
+        mTitlePrefix = prefix;
+    }
+
+    /**
+     * The lists opened inside the next dialog are titled "<parent> - <title>", e.g. "General - Playback mode".
+     * The rows that open them keep their own title.
+     */
+    public void enableNestedTitles(boolean enable) {
+        mIsNestedTitlesEnabled = enable;
+    }
+
+    /**
+     * Of the dialog shown
+     */
+    public CharSequence getTitlePrefix() {
+        return mBackupTitlePrefix;
+    }
+
+    /**
+     * Of the dialog shown
+     */
+    public boolean isNestedTitlesEnabled() {
+        return mBackupIsNestedTitlesEnabled;
     }
 
     public void closeDialog() {
@@ -201,6 +237,13 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
 
     public void appendSingleButton(OptionItem optionItem) {
         mCategories.add(OptionCategory.singleButton(optionItem));
+    }
+
+    /**
+     * A picture with its title above it, e.g. a QR code
+     */
+    public void appendImage(CharSequence title, String imageUrl) {
+        mCategories.add(OptionCategory.image(title, imageUrl));
     }
 
     public void showDialogMessage(String dialogTitle, Runnable onClose, int timeoutMs) {

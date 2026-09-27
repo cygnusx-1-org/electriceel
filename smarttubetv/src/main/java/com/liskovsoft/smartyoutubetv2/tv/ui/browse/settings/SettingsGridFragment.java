@@ -1,6 +1,7 @@
 package com.liskovsoft.smartyoutubetv2.tv.ui.browse.settings;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.leanback.widget.ArrayObjectAdapter;
@@ -11,6 +12,7 @@ import androidx.leanback.widget.RowPresenter;
 import androidx.leanback.widget.VerticalGridPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsGroup;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsItem;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.BrowsePresenter;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
@@ -49,6 +51,13 @@ public class SettingsGridFragment extends GridFragment implements SettingsSectio
         if (getMainFragmentAdapter().getFragmentHost() != null) {
             getMainFragmentAdapter().getFragmentHost().notifyDataReady(getMainFragmentAdapter());
         }
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        GridFragmentHelper.enableDownToShorterRow(getBrowseGrid(), getGridPresenter().getNumberOfColumns());
     }
 
     @Override
@@ -131,7 +140,14 @@ public class SettingsGridFragment extends GridFragment implements SettingsSectio
                 String password = getGeneralData().getSettingsPassword();
 
                 if (password == null) {
-                    ((SettingsItem) item).onClick.run();
+                    // The lists inside the panel are titled "<Parent> - <List>", e.g. "About - Changelog"
+                    AppDialogPresenter dialogPresenter = AppDialogPresenter.instance(getContext());
+                    dialogPresenter.enableNestedTitles(true);
+                    try {
+                        ((SettingsItem) item).onClick.run();
+                    } finally {
+                        dialogPresenter.enableNestedTitles(false);
+                    }
                 } else {
                     SimpleEditDialog.showPassword(
                             getContext(),

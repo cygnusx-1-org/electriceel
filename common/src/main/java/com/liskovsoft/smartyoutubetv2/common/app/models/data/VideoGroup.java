@@ -9,9 +9,11 @@ import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.service.VideoStateService;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.service.VideoStateService.State;
 import com.liskovsoft.smartyoutubetv2.common.misc.AiSListManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.KeywordFilter;
 import com.liskovsoft.smartyoutubetv2.common.misc.OldVideoFilter;
 import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.KeywordFilterData;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -479,7 +481,7 @@ public class VideoGroup {
             return;
         }
 
-        if (isChannelBlocked(video) || isAiListed(video) || isHiddenCategory(video) || isOld(video) || isWatchedSuggestion(video)) {
+        if (isChannelBlocked(video) || isAiListed(video) || isHiddenCategory(video) || isOld(video) || hasHiddenKeyword(video) || isWatchedSuggestion(video)) {
             if (video.videoId != null) {
                 mHiddenVideoCount++;
             }
@@ -585,6 +587,25 @@ public class VideoGroup {
         }
 
         return OldVideoFilter.isHidden(GlobalPreferences.context(), getSection().getId(), video.getSecondTitle());
+    }
+
+    /**
+     * The title has a keyword of the Hide content setting. Not in the lists the user made (e.g. history).
+     */
+    public boolean hasHiddenKeyword(Video video) {
+        // No context before the app is initialized (GlobalPreferences)
+        if (video.isChapter || video.videoId == null || GlobalPreferences.context() == null) {
+            return false;
+        }
+
+        KeywordFilterData data = KeywordFilterData.instance(GlobalPreferences.context());
+
+        if (data.isEmpty() || !KeywordFilter.isSupportedSection(getAiSListSection())) {
+            return false;
+        }
+
+        // DeArrow might have replaced the title already
+        return data.isHidden(video.title) || data.isHidden(video.deArrowTitle);
     }
 
     public int getAiSListSection() {

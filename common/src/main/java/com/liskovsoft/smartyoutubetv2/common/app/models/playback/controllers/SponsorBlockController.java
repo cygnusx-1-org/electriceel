@@ -34,10 +34,11 @@ public class SponsorBlockController extends BasePlayerController {
     private static final long POLL_INTERVAL_MS = 1_000;
     private static final int CONTENT_BLOCK_ID = 144;
     private MediaItemService mMediaItemService;
-    private List<SponsorSegment> mOriginalSegments;
     private List<SponsorSegment> mActiveSegments;
     private long mLastSkipPosMs;
     private boolean mSkipExclude;
+    private String mToggledVideoId;
+    private boolean mIsToggledVideoEnabled;
     private Disposable mSegmentsAction;
     private Observable<List<SponsorSegment>> mCachedSegmentsAction;
     private String mVideoId;
@@ -87,6 +88,10 @@ public class SponsorBlockController extends BasePlayerController {
     @Override
     public void onNewVideo(Video item) {
         mSkipExclude = false;
+        // The toggle lasts until a different video is played. Reloads of the same video keep it.
+        if (item == null || !Helpers.equals(mToggledVideoId, item.videoId)) {
+            mToggledVideoId = null;
+        }
         if (getPlayer() != null) {
             getPlayer().setSeekBarSegments(null); // reset colors
         }
@@ -100,7 +105,7 @@ public class SponsorBlockController extends BasePlayerController {
             return;
         }
 
-        boolean enabled = getSponsorBlockData().isSponsorBlockEnabled() && checkVideo(item) && !isChannelExcluded(item.channelId);
+        boolean enabled = isSponsorBlockEnabled(item, item != null ? item.channelId : null);
         getPlayer().setButtonState(R.id.action_content_block, enabled ? PlayerUI.BUTTON_ON : PlayerUI.BUTTON_OFF);
 
         if (enabled) {
@@ -112,9 +117,8 @@ public class SponsorBlockController extends BasePlayerController {
     public void onMetadata(MediaItemMetadata metadata) {
         // Disable sponsor for the live streams.
         // Fix when using remote control.
-        if (!getSponsorBlockData().isSponsorBlockEnabled() || !checkVideo(getVideo())) {
-            disposeActions();
-        } else if (isChannelExcluded(metadata.getChannelId())) { // got channel id. check the exclusions
+        // Got channel id. Check the exclusions.
+        if (!isSponsorBlockEnabled(getVideo(), metadata.getChannelId())) {
             if (getPlayer() != null) {
                 getPlayer().setButtonState(R.id.action_content_block, PlayerUI.BUTTON_OFF);
             }
@@ -134,19 +138,15 @@ public class SponsorBlockController extends BasePlayerController {
         }
 
         if (buttonId == R.id.action_content_block) {
-            List<SponsorSegment> foundSegments = findMatchedSegments(getPlayer().getPositionMs(), mOriginalSegments, true);
+            Video video = getVideo();
 
-            if (foundSegments != null) {
-                SponsorSegment lastSegment = foundSegments.get(foundSegments.size() - 1);
-                setPositionMs(lastSegment.getEndMs());
-            } else {
-                Video video = getVideo();
-                String channelId = video != null ? video.channelId : null;
-
-                getSponsorBlockData().setSponsorBlockEnabled(buttonState != PlayerUI.BUTTON_ON);
-                getSponsorBlockData().stopExcludingChannel(channelId);
-                onVideoLoaded(video);
+            // Toggle for the current video only
+            if (video != null && video.videoId != null) {
+                mToggledVideoId = video.videoId;
+                mIsToggledVideoEnabled = buttonState != PlayerUI.BUTTON_ON;
             }
+
+            onVideoLoaded(video);
         }
     }
 
@@ -166,9 +166,24 @@ public class SponsorBlockController extends BasePlayerController {
         return video != null;
     }
 
+    /**
+     * The per-video toggle wins over the channel exclusion, which wins over the global switch
+     */
+    private boolean isSponsorBlockEnabled(Video video, String channelId) {
+        if (!checkVideo(video)) {
+            return false;
+        }
+
+        if (mToggledVideoId != null && mToggledVideoId.equals(video.videoId)) {
+            return mIsToggledVideoEnabled;
+        }
+
+        return getSponsorBlockData().isSponsorBlockEnabled() && !isChannelExcluded(channelId);
+    }
+
     private void updateSponsorSegmentsAndWatch(Video item) {
         if (item == null || item.videoId == null || item.isLive || getSponsorBlockData().getEnabledCategories().isEmpty()) {
-            mActiveSegments = mOriginalSegments = null;
+            mActiveSegments = null;
             mCachedSegmentsAction = null;
             return;
         }
@@ -191,11 +206,9 @@ public class SponsorBlockController extends BasePlayerController {
 
     private Observable<Long> startSponsorWatcher(List<SponsorSegment> segments) {
         if (getPlayer() == null || segments == null || segments.isEmpty()) {
-            mActiveSegments = mOriginalSegments = null;
+            mActiveSegments = null;
             return Observable.empty();
         }
-
-        mOriginalSegments = segments;
 
         mActiveSegments = new ArrayList<>(segments);
 
@@ -234,7 +247,7 @@ public class SponsorBlockController extends BasePlayerController {
 
         long positionMs = getPlayer().getPositionMs();
 
-        List<SponsorSegment> foundSegments = findMatchedSegments(positionMs, mActiveSegments, false);
+        List<SponsorSegment> foundSegments = findMatchedSegments(positionMs, mActiveSegments);
 
         applyActions(foundSegments);
 
@@ -244,17 +257,13 @@ public class SponsorBlockController extends BasePlayerController {
         }
     }
 
-    private boolean isPositionInsideSegment(long positionMs, SponsorSegment segment, boolean fullMatch) {
+    private boolean isPositionInsideSegment(long positionMs, SponsorSegment segment) {
         // NOTE: in case of using Player.setSeekParameters (inaccurate seeking) increase sponsor segment window
         // int seekShift = 1_000;
         // return positionMs >= (segment.getStartMs() - seekShift) && positionMs <= (segment.getEndMs() + seekShift);
 
-        if (fullMatch) {
-            return positionMs >= segment.getStartMs() && positionMs <= segment.getEndMs();
-        } else {
-            long windowSizeMs = (long) (2_000 * getPlayer().getSpeed());
-            return positionMs >= segment.getStartMs() && positionMs <= Math.min(segment.getStartMs() + windowSizeMs, segment.getEndMs());
-        }
+        long windowSizeMs = (long) (2_000 * getPlayer().getSpeed());
+        return positionMs >= segment.getStartMs() && positionMs <= Math.min(segment.getStartMs() + windowSizeMs, segment.getEndMs());
     }
 
     private void simpleSkip(long skipPosMs) {
@@ -345,9 +354,9 @@ public class SponsorBlockController extends BasePlayerController {
     }
 
     /**
-     * @param fullMatch Match only the beginning or the full segment length
+     * Matches only the beginning of the segment
      */
-    private List<SponsorSegment> findMatchedSegments(long positionMs, List<SponsorSegment> segments, boolean fullMatch) {
+    private List<SponsorSegment> findMatchedSegments(long positionMs, List<SponsorSegment> segments) {
         if (segments == null) {
             return null;
         }
@@ -359,7 +368,7 @@ public class SponsorBlockController extends BasePlayerController {
             boolean isSkipAction = action == SponsorBlockData.ACTION_SKIP_ONLY ||
                     action == SponsorBlockData.ACTION_SKIP_WITH_TOAST;
             if (foundSegment == null) {
-                if (isPositionInsideSegment(positionMs, segment, fullMatch)) {
+                if (isPositionInsideSegment(positionMs, segment)) {
                     foundSegment = new ArrayList<>();
                     foundSegment.add(segment);
 
@@ -370,7 +379,7 @@ public class SponsorBlockController extends BasePlayerController {
                 }
             } else {
                 SponsorSegment lastSegment = foundSegment.get(foundSegment.size() - 1);
-                if (isSkipAction && isPositionInsideSegment(lastSegment.getEndMs() + 3_000, segment, fullMatch)) {
+                if (isSkipAction && isPositionInsideSegment(lastSegment.getEndMs() + 3_000, segment)) {
                     foundSegment.add(segment);
                 }
             }
