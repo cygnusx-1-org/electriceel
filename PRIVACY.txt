@@ -1,0 +1,245 @@
+ELECTRIC EEL PRIVACY POLICY
+
+Effective date: September 28, 2026
+
+Electric Eel is a free, open-source media client for Android TV, published by
+the Electric Eel project (https://github.com/cygnusx-1-org/electriceel) ("we",
+"us"). It is based on SmartTube and is not affiliated with, endorsed by or
+sponsored by Google or YouTube.
+
+This policy covers the official Electric Eel builds:
+org.cygnusx1.electriceel.stable and org.cygnusx1.electriceel.beta. Builds made
+by other people from the source code, and the SmartTube app it is based on, are
+outside it.
+
+
+IN SHORT
+
+- We run no servers. Nothing you do in Electric Eel is sent to us, and we hold
+  no data about you.
+- Electric Eel contains no advertising, analytics, tracking or crash reporting,
+  and sets no cookies of its own.
+- Your settings, sign-ins and YouTube Data API key are stored on your TV, in the
+  app's private storage.
+- The app talks directly to the services it needs: mainly Google and YouTube,
+  plus a few optional community services described below.
+- Electric Eel uses YouTube API Services. See the YouTube Terms of Service
+  (https://www.youtube.com/t/terms) and the Google Privacy Policy
+  (https://policies.google.com/privacy).
+
+
+1. GOOGLE USER DATA
+
+Electric Eel can connect to your Google account in three separate ways. Each one
+is optional, each one asks for your consent on its own, and each one can be
+revoked on its own.
+
+1.1 Getting your YouTube Data API key ("Get a key automatically")
+
+Some features, for example hiding videos from Home by their category or topic,
+work better with a YouTube Data API key. Electric Eel can find or make that key
+in your own Google Cloud account, so you don't have to make one by hand.
+
+When it runs. Only on devices with Google Play services, and only when you start
+it: from "Get a key automatically" in the "API keys" settings, or when the app
+offers it right after you sign in to YouTube (it is offered only if you have no
+key yet). You can cancel at any point, and you can always type a key in by hand
+instead.
+
+What access it asks for. Google Play services shows its own account picker and
+consent screen, asking you to allow Electric Eel to "see, edit, configure and
+delete your Google Cloud data" (https://www.googleapis.com/auth/cloud-platform).
+Google only offers this access in that broad form. Electric Eel uses it only for
+the steps below.
+
+What it does with that access, in this order:
+
+1. Looks for a key you already have. It lists the Google Cloud projects your
+   account can see (their ID, name, labels and state). In up to 50 of them,
+   starting with a project it made for you before, it lists the API keys (their
+   name, display name and restrictions) and checks whether the YouTube Data API
+   is turned on. For a key that can call the YouTube Data API from a TV app (one
+   with no website, IP address, Android or iOS restriction), it reads the key's
+   value and makes one test request to the YouTube Data API with it. The first
+   key that works is used. Keys that don't work are discarded and not stored.
+2. Only if there is no such key, makes one:
+   - it reuses the project it made for you before, or creates a new project
+     named "SmartTube YouTube Data API", with an ID starting "smarttube-yt-" and
+     the label "smarttube-data-api";
+   - it turns on the YouTube Data API in that project;
+   - it reuses the key named "SmartTube YouTube Data API" in that project, or
+     creates one with that name, restricted to the YouTube Data API, and reads
+     its value;
+   - it tests the key with one YouTube Data API request.
+
+The names match the SmartTube key web page, so a project or key made by one is
+found and reused by the other instead of being made twice.
+
+What it never does. It does not change or delete any project, key or setting
+other than the project it created, it does not turn on billing, and it does not
+read any other Google Cloud data (for example storage, compute, databases,
+permissions or billing information).
+
+What is stored, and where:
+
+- The access token Google issues for this is held in the app's memory only while
+  the steps above run. The app never writes it to storage and never sends it
+  anywhere except Google's APIs. Google Play services keeps your consent until
+  you revoke it.
+- The API key that was found or made is stored in the app's private storage on
+  your TV, and in any backup of the app's settings that you make (see section
+  3).
+- The project and key stay in your Google Cloud account until you delete them.
+
+Who receives it. Only Google: cloudresourcemanager.googleapis.com,
+serviceusage.googleapis.com, apikeys.googleapis.com and www.googleapis.com (the
+YouTube Data API). We never receive your access token, your list of projects or
+your API key.
+
+These requests go through our Google Cloud OAuth client, so Google may show us
+aggregate statistics about it, such as how many users have granted access and
+how many requests were made. Those statistics don't identify you or show us your
+projects or keys.
+
+1.2 Using your YouTube Data API key
+
+With a key set, Electric Eel sends the IDs of videos it is about to show to the
+YouTube Data API (videos.list), asking only for each video's category and
+topics. It uses them to apply your content filters, and caches the result on
+your TV by video ID. These requests are made with your key, so they count
+against the free daily quota of the project the key belongs to. Electric Eel
+doesn't turn on billing, so they cost you nothing.
+
+1.3 Signing in to YouTube
+
+Signing in is optional. You sign in by entering a code on Google's own page on
+your phone or computer; Electric Eel never sees your password. The access this
+grants appears in your Google account's list of third-party connections, where
+you can remove it (see section 4).
+
+The app stores the resulting sign-in tokens, and your account's name, email
+address and profile picture, in its private storage on your TV. It uses them to
+show your subscriptions, playlists, history and recommendations, and to carry
+out actions you ask for, such as subscribing, liking a video or adding it to a
+playlist. That information is exchanged only with YouTube and Google.
+
+1.4 Backing up to Google Drive
+
+Backing up to Google Drive is optional. It asks for access only to the files
+Electric Eel creates in your Drive (https://www.googleapis.com/auth/drive.file);
+it cannot see your other files. It uploads an archive of the app's settings to a
+"SmartTubeBackup" folder in your own Drive, and reads it back when you restore.
+That archive includes your YouTube sign-in and your YouTube Data API key. It is
+stored only in your Drive; we have no access to it.
+
+1.5 Limited Use
+
+Electric Eel's use and transfer of information received from Google APIs to any
+other app will adhere to the Google API Services User Data Policy
+(https://developers.google.com/terms/api-services-user-data-policy), including
+the Limited Use requirements. In particular, data from Google APIs is:
+
+- used only to provide the features described above, which you can see in the
+  app;
+- never transferred to anyone, except to Google as needed to provide those
+  features, or as required by law;
+- never used for advertising, never sold, and never used to decide whether you
+  are creditworthy or for lending;
+- never read by a human;
+- never used to develop, improve or train generalized artificial intelligence or
+  machine learning models.
+
+
+2. OTHER SERVICES ELECTRIC EEL CONTACTS
+
+Besides Google and YouTube, Electric Eel contacts the following services
+directly from your TV. Like any website you visit, each of them sees your IP
+address and the request itself. None of them receives your Google account,
+sign-in tokens or API key. Each is run by someone else and governed by its own
+privacy policy.
+
+- SponsorBlock (sponsor.ajay.app), when SponsorBlock is on: the ID of the video
+  you are watching, to fetch segments to skip.
+- DeArrow (sponsor.ajay.app, dearrow-thumb.ajay.app), when DeArrow is on: the
+  IDs of videos being shown, to fetch community titles and thumbnails.
+- Return YouTube Dislike (returnyoutubedislikeapi.com), when "Show
+  likes/dislikes count" is on: the ID of the video you are watching.
+- AiSList (raw.githubusercontent.com), when the AiSList filter is on: nothing
+  about you; it downloads public block and warn lists.
+- GitHub (github.com), when the app checks for updates or needs its
+  configuration: nothing about you; it downloads update information and the
+  app's configuration file.
+- Google Public DNS (8.8.8.8, dns.google), only if "Prefer Google DNS" is on:
+  the names of the servers the app connects to.
+
+Links in the app, such as to the project page or to donation sites, open only
+when you choose them. Once you leave the app, the site you visit is governed by
+its own policy.
+
+
+3. DATA ON YOUR TV AND IN BACKUPS
+
+Everything Electric Eel keeps (settings, filters, watch positions, cached video
+categories, your YouTube sign-in and your YouTube Data API key) is stored in the
+app's private storage on your TV. Other apps cannot read it, and it is deleted
+when you uninstall the app or clear its data.
+
+The app writes diagnostic messages to Android's system log, which stays on your
+TV. The Google Cloud steps in section 1.1 never write your access token or your
+API key to it.
+
+If you make a local backup, the app writes an archive of its settings to your
+TV's shared storage (a "SmartTubeBackup" folder in Documents on recent Android
+versions). Like the Google Drive backup, it contains your YouTube sign-in and
+your YouTube Data API key, and other apps with storage access on that TV can
+read it. Keep backups somewhere private, and delete old ones you no longer need.
+
+
+4. YOUR CHOICES, AND DELETING YOUR DATA
+
+We hold no data about you, so there is nothing for us to access, correct, export
+or delete on request. You control everything yourself:
+
+- Revoke Electric Eel's access to your Google account: open your Google
+  account's third-party connections page
+  (https://security.google.com/settings/security/permissions) and remove
+  Electric Eel, or the YouTube or Google Drive connection it made. The access
+  stops at once.
+- Remove the API key from the app: turn off "YouTube Data API key" in the "API
+  keys" settings.
+- Delete the project and key from your Google account: open the Google Cloud
+  console (https://console.cloud.google.com/) and delete the "SmartTube YouTube
+  Data API" project, or just its key. Deleting the project deletes the key too.
+- Sign out of YouTube: in the app's account settings.
+- Delete everything on the TV: uninstall Electric Eel, or clear its data in
+  Android's app settings.
+- Delete backups: delete the "SmartTubeBackup" folder from your Google Drive and
+  from your TV's storage.
+
+
+5. SECURITY
+
+Electric Eel connects to every service over HTTPS. Sign-in with Google happens
+on Google's own pages and screens, so the app never sees your password. Tokens
+and keys are kept in the app's private storage, and we never have a copy of
+them.
+
+
+6. CHILDREN
+
+Electric Eel is not directed at children under 13, and we do not knowingly
+collect information from anyone. Using YouTube through Electric Eel is subject
+to YouTube's own age requirements.
+
+
+7. CHANGES TO THIS POLICY
+
+If the app starts handling your data in a new way, this policy will be updated
+before that version is released, and the effective date above will change. The
+full history of this policy is public in the project's repository.
+
+
+8. CONTACT
+
+For questions about this policy or about how Electric Eel handles your data,
+open an issue at https://github.com/cygnusx-1-org/electriceel/issues.
