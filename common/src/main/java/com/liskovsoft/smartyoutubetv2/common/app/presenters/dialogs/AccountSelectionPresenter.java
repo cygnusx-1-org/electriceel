@@ -52,14 +52,22 @@ public class AccountSelectionPresenter extends BasePresenter<Void> {
     }
 
     public void show(boolean force) {
+        show(force, null);
+    }
+
+    /**
+     * @param onFinish when the dialog closes, or at once when it isn't shown
+     */
+    public void show(boolean force, Runnable onFinish) {
         if (!AccountsData.instance(getContext()).isSelectAccountOnBootEnabled() && !force) {
             // user don't want to see selection dialog
+            runOnFinish(onFinish);
             return;
         }
 
         GlideIconFetcher.fetchDrawables(getContext(),
                 Helpers.map(mSignInService.getAccounts(), Account::getAvatarImageUrl),
-                icons -> createAndShowDialog(mSignInService.getAccounts(), icons, force));
+                icons -> createAndShowDialog(mSignInService.getAccounts(), icons, force, onFinish));
     }
 
     public void nextAccountOrDialog() {
@@ -70,8 +78,9 @@ public class AccountSelectionPresenter extends BasePresenter<Void> {
         sInstance = null;
     }
 
-    private void createAndShowDialog(List<Account> accounts, List<Drawable> icons, boolean force) {
+    private void createAndShowDialog(List<Account> accounts, List<Drawable> icons, boolean force, Runnable onFinish) {
         if (accounts.size() <= 1 && !force) {
+            runOnFinish(onFinish);
             return;
         }
 
@@ -79,7 +88,16 @@ public class AccountSelectionPresenter extends BasePresenter<Void> {
 
         appendAccountSelection(accounts, icons, dialogPresenter);
 
-        dialogPresenter.showDialog(getContext().getString(R.string.settings_accounts), this::unhold);
+        dialogPresenter.showDialog(getContext().getString(R.string.settings_accounts), () -> {
+            unhold();
+            runOnFinish(onFinish);
+        });
+    }
+
+    private static void runOnFinish(Runnable onFinish) {
+        if (onFinish != null) {
+            onFinish.run();
+        }
     }
 
     private void appendAccountSelection(List<Account> accounts, List<Drawable> icons, AppDialogPresenter settingsPresenter) {

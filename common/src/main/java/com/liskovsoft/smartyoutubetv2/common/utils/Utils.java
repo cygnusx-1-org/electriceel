@@ -625,7 +625,7 @@ public class Utils {
 
     public static CharSequence icon(Drawable drawable) {
         if (drawable == null) {
-            return null;
+            return ""; // not null: TextUtils.concat() writes a null as "null" (e.g. an account without an avatar)
         }
 
         SpannableString spannable = new SpannableString(" ");

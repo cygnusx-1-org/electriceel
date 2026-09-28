@@ -35,7 +35,11 @@ public class GlideIconFetcher {
 
             if (url == null) {
                 result.set(index, null);
-                counter.incrementAndGet();
+
+                // Every url null (accounts without avatars): no load will ever call back
+                if (counter.incrementAndGet() == iconUrls.size()) {
+                    onFetch.onDone(result);
+                }
                 continue;
             }
 
