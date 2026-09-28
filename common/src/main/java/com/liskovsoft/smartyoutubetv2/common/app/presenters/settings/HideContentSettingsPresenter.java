@@ -82,6 +82,12 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
         options.add(createContentItem(R.string.hide_shorts_channel, MediaServiceData.CONTENT_SHORTS_CHANNEL));
         options.add(createContentItem(R.string.hide_shorts_from_history, MediaServiceData.CONTENT_SHORTS_HISTORY));
         options.add(createContentItem(R.string.hide_shorts_from_trending, MediaServiceData.CONTENT_SHORTS_TRENDING));
+        options.add(createContentItem(R.string.hide_shorts_from_sports, MediaServiceData.CONTENT_SHORTS_SPORTS));
+        options.add(createContentItem(R.string.hide_shorts_from_live, MediaServiceData.CONTENT_SHORTS_LIVE));
+        options.add(createContentItem(R.string.hide_shorts_from_my_videos, MediaServiceData.CONTENT_SHORTS_MY_VIDEOS));
+        options.add(createContentItem(R.string.hide_shorts_from_gaming, MediaServiceData.CONTENT_SHORTS_GAMING));
+        options.add(createContentItem(R.string.hide_shorts_from_news, MediaServiceData.CONTENT_SHORTS_NEWS));
+        options.add(createContentItem(R.string.hide_shorts_from_music, MediaServiceData.CONTENT_SHORTS_MUSIC));
 
         showSubmenu(R.string.header_shorts, options);
     }

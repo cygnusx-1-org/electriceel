@@ -432,6 +432,12 @@
     <string name="hide_shorts_from_search">Hide shorts from the search result</string>
     <string name="hide_shorts_from_history">Hide shorts from History</string>
     <string name="hide_shorts_from_trending">Hide shorts from Trending</string>
+    <string name="hide_shorts_from_sports">Hide shorts from Sports</string>
+    <string name="hide_shorts_from_live">Hide shorts from Live</string>
+    <string name="hide_shorts_from_my_videos">Hide shorts from My videos</string>
+    <string name="hide_shorts_from_gaming">Hide shorts from Gaming</string>
+    <string name="hide_shorts_from_news">Hide shorts from News</string>
+    <string name="hide_shorts_from_music">Hide shorts from Music</string>
     <string name="disable_screensaver">Disable screensaver</string>
     <string name="description_not_found">Description not found</string>
     <string name="proxy_port_hint">Proxy port</string>
