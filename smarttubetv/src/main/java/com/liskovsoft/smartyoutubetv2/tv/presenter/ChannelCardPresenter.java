@@ -45,7 +45,7 @@ public class ChannelCardPresenter extends LongClickPresenter {
         mDefaultTextColor =
                 ContextCompat.getColor(context, R.color.card_default_text);
         mNewContentBackgroundColor =
-                ContextCompat.getColor(context, R.color.dark_red);
+                ContextCompat.getColor(context, Helpers.getThemeAttr(context, R.attr.cardNewContentBackground));
         mSelectedBackgroundColor =
                 ContextCompat.getColor(context, Helpers.getThemeAttr(context, R.attr.cardSelectedBackground));
         mSelectedTextColor =

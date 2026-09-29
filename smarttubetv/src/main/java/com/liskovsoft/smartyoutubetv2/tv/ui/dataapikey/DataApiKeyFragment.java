@@ -19,8 +19,10 @@ import java.util.List;
  * One row per step, and the same rows in every state: only their text changes
  */
 public class DataApiKeyFragment extends GuidedStepSupportFragment implements DataApiKeyView {
-    private static final int RETRY = 10;
+    // Continue at first, Try again after a failure
+    private static final int AUTHORIZE = 10;
     private static final int CLOSE = 11;
+    private static final int PRIVACY_POLICY = 12;
     private DataApiKeyPresenter mPresenter;
     private GoogleCloudAuthorizer mAuthorizer;
 
@@ -55,7 +57,7 @@ public class DataApiKeyFragment extends GuidedStepSupportFragment implements Dat
         // The rows fit on the screen. The default alignment scrolls the list to keep the selected button on the keyline,
         // which pushed the first steps off the top and moved every row when the focus went between the buttons.
         getGuidedActionsStylist().getActionsGridView().setWindowAlignment(VerticalGridView.WINDOW_ALIGN_BOTH_EDGE);
-        setSelectedActionPosition(findActionPositionById(CLOSE));
+        setSelectedActionPosition(findActionPositionById(AUTHORIZE));
         mPresenter.onViewInitialized();
     }
 
@@ -96,17 +98,13 @@ public class DataApiKeyFragment extends GuidedStepSupportFragment implements Dat
     }
 
     @Override
+    public void showContinue() {
+        showAuthorize(R.string.data_api_key_auto_continue, true);
+    }
+
+    @Override
     public void enableRetry(boolean enable) {
-        GuidedAction retry = findActionById(RETRY);
-
-        if (retry == null) {
-            return;
-        }
-
-        retry.setEnabled(enable);
-        retry.setFocusable(enable);
-        notifyActionChanged(findActionPositionById(RETRY));
-        setSelectedActionPosition(findActionPositionById(enable ? RETRY : CLOSE));
+        showAuthorize(R.string.data_api_key_auto_retry, enable);
     }
 
     @Override
@@ -128,12 +126,15 @@ public class DataApiKeyFragment extends GuidedStepSupportFragment implements Dat
         actions.add(createStep(STEP_API, R.string.data_api_key_auto_step_api));
         actions.add(createStep(STEP_KEY, R.string.data_api_key_auto_step_key));
         actions.add(createStep(STEP_TEST, R.string.data_api_key_auto_step_test));
-        // Always there, so the rows never move: enabled after a failure
+        // Always there, so the rows never move: goes on to Google's consent screen, then disabled until a failure
         actions.add(new GuidedAction.Builder()
-                .id(RETRY)
-                .title(getString(R.string.data_api_key_auto_retry))
-                .enabled(false)
-                .focusable(false)
+                .id(AUTHORIZE)
+                .title(getString(R.string.data_api_key_auto_continue))
+                .build());
+        actions.add(new GuidedAction.Builder()
+                .id(PRIVACY_POLICY)
+                .title(getString(R.string.privacy_policy))
+                .description(getString(R.string.privacy_policy_url).replaceFirst("^https?://", ""))
                 .build());
         actions.add(new GuidedAction.Builder()
                 .id(CLOSE)
@@ -143,11 +144,30 @@ public class DataApiKeyFragment extends GuidedStepSupportFragment implements Dat
 
     @Override
     public void onGuidedActionClicked(GuidedAction action) {
-        if (action.getId() == RETRY) {
-            mPresenter.onRetryClicked();
+        if (action.getId() == AUTHORIZE) {
+            mPresenter.onAuthorizeClicked();
+        } else if (action.getId() == PRIVACY_POLICY) {
+            mPresenter.onPrivacyPolicyClicked();
         } else if (action.getId() == CLOSE) {
             mPresenter.onCloseClicked();
         }
+    }
+
+    /**
+     * Only the title changes: the row stays where it is
+     */
+    private void showAuthorize(int titleResId, boolean enable) {
+        GuidedAction authorize = findActionById(AUTHORIZE);
+
+        if (authorize == null) {
+            return;
+        }
+
+        authorize.setTitle(getString(titleResId));
+        authorize.setEnabled(enable);
+        authorize.setFocusable(enable);
+        notifyActionChanged(findActionPositionById(AUTHORIZE));
+        setSelectedActionPosition(findActionPositionById(enable ? AUTHORIZE : CLOSE));
     }
 
     private GuidedAction createStep(int step, int titleResId) {

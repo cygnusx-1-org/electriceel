@@ -14,7 +14,6 @@ import com.liskovsoft.sharedutils.helpers.PermissionHelpers;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.sharedutils.rx.RxHelper;
 import com.liskovsoft.smartyoutubetv2.common.R;
-import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.HiddenPrefs;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
@@ -315,15 +314,15 @@ public class BackupAndRestoreManager implements MotherActivity.OnPermissions {
     }
 
     public String getBackupRootPath() {
-        // NOTE: Android 11+ only backup through the file manager (no shared dir)
-        if (hasAccessOnlyToAppFolders() && VERSION.SDK_INT > 29) {
-            String backupZipName = GeneralData.instance(mContext).getBackupZipName();
-            backupZipName = backupZipName != null ? "/" + backupZipName : "";
-            return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).getAbsolutePath()
-                    + "/" + BackupAndRestoreHelper.BACKUP_FOLDER_NAME + backupZipName;
-        }
-
+        // NOTE: Android 11+ backs up into a new zip there each time (no shared dir)
         return getRestoreRootPath();
+    }
+
+    /**
+     * Android 11+: each backup is a new zip in Documents/SmartTubeBackup, named with the time it's made
+     */
+    public boolean isZipBackup() {
+        return hasAccessOnlyToAppFolders() && VERSION.SDK_INT > 29;
     }
 
     public String getRestoreRootPath() {

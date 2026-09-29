@@ -15,6 +15,13 @@ public interface DataApiKeyView {
     void authorize();
     void showStep(int step, CharSequence status);
     void showDescription(CharSequence description);
+    /**
+     * Before Google's consent screen: the button that goes on to it, focused
+     */
+    void showContinue();
+    /**
+     * The same button, after the consent screen: enabled after a failure
+     */
     void enableRetry(boolean enable);
     void close();
 }

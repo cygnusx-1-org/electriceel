@@ -102,7 +102,7 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
     private float mUIScale;
     private float mVideoGridScale;
     private final List<ColorScheme> mColorSchemes = new ArrayList<>();
-    private int mColorSchemeIndex;
+    private int mColorSchemeId;
     private int mChannelCategorySorting;
     private int mPlaylistsStyle;
     private boolean mIsUploadsOldLookEnabled;
@@ -207,11 +207,17 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
     }
 
     public ColorScheme getColorScheme() {
-        return mColorSchemes.get(mColorSchemeIndex);
+        for (ColorScheme scheme : mColorSchemes) {
+            if (scheme.id == mColorSchemeId) {
+                return scheme;
+            }
+        }
+
+        return mColorSchemes.get(0);
     }
 
     public void setColorScheme(ColorScheme scheme) {
-        mColorSchemeIndex = mColorSchemes.indexOf(scheme);
+        mColorSchemeId = scheme.id;
         persistState();
     }
 
@@ -373,50 +379,66 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
         persistState();
     }
 
+    // Listed in display order. The id is what gets persisted, so never change or reuse one.
     private void initColorSchemes() {
         mColorSchemes.add(new ColorScheme(
-                R.string.color_scheme_teal,
-                null,
-                null,
-                null,
+                8,
+                R.string.color_scheme_electric_blue,
+                "App.Theme.ElectricBlue.Player",
+                "App.Theme.ElectricBlue.Browse",
+                "App.Theme.ElectricBlue.Preferences",
                 mContext));
         mColorSchemes.add(new ColorScheme(
-                R.string.color_scheme_dark_grey,
-                "App.Theme.DarkGrey.Player",
-                "App.Theme.DarkGrey.Browse",
-                "App.Theme.DarkGrey.Preferences",
-                mContext));
-        mColorSchemes.add(new ColorScheme(
+                2,
                 R.string.color_scheme_red,
                 "App.Theme.Red.Player",
                 "App.Theme.Red.Browse",
                 "App.Theme.Red.Preferences",
                 mContext));
         mColorSchemes.add(new ColorScheme(
-                R.string.color_scheme_dark_grey_oled,
-                "App.Theme.DarkGrey.OLED.Player",
-                "App.Theme.DarkGrey.OLED.Browse",
+                1,
+                R.string.color_scheme_dark_grey,
+                "App.Theme.DarkGrey.Player",
+                "App.Theme.DarkGrey.Browse",
                 "App.Theme.DarkGrey.Preferences",
                 mContext));
         mColorSchemes.add(new ColorScheme(
-                R.string.color_scheme_teal_oled,
-                "App.Theme.Leanback.OLED.Player",
-                "App.Theme.Leanback.OLED.Browse",
+                0,
+                R.string.color_scheme_teal,
+                null,
+                null,
                 null,
                 mContext));
         mColorSchemes.add(new ColorScheme(
-                R.string.color_scheme_dark_grey_monochrome,
-                "App.Theme.DarkGrey2.OLED.Player",
-                "App.Theme.DarkGrey2.OLED.Browse",
-                "App.Theme.DarkGrey.Preferences",
-                mContext));
-        mColorSchemes.add(new ColorScheme(
+                6,
                 R.string.color_scheme_dark_blue,
                 "App.Theme.Leanback.Blue.Player",
                 "App.Theme.Leanback.Blue.Browse",
                 "App.Theme.Leanback.Blue.Preferences",
                 mContext));
         mColorSchemes.add(new ColorScheme(
+                5,
+                R.string.color_scheme_dark_grey_monochrome,
+                "App.Theme.DarkGrey2.OLED.Player",
+                "App.Theme.DarkGrey2.OLED.Browse",
+                "App.Theme.DarkGrey.Preferences",
+                mContext));
+        mColorSchemes.add(new ColorScheme(
+                3,
+                R.string.color_scheme_dark_grey_oled,
+                "App.Theme.DarkGrey.OLED.Player",
+                "App.Theme.DarkGrey.OLED.Browse",
+                "App.Theme.DarkGrey.Preferences",
+                mContext));
+        mColorSchemes.add(new ColorScheme(
+                4,
+                R.string.color_scheme_teal_oled,
+                "App.Theme.Leanback.OLED.Player",
+                "App.Theme.Leanback.OLED.Browse",
+                null,
+                mContext));
+        mColorSchemes.add(new ColorScheme(
+                7,
                 R.string.color_scheme_dark_blue_oled,
                 "App.Theme.Leanback.Blue.OLED.Player",
                 "App.Theme.Leanback.Blue.OLED.Browse",
@@ -432,7 +454,7 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
         //mIsCardAnimatedPreviewsEnabled = Helpers.parseBoolean(split, 0, true);
         mVideoGridScale = Helpers.parseFloat(split, 1, 1.0f); // 4 cards in a row
         mUIScale = Helpers.parseFloat(split, 2, 1.0f);
-        mColorSchemeIndex = Helpers.parseInt(split, 3, 1);
+        mColorSchemeId = Helpers.parseInt(split, 3, 8); // Electric Blue
         mIsCardMultilineTitleEnabled = Helpers.parseBoolean(split, 4, true);
         mChannelCategorySorting = Helpers.parseInt(split, 5, CHANNEL_SORTING_LAST_VIEWED);
         mPlaylistsStyle = Helpers.parseInt(split, 6, PLAYLISTS_STYLE_GRID);
@@ -477,10 +499,6 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
             }
         }
 
-        if (mColorSchemes.size() <= mColorSchemeIndex) {
-            mColorSchemeIndex = mColorSchemes.size() - 1;
-        }
-        
         updateDefaultValues();
     }
 
@@ -495,7 +513,7 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
 
     private void persistStateInt() {
         mPrefs.setProfileData(MAIN_UI_DATA, Helpers.mergeData(null,
-                mVideoGridScale, mUIScale, mColorSchemeIndex, mIsCardMultilineTitleEnabled,
+                mVideoGridScale, mUIScale, mColorSchemeId, mIsCardMultilineTitleEnabled,
                 mChannelCategorySorting, mPlaylistsStyle, mCardTitleLinesNum, mIsCardTextAutoScrollEnabled,
                 mIsUploadsOldLookEnabled, mIsUploadsAutoLoadEnabled, mCardTextScrollSpeed, mMenuItems, mTopButtons,
                 null, mThumbQuality, mIsCardMultilineSubtitleEnabled, Helpers.mergeList(mMenuItemsOrdered),
@@ -504,16 +522,19 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
     }
 
     public static class ColorScheme {
+        public final int id;
         public final int nameResId;
         public final int playerThemeResId;
         public final int browseThemeResId;
         public final int settingsThemeResId;
 
-        public ColorScheme(int nameResId,
+        public ColorScheme(int id,
+                           int nameResId,
                            String playerTheme,
                            String browseTheme,
                            String settingsTheme,
                            Context context) {
+            this.id = id;
             this.nameResId = nameResId;
             this.playerThemeResId = Helpers.getResourceId(playerTheme, "style", context);
             this.browseThemeResId = Helpers.getResourceId(browseTheme, "style", context);

@@ -14,6 +14,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.GeneralSettingsPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.DataApiKeyView;
 import com.liskovsoft.smartyoutubetv2.common.misc.GoogleCloudAuthorizer;
+import com.liskovsoft.smartyoutubetv2.common.utils.AppDialogUtil;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
 
@@ -25,8 +26,9 @@ import io.reactivex.disposables.Disposable;
 /**
  * Gets the user's own Data API key from their Google account: Play services signs them in (cloud-platform scope),
  * then their existing key is found, or a project and key are made.<br/>
- * Runs by itself after a YouTube sign-in, and from the settings. Only where Play services is on the device.
- * The key can always be entered by hand too.
+ * Opens by itself after a YouTube sign-in, and from the settings. Only where Play services is on the device.
+ * The key can always be entered by hand too.<br/>
+ * Google's consent screen comes only after the user has read what the access is for, and pressed Continue.
  */
 public class DataApiKeyPresenter extends BasePresenter<DataApiKeyView> {
     private static final String TAG = DataApiKeyPresenter.class.getSimpleName();
@@ -80,7 +82,11 @@ public class DataApiKeyPresenter extends BasePresenter<DataApiKeyView> {
     @Override
     public void onViewInitialized() {
         super.onViewInitialized();
-        authorize();
+
+        if (getView() != null) {
+            showWaiting();
+            getView().showContinue();
+        }
     }
 
     @Override
@@ -89,8 +95,16 @@ public class DataApiKeyPresenter extends BasePresenter<DataApiKeyView> {
         unhold();
     }
 
-    public void onRetryClicked() {
+    /**
+     * Continue at first, then Try again
+     */
+    public void onAuthorizeClicked() {
         authorize();
+    }
+
+    public void onPrivacyPolicyClicked() {
+        AppDialogUtil.showQrCodeDialog(getContext(), getContext().getString(R.string.privacy_policy),
+                getContext().getString(R.string.privacy_policy_url));
     }
 
     public void onCloseClicked() {
@@ -124,13 +138,20 @@ public class DataApiKeyPresenter extends BasePresenter<DataApiKeyView> {
             return;
         }
 
+        showWaiting();
+        getView().enableRetry(false);
+        getView().authorize();
+    }
+
+    /**
+     * Every step waiting, and what the access is for
+     */
+    private void showWaiting() {
         for (int step : STEPS) {
             getView().showStep(step, getContext().getString(R.string.data_api_key_auto_waiting));
         }
 
         getView().showDescription(getContext().getString(R.string.data_api_key_auto_description));
-        getView().enableRetry(false);
-        getView().authorize();
     }
 
     private void onStep(CloudKeyStep step) {

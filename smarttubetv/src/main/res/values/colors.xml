@@ -46,6 +46,13 @@
     <color name="scheme_blue_background">#33B5E5</color>
     <color name="scheme_blue_background_dark">#207EA1</color>
 
+    <!-- Electric Blue color scheme (sampled from the app logo) -->
+    <color name="scheme_electric_blue">#025DEE</color>
+    <color name="scheme_electric_blue_light">#85D2F4</color>
+    <color name="scheme_electric_blue_background_dark">#0B2862</color>
+    <color name="scheme_electric_blue_shelf_background_dark">#060F30</color>
+    <color name="scheme_electric_blue_card_background_dark">#000000</color>
+
     <!-- Vineyard -->
     <color name="black_87pc">#77000000</color>
     <color name="primary_dark">#00796B</color>

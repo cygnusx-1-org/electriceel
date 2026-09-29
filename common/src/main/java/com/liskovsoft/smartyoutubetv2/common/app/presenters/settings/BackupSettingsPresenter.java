@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 
 import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
-import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.smartyoutubetv2.common.R;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
@@ -182,12 +181,11 @@ public class BackupSettingsPresenter extends BasePresenter<Void> {
 
         String backupPath = backupManager.getBackupRootPath();
         String restorePath = backupManager.getRestoreRootPath();
-        boolean hasFullStorageAccess = Helpers.equals(backupPath, restorePath);
 
         options.add(UiOptionItem.from(
                 backupPath == null ? getContext().getString(R.string.app_backup) :
                     String.format("%s:\n%s", getContext().getString(R.string.app_backup), backupPath),
-                hasFullStorageAccess ? null : getContext().getString(R.string.app_backup_desc),
+                backupManager.isZipBackup() ? getContext().getString(R.string.app_backup_desc) : null,
                 option -> {
                     AppDialogUtil.showConfirmationDialog(getContext(), getContext().getString(R.string.app_backup), () -> {
                         mSidebarService.enableSection(MediaGroup.TYPE_SETTINGS, true); // prevent Settings lock

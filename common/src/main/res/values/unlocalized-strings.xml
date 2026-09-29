@@ -3,6 +3,8 @@
     <string name="releases_url" translatable="false">https://t.me/SmartTubeNewsEN</string>
     <string name="sources_url" translatable="false">https://github.com/yuliskov/SmartTubeNext</string>
     <string name="git_repository_url" translatable="false">https://github.com/cygnusx-1-org/electriceel</string>
+    <string name="privacy_policy_url" translatable="false">https://cygnusx-1.org/electriceel/PRIVACY.txt</string>
+    <string name="terms_of_service_url" translatable="false">https://cygnusx-1.org/electriceel/TERMS.txt</string>
     <string name="web_site_url" translatable="false">https://smarttubeapp.github.io</string>
     <string name="content_block_provider" translatable="false">SponsorBlock</string>
     <string name="content_block_provider_url" translatable="false">https://sponsor.ajay.app</string>

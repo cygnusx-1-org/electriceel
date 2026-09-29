@@ -21,7 +21,6 @@ import com.liskovsoft.smartyoutubetv2.common.R;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.BackupSettingsPresenter;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager.OnError;
 import com.liskovsoft.smartyoutubetv2.common.misc.MotherActivity.OnResult;
-import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -41,6 +40,8 @@ public class BackupAndRestoreHelper implements OnResult {
     private static final int REQ_ALL_FILES_ACCESS = 1002;
     // <app_id>_<yyyyMMdd-HHmmss>.zip
     private static final Pattern BACKUP_ZIP_PATTERN = Pattern.compile("^([A-Za-z]\\w*(?:\\.[A-Za-z]\\w*)+)_(\\d{8}-\\d{6})\\.zip$");
+    // Backup zips of this app id that are kept, so auto backup doesn't fill the storage
+    private static final int MAX_BACKUP_ZIPS = 7;
     private final Context mContext;
     private Runnable mOnSuccess;
     private Runnable mOnAllFilesAccess;
@@ -60,21 +61,10 @@ public class BackupAndRestoreHelper implements OnResult {
         File dataDir = new File(mediaDir, "data");
         if (!dataDir.exists() || FileHelpers.isEmpty(dataDir) || VERSION.SDK_INT < 29) return;
 
-        String backupZipName = getSavedBackupZipName();
+        // A new zip every time, named when it's made: the older ones stay, up to MAX_BACKUP_ZIPS
+        String backupZipName = createBackupZipName();
 
         MediaStoreFile file = new MediaStoreFile(mContext, backupZipName, BACKUP_FOLDER_NAME);
-        if (!file.isWritable()) {
-            backupZipName = createBackupZipNameWithTimestamp();
-            getGeneralData().setBackupZipName(backupZipName);
-            file = new MediaStoreFile(mContext, backupZipName, BACKUP_FOLDER_NAME);
-        }
-
-        if (!file.isWritable()) {
-            deleteTimeStamp(); // User copied full old media directory (with the old timestamp)
-            backupZipName = createBackupZipNameWithTimestamp();
-            getGeneralData().setBackupZipName(backupZipName);
-            file = new MediaStoreFile(mContext, backupZipName, BACKUP_FOLDER_NAME);
-        }
 
         if (file.isWritable()) {
             final File zipFile = new File(mediaDir, backupZipName);
@@ -84,6 +74,7 @@ public class BackupAndRestoreHelper implements OnResult {
                 file.copyFrom(zipFile);
                 // Delete temporary zip
                 zipFile.delete();
+                deleteOldBackupZips(backupZipName);
             }
         }
 
@@ -297,8 +288,7 @@ public class BackupAndRestoreHelper implements OnResult {
         File mediaDir = FileHelpers.getExternalMediaDirectory(mContext);
 
         // Copy ZIP from URI to the temporary file
-        String backupZipName = getSavedBackupZipName();
-        File tempZip = new File(mediaDir, backupZipName);
+        File tempZip = new File(mediaDir, createBackupZipName());
         copyUriToFile(zipUri, tempZip);
 
         unpackTempZip(tempZip);
@@ -454,44 +444,42 @@ public class BackupAndRestoreHelper implements OnResult {
         return new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), BACKUP_FOLDER_NAME);
     }
 
-    private GeneralData getGeneralData() {
-        return GeneralData.instance(mContext);
-    }
-    
-    private String createBackupZipNameWithTimestamp() {
-        return mContext.getPackageName() + "_" + getTimeStamp() + ".zip";
-    }
+    /**
+     * Keeps the zip just made and the newest others of this app id, in the order of the restore list, up to {@link #MAX_BACKUP_ZIPS}
+     */
+    private void deleteOldBackupZips(String newZipName) {
+        int kept = 1; // the zip just made
 
-    private String getTimeStamp() {
-        File timestampFile = getTimestampFile();
-        if (timestampFile.exists()) {
-            return FileHelpers.getFileContents(timestampFile);
-        }
+        for (String name : getBackupZipNames()) {
+            if (name.equals(newZipName) || !mContext.getPackageName().equals(getZipPackageName(name))) {
+                continue;
+            }
 
-        String timestamp = DateHelper.createTimestamp();
-        FileHelpers.stringToFile(timestamp, timestampFile);
-        return timestamp;
-    }
-
-    private void deleteTimeStamp() {
-        File timestampFile = getTimestampFile();
-        if (timestampFile.exists()) {
-            timestampFile.delete();
+            if (kept < MAX_BACKUP_ZIPS) {
+                kept++;
+            } else {
+                deleteBackupZip(name);
+            }
         }
     }
 
-    private File getTimestampFile() {
-        File mediaDir = FileHelpers.getExternalMediaDirectory(mContext);
-        File timestampFile = new File(mediaDir, "timestamp.txt");
-        return timestampFile;
+    private void deleteBackupZip(String zipName) {
+        if (new File(getBackupZipDir(), zipName).delete() || VERSION.SDK_INT < 29) {
+            return;
+        }
+
+        // Without direct access: MediaStore, which only deletes the zips this install made
+        try {
+            new MediaStoreFile(mContext, zipName, BACKUP_FOLDER_NAME).delete();
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
     }
 
-    private String getSavedBackupZipName() {
-        String oldBackupZipName = getGeneralData().getBackupZipName();
-        if (oldBackupZipName == null || !oldBackupZipName.endsWith(".zip")) {
-            oldBackupZipName = createBackupZipNameWithTimestamp();
-            getGeneralData().setBackupZipName(oldBackupZipName);
-        }
-        return oldBackupZipName;
+    /**
+     * &lt;app_id&gt;_&lt;yyyyMMdd-HHmmss&gt;.zip, with the current time
+     */
+    private String createBackupZipName() {
+        return mContext.getPackageName() + "_" + DateHelper.createTimestamp() + ".zip";
     }
 }

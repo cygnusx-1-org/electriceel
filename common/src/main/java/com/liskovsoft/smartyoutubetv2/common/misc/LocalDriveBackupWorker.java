@@ -57,7 +57,8 @@ public class LocalDriveBackupWorker extends Worker {
     }
 
     public static void cancel(Context context) {
-        if (VERSION.SDK_INT >= 23 && GeneralData.instance(context).getLocalDriveBackupFreqDays() > 0) {
+        // NOTE: no frequency check: "None" has already been saved by the time this is called
+        if (VERSION.SDK_INT >= 23) {
             Log.d(TAG, "Unregistering worker job...");
 
             WorkManager workManager = WorkManager.getInstance(context);
@@ -70,6 +71,11 @@ public class LocalDriveBackupWorker extends Worker {
     public Result doWork() {
         if (BackupSettingsPresenter.hasInstance()) {
             return Result.retry();
+        }
+
+        // A worker left scheduled after auto backup was turned off: each backup is a new zip
+        if (GeneralData.instance(getApplicationContext()).getLocalDriveBackupFreqDays() <= 0) {
+            return Result.success();
         }
 
         Log.d(TAG, "Starting worker %s...", this);

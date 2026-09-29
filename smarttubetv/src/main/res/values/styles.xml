@@ -5,6 +5,7 @@
     <attr name="shelfBackground" format="reference"/>
     <attr name="cardDefaultBackground" format="reference"/>
     <attr name="cardSelectedBackground" format="reference"/>
+    <attr name="cardNewContentBackground" format="reference"/>
     <attr name="cardProgressStyle" format="reference"/>
     <attr name="appLogo" format="reference"/>
 
@@ -53,6 +54,7 @@
         <item name="shelfBackground">@color/shelf_background_dark</item>
         <item name="cardDefaultBackground">@color/card_default_background_dark</item>
         <item name="cardSelectedBackground">@color/card_selected_background_white</item>
+        <item name="cardNewContentBackground">@color/dark_red</item>
         <item name="cardProgressStyle">?android:attr/progressBarStyleHorizontal</item>
         <item name="appLogo">@mipmap/app_logo</item>
         <item name="android:colorAccent" tools:targetApi="21">@color/fastlane_background</item>
@@ -248,4 +250,33 @@
         <item name="cardSelectedBackground">@color/card_selected_background_white_grey</item>
     </style>
     <!--  End Color scheme: Dark Blue (OLED)  -->
+
+    <!--  Color scheme: Electric Blue  -->
+    <style name="App.Theme.ElectricBlue.Player" parent="App.Theme.Leanback.Player">
+        <item name="playbackProgressPrimaryColor">@color/scheme_electric_blue</item>
+        <item name="playbackProgressSecondaryColor">@color/scheme_electric_blue_light</item>
+        <item name="playbackControlsIconHighlightColor">@color/scheme_electric_blue</item>
+        <item name="cardProgressStyle">@style/ProgressBarHorizontal.ElectricBlue</item>
+        <item name="shelfBackground">@color/scheme_electric_blue_shelf_background_dark</item>
+        <item name="cardDefaultBackground">@color/scheme_electric_blue_card_background_dark</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/scheme_electric_blue</item>
+    </style>
+    <style name="App.Theme.ElectricBlue.Browse" parent="App.Theme.Leanback.Browse">
+        <item name="android:windowBackground">@color/scheme_electric_blue_shelf_background_dark</item>
+        <item name="brandColor">@color/scheme_electric_blue_background_dark</item>
+        <item name="brandAccentColor">@color/scheme_electric_blue</item>
+        <item name="cardProgressStyle">@style/ProgressBarHorizontal.ElectricBlue</item>
+        <item name="shelfBackground">@color/scheme_electric_blue_shelf_background_dark</item>
+        <item name="cardDefaultBackground">@color/scheme_electric_blue_card_background_dark</item>
+        <item name="cardNewContentBackground">@color/scheme_electric_blue</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/scheme_electric_blue</item>
+    </style>
+    <style name="App.Theme.ElectricBlue.Preferences" parent="App.Theme.Leanback.Preferences">
+        <item name="android:colorPrimary" tools:targetApi="21">@color/scheme_electric_blue_background_dark</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/scheme_electric_blue</item>
+    </style>
+    <style name="ProgressBarHorizontal.ElectricBlue" parent="@android:style/Widget.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/progress_bar_electric_blue</item>
+    </style>
+    <!--  End Color scheme: Electric Blue  -->
 </resources>
