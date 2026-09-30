@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="update_urls">
-        <item>https://github.com/cygnusx-1-org/electriceel/releases/latest/download/electriceel_stable.json</item>
+        <item>https://raw.githubusercontent.com/cygnusx-1-org/electriceel/master/updates/electriceel_stable.json</item>
     </string-array>
 </resources>
