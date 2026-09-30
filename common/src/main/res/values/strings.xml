@@ -412,6 +412,14 @@
     <string name="collaborations_desc">A video whose channel is shown as \"X and Y\", where X and Y are both channel names. Each name is looked up once with a signed-out channel search. English only.</string>
     <string name="collaborations_sections">Sections</string>
     <string name="collaboration_mark">Collab</string>
+    <string name="watch_later">Watch later</string>
+    <string name="watch_later_show">Show</string>
+    <string name="watch_later_mark">Mark</string>
+    <string name="watch_later_mark_desc">Videos in Watch later stay in the feeds with a \"Watch later\" label</string>
+    <string name="watch_later_hide">Hide</string>
+    <string name="watch_later_desc">A video that is in your Watch later playlist. Needs a signed-in account. The playlist is read when a picked section opens, and again once it is 15 minutes old.</string>
+    <string name="watch_later_sections">Sections</string>
+    <string name="watch_later_label">Watch later</string>
     <string name="keyword_filter_keywords">Keywords</string>
     <string name="keyword_filter_common">Common keywords</string>
     <string name="keyword_filter_feed_words">Words from a feed</string>

@@ -11,6 +11,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.VideoGroup;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AiSListFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.CollaborationsData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.WatchLaterData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
 import org.junit.After;
@@ -61,7 +62,9 @@ public class HiddenVideoResolverTest {
     private final Context mContext = RuntimeEnvironment.getApplication();
     private final List<String> mSearches = new ArrayList<>();
     private final List<String> mHandleLookups = new ArrayList<>();
+    private int mWatchLaterLoads;
     private CollaborationsData mCollaborationsData;
+    private WatchLaterData mWatchLaterData;
     private AiSListFilterData mAiSListData;
     private boolean mIsNetworkDown;
 
@@ -74,6 +77,12 @@ public class HiddenVideoResolverTest {
         mCollaborationsData.setSectionEnabled(MediaGroup.TYPE_GAMING, false);
         CollaborationManager.instance(mContext).resetForTesting(this::search);
 
+        mWatchLaterData = WatchLaterData.instance(mContext);
+        mWatchLaterData.setMode(WatchLaterData.MODE_SHOW);
+        mWatchLaterData.setSectionEnabled(MediaGroup.TYPE_HOME, true);
+        mWatchLaterData.setSectionEnabled(MediaGroup.TYPE_GAMING, false);
+        WatchLaterManager.instance(mContext).resetForTesting(this::loadWatchLater, () -> "one@example.com");
+
         mAiSListData = AiSListFilterData.instance(mContext);
         disableAiSList();
         AiSListManager aiSListManager = AiSListManager.instance(mContext);
@@ -84,6 +93,7 @@ public class HiddenVideoResolverTest {
     @After
     public void tearDown() {
         mCollaborationsData.setMode(CollaborationsData.MODE_SHOW);
+        mWatchLaterData.setMode(WatchLaterData.MODE_SHOW);
         disableAiSList();
         Utils.sHandler.removeCallbacksAndMessages(null);
     }
@@ -124,6 +134,44 @@ public class HiddenVideoResolverTest {
         assertEquals(2, group.getSize());
         assertTrue(group.get(0).isCollaboration);
         assertFalse(group.get(1).isCollaboration);
+    }
+
+    @Test
+    public void watchLaterVideoNeverAppears() {
+        PublishSubject<List<String>> load = PublishSubject.create(); // ends when the test says
+        WatchLaterManager.instance(mContext).resetForTesting(() -> load, () -> "one@example.com");
+        mWatchLaterData.setMode(WatchLaterData.MODE_HIDE);
+        BrowseSection home = createSection(MediaGroup.TYPE_HOME);
+        List<MediaGroup> shown = new ArrayList<>();
+
+        HiddenVideoResolver.resolveGroup(mContext, Observable.just(createRow(createVideo("later", HUMAN_CHANNEL), createVideo("fresh", HUMAN_CHANNEL))), home)
+                .subscribe(shown::add);
+
+        // Held while Watch later is read
+        assertTrue(shown.isEmpty());
+
+        load.onNext(Collections.singletonList("later"));
+        load.onComplete();
+
+        assertEquals(1, shown.size());
+        VideoGroup group = VideoGroup.from(shown.get(0), home);
+        assertEquals(1, group.getSize());
+        assertEquals("fresh", group.get(0).videoId);
+    }
+
+    @Test
+    public void watchLaterVideoIsMarkedWhenShown() {
+        mWatchLaterData.setMode(WatchLaterData.MODE_MARK);
+        BrowseSection home = createSection(MediaGroup.TYPE_HOME);
+        List<MediaGroup> shown = new ArrayList<>();
+
+        HiddenVideoResolver.resolveGroup(mContext, Observable.just(createRow(createVideo("later", HUMAN_CHANNEL), createVideo("fresh", HUMAN_CHANNEL))), home)
+                .subscribe(shown::add);
+
+        VideoGroup group = VideoGroup.from(shown.get(0), home);
+        assertEquals(2, group.getSize());
+        assertTrue(group.get(0).isInWatchLater);
+        assertFalse(group.get(1).isInWatchLater);
     }
 
     @Test
@@ -191,14 +239,16 @@ public class HiddenVideoResolverTest {
         mIsNetworkDown = true;
         mAiSListData.setHideEnabled(AiSListFilterData.LIST_BLOCKLIST, AiSListFilterData.SECTION_HOME, true);
         mCollaborationsData.setMode(CollaborationsData.MODE_HIDE);
+        mWatchLaterData.setMode(WatchLaterData.MODE_HIDE);
         BrowseSection home = createSection(MediaGroup.TYPE_HOME);
         List<MediaGroup> shown = new ArrayList<>();
 
-        HiddenVideoResolver.resolveGroup(mContext, Observable.just(createRow(createVideo("ai", AI_CHANNEL), createVideo("collab", COLLABORATION))), home)
+        HiddenVideoResolver.resolveGroup(mContext, Observable.just(createRow(createVideo("ai", AI_CHANNEL), createVideo("collab", COLLABORATION),
+                createVideo("later", HUMAN_CHANNEL))), home)
                 .subscribe(shown::add);
 
         assertEquals(1, shown.size());
-        assertEquals(2, VideoGroup.from(shown.get(0), home).getSize());
+        assertEquals(3, VideoGroup.from(shown.get(0), home).getSize());
     }
 
     @Test
@@ -209,14 +259,19 @@ public class HiddenVideoResolverTest {
         // Both are off
         HiddenVideoResolver.resolveGroup(mContext, Observable.just(row), createSection(MediaGroup.TYPE_HOME)).subscribe(shown::add);
 
-        // Not picked there: collaborations only in Home, AiSList only in Search
+        // Not picked there: collaborations and Watch later only in Home, AiSList only in Search
         mCollaborationsData.setMode(CollaborationsData.MODE_HIDE);
+        mWatchLaterData.setMode(WatchLaterData.MODE_HIDE);
         mAiSListData.setHideEnabled(AiSListFilterData.LIST_BLOCKLIST, AiSListFilterData.SECTION_SEARCH, true);
         HiddenVideoResolver.resolveGroup(mContext, Observable.just(row), createSection(MediaGroup.TYPE_GAMING)).subscribe(shown::add);
 
-        assertEquals(2, shown.size());
+        // Search, a channel: no sidebar section
+        HiddenVideoResolver.resolveGroup(mContext, Observable.just(row), null).subscribe(shown::add);
+
+        assertEquals(3, shown.size());
         assertTrue(mSearches.isEmpty());
         assertTrue(mHandleLookups.isEmpty());
+        assertEquals(0, mWatchLaterLoads);
     }
 
     @Test
@@ -249,6 +304,16 @@ public class HiddenVideoResolverTest {
         List<String> names = SEARCH_RESULTS.get(query);
 
         return Observable.just(names != null ? names : Collections.emptyList());
+    }
+
+    private Observable<List<String>> loadWatchLater() {
+        mWatchLaterLoads++;
+
+        if (mIsNetworkDown) {
+            return Observable.error(new IllegalStateException("No network"));
+        }
+
+        return Observable.just(Collections.singletonList("later"));
     }
 
     private Observable<String> lookupHandle(String videoId) {

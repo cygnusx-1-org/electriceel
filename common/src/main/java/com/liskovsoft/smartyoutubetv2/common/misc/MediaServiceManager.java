@@ -429,7 +429,9 @@ public class MediaServiceManager implements OnAccountChange {
                             Observable<Void> editObserve = isAdd ? mItemService.addToPlaylistObserve(watchLater.getPlaylistId(), video.videoId)
                                    : mItemService.removeFromPlaylistObserve(watchLater.getPlaylistId(), video.videoId);
 
-                            RxHelper.execute(editObserve);
+                            RxHelper.execute(editObserve,
+                                    error -> Log.e(TAG, "Edit Watch later error: %s", error.getMessage()),
+                                    () -> WatchLaterManager.onPlaylistEdited(GlobalPreferences.context(), watchLater.getPlaylistId(), video, isAdd));
                         },
                         error -> {
                             // Fallback to something on error

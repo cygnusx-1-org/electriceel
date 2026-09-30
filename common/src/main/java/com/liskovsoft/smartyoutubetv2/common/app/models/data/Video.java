@@ -55,6 +55,7 @@ public final class Video {
     public String channelHandle;
     public int aiMarkList = -1; // AiSListFilterData.LIST_* the channel is marked for, or -1
     public boolean isCollaboration; // marked as a collaboration (see CollaborationManager)
+    public boolean isInWatchLater; // marked as in Watch later (see WatchLaterManager)
     public String videoId;
     public String playlistId;
     public String remotePlaylistId;
@@ -184,6 +185,7 @@ public final class Video {
         video.channelHandle = item.channelHandle;
         video.aiMarkList = item.aiMarkList;
         video.isCollaboration = item.isCollaboration;
+        video.isInWatchLater = item.isInWatchLater;
         video.bgImageUrl = item.bgImageUrl;
         video.cardImageUrl = item.cardImageUrl;
         video.author = item.author;

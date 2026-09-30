@@ -32,6 +32,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.views.PlaybackView;
 import com.liskovsoft.smartyoutubetv2.common.misc.KeywordFilter;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.StreamReminderService;
+import com.liskovsoft.smartyoutubetv2.common.misc.WatchLaterManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
@@ -230,11 +231,13 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
             return;
         }
 
+        boolean isInWatchLater = WatchLaterManager.instance(getContext()).isInWatchLater(mVideo.videoId);
+
         mDialogPresenter.appendSingleButton(
                 UiOptionItem.from(
-                        getContext().getString(R.string.add_video_to_watch_later),
+                        getContext().getString(isInWatchLater ? R.string.remove_video_to_watch_later : R.string.add_video_to_watch_later),
                         optionItem -> {
-                            MediaServiceManager.instance().addToWatchLaterPlaylist(mVideo);
+                            MediaServiceManager.instance().addRemoveFromWatchLaterPlaylist(mVideo, !isInWatchLater);
                             mDialogPresenter.closeDialog();
                         }
                 ));
@@ -938,8 +941,10 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
         if (add) {
             Observable<Void> editObserve = mVideo.mediaItem != null ?
                     mMediaItemService.addToPlaylistObserve(playlistId, mVideo.mediaItem) : mMediaItemService.addToPlaylistObserve(playlistId, mVideo.videoId);
+            Video video = mVideo;
             // Handle error: Maximum playlist size exceeded (> 5000 items)
-            mAddToPlaylistAction = RxHelper.execute(editObserve, error -> MessageHelpers.showLongMessage(getContext(), error.getMessage()));
+            mAddToPlaylistAction = RxHelper.execute(editObserve, error -> MessageHelpers.showLongMessage(getContext(), error.getMessage()),
+                    () -> WatchLaterManager.onPlaylistEdited(getContext(), playlistId, video, true));
             mDialogPresenter.closeDialog();
             MessageHelpers.showMessage(getContext(),
                     getContext().getString(R.string.added_to, playlistTitle));
@@ -949,7 +954,10 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
                 mCallback.onItemAction(mVideo, VideoMenuCallback.ACTION_REMOVE_FROM_PLAYLIST);
             }
             Observable<Void> editObserve = mMediaItemService.removeFromPlaylistObserve(playlistId, mVideo.videoId);
-            mAddToPlaylistAction = RxHelper.execute(editObserve);
+            Video video = mVideo;
+            mAddToPlaylistAction = RxHelper.execute(editObserve,
+                    error -> Log.e(TAG, "Remove from playlist error: %s", error.getMessage()),
+                    () -> WatchLaterManager.onPlaylistEdited(getContext(), playlistId, video, false));
             mDialogPresenter.closeDialog();
             MessageHelpers.showMessage(getContext(),
                     getContext().getString(R.string.removed_from, playlistTitle));

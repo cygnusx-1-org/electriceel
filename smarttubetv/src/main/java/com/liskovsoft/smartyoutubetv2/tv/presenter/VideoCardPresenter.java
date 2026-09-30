@@ -196,13 +196,17 @@ public class VideoCardPresenter extends LongClickPresenter {
     }
 
     /**
-     * The second title, after the "AI" and "Collab" markers the video has
+     * The second title, after the "AI", "Collab" and "Watch later" markers the video has
      */
     private static CharSequence getContentText(Context context, Video video, boolean selected) {
         CharSequence text = video.getSecondTitle();
 
+        if (video.isInWatchLater) {
+            text = addBoldMark(context, text, R.string.watch_later_label);
+        }
+
         if (video.isCollaboration) {
-            text = addCollaborationMark(context, text);
+            text = addBoldMark(context, text, R.string.collaboration_mark);
         }
 
         if (video.aiMarkList != -1) {
@@ -212,8 +216,8 @@ public class VideoCardPresenter extends LongClickPresenter {
         return text;
     }
 
-    private static CharSequence addCollaborationMark(Context context, CharSequence secondTitle) {
-        SpannableString mark = new SpannableString(context.getString(R.string.collaboration_mark));
+    private static CharSequence addBoldMark(Context context, CharSequence secondTitle, int markResId) {
+        SpannableString mark = new SpannableString(context.getString(markResId));
         mark.setSpan(new StyleSpan(Typeface.BOLD), 0, mark.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         return secondTitle != null ? TextUtils.concat(mark, " " + Video.TERTIARY_TEXT_DELIM + " ", secondTitle) : mark;

@@ -13,6 +13,7 @@ import com.liskovsoft.smartyoutubetv2.common.misc.KeywordFilter;
 import com.liskovsoft.smartyoutubetv2.common.misc.CollaborationManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.OldVideoFilter;
 import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.WatchLaterManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.KeywordFilterData;
 
@@ -483,7 +484,7 @@ public class VideoGroup {
         }
 
         if (isChannelBlocked(video) || isAiListed(video) || isHiddenCategory(video) || isOld(video) || isHiddenCollaboration(video)
-                || hasHiddenKeyword(video) || isWatchedSuggestion(video)) {
+                || isHiddenWatchLater(video) || hasHiddenKeyword(video) || isWatchedSuggestion(video)) {
             if (video.videoId != null) {
                 mHiddenVideoCount++;
             }
@@ -619,6 +620,36 @@ public class VideoGroup {
         }
 
         video.isCollaboration = true;
+
+        return false;
+    }
+
+    /**
+     * In the account's Watch later, only in the sections picked in the Watch later setting.
+     * Also marks the video when the setting marks instead of hiding. The list is read before the group is created (see HiddenVideoResolver).
+     */
+    private boolean isHiddenWatchLater(Video video) {
+        // No context before the app is initialized (GlobalPreferences)
+        if (video.isChapter || video.videoId == null || getSection() == null || GlobalPreferences.context() == null) {
+            return false;
+        }
+
+        if (WatchLaterManager.isWatchLaterPlaylist(this, video)) {
+            return false;
+        }
+
+        int sectionId = getSection().getId();
+        WatchLaterManager manager = WatchLaterManager.instance(GlobalPreferences.context());
+
+        if (!manager.isEnabled(sectionId) || !manager.contains(video.videoId)) {
+            return false;
+        }
+
+        if (manager.isHidden(sectionId)) {
+            return true;
+        }
+
+        video.isInWatchLater = true;
 
         return false;
     }

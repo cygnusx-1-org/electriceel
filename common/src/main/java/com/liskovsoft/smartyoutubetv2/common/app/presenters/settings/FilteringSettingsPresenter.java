@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The Filtering card of the Content Filtering settings: Hide videos older than, Keyword filtering and Collaborations
+ * The Filtering card of the Content Filtering settings: Hide videos older than, Keyword filtering, Collaborations and Watch later
  */
 public class FilteringSettingsPresenter extends BasePresenter<Void> {
     private FilteringSettingsPresenter(Context context) {
@@ -29,7 +29,8 @@ public class FilteringSettingsPresenter extends BasePresenter<Void> {
         List<OptionItem> options = new ArrayList<>();
         options.add(createMenuItem(R.string.hide_old_videos, () -> OldVideosSettingsPresenter.instance(getContext()).show()));
         options.add(createMenuItem(R.string.keyword_filtering, () -> KeywordFilterSettingsPresenter.instance(getContext()).show()));
-        options.add(createMenuItem(R.string.collaborations, R.string.collaborations_desc, () -> CollaborationsSettingsPresenter.instance(getContext()).show()));
+        options.add(createMenuItem(R.string.collaborations, R.string.collaborations_desc, () -> SectionFilterSettingsPresenter.collaborations(getContext()).show()));
+        options.add(createMenuItem(R.string.watch_later, R.string.watch_later_desc, () -> SectionFilterSettingsPresenter.watchLater(getContext()).show()));
 
         String title = getContext().getString(R.string.content_filtering_filtering);
         presenter.appendCheckedCategory(title, options);

@@ -44,6 +44,7 @@ import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager.AccountCha
 import com.liskovsoft.smartyoutubetv2.common.prefs.AccountsData;
 import com.liskovsoft.smartyoutubetv2.common.misc.AiSListManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.WatchLaterManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
@@ -95,6 +96,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
 
         mBrowseProcessor = new BrowseProcessorManager(getContext(), this::syncItem);
         mActions = new ArrayList<>();
+        WatchLaterManager.instance(context).setOnEdited(this::onWatchLaterEdited);
 
         initSectionMappings();
         updateChannelSorting();
@@ -482,6 +484,31 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
                 }
             });
         }
+    }
+
+    /**
+     * Shows an edit of Watch later made in the app on the card at once, in the sections the Watch later setting applies to:
+     * marks it or takes the mark off, or removes it where they're hidden
+     */
+    private void onWatchLaterEdited(Video video, boolean isAdded) {
+        VideoGroup group = video.getGroup();
+        BrowseSection section = group != null ? group.getSection() : null;
+        WatchLaterManager manager = WatchLaterManager.instance(getContext());
+
+        if (section == null || !manager.isEnabled(section.getId()) || WatchLaterManager.isWatchLaterPlaylist(group, video)) {
+            return;
+        }
+
+        if (manager.isHidden(section.getId())) {
+            if (isAdded) {
+                removeItem(video);
+            }
+
+            return;
+        }
+
+        video.isInWatchLater = isAdded;
+        syncItem(video);
     }
 
     @Override

@@ -18,8 +18,8 @@ import java.util.Set;
 import io.reactivex.Observable;
 
 /**
- * Holds each emission until what hides its videos after a lookup is known: the channel handles of AiSList and
- * the collaborations, in the sections they apply to. The groups are then built without those videos (see VideoGroup),
+ * Holds each emission until what hides its videos after a lookup is known: the channel handles of AiSList,
+ * the collaborations and Watch later, in the sections they apply to. The groups are then built without those videos (see VideoGroup),
  * so a hidden video never appears first and vanishes after. The categories of Home are held the same way (see VideoCategoryManager).<br/>
  * A failed lookup doesn't hold the group back: its videos are shown.
  */
@@ -56,8 +56,10 @@ public class HiddenVideoResolver {
 
         AiSListManager aiSListManager = AiSListManager.instance(context);
         CollaborationManager collaborationManager = CollaborationManager.instance(context);
-        // Collaborations apply to the sidebar sections only (see VideoGroup)
+        WatchLaterManager watchLaterManager = WatchLaterManager.instance(context);
+        // Collaborations and Watch later apply to the sidebar sections only (see VideoGroup)
         boolean isCollaborationEnabled = section != null && collaborationManager.isEnabled(section.getId());
+        boolean isWatchLaterEnabled = section != null && watchLaterManager.isEnabled(section.getId());
         Map<String, String> videoIdByKey = new LinkedHashMap<>();
         Set<String> authors = new LinkedHashSet<>();
         boolean isAiSListUsed = false;
@@ -102,7 +104,7 @@ public class HiddenVideoResolver {
             }
         }
 
-        if (!isAiSListUsed && authors.isEmpty()) {
+        if (!isAiSListUsed && authors.isEmpty() && !isWatchLaterEnabled) {
             return Observable.just(true);
         }
 
@@ -111,7 +113,8 @@ public class HiddenVideoResolver {
                 isAiSListUsed ? aiSListManager.awaitLists() : Observable.just(true),
                 aiSListManager.resolveHandles(videoIdByKey),
                 collaborationManager.resolve(authors),
-                (lists, handles, collaborations) -> true)
+                isWatchLaterEnabled ? watchLaterManager.resolve() : Observable.just(true),
+                (lists, handles, collaborations, watchLater) -> true)
                 // Show the videos rather than nothing
                 .onErrorReturn(error -> {
                     Log.e(TAG, "Can't resolve the hidden videos: %s", error.getMessage());

@@ -40,6 +40,7 @@ import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem.Video
 import com.liskovsoft.smartyoutubetv2.common.misc.AppDataSourceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MotherActivity;
+import com.liskovsoft.smartyoutubetv2.common.misc.WatchLaterManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.SponsorBlockData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
@@ -1098,6 +1099,11 @@ public class AppDialogUtil {
     }
 
     public static void showAddToPlaylistDialog(Context context, Video video, VideoMenuCallback callback, List<PlaylistInfo> playlistInfos, Runnable onFinish) {
+        // The player might have no video yet (see PlayerUIController)
+        if (video == null) {
+            return;
+        }
+
         if (playlistInfos == null) {
             MessageHelpers.showMessage(context, R.string.msg_signed_users_only);
             return;
@@ -1112,6 +1118,8 @@ public class AppDialogUtil {
     private static void appendPlaylistDialogContent(
             Context context, Video video, VideoMenuCallback callback, AppDialogPresenter dialogPresenter, List<PlaylistInfo> playlistInfos) {
         List<OptionItem> options = new ArrayList<>();
+        // YouTube never marks Watch later as selected
+        boolean isInWatchLater = WatchLaterManager.instance(context).isInWatchLater(video.videoId);
 
         for (PlaylistInfo playlistInfo : playlistInfos) {
             options.add(UiOptionItem.from(
@@ -1124,7 +1132,8 @@ public class AppDialogUtil {
                         GeneralData.instance(context).setLastPlaylistId(playlistInfo.getPlaylistId());
                         GeneralData.instance(context).setLastPlaylistTitle(playlistInfo.getTitle());
                     },
-                    playlistInfo.isSelected() || Helpers.equals(playlistInfo.getPlaylistId(), video.playlistId)));
+                    playlistInfo.isSelected() || Helpers.equals(playlistInfo.getPlaylistId(), video.playlistId)
+                            || (isInWatchLater && WatchLaterManager.WATCH_LATER_PLAYLIST_ID.equals(playlistInfo.getPlaylistId()))));
         }
 
         dialogPresenter.appendCheckedCategory(context.getString(R.string.dialog_add_to_playlist), options);
@@ -1150,7 +1159,8 @@ public class AppDialogUtil {
         }
 
         // Handle error: Maximum playlist size exceeded (> 5000 items)
-        RxHelper.execute(editObserve, error -> MessageHelpers.showLongMessage(context, error.getMessage()));
+        RxHelper.execute(editObserve, error -> MessageHelpers.showLongMessage(context, error.getMessage()),
+                () -> WatchLaterManager.onPlaylistEdited(context, playlistId, video, add));
     }
 
     public static void showPlaylistOrderDialog(Context context, Video video, Runnable onClose) {
