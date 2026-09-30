@@ -4,7 +4,7 @@
 
 ![The app screenshot](./images/browse_home.png)
 
-Electric Eel is a free and open-source media client for Android TVs and TV boxes. It allows you to browse and play content from various public sources in a TV-optimized interface.
+Electric Eel is a fork of [SmartTube](https://github.com/yuliskov/SmartTube), and a free and open-source media client for Android TVs and TV boxes. It allows you to browse and play content from various public sources in a TV-optimized interface.
 
 ### Features
 - Filtering of channels via AiSList's lists
