@@ -1,0 +1,21 @@
+{
+  "package": {
+    "downloadUrlList_arm64-v8a": [
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.2/ElectricEel_stable_32.56.2_arm64-v8a.apk"
+    ],
+    "downloadUrlList_armeabi-v7a": [
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.2/ElectricEel_stable_32.56.2_armeabi-v7a.apk"
+    ],
+    "downloadUrlList": [
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.2/ElectricEel_stable_32.56.2_armeabi-v7a.apk"
+    ]
+  },
+  "32.56.2": {
+    "versionCode": 2446,
+    "changelog": [
+      "Added a mark and hide option for Watch later",
+      "Added a Collaborations filter that hides or marks videos from \"X and Y\" channel pairs",
+      "Removed the automatic Google Cloud sign-in that fetched a Data API key"
+    ]
+  }
+}
