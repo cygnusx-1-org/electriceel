@@ -7,5 +7,12 @@ public interface VideoGroupPresenter {
     void onVideoItemClicked(Video item);
     void onVideoItemLongClicked(Video item);
     void onScrollEnd(Video item);
+    /**
+     * Moving toward the end of a row. Its next page is loaded before it's needed, without the loading bar where
+     * overridden, like at the end otherwise.
+     */
+    default void onScrollNearEnd(Video item) {
+        onScrollEnd(item);
+    }
     boolean hasPendingActions();
 }

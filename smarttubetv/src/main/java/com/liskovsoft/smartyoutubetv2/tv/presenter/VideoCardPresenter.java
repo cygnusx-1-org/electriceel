@@ -134,7 +134,7 @@ public class VideoCardPresenter extends LongClickPresenter {
         Context context = cardView.getContext();
 
         cardView.setTitleText(video.getTitle());
-        cardView.setContentText(video.aiMarkList != -1 ? addAiMark(context, video.getSecondTitle(), video.aiMarkList, cardView.isSelected()) : video.getSecondTitle());
+        cardView.setContentText(getContentText(context, video, cardView.isSelected()));
         // Count progress that very close to zero. E.g. when user closed video immediately.
         cardView.setProgress(video.percentWatched > 0 && video.percentWatched < 1 ? 1 : Math.round(video.percentWatched));
         cardView.setBadgeText(
@@ -193,6 +193,30 @@ public class VideoCardPresenter extends LongClickPresenter {
 
         // Cleanup Glide resources. https://chatgpt.com/share/682120c5-e428-8010-b848-371b2dec0cd5
         Glide.with(cardView.getContext().getApplicationContext()).clear(cardView.getMainImageView());
+    }
+
+    /**
+     * The second title, after the "AI" and "Collab" markers the video has
+     */
+    private static CharSequence getContentText(Context context, Video video, boolean selected) {
+        CharSequence text = video.getSecondTitle();
+
+        if (video.isCollaboration) {
+            text = addCollaborationMark(context, text);
+        }
+
+        if (video.aiMarkList != -1) {
+            text = addAiMark(context, text, video.aiMarkList, selected);
+        }
+
+        return text;
+    }
+
+    private static CharSequence addCollaborationMark(Context context, CharSequence secondTitle) {
+        SpannableString mark = new SpannableString(context.getString(R.string.collaboration_mark));
+        mark.setSpan(new StyleSpan(Typeface.BOLD), 0, mark.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        return secondTitle != null ? TextUtils.concat(mark, " " + Video.TERTIARY_TEXT_DELIM + " ", secondTitle) : mark;
     }
 
     private static CharSequence addAiMark(Context context, CharSequence secondTitle, int list, boolean selected) {

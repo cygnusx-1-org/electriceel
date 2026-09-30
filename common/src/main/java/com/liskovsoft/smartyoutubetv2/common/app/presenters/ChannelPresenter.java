@@ -18,6 +18,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.VideoMe
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.interfaces.VideoGroupPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.ChannelView;
 import com.liskovsoft.smartyoutubetv2.common.misc.BrowseProcessorManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.HiddenVideoResolver;
 import com.liskovsoft.sharedutils.rx.RxHelper;
 import com.liskovsoft.smartyoutubetv2.common.utils.LoadingManager;
 import io.reactivex.Observable;
@@ -35,6 +36,8 @@ public class ChannelPresenter extends BasePresenter<ChannelView> implements Vide
     private final List<List<MediaGroup>> mPendingGroups = new ArrayList<>();
     private Disposable mUpdateAction;
     private Disposable mScrollAction;
+    // Loads a row's next page before it's needed. Apart, so it never holds up the one the user waits for.
+    private Disposable mPreloadAction;
     private int mSortIdx;
     private Video mChannel;
 
@@ -48,7 +51,7 @@ public class ChannelPresenter extends BasePresenter<ChannelView> implements Vide
 
     public ChannelPresenter(Context context) {
         super(context);
-        mBrowseProcessor = new BrowseProcessorManager(getContext(), this::syncItem, this::removeItem);
+        mBrowseProcessor = new BrowseProcessorManager(getContext(), this::syncItem);
     }
 
     public static ChannelPresenter instance(Context context) {
@@ -129,6 +132,16 @@ public class ChannelPresenter extends BasePresenter<ChannelView> implements Vide
     }
 
     @Override
+    public void onScrollNearEnd(Video item) {
+        if (item == null || item.getGroup() == null) {
+            Log.e(TAG, "Can't scroll. Video or its group is null.");
+            return;
+        }
+
+        continueGroup(item.getGroup(), false);
+    }
+
+    @Override
     public boolean hasPendingActions() {
         return RxHelper.isAnyActionRunning(mScrollAction, mUpdateAction);
     }
@@ -182,7 +195,7 @@ public class ChannelPresenter extends BasePresenter<ChannelView> implements Vide
     }
 
     private void disposeActions() {
-        RxHelper.disposeActions(mUpdateAction, mScrollAction);
+        RxHelper.disposeActions(mUpdateAction, mScrollAction, mPreloadAction);
         getServiceManager().disposeActions();
         mSortIdx = 0;
         mBrowseProcessor.dispose();
@@ -195,7 +208,7 @@ public class ChannelPresenter extends BasePresenter<ChannelView> implements Vide
 
         getView().showProgressBar(true);
 
-        mUpdateAction = group
+        mUpdateAction = HiddenVideoResolver.resolveGroups(getContext(), group, null)
                 .subscribe(
                         this::updateRows,
                         error -> {
@@ -235,7 +248,12 @@ public class ChannelPresenter extends BasePresenter<ChannelView> implements Vide
     }
 
     private void continueGroup(VideoGroup group) {
-        boolean scrollInProgress = mScrollAction != null && !mScrollAction.isDisposed();
+        continueGroup(group, true);
+    }
+
+    private void continueGroup(VideoGroup group, boolean showLoading) {
+        Disposable runningAction = showLoading ? mScrollAction : mPreloadAction;
+        boolean scrollInProgress = runningAction != null && !runningAction.isDisposed();
 
         if (scrollInProgress) {
             return;
@@ -253,11 +271,13 @@ public class ChannelPresenter extends BasePresenter<ChannelView> implements Vide
 
         Log.d(TAG, "continueGroup: start continue group: " + group.getTitle());
 
-        getView().showProgressBar(true);
+        if (showLoading) {
+            getView().showProgressBar(true);
+        }
 
         MediaGroup mediaGroup = group.getMediaGroup();
 
-        mScrollAction = getContentService().continueGroupObserve(mediaGroup)
+        Disposable action = HiddenVideoResolver.resolveGroup(getContext(), getContentService().continueGroupObserve(mediaGroup), group.getSection())
                 .subscribe(
                         continueMediaGroup -> {
                             VideoGroup newGroup = VideoGroup.from(group, continueMediaGroup);
@@ -266,12 +286,22 @@ public class ChannelPresenter extends BasePresenter<ChannelView> implements Vide
                         },
                         error -> {
                             Log.e(TAG, "continueGroup error: %s", error.getMessage());
-                            if (getView() != null) {
+                            if (showLoading && getView() != null) {
                                 getView().showProgressBar(false);
                             }
                         },
-                        () -> getView().showProgressBar(false)
+                        () -> {
+                            if (showLoading && getView() != null) {
+                                getView().showProgressBar(false);
+                            }
+                        }
                 );
+
+        if (showLoading) {
+            mScrollAction = action;
+        } else {
+            mPreloadAction = action;
+        }
     }
 
     /**

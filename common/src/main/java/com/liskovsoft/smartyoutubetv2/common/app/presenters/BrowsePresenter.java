@@ -38,6 +38,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.interfaces.VideoGrou
 import com.liskovsoft.smartyoutubetv2.common.app.views.BrowseView;
 import com.liskovsoft.smartyoutubetv2.common.misc.AppDataSourceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.BrowseProcessorManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.HiddenVideoResolver;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager.AccountChangeListener;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AccountsData;
@@ -92,7 +93,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         mSectionsMapping = new HashMap<>();
         MediaServiceManager.instance().addAccountListener(this);
 
-        mBrowseProcessor = new BrowseProcessorManager(getContext(), this::syncItem, this::removeItem);
+        mBrowseProcessor = new BrowseProcessorManager(getContext(), this::syncItem);
         mActions = new ArrayList<>();
 
         initSectionMappings();
@@ -496,6 +497,16 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
     }
 
     @Override
+    public void onScrollNearEnd(Video item) {
+        if (item == null) {
+            Log.e(TAG, "Can't scroll. Video is null.");
+            return;
+        }
+
+        continueGroup(item.getGroup(), false);
+    }
+
+    @Override
     public void onSectionFocused(int sectionId) {
         saveSelectedItems(); // save previous state
         mCurrentSection = findSectionById(sectionId);
@@ -736,7 +747,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
 
         AtomicInteger groupIndex = new AtomicInteger(-1);
 
-        Disposable updateAction = VideoCategoryManager.instance(getContext()).resolveGroups(groups)
+        Disposable updateAction = HiddenVideoResolver.resolveGroups(getContext(), VideoCategoryManager.instance(getContext()).resolveGroups(groups), section)
                 .subscribe(
                         mediaGroups -> {
                             getView().showProgressBar(false);
@@ -800,7 +811,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
             return;
         }
 
-        Disposable updateAction = VideoCategoryManager.instance(getContext()).resolveGroup(group)
+        Disposable updateAction = HiddenVideoResolver.resolveGroup(getContext(), VideoCategoryManager.instance(getContext()).resolveGroup(group), section)
                 .subscribe(
                         mediaGroup -> {
                             getView().showProgressBar(false);
@@ -863,7 +874,8 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         //    continuation = getContentService().continueGroupObserve(mediaGroup);
         //}
 
-        continuation = VideoCategoryManager.instance(getContext()).resolveGroup(getContentService().continueGroupObserve(mediaGroup));
+        continuation = HiddenVideoResolver.resolveGroup(getContext(),
+                VideoCategoryManager.instance(getContext()).resolveGroup(getContentService().continueGroupObserve(mediaGroup)), group.getSection());
 
         Disposable continueAction = continuation
                 .subscribe(

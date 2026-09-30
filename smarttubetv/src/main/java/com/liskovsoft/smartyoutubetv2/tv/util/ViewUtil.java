@@ -47,6 +47,10 @@ public class ViewUtil {
      */
     public static final int GRID_SCROLL_CONTINUE_NUM = 10;
     public static final int ROW_SCROLL_CONTINUE_NUM = 4;
+    /**
+     * Moving right, the row's next page is loaded this many cards before its end (see {@link RowContinuation})
+     */
+    public static final int ROW_PRELOAD_NUM = 20;
 
     /**
      * Checks whether text is truncated (e.g. has ... at the end)

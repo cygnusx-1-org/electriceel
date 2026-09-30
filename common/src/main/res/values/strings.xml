@@ -404,6 +404,14 @@
     <string name="enable_hide_shorts_options">Enable hide shorts options</string>
     <string name="quick_toggles">Quick toggles</string>
     <string name="keyword_filtering">Keyword filtering</string>
+    <string name="collaborations">Collaborations</string>
+    <string name="collaborations_show">Show</string>
+    <string name="collaborations_mark">Mark</string>
+    <string name="collaborations_mark_desc">Collaborations stay in the feeds with a \"Collab\" label</string>
+    <string name="collaborations_hide">Hide</string>
+    <string name="collaborations_desc">A video whose channel is shown as \"X and Y\", where X and Y are both channel names. Each name is looked up once with a signed-out channel search. English only.</string>
+    <string name="collaborations_sections">Sections</string>
+    <string name="collaboration_mark">Collab</string>
     <string name="keyword_filter_keywords">Keywords</string>
     <string name="keyword_filter_common">Common keywords</string>
     <string name="keyword_filter_feed_words">Words from a feed</string>

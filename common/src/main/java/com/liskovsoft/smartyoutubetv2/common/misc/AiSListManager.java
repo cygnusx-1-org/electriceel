@@ -16,7 +16,6 @@ import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.service.YouTubeServiceManager;
 
 import java.io.File;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -26,7 +25,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.subjects.BehaviorSubject;
 
 /**
  * Hides videos from channels listed by AiSList (https://github.com/Override92/AiSList).<br/>
@@ -34,7 +35,8 @@ import io.reactivex.disposables.Disposable;
  * so the settings show them ready.<br/>
  * Hidden channels are collected for the Blocked AI Channels section (this session only).<br/>
  * Most TV Home cards carry only the channel name. The handle of such a channel is looked up once
- * (one watch-next request for one of its videos) and cached on disk by the channel name.
+ * (one watch-next request for one of its videos), before the card is shown (see HiddenVideoResolver),
+ * and cached on disk by the channel name.
  */
 public class AiSListManager implements OnDataChange {
     private static final String TAG = AiSListManager.class.getSimpleName();
@@ -50,21 +52,23 @@ public class AiSListManager implements OnDataChange {
     private static final String HANDLES_FILE = "aislist/handles.tsv";
     private static final String NO_HANDLE = ""; // the lookup failed, don't repeat it this session
     private static final long SAVE_DELAY_MS = 10_000;
+    private static final int MAX_PARALLEL_LOOKUPS = 4;
     @SuppressLint("StaticFieldLeak")
     private static AiSListManager sInstance;
     private final AiSListFilterData mFilterData;
     private final MediaItemService mItemService;
+    private HandleLookup mHandleLookup;
     private final File mHandlesFile;
     private final Map<String, String> mHandleByAuthor = new ConcurrentHashMap<>();
-    private final Map<String, List<OnHandle>> mPendingLookups = new LinkedHashMap<>();
-    private final ArrayDeque<String[]> mLookupQueue = new ArrayDeque<>(); // author, videoId
+    private final Map<String, Observable<String>> mRunningLookups = new ConcurrentHashMap<>(); // see resolveHandles
     private final Runnable mSaveHandles = () -> RxHelper.runAsync(this::saveHandles);
-    private Disposable mLookupAction;
     private volatile Set<String> mBlocklist = Collections.emptySet();
     private volatile Set<String> mWarnlist = Collections.emptySet();
     private long mUpdatedTimeMs;
     private long mLastCheckMs;
     private Disposable mLoadAction;
+    // The first download ended, well or not: the lists the cards are checked against are known
+    private final BehaviorSubject<Boolean> mFirstLoadEnded = BehaviorSubject.create();
     private boolean mIsBlocklistMarked;
     private boolean mIsWarnlistMarked;
     // Access order, so the most recently hidden channel is the last one
@@ -81,13 +85,17 @@ public class AiSListManager implements OnDataChange {
         mIsBlocklistMarked = isMarkedEverywhere(AiSListFilterData.LIST_BLOCKLIST);
         mIsWarnlistMarked = isMarkedEverywhere(AiSListFilterData.LIST_WARNLIST);
         mItemService = YouTubeServiceManager.instance().getMediaItemService();
+        mHandleLookup = mItemService::getChannelHandleObserve;
         mHandlesFile = new File(FileHelpers.getFilesDir(context), HANDLES_FILE);
         RxHelper.runAsync(this::restoreHandles);
         loadIfNeeded();
     }
 
-    public interface OnHandle {
-        void onHandle(String handle);
+    interface HandleLookup {
+        /**
+         * @return the owner's handle of the video, an error when it isn't found
+         */
+        Observable<String> getChannelHandle(String videoId);
     }
 
     public static AiSListManager instance(Context context) {
@@ -244,71 +252,48 @@ public class AiSListManager implements OnDataChange {
     }
 
     /**
-     * Looks up the handle of the channel (one request per channel name, one request at a time).<br/>
-     * The callback runs on the main thread and only when the handle is found.
+     * Looks up the handles of the channel names not known yet, a few at a time, before the cards are shown
+     * (see HiddenVideoResolver). Completes once every lookup is done, the failed ones too.
+     * @param videoIdByKey the key of the handle cache (see {@link #getLookupKey}) -> a video of the channel
      */
-    public void lookupHandle(String author, String videoId, OnHandle callback) {
-        if (author == null || videoId == null || mHandleByAuthor.containsKey(author)) {
-            return;
-        }
+    public Observable<Boolean> resolveHandles(Map<String, String> videoIdByKey) {
+        List<Observable<String>> lookups = new ArrayList<>();
 
-        List<OnHandle> callbacks = mPendingLookups.get(author);
-
-        if (callbacks != null) {
-            callbacks.add(callback);
-            return;
-        }
-
-        callbacks = new ArrayList<>();
-        callbacks.add(callback);
-        mPendingLookups.put(author, callbacks);
-        mLookupQueue.add(new String[] {author, videoId});
-
-        lookupNext();
-    }
-
-    /**
-     * Drops the callbacks (e.g. the view is gone). The lookups themselves still fill the cache.
-     */
-    public void removeCallback(OnHandle callback) {
-        for (List<OnHandle> callbacks : mPendingLookups.values()) {
-            callbacks.remove(callback);
-        }
-    }
-
-    private void lookupNext() {
-        if (RxHelper.isAnyActionRunning(mLookupAction) || mLookupQueue.isEmpty()) {
-            return;
-        }
-
-        String[] next = mLookupQueue.poll();
-        String author = next[0];
-
-        mLookupAction = RxHelper.execute(mItemService.getChannelHandleObserve(next[1]),
-                handle -> onLookupDone(author, handle),
-                error -> {
-                    Log.e(TAG, "Can't find the handle of %s: %s", author, error.getMessage());
-                    onLookupDone(author, null);
-                },
-                null);
-    }
-
-    private void onLookupDone(String author, String handle) {
-        mHandleByAuthor.put(author, handle != null ? handle : NO_HANDLE);
-        List<OnHandle> callbacks = mPendingLookups.remove(author);
-
-        if (handle != null) {
-            Utils.postDelayed(mSaveHandles, SAVE_DELAY_MS);
-
-            if (callbacks != null) {
-                for (OnHandle callback : callbacks) {
-                    callback.onHandle(handle);
-                }
+        for (Map.Entry<String, String> entry : videoIdByKey.entrySet()) {
+            if (!mHandleByAuthor.containsKey(entry.getKey())) {
+                lookups.add(getHandleLookup(entry.getKey(), entry.getValue()));
             }
         }
 
-        mLookupAction = null;
-        lookupNext();
+        if (lookups.isEmpty()) {
+            return Observable.just(true);
+        }
+
+        return Observable.fromIterable(lookups)
+                .flatMap(lookup -> lookup, MAX_PARALLEL_LOOKUPS)
+                .toList()
+                .map(handles -> true)
+                .toObservable();
+    }
+
+    /**
+     * One lookup per channel name at a time, shared by the groups that need it
+     */
+    private Observable<String> getHandleLookup(String author, String videoId) {
+        return mRunningLookups.computeIfAbsent(author, key -> mHandleLookup.getChannelHandle(videoId)
+                .onErrorReturn(error -> {
+                    Log.e(TAG, "Can't find the handle of %s: %s", author, error.getMessage());
+                    return NO_HANDLE;
+                })
+                .doOnNext(handle -> {
+                    mHandleByAuthor.put(author, handle);
+
+                    if (!NO_HANDLE.equals(handle)) {
+                        Utils.postDelayed(mSaveHandles, SAVE_DELAY_MS);
+                    }
+                })
+                .doFinally(() -> mRunningLookups.remove(author))
+                .cache());
     }
 
     private void restoreHandles() {
@@ -467,8 +452,31 @@ public class AiSListManager implements OnDataChange {
 
         mLastCheckMs = now;
 
-        mLoadAction = RxHelper.execute(mItemService.getAiSListDataObserve(), this::applyData,
-                error -> Log.e(TAG, "Can't load AiSList: %s", error.getMessage()));
+        mLoadAction = RxHelper.execute(mItemService.getAiSListDataObserve(),
+                data -> {
+                    applyData(data);
+                    mFirstLoadEnded.onNext(true);
+                },
+                error -> {
+                    Log.e(TAG, "Can't load AiSList: %s", error.getMessage());
+                    mFirstLoadEnded.onNext(true);
+                });
+    }
+
+    /**
+     * Completes once the first download ended (see HiddenVideoResolver), right away after that
+     */
+    public Observable<Boolean> awaitLists() {
+        return mFirstLoadEnded.take(1);
+    }
+
+    /**
+     * Looks up with the given one from now on and forgets every handle found
+     */
+    void setHandleLookupForTesting(HandleLookup lookup) {
+        mHandleLookup = lookup;
+        mHandleByAuthor.clear();
+        mRunningLookups.clear();
     }
 
     /**
@@ -480,6 +488,7 @@ public class AiSListManager implements OnDataChange {
         mWarnlist = warnlist;
         mUpdatedTimeMs = System.currentTimeMillis();
         mLastCheckMs = mUpdatedTimeMs;
+        mFirstLoadEnded.onNext(true);
     }
 
     private void applyData(AiSListData data) {

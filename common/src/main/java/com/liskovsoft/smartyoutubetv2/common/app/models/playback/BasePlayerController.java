@@ -135,6 +135,11 @@ public abstract class BasePlayerController implements PlayerEventListener {
     }
 
     @Override
+    public void onScrollNearEnd(Video item) {
+        // NOP
+    }
+
+    @Override
     public boolean onPreviousClicked() {
         // NOP
         return false;

@@ -27,6 +27,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.PlaybackPresenter;
 import com.liskovsoft.smartyoutubetv2.common.misc.BrowseProcessorManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.HiddenVideoResolver;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
@@ -112,6 +113,16 @@ public class SuggestionsController extends BasePlayerController {
     }
 
     @Override
+    public void onScrollNearEnd(Video item) {
+        if (item == null) {
+            Log.e(TAG, "Can't scroll. Video is null.");
+            return;
+        }
+
+        continueGroup(item.getGroup(), false);
+    }
+
+    @Override
     public void onSuggestionItemClicked(Video item) {
         markAsQueueIfNeeded(item);
     }
@@ -186,7 +197,7 @@ public class SuggestionsController extends BasePlayerController {
 
         MediaGroup mediaGroup = group.getMediaGroup();
 
-        Disposable continueAction = mContentService.continueGroupObserve(mediaGroup)
+        Disposable continueAction = HiddenVideoResolver.resolveGroup(getContext(), mContentService.continueGroupObserve(mediaGroup), group.getSection())
                 .subscribe(
                         continueMediaGroup -> {
                             getPlayer().showProgressBar(false);
@@ -382,19 +393,33 @@ public class SuggestionsController extends BasePlayerController {
             return;
         }
 
-        int groupIndex = -1;
         int suggestRows = -1;
 
         if (GeneralData.instance(getContext()).isChildModeEnabled() || getPlayerTweaksData().isSuggestionsDisabled()) {
             suggestRows = video.hasPlaylist() ? 1 : 0;
         }
 
+        // Only the rows shown
+        List<MediaGroup> shown = suggestRows != -1 && suggestRows < suggestions.size() ? new ArrayList<>(suggestions.subList(0, suggestRows)) : suggestions;
+
+        // Held until the channels AiSList hides are known, so their videos never appear (see HiddenVideoResolver).
+        // A new video disposes it with the rest.
+        mActions.add(HiddenVideoResolver.resolveGroups(getContext(), Observable.just(shown), null)
+                .subscribe(
+                        resolved -> appendSuggestionRows(video, resolved),
+                        error -> Log.e(TAG, "appendSuggestions error: %s", error.getMessage())
+                ));
+    }
+
+    private void appendSuggestionRows(Video video, List<MediaGroup> suggestions) {
+        if (getPlayer() == null) {
+            return;
+        }
+
+        int groupIndex = -1;
+
         for (MediaGroup group : suggestions) {
             groupIndex++;
-
-            if (groupIndex == suggestRows) {
-                break;
-            }
 
             // Remove duplicated playlist
             if (groupIndex == 0 && video.isSectionPlaylistEnabled(getContext()) && video.belongsToSamePlaylistGroup()) {

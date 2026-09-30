@@ -27,7 +27,7 @@ import com.liskovsoft.smartyoutubetv2.tv.presenter.VideoCardPresenter;
 import com.liskovsoft.smartyoutubetv2.tv.presenter.base.OnItemLongPressedListener;
 import com.liskovsoft.smartyoutubetv2.tv.ui.common.LeanbackActivity;
 import com.liskovsoft.smartyoutubetv2.tv.ui.search.tags.vineyard.SearchTagsFragmentBase;
-import com.liskovsoft.smartyoutubetv2.tv.util.ViewUtil;
+import com.liskovsoft.smartyoutubetv2.tv.util.RowContinuation;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -37,6 +37,7 @@ public class SearchTagsFragment extends SearchTagsFragmentBase {
     private static final String TAG = SearchTagsFragment.class.getSimpleName();
     private SearchPresenter mSearchPresenter;
     private Map<Integer, VideoGroupObjectAdapter> mSearchGroupAdapters;
+    private final RowContinuation mRowContinuation = new RowContinuation();
     private String mSearchQuery;
     private String mNewQuery;
     private VideoCardPresenter mCardPresenter;
@@ -272,11 +273,13 @@ public class SearchTagsFragment extends SearchTagsFragmentBase {
             return;
         }
 
-        int size = resultsAdapter.size();
-        int index = resultsAdapter.indexOf(item);
+        Video last = (Video) resultsAdapter.get(resultsAdapter.size() - 1);
+        int continuation = mRowContinuation.onItemSelected(resultsAdapter, resultsAdapter.indexOf(item));
 
-        if (index > (size - ViewUtil.ROW_SCROLL_CONTINUE_NUM)) {
-            mSearchPresenter.onScrollEnd((Video) resultsAdapter.get(size - 1));
+        if (continuation == RowContinuation.END) {
+            mSearchPresenter.onScrollEnd(last);
+        } else if (continuation == RowContinuation.NEAR_END) {
+            mSearchPresenter.onScrollNearEnd(last);
         }
     }
 

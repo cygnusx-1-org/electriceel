@@ -20,6 +20,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.VideoMe
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.interfaces.VideoGroupPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.SearchView;
 import com.liskovsoft.smartyoutubetv2.common.misc.BrowseProcessorManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.HiddenVideoResolver;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AccountsData;
 import com.liskovsoft.smartyoutubetv2.common.utils.AppDialogUtil;
@@ -34,6 +35,8 @@ public class SearchPresenter extends BasePresenter<SearchView> implements VideoG
     private static SearchPresenter sInstance;
     private final BrowseProcessorManager mBrowseProcessor;
     private Disposable mScrollAction;
+    // Loads a row's next page before it's needed. Apart, so it never holds up the one the user waits for.
+    private Disposable mPreloadAction;
     private Disposable mLoadAction;
     private String mSearchText;
     private boolean mIsVoice;
@@ -47,7 +50,7 @@ public class SearchPresenter extends BasePresenter<SearchView> implements VideoG
 
     private SearchPresenter(Context context) {
         super(context);
-        mBrowseProcessor = new BrowseProcessorManager(getContext(), this::syncItem, this::removeItem);
+        mBrowseProcessor = new BrowseProcessorManager(getContext(), this::syncItem);
     }
 
     public static SearchPresenter instance(Context context) {
@@ -178,8 +181,8 @@ public class SearchPresenter extends BasePresenter<SearchView> implements VideoG
 
         getView().clearSearch();
 
-        mLoadAction = contentService.getSearchObserve(searchText,
-                mUploadDateOptions | mDurationOptions | mTypeOptions | mFeatureOptions | mSortingOptions)
+        mLoadAction = HiddenVideoResolver.resolveGroups(getContext(), contentService.getSearchObserve(searchText,
+                mUploadDateOptions | mDurationOptions | mTypeOptions | mFeatureOptions | mSortingOptions), null)
                 .subscribe(
                         mediaGroups -> {
                             Log.d(TAG, "Receiving results for '%s'", searchText);
@@ -205,7 +208,11 @@ public class SearchPresenter extends BasePresenter<SearchView> implements VideoG
     }
 
     private void continueGroup(VideoGroup group) {
-        if (RxHelper.isAnyActionRunning(mScrollAction)) {
+        continueGroup(group, true);
+    }
+
+    private void continueGroup(VideoGroup group, boolean showLoading) {
+        if (RxHelper.isAnyActionRunning(showLoading ? mScrollAction : mPreloadAction)) {
             return;
         }
 
@@ -215,13 +222,15 @@ public class SearchPresenter extends BasePresenter<SearchView> implements VideoG
 
         Log.d(TAG, "continueGroup: start continue group: " + group.getTitle());
 
-        getView().showProgressBar(true);
+        if (showLoading) {
+            getView().showProgressBar(true);
+        }
 
         MediaGroup mediaGroup = group.getMediaGroup();
 
         ContentService contentService = getContentService();
 
-        mScrollAction = contentService.continueGroupObserve(mediaGroup)
+        Disposable action = HiddenVideoResolver.resolveGroup(getContext(), contentService.continueGroupObserve(mediaGroup), group.getSection())
                 .subscribe(
                         continueMediaGroup -> {
                             VideoGroup newGroup = VideoGroup.from(group, continueMediaGroup);
@@ -230,16 +239,22 @@ public class SearchPresenter extends BasePresenter<SearchView> implements VideoG
                         },
                         error -> {
                             Log.e(TAG, "continueGroup error: %s", error.getMessage());
-                            if (getView() != null) {
+                            if (showLoading && getView() != null) {
                                 getView().showProgressBar(false);
                             }
                         },
                         () -> {
-                            if (getView() != null) {
+                            if (showLoading && getView() != null) {
                                 getView().showProgressBar(false);
                             }
                         }
                 );
+
+        if (showLoading) {
+            mScrollAction = action;
+        } else {
+            mPreloadAction = action;
+        }
     }
 
     @Override
@@ -259,6 +274,16 @@ public class SearchPresenter extends BasePresenter<SearchView> implements VideoG
         Log.d(TAG, "onScrollEnd: Group title: " + group.getTitle());
 
         continueGroup(group);
+    }
+
+    @Override
+    public void onScrollNearEnd(Video item) {
+        if (item == null || item.getGroup() == null) {
+            Log.e(TAG, "Can't scroll. Video or its group is null.");
+            return;
+        }
+
+        continueGroup(item.getGroup(), false);
     }
 
     public void startVoice() {
@@ -307,7 +332,7 @@ public class SearchPresenter extends BasePresenter<SearchView> implements VideoG
     }
 
     public void disposeActions() {
-        RxHelper.disposeActions(mLoadAction, mScrollAction);
+        RxHelper.disposeActions(mLoadAction, mScrollAction, mPreloadAction);
         if (getView() != null) {
             getView().showProgressBar(false);
         }

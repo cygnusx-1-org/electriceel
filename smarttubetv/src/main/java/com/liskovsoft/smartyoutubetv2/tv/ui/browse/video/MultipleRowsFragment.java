@@ -32,7 +32,7 @@ import com.liskovsoft.smartyoutubetv2.tv.presenter.base.OnItemLongPressedListene
 import com.liskovsoft.smartyoutubetv2.tv.ui.browse.interfaces.VideoSection;
 import com.liskovsoft.smartyoutubetv2.tv.ui.common.LeanbackActivity;
 import com.liskovsoft.smartyoutubetv2.tv.ui.common.UriBackgroundManager;
-import com.liskovsoft.smartyoutubetv2.tv.util.ViewUtil;
+import com.liskovsoft.smartyoutubetv2.tv.util.RowContinuation;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -52,6 +52,7 @@ public abstract class MultipleRowsFragment extends RowsSupportFragment implement
     private ShortsCardPresenter mShortsPresenter;
     private int mSelectedRowIndex = -1;
     private ChannelHeaderCallback mChannelHeaderCallback;
+    private final RowContinuation mRowContinuation = new RowContinuation();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -367,9 +368,12 @@ public abstract class MultipleRowsFragment extends RowsSupportFragment implement
                 int index = adapter.indexOf(item);
 
                 if (index != -1) {
-                    int size = adapter.size();
-                    if (index > (size - ViewUtil.ROW_SCROLL_CONTINUE_NUM)) {
-                        mMainPresenter.onScrollEnd((Video) adapter.get(size - 1));
+                    Video last = (Video) adapter.get(adapter.size() - 1);
+                    int continuation = mRowContinuation.onItemSelected(adapter, index);
+                    if (continuation == RowContinuation.END) {
+                        mMainPresenter.onScrollEnd(last);
+                    } else if (continuation == RowContinuation.NEAR_END) {
+                        mMainPresenter.onScrollNearEnd(last);
                     }
                     break;
                 }

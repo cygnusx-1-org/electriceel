@@ -22,6 +22,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.VideoMe
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.interfaces.VideoGroupPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.ChannelUploadsView;
 import com.liskovsoft.smartyoutubetv2.common.misc.BrowseProcessorManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.HiddenVideoResolver;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager.OnComplete;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager.OnError;
@@ -45,7 +46,7 @@ public class ChannelUploadsPresenter extends BasePresenter<ChannelUploadsView> i
 
     public ChannelUploadsPresenter(Context context) {
         super(context);
-        mBrowseProcessor = new BrowseProcessorManager(getContext(), this::syncItem, this::removeItem);
+        mBrowseProcessor = new BrowseProcessorManager(getContext(), this::syncItem);
     }
 
     public static ChannelUploadsPresenter instance(Context context) {
@@ -213,7 +214,7 @@ public class ChannelUploadsPresenter extends BasePresenter<ChannelUploadsView> i
 
         Observable<MediaGroup> continuation;
 
-        continuation = getContentService().continueGroupObserve(mediaGroup);
+        continuation = HiddenVideoResolver.resolveGroup(getContext(), getContentService().continueGroupObserve(mediaGroup), group.getSection());
 
         mScrollAction = continuation
                 .subscribe(
@@ -248,7 +249,8 @@ public class ChannelUploadsPresenter extends BasePresenter<ChannelUploadsView> i
 
         getView().showProgressBar(true);
 
-        mUpdateAction = group
+        // The uploads group has no sidebar section (see update(MediaGroup))
+        mUpdateAction = HiddenVideoResolver.resolveGroup(getContext(), group, null)
                 .subscribe(
                         this::update,
                         error -> {

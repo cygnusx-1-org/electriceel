@@ -54,6 +54,7 @@ public final class Video {
     public String channelId;
     public String channelHandle;
     public int aiMarkList = -1; // AiSListFilterData.LIST_* the channel is marked for, or -1
+    public boolean isCollaboration; // marked as a collaboration (see CollaborationManager)
     public String videoId;
     public String playlistId;
     public String remotePlaylistId;
@@ -182,6 +183,7 @@ public final class Video {
         video.channelId = item.channelId;
         video.channelHandle = item.channelHandle;
         video.aiMarkList = item.aiMarkList;
+        video.isCollaboration = item.isCollaboration;
         video.bgImageUrl = item.bgImageUrl;
         video.cardImageUrl = item.cardImageUrl;
         video.author = item.author;
@@ -867,7 +869,11 @@ public final class Video {
                 AiSListManager aiSListManager = AiSListManager.instance(GlobalPreferences.context());
                 nextVideo = Helpers.findFirst(mediaItems,
                         item -> {
-                            if (aiSListManager.isHidden(item.getChannelHandle(), AiSListFilterData.SECTION_SUGGESTIONS)) {
+                            // TV cards carry only the channel name: its handle was looked up with the suggestions (see HiddenVideoResolver)
+                            String handle = item.getChannelHandle() != null ?
+                                    item.getChannelHandle() : aiSListManager.getCachedHandle(AiSListManager.getLookupKey(Video.from(item)));
+
+                            if (aiSListManager.isHidden(handle, AiSListFilterData.SECTION_SUGGESTIONS)) {
                                 return false;
                             }
 

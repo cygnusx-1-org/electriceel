@@ -86,6 +86,7 @@ import com.liskovsoft.smartyoutubetv2.tv.ui.playback.previewtimebar.StoryboardSe
 import com.liskovsoft.smartyoutubetv2.tv.ui.widgets.chat.LiveChatView;
 import com.liskovsoft.smartyoutubetv2.tv.ui.widgets.time.DateTimeView;
 import com.liskovsoft.smartyoutubetv2.tv.ui.widgets.time.EndingTimeView;
+import com.liskovsoft.smartyoutubetv2.tv.util.RowContinuation;
 import com.liskovsoft.googlecommon.common.helpers.YouTubeHelper;
 
 import java.io.InputStream;
@@ -110,6 +111,7 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
     private VideoCardPresenter mCardPresenter;
     private ShortsCardPresenter mShortsPresenter;
     private Map<Integer, VideoGroupObjectAdapter> mVideoGroupAdapters;
+    private final RowContinuation mRowContinuation = new RowContinuation();
     private ExoPlayerController mExoPlayerController;
     private ExoPlayerInitializer mPlayerInitializer;
     private SubtitleManager mSubtitleManager;
@@ -778,9 +780,11 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
                 int index = adapter.indexOf(item);
 
                 if (index != -1) {
-                    int size = adapter.size();
-                    if (index > (size - 4)) {
+                    int continuation = mRowContinuation.onItemSelected(adapter, index);
+                    if (continuation == RowContinuation.END) {
                         mPlaybackPresenter.onScrollEnd(item);
+                    } else if (continuation == RowContinuation.NEAR_END) {
+                        mPlaybackPresenter.onScrollNearEnd(item);
                     }
                     break;
                 }

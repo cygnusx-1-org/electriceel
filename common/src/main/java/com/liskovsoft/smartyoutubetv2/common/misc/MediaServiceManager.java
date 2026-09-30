@@ -18,6 +18,7 @@ import com.liskovsoft.mediaserviceinterfaces.data.NotificationState;
 import com.liskovsoft.mediaserviceinterfaces.data.PlaylistInfo;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.sharedutils.mylogger.Log;
+import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
 import com.liskovsoft.sharedutils.rx.RxHelper;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.VideoGroup;
@@ -220,7 +221,8 @@ public class MediaServiceManager implements OnAccountChange {
         Observable<List<MediaGroup>> observable = item.mediaItem != null ?
                 mContentService.getChannelObserve(item.mediaItem) : mContentService.getChannelObserve(item.channelId);
 
-        mRowsAction = observable
+        // The rows are built without sidebar section (see ChannelPresenter, ChannelUploadsPresenter)
+        mRowsAction = HiddenVideoResolver.resolveGroups(GlobalPreferences.context(), observable, null)
                 .subscribe(
                         onMediaGroupList::onMediaGroupList,
                         error -> {

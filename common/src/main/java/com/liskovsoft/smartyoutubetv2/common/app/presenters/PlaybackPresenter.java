@@ -397,6 +397,11 @@ public class PlaybackPresenter extends BasePresenter<PlaybackView> implements Pl
     }
 
     @Override
+    public void onScrollNearEnd(Video item) {
+        process(listener -> listener.onScrollNearEnd(item));
+    }
+
+    @Override
     public boolean onPreviousClicked() {
         return chainProcess(PlayerEventListener::onPreviousClicked);
     }

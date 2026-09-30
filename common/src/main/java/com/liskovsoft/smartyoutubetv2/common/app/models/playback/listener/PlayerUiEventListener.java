@@ -6,6 +6,10 @@ public interface PlayerUiEventListener {
     void onSuggestionItemClicked(Video item);
     void onSuggestionItemLongClicked(Video item);
     void onScrollEnd(Video item);
+    /**
+     * Moving toward the end of a row. Its next page is loaded before it's needed, without the loading bar.
+     */
+    void onScrollNearEnd(Video item);
     boolean onPreviousClicked();
     boolean onNextClicked();
     void onPlayClicked();

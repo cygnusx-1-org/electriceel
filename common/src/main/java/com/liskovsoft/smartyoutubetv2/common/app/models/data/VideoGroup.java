@@ -10,6 +10,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.service.VideoSt
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.service.VideoStateService.State;
 import com.liskovsoft.smartyoutubetv2.common.misc.AiSListManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.KeywordFilter;
+import com.liskovsoft.smartyoutubetv2.common.misc.CollaborationManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.OldVideoFilter;
 import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
@@ -481,7 +482,8 @@ public class VideoGroup {
             return;
         }
 
-        if (isChannelBlocked(video) || isAiListed(video) || isHiddenCategory(video) || isOld(video) || hasHiddenKeyword(video) || isWatchedSuggestion(video)) {
+        if (isChannelBlocked(video) || isAiListed(video) || isHiddenCategory(video) || isOld(video) || isHiddenCollaboration(video)
+                || hasHiddenKeyword(video) || isWatchedSuggestion(video)) {
             if (video.videoId != null) {
                 mHiddenVideoCount++;
             }
@@ -541,7 +543,7 @@ public class VideoGroup {
         }
 
         if (video.channelHandle == null) {
-            // Most TV cards have only the channel name. The handle might be found earlier (see AiSListProcessor).
+            // Most TV cards have only the channel name. Its handle is looked up before the group is created (see HiddenVideoResolver).
             video.channelHandle = manager.getCachedHandle(AiSListManager.getLookupKey(video));
         }
 
@@ -587,6 +589,38 @@ public class VideoGroup {
         }
 
         return OldVideoFilter.isHidden(GlobalPreferences.context(), getSection().getId(), video.getSecondTitle());
+    }
+
+    /**
+     * A collaboration, only in the sections picked in the Collaborations setting.
+     * Also marks the video when the setting marks instead of hiding. The names are looked up before the group is created (see HiddenVideoResolver).
+     */
+    private boolean isHiddenCollaboration(Video video) {
+        // No context before the app is initialized (GlobalPreferences)
+        if (video.isChapter || video.videoId == null || getSection() == null || GlobalPreferences.context() == null) {
+            return false;
+        }
+
+        int sectionId = getSection().getId();
+        String author = video.getAuthor();
+
+        if (!CollaborationManager.isCandidate(author)) {
+            return false;
+        }
+
+        CollaborationManager manager = CollaborationManager.instance(GlobalPreferences.context());
+
+        if (!manager.isEnabled(sectionId) || !Boolean.TRUE.equals(manager.getCachedResult(author))) {
+            return false;
+        }
+
+        if (manager.isHidden(sectionId)) {
+            return true;
+        }
+
+        video.isCollaboration = true;
+
+        return false;
     }
 
     /**
