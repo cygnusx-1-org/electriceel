@@ -74,5 +74,3 @@ fabric.properties
 hs_err_pid*.log
 
 backup/
-
-YoutubeDataAPIKeyCreation/bin/
