@@ -57,6 +57,8 @@ public class VideoCategoryManagerTest {
         setHidden(MediaServiceData.CONTENT_SPORTS_HOME, false);
         setHidden(MediaServiceData.CONTENT_NEWS_HOME, false);
         setHidden(MediaServiceData.CONTENT_TECH_HOME, false);
+        // Home categories are hidden only with the user's own key
+        MediaServiceData.instance().setDataApiKey("key");
 
         VideoCategoryManager manager = VideoCategoryManager.instance(context);
         manager.setCategoryForTesting(MUSIC_ID, "Music");
@@ -139,8 +141,9 @@ public class VideoCategoryManagerTest {
         TestMediaGroup row = new TestMediaGroup(MediaGroup.TYPE_HOME, MediaGroup.TOPIC_NONE,
                 PLAYER_VLOG_ID, MUSIC_MIX_ID, MUSIC_ID, UNKNOWN_ID);
 
-        // Without a key only the unknown video is looked up
-        assertEquals(Collections.singletonList(UNKNOWN_ID), manager.getUnknownVideoIdsForTesting(row));
+        // Without a key nothing is looked up
+        MediaServiceData.instance().setDataApiKey(null);
+        assertEquals(Collections.emptyList(), manager.getUnknownVideoIdsForTesting(row));
 
         MediaServiceData.instance().setDataApiKey("key");
 
@@ -148,6 +151,25 @@ public class VideoCategoryManagerTest {
         assertEquals(Arrays.asList(UNKNOWN_ID, PLAYER_VLOG_ID), manager.getUnknownVideoIdsForTesting(row));
         // Not again this session (e.g. the key is out of quota)
         assertEquals(Collections.singletonList(UNKNOWN_ID), manager.getUnknownVideoIdsForTesting(row));
+    }
+
+    @Test
+    public void nothingIsHiddenWithoutKey() {
+        setHidden(MediaServiceData.CONTENT_MUSIC_HOME, true);
+        setHidden(MediaServiceData.CONTENT_GAMING_HOME, true);
+        MediaServiceData.instance().setDataApiKey(null);
+        VideoCategoryManager manager = getManager();
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME);
+
+        addVideos(home);
+
+        assertFalse(VideoCategoryManager.isAvailable());
+        assertFalse(manager.isGroupEnabled(MediaGroup.TYPE_HOME));
+        assertEquals(4, home.getSize());
+        assertFalse(manager.isRowHidden(new TestMediaGroup(MediaGroup.TYPE_HOME, MediaGroup.TOPIC_MUSIC, MUSIC_ID)));
+        // The options keep their state: entering a key brings the filter back
+        MediaServiceData.instance().setDataApiKey("key");
+        assertTrue(manager.isGroupEnabled(MediaGroup.TYPE_HOME));
     }
 
     @Test
@@ -172,8 +194,7 @@ public class VideoCategoryManagerTest {
         assertNull(manager.getCachedCategory("broken"));
         assertNull(manager.getCachedCategory(MUSIC_MIX_ID));
 
-        // The topic-less old line is looked up again once there's a key
-        MediaServiceData.instance().setDataApiKey("key");
+        // The topic-less old line is looked up again
         setHidden(MediaServiceData.CONTENT_MUSIC_HOME, false);
         setHidden(MediaServiceData.CONTENT_GAMING_HOME, true);
         assertEquals(Collections.singletonList("old"),

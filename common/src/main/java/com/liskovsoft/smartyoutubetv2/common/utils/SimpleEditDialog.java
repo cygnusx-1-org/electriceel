@@ -1,6 +1,9 @@
 package com.liskovsoft.smartyoutubetv2.common.utils;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
+import android.text.Editable;
 import android.text.InputType;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -63,6 +66,8 @@ public class SimpleEditDialog {
                 .setView(contentView)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> { })
                 .setNegativeButton(android.R.string.cancel, (dialog, which) -> { })
+                // The remote has no way to paste into the field
+                .setNeutralButton(android.R.string.paste, (dialog, which) -> { })
                 .create();
 
         if (onDismiss != null) {
@@ -113,6 +118,33 @@ public class SimpleEditDialog {
 
         configDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener((view) -> configDialog.dismiss());
 
+        // Stays open: the pasted text can be checked before OK
+        configDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener((view) -> paste(context, editField));
+
         //editField.setNextFocusDownId(configDialog.getButton(AlertDialog.BUTTON_POSITIVE).getId()); // OK button
+    }
+
+    /**
+     * Puts the clipboard's text in place of the selection, or at the cursor. One line: the fields are single-line.
+     */
+    private static void paste(Context context, EditText editField) {
+        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = clipboard != null ? clipboard.getPrimaryClip() : null;
+        CharSequence text = clip != null && clip.getItemCount() > 0 ? clip.getItemAt(0).coerceToText(context) : null;
+        String pasted = text != null ? text.toString().replaceAll("\\s*[\\r\\n]+\\s*", " ").trim() : "";
+
+        if (pasted.isEmpty()) {
+            MessageHelpers.showMessage(context, R.string.clipboard_empty);
+            return;
+        }
+
+        Editable editable = editField.getText();
+        // -1 when the field never had the cursor
+        int start = Math.max(0, Math.min(editField.getSelectionStart(), editField.getSelectionEnd()));
+        int end = Math.max(0, Math.max(editField.getSelectionStart(), editField.getSelectionEnd()));
+
+        editable.replace(start, end, pasted);
+        editField.setSelection(start + pasted.length());
+        editField.requestFocus();
     }
 }

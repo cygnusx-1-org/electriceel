@@ -64,6 +64,7 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
     private static final int VIEW_TYPE_SWITCH = 1;
     private static final int VIEW_TYPE_MENU = 2;
     private static final int VIEW_TYPE_RADIO = 3;
+    private static final int VIEW_TYPE_NOTE = 4;
     private boolean mMulti;
     protected CharSequence[] mEntries;
     protected CharSequence[] mEntryValues;
@@ -302,9 +303,12 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-            // MOD: switch, menu and radio rows (see DependentListPreference)
+            // MOD: switch, menu, radio and note rows (see DependentListPreference)
             final int layoutResId;
             switch (viewType) {
+                case VIEW_TYPE_NOTE:
+                    layoutResId = R.layout.dialog_list_preference_item_note;
+                    break;
                 case VIEW_TYPE_SWITCH:
                     layoutResId = R.layout.dialog_list_preference_item_switch;
                     break;
@@ -332,6 +336,10 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
             }
 
             String entryValue = mEntryValues[position].toString();
+
+            if (((DependentListPreference) preference).isNote(entryValue)) {
+                return VIEW_TYPE_NOTE;
+            }
 
             if (((DependentListPreference) preference).isMenu(entryValue)) {
                 return VIEW_TYPE_MENU;
@@ -368,7 +376,7 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
         @Override
         public void onItemClick(ViewHolder viewHolder) {
             final int index = viewHolder.getAdapterPosition();
-            if (index == RecyclerView.NO_POSITION || isDisabled(index)) {
+            if (index == RecyclerView.NO_POSITION || isDisabled(index) || getItemViewType(index) == VIEW_TYPE_NOTE) {
                 return;
             }
             final String entry = mEntryValues[index].toString();

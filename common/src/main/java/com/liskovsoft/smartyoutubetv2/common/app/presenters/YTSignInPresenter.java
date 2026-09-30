@@ -7,7 +7,6 @@ import com.liskovsoft.mediaserviceinterfaces.ServiceManager;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.sharedutils.rx.RxHelper;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.AccountSelectionPresenter;
-import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.service.YouTubeServiceManager;
 
 import io.reactivex.disposables.Disposable;
@@ -80,11 +79,7 @@ public class YTSignInPresenter extends SignInPresenter {
                                 getView().close();
                             }
 
-                            // Then the user's own Data API key, from the Google account (see DataApiKeyPresenter).
-                            // Posted: the dialog starts its parent view as it closes, which would cover the key's view.
-                            Context context = getContext();
-                            AccountSelectionPresenter.instance(context).show(true,
-                                    () -> Utils.postDelayed(() -> DataApiKeyPresenter.instance(context).startAfterSignIn(), 0));
+                            AccountSelectionPresenter.instance(getContext()).show(true);
                         }
                  );
     }

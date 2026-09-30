@@ -27,11 +27,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import io.reactivex.Observable;
 
 /**
- * Hides music, gaming, sports, news and tech videos from Home.<br/>
+ * Hides music, gaming, sports, news and tech videos from Home. Only with the user's own Data API key (see {@link #isAvailable}).<br/>
  * Home cards don't carry the category. It's looked up once per video before the row is shown,
  * so the hidden videos never appear, and cached on disk by the video id.<br/>
- * The category is whatever the uploader picked (e.g. many music mixes are People & Blogs). With the user's own Data API key,
- * the lookup also brings the topics YouTube finds in the video itself (e.g. Music), and either one hides the video.<br/>
+ * The category is whatever the uploader picked (e.g. many music mixes are People & Blogs). The lookup also brings
+ * the topics YouTube finds in the video itself (e.g. Music), and either one hides the video.<br/>
  * Whole rows go too: the ones marked with a hidden topic (e.g. music shelves) and the ones left with a single video or none.
  */
 public class VideoCategoryManager {
@@ -83,7 +83,7 @@ public class VideoCategoryManager {
      * Some category should be removed from the group
      */
     public boolean isGroupEnabled(int groupType) {
-        if (groupType != MediaGroup.TYPE_HOME) {
+        if (groupType != MediaGroup.TYPE_HOME || !isAvailable()) {
             return false;
         }
 
@@ -158,7 +158,11 @@ public class VideoCategoryManager {
         }
     }
 
-    private static boolean isDataApiKeySet() {
+    /**
+     * The user has entered their own Data API key: the Home categories are hidden only then.
+     * The hide options keep their state without one.
+     */
+    public static boolean isAvailable() {
         return MediaServiceData.instance().getDataApiKey() != null;
     }
 
@@ -223,14 +227,12 @@ public class VideoCategoryManager {
 
     /**
      * @param result the videos not looked up yet
-     * @param topicResult the videos found by the player before the user's key was set
+     * @param topicResult the videos found by the player, without topics (e.g. while the key was out of quota)
      */
     private void getUnknownVideoIds(List<MediaGroup> mediaGroups, List<String> result, List<String> topicResult) {
         if (mediaGroups == null) {
             return;
         }
-
-        boolean isKeySet = isDataApiKeySet();
 
         synchronized (mCategoryById) {
             for (MediaGroup mediaGroup : mediaGroups) {
@@ -249,7 +251,7 @@ public class VideoCategoryManager {
 
                     if (!mCategoryById.containsKey(videoId)) {
                         result.add(videoId);
-                    } else if (isKeySet && needsTopics(videoId)) {
+                    } else if (needsTopics(videoId)) {
                         topicResult.add(videoId);
                     }
                 }

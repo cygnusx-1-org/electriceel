@@ -198,13 +198,6 @@
                   android:screenOrientation="unspecified"
                   android:theme="@style/App.Theme.Leanback.GuidedStep"/>
 
-        <!-- Not singleInstance like the others: from one, the Play services consent screen's result comes back cancelled at once -->
-        <activity android:name="com.liskovsoft.smartyoutubetv2.tv.ui.dataapikey.DataApiKeyActivity"
-                  android:launchMode="singleTask"
-                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|layoutDirection"
-                  android:screenOrientation="unspecified"
-                  android:theme="@style/App.Theme.Leanback.GuidedStep"/>
-
         <activity
             android:name="com.liskovsoft.smartyoutubetv2.tv.ui.webbrowser.WebBrowserActivity"
             android:launchMode="singleInstance"

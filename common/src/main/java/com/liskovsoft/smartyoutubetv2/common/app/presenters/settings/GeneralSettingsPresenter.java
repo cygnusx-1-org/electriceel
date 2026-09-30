@@ -15,9 +15,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.BrowsePresenter;
-import com.liskovsoft.smartyoutubetv2.common.app.presenters.DataApiKeyPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
-import com.liskovsoft.smartyoutubetv2.common.misc.GoogleCloudAuthorizer;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
@@ -571,16 +569,6 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
                     }
                 },
                 mMediaServiceData.getDataApiKey() != null));
-
-        // Play services signs the user in on the TV, so the key can come from their Google account
-        if (GoogleCloudAuthorizer.isAvailable(getContext())) {
-            settingsPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.data_api_key_auto),
-                    getContext().getString(R.string.data_api_key_auto_desc),
-                    option -> {
-                        settingsPresenter.closeDialog();
-                        DataApiKeyPresenter.instance(getContext()).start();
-                    }));
-        }
     }
 
     private void appendInternetCensorship(AppDialogPresenter settingsPresenter) {
@@ -704,10 +692,7 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
                 });
     }
 
-    /**
-     * Shows whether the key works (one Data API request)
-     */
-    public void checkDataApiKey(String key) {
+    private void checkDataApiKey(String key) {
         if (key == null) {
             return;
         }

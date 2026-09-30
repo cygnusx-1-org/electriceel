@@ -93,9 +93,6 @@ dependencies {
 
     implementation 'androidx.browser:browser:' + browserXVersion
 
-    // The cloud-platform token for getting the user's own Data API key. Only used when Play services is on the device.
-    implementation 'com.google.android.gms:play-services-auth:' + playServicesAuthVersion
-
     implementation 'androidx.core:core-ktx:' + kotlinCoreXVersion
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:' + kotlinVersion
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:' + kotlinxVersion

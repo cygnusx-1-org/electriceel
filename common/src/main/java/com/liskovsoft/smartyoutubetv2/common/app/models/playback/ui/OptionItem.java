@@ -17,6 +17,16 @@ public interface OptionItem {
     void setDisabledBy(OptionItem item);
     OptionItem getDisabledBy();
     /**
+     * Grey out this item of a checked list (and ignore clicks) for as long as the list is shown
+     */
+    void setEnabled(boolean isEnabled);
+    boolean isEnabled();
+    /**
+     * Show this item of a checked list as a line of text: no checkbox, can't be focused or selected
+     */
+    void setNote(boolean isNote);
+    boolean isNote();
+    /**
      * Show this item of a checked list as a row that opens a menu: no checkbox, selecting it calls the callback and leaves it unchecked
      */
     void setMenu(boolean isMenu);

@@ -9,6 +9,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.BrowsePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
+import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
 
@@ -44,7 +45,17 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
         options.add(createMenuItem(R.string.hide_content_watched, this::showWatchedMenu));
         options.add(createMenuItem(R.string.hide_content_streams, this::showStreamsMenu));
         options.add(createMenuItem(R.string.hide_content_upcoming, this::showUpcomingMenu));
-        options.add(createMenuItem(R.string.hide_content_home_categories, this::showHomeCategoriesMenu));
+
+        OptionItem homeCategories = createMenuItem(R.string.hide_content_home_categories, this::showHomeCategoriesMenu);
+        options.add(homeCategories);
+
+        // Last in the list: the note is added below it, and the rows above stay where they are
+        if (!VideoCategoryManager.isAvailable()) {
+            homeCategories.setEnabled(false);
+            OptionItem note = UiOptionItem.from(getContext().getString(R.string.hide_content_home_categories_needs_key));
+            note.setNote(true);
+            options.add(note);
+        }
 
         String title = getContext().getString(R.string.hide_unwanted_content);
         presenter.appendCheckedCategory(title, options);
@@ -132,7 +143,7 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
     }
 
     /**
-     * The music, gaming, sports, news and tech videos of Home
+     * The music, gaming, sports, news and tech videos of Home. Only with the user's own Data API key (see VideoCategoryManager).
      */
     private void showHomeCategoriesMenu() {
         List<OptionItem> options = new ArrayList<>();
