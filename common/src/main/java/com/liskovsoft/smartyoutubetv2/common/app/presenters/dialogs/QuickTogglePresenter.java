@@ -16,7 +16,7 @@ import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
 
 /**
  * The quick toggle button on the main screen, next to the account button. It toggles Hide videos older than
- * (Content Filtering | Filtering) or the Shorts options (Content Filtering | Hide content | Shorts), whichever has its quick toggle enabled.
+ * (Content Filtering | Hide content) or the Shorts options (Content Filtering | Hide content | Shorts), whichever has its quick toggle enabled.
  * With both enabled, it opens a panel with a switch for each.
  */
 public class QuickTogglePresenter extends BasePresenter<Void> {

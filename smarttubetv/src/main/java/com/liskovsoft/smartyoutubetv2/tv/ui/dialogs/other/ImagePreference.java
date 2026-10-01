@@ -6,15 +6,13 @@ import android.widget.ImageView;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
-import com.bumptech.glide.Glide;
 import com.liskovsoft.smartyoutubetv2.tv.R;
-import com.liskovsoft.smartyoutubetv2.tv.util.ViewUtil;
 
 /**
  * A picture with its title above it, e.g. a QR code. Nothing to press.
  */
 public class ImagePreference extends Preference {
-    private String mImageUrl;
+    private int mImageResId;
 
     public ImagePreference(Context context) {
         super(context);
@@ -23,8 +21,11 @@ public class ImagePreference extends Preference {
         setSelectable(false);
     }
 
-    public void setImageUrl(String imageUrl) {
-        mImageUrl = imageUrl;
+    /**
+     * A drawable, drawn with the row: no loading
+     */
+    public void setImageResource(int imageResId) {
+        mImageResId = imageResId;
         notifyChanged();
     }
 
@@ -33,11 +34,6 @@ public class ImagePreference extends Preference {
         super.onBindViewHolder(holder);
 
         ImageView imageView = (ImageView) holder.findViewById(R.id.image_preference_image);
-
-        // The view keeps its size while the picture loads
-        Glide.with(getContext())
-                .load(mImageUrl)
-                .apply(ViewUtil.glideOptions())
-                .into(imageView);
+        imageView.setImageResource(mImageResId);
     }
 }

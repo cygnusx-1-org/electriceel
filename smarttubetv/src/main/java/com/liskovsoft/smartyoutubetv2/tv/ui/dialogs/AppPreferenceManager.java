@@ -197,7 +197,7 @@ public class AppPreferenceManager {
         ImagePreference pref = new ImagePreference(mContext);
         pref.setPersistent(false);
         pref.setTitle(category.title);
-        pref.setImageUrl(category.imageUrl);
+        pref.setImageResource(category.imageResId);
 
         return pref;
     }

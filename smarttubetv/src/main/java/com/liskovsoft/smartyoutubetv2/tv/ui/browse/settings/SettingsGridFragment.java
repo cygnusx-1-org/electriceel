@@ -1,7 +1,9 @@
 package com.liskovsoft.smartyoutubetv2.tv.ui.browse.settings;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.leanback.widget.ArrayObjectAdapter;
@@ -25,17 +27,24 @@ import com.liskovsoft.smartyoutubetv2.tv.ui.browse.video.GridFragmentHelper;
 import com.liskovsoft.smartyoutubetv2.tv.ui.common.LeanbackActivity;
 import com.liskovsoft.smartyoutubetv2.tv.ui.common.UriBackgroundManager;
 import com.liskovsoft.smartyoutubetv2.tv.ui.mod.fragments.GridFragment;
+import com.liskovsoft.smartyoutubetv2.tv.ui.settingscards.SettingsCardsLayout;
 import com.liskovsoft.smartyoutubetv2.tv.util.ViewUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The Settings section: its cards under its title, like a settings section on its own screen (see SettingsCardsLayout).
+ * The title of Browse is hidden over it (see BrowseFragment).
+ */
 public class SettingsGridFragment extends GridFragment implements SettingsSection {
     private static final String TAG = SettingsGridFragment.class.getSimpleName();
     private ArrayObjectAdapter mSettingsAdapter;
     private BrowsePresenter mMainPresenter;
     private UriBackgroundManager mBackgroundManager;
     private final List<SettingsGroup> mPendingUpdates = new ArrayList<>();
+    private SettingsCardsLayout mCardsLayout;
+    private String mTitle;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -54,15 +63,32 @@ public class SettingsGridFragment extends GridFragment implements SettingsSectio
     }
 
     @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return SettingsCardsLayout.wrap(inflater, container, super.onCreateView(inflater, container, savedInstanceState));
+    }
+
+    @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         GridFragmentHelper.enableDownToShorterRow(getBrowseGrid(), getGridPresenter().getNumberOfColumns());
+        mCardsLayout = SettingsCardsLayout.attach(view, getBrowseGrid());
+        mCardsLayout.setTitle(mTitle);
+    }
+
+    @Override
+    public void onDestroyView() {
+        if (mCardsLayout != null) {
+            mCardsLayout.detach();
+            mCardsLayout = null;
+        }
+
+        super.onDestroyView();
     }
 
     @Override
     protected void showOrHideTitle() {
-        // NOP. Always show Browse fragment title
+        // NOP. The Browse title is hidden over the section (see BrowseFragment.showTitle)
     }
 
     private void applyPendingUpdates() {
@@ -117,6 +143,13 @@ public class SettingsGridFragment extends GridFragment implements SettingsSectio
         clear();
 
         if (group != null) {
+            // Before the view is made too (see mPendingUpdates)
+            mTitle = group.getTitle();
+
+            if (mCardsLayout != null) {
+                mCardsLayout.setTitle(mTitle);
+            }
+
             for (SettingsItem item : group.getItems()) {
                 mSettingsAdapter.add(item);
             }

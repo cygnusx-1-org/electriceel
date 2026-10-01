@@ -1,9 +1,9 @@
 package com.liskovsoft.smartyoutubetv2.tv.ui.settingscards;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.TextView;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -34,6 +34,7 @@ public class SettingsCardsFragment extends GridFragment implements SettingsCards
     private SettingsCardsPresenter mPresenter;
     private ArrayObjectAdapter mCardsAdapter;
     private String mTitle;
+    private SettingsCardsLayout mCardsLayout;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -73,10 +74,26 @@ public class SettingsCardsFragment extends GridFragment implements SettingsCards
     }
 
     @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return SettingsCardsLayout.wrap(inflater, container, super.onCreateView(inflater, container, savedInstanceState));
+    }
+
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         GridFragmentHelper.enableDownToShorterRow(getBrowseGrid(), getGridPresenter().getNumberOfColumns());
+        mCardsLayout = SettingsCardsLayout.attach(view, getBrowseGrid());
+    }
+
+    @Override
+    public void onDestroyView() {
+        if (mCardsLayout != null) {
+            mCardsLayout.detach();
+            mCardsLayout = null;
+        }
+
+        super.onDestroyView();
     }
 
     @Override
@@ -90,12 +107,8 @@ public class SettingsCardsFragment extends GridFragment implements SettingsCards
     public void update(String title, String cardsTitle, List<SettingsItem> items, int selectedPosition) {
         mTitle = cardsTitle;
 
-        // The title is above the fragment, in the activity layout
-        Activity activity = getActivity();
-        TextView titleView = activity != null ? activity.findViewById(R.id.settings_cards_title) : null;
-
-        if (titleView != null) {
-            titleView.setText(title);
+        if (mCardsLayout != null) {
+            mCardsLayout.setTitle(title);
         }
 
         mCardsAdapter.clear();

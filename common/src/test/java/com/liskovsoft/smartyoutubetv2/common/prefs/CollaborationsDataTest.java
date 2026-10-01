@@ -35,14 +35,17 @@ public class CollaborationsDataTest {
     }
 
     @Test
-    public void shownByDefaultInHomeAndSubscriptions() {
+    public void markedByDefaultInHomeAndSubscriptions() {
         CollaborationsData data = getData();
 
-        assertEquals(CollaborationsData.MODE_SHOW, data.getMode());
+        assertEquals(CollaborationsData.MODE_MARK, data.getMode());
         assertTrue(data.isSectionEnabled(MediaGroup.TYPE_HOME));
         assertTrue(data.isSectionEnabled(MediaGroup.TYPE_SUBSCRIPTIONS));
         assertFalse(data.isSectionEnabled(MediaGroup.TYPE_GAMING));
-        assertFalse(data.isEnabled(MediaGroup.TYPE_HOME));
+        assertTrue(data.isMarkingEnabled(MediaGroup.TYPE_HOME));
+        assertTrue(data.isMarkingEnabled(MediaGroup.TYPE_SUBSCRIPTIONS));
+        assertFalse(data.isHidingEnabled(MediaGroup.TYPE_HOME));
+        assertFalse(data.isEnabled(MediaGroup.TYPE_GAMING));
     }
 
     @Test
@@ -76,13 +79,12 @@ public class CollaborationsDataTest {
     }
 
     @Test
-    public void unknownModeIsShow() {
+    public void unknownModeIsTheDefault() {
         CollaborationsData data = getData();
 
         data.setMode(7);
 
-        assertEquals(CollaborationsData.MODE_SHOW, data.getMode());
-        assertFalse(data.isEnabled(MediaGroup.TYPE_HOME));
+        assertEquals(CollaborationsData.MODE_MARK, data.getMode());
     }
 
     /**
@@ -99,7 +101,7 @@ public class CollaborationsDataTest {
 
         CollaborationsData restored = getData();
 
-        assertEquals(CollaborationsData.MODE_SHOW, restored.getMode());
+        assertEquals(CollaborationsData.MODE_MARK, restored.getMode());
         assertTrue(restored.isSectionEnabled(MediaGroup.TYPE_MUSIC));
         assertTrue(restored.isSectionEnabled(MediaGroup.TYPE_HOME));
     }
@@ -119,6 +121,24 @@ public class CollaborationsDataTest {
         assertEquals(CollaborationsData.MODE_MARK, restored.getMode());
         assertFalse(restored.isSectionEnabled(MediaGroup.TYPE_HOME));
         assertTrue(restored.isSectionEnabled(MediaGroup.TYPE_SUBSCRIPTIONS));
+    }
+
+    /**
+     * Show is saved as 0, apart from the default
+     */
+    @Test
+    public void showSurvivesRestart() {
+        CollaborationsData data = getData();
+
+        data.setMode(CollaborationsData.MODE_SHOW);
+        data.persistNow();
+        ShadowLooper.shadowMainLooper().idle();
+        CollaborationsData.resetInstanceForTesting();
+
+        CollaborationsData restored = getData();
+
+        assertEquals(CollaborationsData.MODE_SHOW, restored.getMode());
+        assertFalse(restored.isEnabled(MediaGroup.TYPE_HOME));
     }
 
     @Test

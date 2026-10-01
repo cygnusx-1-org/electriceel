@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 /**
- * The Hide videos older than card of the Content Filtering settings
+ * The Hide videos older than menu of the Hide content setting
  */
 public class OldVideosSettingsPresenter extends BasePresenter<Void> {
     private final SidebarService mSidebarService;

@@ -15,6 +15,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.leanback.app.BrowseSupportFragment;
 import androidx.leanback.app.HeadersSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
+import androidx.leanback.widget.BrowseFrameLayout;
 import androidx.leanback.widget.HeaderItem;
 import androidx.leanback.widget.ListRowPresenter;
 import androidx.leanback.widget.PageRow;
@@ -36,6 +37,7 @@ import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.smartyoutubetv2.tv.R;
 import com.liskovsoft.smartyoutubetv2.tv.presenter.IconHeaderItemPresenter;
 import com.liskovsoft.smartyoutubetv2.tv.ui.browse.dialog.ErrorDialogFragment;
+import com.liskovsoft.smartyoutubetv2.tv.ui.browse.settings.SettingsGridFragment;
 import com.liskovsoft.smartyoutubetv2.tv.ui.mod.leanback.headers.ExtendedHeadersSupportFragment;
 import com.liskovsoft.smartyoutubetv2.tv.ui.mod.leanback.misc.ProgressBarManager;
 
@@ -95,6 +97,12 @@ public class BrowseFragment extends BrowseSupportFragment implements BrowseView 
         View root = super.onCreateView(inflater, container, savedInstanceState);
 
         mProgressBarManager.setRootView((ViewGroup) root);
+
+        // Up goes to the title, hidden over the Settings section (see showTitle): there, nothing is above
+        BrowseFrameLayout browseFrame = root.findViewById(R.id.browse_frame);
+        BrowseFrameLayout.OnFocusSearchListener onFocusSearch = browseFrame.getOnFocusSearchListener();
+        browseFrame.setOnFocusSearchListener((focused, direction) ->
+                direction == View.FOCUS_UP && getMainFragment() instanceof SettingsGridFragment ? focused : onFocusSearch.onFocusSearch(focused, direction));
 
         return root;
     }
@@ -470,6 +478,15 @@ public class BrowseFragment extends BrowseSupportFragment implements BrowseView 
         }
 
         mIsFragmentCreated = false;
+    }
+
+    /**
+     * Never over the Settings section: no search, account, quick toggle, clock or logo there. It has its own title, like the
+     * settings sections on their own screens (see SettingsGridFragment).
+     */
+    @Override
+    public void showTitle(boolean show) {
+        super.showTitle(show && !(getMainFragment() instanceof SettingsGridFragment));
     }
 
     /**

@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The Filtering card of the Content Filtering settings: Hide videos older than, Keyword filtering, Collaborations and Watch later
+ * The Hide or mark content card of the Content Filtering settings: Collaborations and Watch later
  */
 public class FilteringSettingsPresenter extends BasePresenter<Void> {
     private FilteringSettingsPresenter(Context context) {
@@ -27,20 +27,12 @@ public class FilteringSettingsPresenter extends BasePresenter<Void> {
         AppDialogPresenter presenter = AppDialogPresenter.instance(getContext());
 
         List<OptionItem> options = new ArrayList<>();
-        options.add(createMenuItem(R.string.hide_old_videos, () -> OldVideosSettingsPresenter.instance(getContext()).show()));
-        options.add(createMenuItem(R.string.keyword_filtering, () -> KeywordFilterSettingsPresenter.instance(getContext()).show()));
         options.add(createMenuItem(R.string.collaborations, R.string.collaborations_desc, () -> SectionFilterSettingsPresenter.collaborations(getContext()).show()));
         options.add(createMenuItem(R.string.watch_later, R.string.watch_later_desc, () -> SectionFilterSettingsPresenter.watchLater(getContext()).show()));
 
         String title = getContext().getString(R.string.content_filtering_filtering);
         presenter.appendCheckedCategory(title, options);
         presenter.showDialog(title);
-    }
-
-    private OptionItem createMenuItem(int titleResId, Runnable onSelect) {
-        OptionItem item = UiOptionItem.from(getContext().getString(titleResId), option -> onSelect.run());
-        item.setMenu(true);
-        return item;
     }
 
     private OptionItem createMenuItem(int titleResId, int descriptionResId, Runnable onSelect) {

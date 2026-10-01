@@ -13,6 +13,7 @@ public abstract class SectionFilterData extends DataSaverBase {
     public static final int MODE_SHOW = 0;
     public static final int MODE_MARK = 1;
     public static final int MODE_HIDE = 2;
+    private static final int DEFAULT_MODE = MODE_MARK;
     // Storage layout. Don't change: the values are saved by index.
     private static final int MODE_INDEX = 0;
     private static final int SECTIONS_INDEX = 1; // a bit per section, by the section id (MediaGroup.TYPE_*)
@@ -25,13 +26,13 @@ public abstract class SectionFilterData extends DataSaverBase {
     }
 
     /**
-     * One of MODE_*. Shown as they are by default.
+     * One of MODE_*. Marked by default.
      */
     public int getMode() {
         // A value never set is saved as "null" when a later one is set, and comes back as -1
-        int mode = getInt(MODE_INDEX, MODE_SHOW);
+        int mode = getInt(MODE_INDEX, DEFAULT_MODE);
 
-        return mode == MODE_MARK || mode == MODE_HIDE ? mode : MODE_SHOW;
+        return mode == MODE_SHOW || mode == MODE_MARK || mode == MODE_HIDE ? mode : DEFAULT_MODE;
     }
 
     public void setMode(int mode) {

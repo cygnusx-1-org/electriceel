@@ -25,7 +25,7 @@
         android:layout_width="0dp"
         android:layout_height="@dimen/lb_preference_item_text_space_bottom" />
 
-    <!-- A fixed size: the row doesn't change while the picture loads -->
+    <!-- A fixed size, the size of the picture (e.g. qr_code_git_repository) -->
     <ImageView
         android:id="@+id/image_preference_image"
         android:layout_width="@dimen/image_preference_image_size"

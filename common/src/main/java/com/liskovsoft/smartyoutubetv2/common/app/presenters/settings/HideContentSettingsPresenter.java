@@ -45,6 +45,8 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
         options.add(createMenuItem(R.string.hide_content_watched, this::showWatchedMenu));
         options.add(createMenuItem(R.string.hide_content_streams, this::showStreamsMenu));
         options.add(createMenuItem(R.string.hide_content_upcoming, this::showUpcomingMenu));
+        options.add(createMenuItem(R.string.hide_old_videos, () -> OldVideosSettingsPresenter.instance(getContext()).show()));
+        options.add(createMenuItem(R.string.keyword_filtering, () -> KeywordFilterSettingsPresenter.instance(getContext()).show()));
 
         OptionItem homeCategories = createMenuItem(R.string.hide_content_home_categories, this::showHomeCategoriesMenu);
         options.add(homeCategories);

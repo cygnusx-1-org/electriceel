@@ -36,14 +36,17 @@ public class WatchLaterDataTest {
     }
 
     @Test
-    public void shownByDefaultInHomeAndSubscriptions() {
+    public void markedByDefaultInHomeAndSubscriptions() {
         WatchLaterData data = getData();
 
-        assertEquals(WatchLaterData.MODE_SHOW, data.getMode());
+        assertEquals(WatchLaterData.MODE_MARK, data.getMode());
         assertTrue(data.isSectionEnabled(MediaGroup.TYPE_HOME));
         assertTrue(data.isSectionEnabled(MediaGroup.TYPE_SUBSCRIPTIONS));
         assertFalse(data.isSectionEnabled(MediaGroup.TYPE_GAMING));
-        assertFalse(data.isEnabled(MediaGroup.TYPE_HOME));
+        assertTrue(data.isMarkingEnabled(MediaGroup.TYPE_HOME));
+        assertTrue(data.isMarkingEnabled(MediaGroup.TYPE_SUBSCRIPTIONS));
+        assertFalse(data.isHidingEnabled(MediaGroup.TYPE_HOME));
+        assertFalse(data.isEnabled(MediaGroup.TYPE_GAMING));
     }
 
     @Test

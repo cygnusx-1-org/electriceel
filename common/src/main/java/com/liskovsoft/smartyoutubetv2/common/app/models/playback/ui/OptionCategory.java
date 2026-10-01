@@ -31,9 +31,11 @@ public class OptionCategory {
 
     /**
      * A picture with its title above it, e.g. a QR code. Nothing to press.
+     *
+     * @param imageResId a drawable, shown at once
      */
-    public static OptionCategory image(CharSequence title, String imageUrl) {
-        return new OptionCategory(title, Collections.<OptionItem>emptyList(), TYPE_IMAGE, -1, imageUrl);
+    public static OptionCategory image(CharSequence title, int imageResId) {
+        return new OptionCategory(title, Collections.<OptionItem>emptyList(), TYPE_IMAGE, -1, imageResId);
     }
 
     public static OptionCategory singleSwitch(OptionItem item) {
@@ -61,15 +63,15 @@ public class OptionCategory {
     }
 
     private OptionCategory(CharSequence title, List<OptionItem> options, int type, int id) {
-        this(title, options, type, id, null);
+        this(title, options, type, id, 0);
     }
 
-    private OptionCategory(CharSequence title, List<OptionItem> options, int type, int id, String imageUrl) {
+    private OptionCategory(CharSequence title, List<OptionItem> options, int type, int id, int imageResId) {
         this.id = id;
         this.type = type;
         this.title = title;
         this.options = options;
-        this.imageUrl = imageUrl;
+        this.imageResId = imageResId;
     }
 
     public static final int TYPE_RADIO_LIST = 0;
@@ -85,5 +87,5 @@ public class OptionCategory {
     public final int type;
     public final CharSequence title;
     public final List<OptionItem> options;
-    public final String imageUrl;
+    public final int imageResId;
 }

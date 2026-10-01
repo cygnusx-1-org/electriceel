@@ -210,15 +210,13 @@
     <string name="settings_scale_options">Scale options</string>
     <string name="settings_color_scheme_options">Color scheme options</string>
     <string name="git_repository">Git repository</string>
-    <string name="privacy_policy">Privacy policy</string>
-    <string name="terms_of_service">Terms of Service</string>
     <string name="hide_content_mixes">Mixes</string>
     <string name="hide_content_watched">Watched videos</string>
     <string name="hide_content_streams">Streams</string>
     <string name="hide_content_upcoming">Upcoming</string>
     <string name="hide_content_home_categories">Home categories</string>
     <string name="hide_content_home_categories_needs_key">Enter a YouTube Data API key in System &gt; General &gt; API keys to unlock Home categories</string>
-    <string name="content_filtering_filtering">Filtering</string>
+    <string name="content_filtering_filtering">Hide or mark content</string>
     <string name="settings_video">Video</string>
     <string name="content_block_confirm_skip">Confirm on skip</string>
     <string name="content_block_categories">Skip segments</string>

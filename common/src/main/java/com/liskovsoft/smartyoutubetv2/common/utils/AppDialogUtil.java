@@ -173,27 +173,6 @@ public class AppDialogUtil {
                 }));
     }
 
-    /**
-     * A QR code of the address, with its title above it
-     */
-    public static void appendQrCode(AppDialogPresenter dialogPresenter, CharSequence title, String url) {
-        // Twice the size of the default, sharp at the size it's shown
-        dialogPresenter.appendImage(title, Utils.toQrCodeLink(url) + "&size=400x400");
-    }
-
-    /**
-     * A panel with only the QR code of the address, e.g. the privacy policy. The address is written above the code.
-     */
-    public static void showQrCodeDialog(Context context, CharSequence title, String url) {
-        AppDialogPresenter dialogPresenter = AppDialogPresenter.instance(context);
-
-        appendQrCode(dialogPresenter, url.replaceFirst("^https?://", ""), url);
-
-        // A single item would be opened right away instead of showing the panel with the title
-        dialogPresenter.enableExpandable(false);
-        dialogPresenter.showDialog(title);
-    }
-
     public static OptionCategory createBackgroundPlaybackCategory(Context context, PlayerData playerData, GeneralData generalData) {
         return createBackgroundPlaybackCategory(context, playerData, generalData, () -> {});
     }
