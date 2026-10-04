@@ -3,8 +3,10 @@ package com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu;
 import android.content.Context;
 import com.liskovsoft.mediaserviceinterfaces.MediaItemService;
 import com.liskovsoft.mediaserviceinterfaces.ServiceManager;
+import com.liskovsoft.mediaserviceinterfaces.data.FeedbackEndpoint;
 import com.liskovsoft.mediaserviceinterfaces.data.FeedbackReasons.FeedbackItem;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
+import com.liskovsoft.mediaserviceinterfaces.data.MediaItem;
 import com.liskovsoft.mediaserviceinterfaces.data.PlaylistInfo;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
@@ -346,11 +348,13 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
     }
 
     private void appendNotInterestedButton() {
-        if (mVideo == null || mVideo.mediaItem == null || (mVideo.mediaItem.getFeedbackToken() == null && mVideo.mediaItem.getFeedbackEndpoint() == null)) {
+        FeedbackEndpoint feedbackEndpoint = getFeedbackEndpoint();
+
+        if (mVideo == null || mVideo.mediaItem == null || (mVideo.mediaItem.getFeedbackToken() == null && feedbackEndpoint == null)) {
             return;
         }
 
-        if ((!mVideo.belongsToHome() && !mVideo.belongsToShorts()) || !mIsNotInterestedButtonEnabled) {
+        if ((!mVideo.belongsToHomeLikeSection() && !mVideo.belongsToShorts()) || !mIsNotInterestedButtonEnabled) {
             return;
         }
 
@@ -358,10 +362,10 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
 
         mDialogPresenter.appendSingleButton(
                 UiOptionItem.from(getContext().getString(R.string.not_interested), optionItem -> {
-                    if (mVideo.mediaItem.getFeedbackEndpoint() == null) {
+                    if (feedbackEndpoint == null) {
                         markAsNotInterested(mVideo.mediaItem.getFeedbackToken());
                     } else {
-                        mNotInterestedAction = mMediaItemService.getFeedbackTokensObserve(mVideo.mediaItem.getFeedbackEndpoint())
+                        mNotInterestedAction = mMediaItemService.getFeedbackTokensObserve(feedbackEndpoint)
                                 .subscribe(
                                         tokens -> {
                                             if (tokens.size() == 2) {
@@ -398,6 +402,25 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
                 );
     }
 
+    /**
+     * The sections loaded like Home (e.g. Gaming) don't send the feedback, so their videos get the one of the Home context menu.
+     * Not the playlists: their video id is the first video's, so the feedback would be about it.
+     */
+    private FeedbackEndpoint getFeedbackEndpoint() {
+        if (mVideo == null || mVideo.mediaItem == null) {
+            return null;
+        }
+
+        MediaItem mediaItem = mVideo.mediaItem;
+
+        if (mediaItem.getFeedbackEndpoint() != null || mediaItem.getFeedbackToken() != null || mediaItem.getFeedbackToken2() != null
+                || !mVideo.belongsToHomeLikeSection() || !mVideo.hasVideo() || mediaItem.getType() != MediaItem.TYPE_VIDEO) {
+            return mediaItem.getFeedbackEndpoint();
+        }
+
+        return mMediaItemService.getHomeFeedbackEndpoint(mVideo.videoId);
+    }
+
     private void removeSuggestedItemAndClose() {
         if (mCallback != null) {
             mCallback.onItemAction(mVideo, VideoMenuCallback.ACTION_REMOVE);
@@ -408,11 +431,13 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
     }
 
     private void appendNotRecommendChannelButton() {
-        if (mVideo == null || mVideo.mediaItem == null || (mVideo.mediaItem.getFeedbackToken2() == null && mVideo.mediaItem.getFeedbackEndpoint() == null)) {
+        FeedbackEndpoint feedbackEndpoint = getFeedbackEndpoint();
+
+        if (mVideo == null || mVideo.mediaItem == null || (mVideo.mediaItem.getFeedbackToken2() == null && feedbackEndpoint == null)) {
             return;
         }
 
-        if ((!mVideo.belongsToHome() && !mVideo.belongsToShorts()) || !mIsNotRecommendChannelEnabled) {
+        if ((!mVideo.belongsToHomeLikeSection() && !mVideo.belongsToShorts()) || !mIsNotRecommendChannelEnabled) {
             return;
         }
 
@@ -420,10 +445,10 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
 
         mDialogPresenter.appendSingleButton(
                 UiOptionItem.from(getContext().getString(R.string.not_recommend_channel), optionItem -> {
-                    if (mVideo.mediaItem.getFeedbackEndpoint() == null) {
+                    if (feedbackEndpoint == null) {
                         markAsNotRecommendChannel(mVideo.mediaItem.getFeedbackToken2());
                     } else {
-                        mNotInterestedAction = mMediaItemService.getFeedbackTokensObserve(mVideo.mediaItem.getFeedbackEndpoint())
+                        mNotInterestedAction = mMediaItemService.getFeedbackTokensObserve(feedbackEndpoint)
                                 .subscribe(
                                         tokens -> {
                                             if (tokens.size() == 2) {
