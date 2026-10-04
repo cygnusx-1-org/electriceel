@@ -1,7 +1,6 @@
 package com.liskovsoft.smartyoutubetv2.common.misc;
 
 import android.content.Context;
-import android.util.Pair;
 
 import com.liskovsoft.mediaserviceinterfaces.ContentService;
 import com.liskovsoft.mediaserviceinterfaces.MediaItemService;
@@ -35,9 +34,7 @@ import com.liskovsoft.youtubeapi.service.YouTubeServiceManager;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -60,7 +57,7 @@ public class MediaServiceManager implements OnAccountChange {
     private static final int MIN_ROW_GROUP_SIZE = 5;
     private static final int MIN_SCALED_GRID_GROUP_SIZE = 35;
     private static final int MIN_SCALED_ROW_GROUP_SIZE = 10;
-    private final Map<Integer, Pair<Integer, Long>> mContinuations = new HashMap<>();
+    private final GroupFiller mGroupFiller = new GroupFiller();
     private final List<AccountChangeListener> mAccountListeners = new CopyOnWriteArrayList<>();
 
     public interface OnMetadata {
@@ -329,31 +326,26 @@ public class MediaServiceManager implements OnAccountChange {
      * Most tiny ui has 8 cards in a row or 24 in grid.
      */
     public boolean shouldContinueTheGroup(Context context, VideoGroup group, boolean isGrid) {
-        if (group == null || group.getMediaGroup() == null) {
-            return false;
-        }
+        return mGroupFiller.shouldContinue(group, getMinGroupSize(context, isGrid));
+    }
 
-        Pair<Integer, Long> sizeTimestamp = mContinuations.get(group.getId());
+    /**
+     * Emits the rows once the short ones have their next pages, so they are shown complete
+     */
+    public Observable<List<VideoGroup>> fillRowGroups(Context context, List<VideoGroup> groups, GroupFiller.Continuation continuation) {
+        return mGroupFiller.fill(groups, getMinGroupSize(context, false), continuation);
+    }
 
-        long currentTimeMillis = System.currentTimeMillis();
-        if (sizeTimestamp != null && currentTimeMillis - sizeTimestamp.second > 3_000) { // seems that section is refreshed
-            sizeTimestamp = null;
-        }
-
-        int prevSize = sizeTimestamp != null ? sizeTimestamp.first : 0;
-        int newSize = Math.max(group.getSize(), 0);
-        int totalSize = prevSize + newSize;
-
+    private static int getMinGroupSize(Context context, boolean isGrid) {
         MainUIData mainUIData = MainUIData.instance(context);
 
         boolean isScaledUIEnabled = mainUIData.getUIScale() < 0.8f || mainUIData.getVideoGridScale() < 0.8f;
-        int minScaledSize = isGrid ? MIN_SCALED_GRID_GROUP_SIZE : MIN_SCALED_ROW_GROUP_SIZE;
-        int minSize = isGrid ? MIN_GRID_GROUP_SIZE : MIN_ROW_GROUP_SIZE;
-        boolean groupTooSmall = isScaledUIEnabled ? totalSize < minScaledSize : totalSize < minSize;
 
-        mContinuations.put(group.getId(), new Pair<>(groupTooSmall ? totalSize : 0, currentTimeMillis));
+        if (isScaledUIEnabled) {
+            return isGrid ? MIN_SCALED_GRID_GROUP_SIZE : MIN_SCALED_ROW_GROUP_SIZE;
+        }
 
-        return groupTooSmall;
+        return isGrid ? MIN_GRID_GROUP_SIZE : MIN_ROW_GROUP_SIZE;
     }
 
     public void enableHistory(boolean enable) {

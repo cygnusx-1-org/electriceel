@@ -775,31 +775,20 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         AtomicInteger groupIndex = new AtomicInteger(-1);
 
         Disposable updateAction = HiddenVideoResolver.resolveGroups(getContext(), VideoCategoryManager.instance(getContext()).resolveGroups(groups), section)
+                // The rows that lost their videos to Hide content get the next ones before they're shown
+                .concatMap(mediaGroups -> MediaServiceManager.instance().fillRowGroups(getContext(),
+                        createRowGroups(section, mediaGroups, groupIndex), this::continueGroupObserve))
                 .subscribe(
-                        mediaGroups -> {
+                        videoGroups -> {
+                            // E.g. the app is closing while the rows are filled
+                            if (getView() == null) {
+                                Log.e(TAG, "Can't show the rows. The view is null.");
+                                return;
+                            }
+
                             getView().showProgressBar(false);
 
-                            filterHomeIfNeeded(mediaGroups);
-
-                            for (MediaGroup mediaGroup : mediaGroups) {
-                                if (mediaGroup.isEmpty()) {
-                                    Log.e(TAG, "loadRowsHeader: MediaGroup is empty. Group Name: " + mediaGroup.getTitle());
-                                    continue;
-                                }
-
-                                VideoGroup videoGroup = VideoGroup.from(mediaGroup, section, groupIndex.get() + 1);
-
-                                // A card alone says nothing, e.g. "More music" of a row that lost its videos to Hide content
-                                if (videoGroup.hasOnlyHiddenVideos()) {
-                                    continue;
-                                }
-
-                                groupIndex.incrementAndGet();
-
-                                if (TextUtils.isEmpty(videoGroup.getTitle())) {
-                                    videoGroup.setTitle(getContext().getString(R.string.suggestions));
-                                }
-
+                            for (VideoGroup videoGroup : videoGroups) {
                                 getView().updateSection(videoGroup);
                                 mBrowseProcessor.process(videoGroup);
 
@@ -812,6 +801,36 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
                         }, () -> handleLoadError(null));
 
         mActions.add(updateAction);
+    }
+
+    private List<VideoGroup> createRowGroups(BrowseSection section, List<MediaGroup> mediaGroups, AtomicInteger groupIndex) {
+        List<VideoGroup> result = new ArrayList<>();
+
+        filterHomeIfNeeded(mediaGroups);
+
+        for (MediaGroup mediaGroup : mediaGroups) {
+            if (mediaGroup.isEmpty()) {
+                Log.e(TAG, "loadRowsHeader: MediaGroup is empty. Group Name: " + mediaGroup.getTitle());
+                continue;
+            }
+
+            VideoGroup videoGroup = VideoGroup.from(mediaGroup, section, groupIndex.get() + 1);
+
+            // A card alone says nothing, e.g. "More music" of a row that lost its videos to Hide content
+            if (videoGroup.hasOnlyHiddenVideos()) {
+                continue;
+            }
+
+            groupIndex.incrementAndGet();
+
+            if (TextUtils.isEmpty(videoGroup.getTitle())) {
+                videoGroup.setTitle(getContext().getString(R.string.suggestions));
+            }
+
+            result.add(videoGroup);
+        }
+
+        return result;
     }
 
     private void updateVideoGrid(BrowseSection section, Observable<MediaGroup> group, int column) {
@@ -891,22 +910,14 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
             getView().showProgressBar(true);
         }
 
-        MediaGroup mediaGroup = group.getMediaGroup();
-
-        Observable<MediaGroup> continuation;
-
-        //if (mediaGroup.getType() == MediaGroup.TYPE_SUGGESTIONS) { // Pinned playlist
-        //    continuation = mItemService.continueGroupObserve(mediaGroup);
-        //} else {
-        //    continuation = getContentService().continueGroupObserve(mediaGroup);
-        //}
-
-        continuation = HiddenVideoResolver.resolveGroup(getContext(),
-                VideoCategoryManager.instance(getContext()).resolveGroup(getContentService().continueGroupObserve(mediaGroup)), group.getSection());
-
-        Disposable continueAction = continuation
+        Disposable continueAction = continueGroupObserve(group)
                 .subscribe(
                         continueGroup -> {
+                            if (getView() == null) {
+                                Log.e(TAG, "Can't continue group. The view is null.");
+                                return;
+                            }
+
                             getView().showProgressBar(false);
 
                             VideoGroup videoGroup = VideoGroup.from(group, continueGroup);
@@ -929,6 +940,19 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
                 );
 
         mActions.add(continueAction);
+    }
+
+    private Observable<MediaGroup> continueGroupObserve(VideoGroup group) {
+        MediaGroup mediaGroup = group.getMediaGroup();
+
+        //if (mediaGroup.getType() == MediaGroup.TYPE_SUGGESTIONS) { // Pinned playlist
+        //    continuation = mItemService.continueGroupObserve(mediaGroup);
+        //} else {
+        //    continuation = getContentService().continueGroupObserve(mediaGroup);
+        //}
+
+        return HiddenVideoResolver.resolveGroup(getContext(),
+                VideoCategoryManager.instance(getContext()).resolveGroup(getContentService().continueGroupObserve(mediaGroup)), group.getSection());
     }
 
     private void authCheck(boolean check, Runnable callback) {
