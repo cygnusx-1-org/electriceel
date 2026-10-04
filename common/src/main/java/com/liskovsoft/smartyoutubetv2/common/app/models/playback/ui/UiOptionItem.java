@@ -20,6 +20,7 @@ public class UiOptionItem implements OptionItem {
     private boolean mIsNote;
     private boolean mIsMenu;
     private boolean mIsToggle;
+    private OptionItem[] mSelectAllItems;
     private ChatReceiver mChatReceiver;
     private CommentsReceiver mCommentsReceiver;
 
@@ -230,6 +231,16 @@ public class UiOptionItem implements OptionItem {
     @Override
     public boolean isToggle() {
         return mIsToggle;
+    }
+
+    @Override
+    public void setSelectAll(OptionItem... items) {
+        mSelectAllItems = items != null && items.length > 0 ? items : null;
+    }
+
+    @Override
+    public OptionItem[] getSelectAll() {
+        return mSelectAllItems;
     }
 
     @Override

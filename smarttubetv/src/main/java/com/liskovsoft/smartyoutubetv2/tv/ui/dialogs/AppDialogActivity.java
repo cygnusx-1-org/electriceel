@@ -44,6 +44,13 @@ public class AppDialogActivity extends MotherActivity {
         }
     }
 
+    @Override
+    protected boolean isRecreatedOnColorSchemeChange() {
+        // The destroyed fragment clears the dialog's data (AppDialogPresenter.onViewDestroyed), so it would come back empty.
+        // The dialog keeps the old colors until it's closed, then the activity below it is recreated.
+        return false;
+    }
+
     private void setupActivity() {
         // Fix crash in AppSettingsActivity: "Only fullscreen opaque activities can request orientation"
         // Error happen only on Android O (api 26) when you set "portrait" orientation in manifest

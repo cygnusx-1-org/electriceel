@@ -508,7 +508,9 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
 
     private void persistState() {
         onDataChange();
-        Utils.postDelayed(mPersistStateInt, 10_000);
+        // Saved right away: a save still pending when the account changes is dropped (see onProfileChanged),
+        // so e.g. a color scheme picked just before switching the account was lost
+        Utils.post(mPersistStateInt);
     }
 
     private void persistStateInt() {
@@ -560,6 +562,8 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
 
     @Override
     public void onProfileChanged() {
+        // Already the new account: a pending save would put the old account's values there
+        Utils.removeCallbacks(mPersistStateInt);
         restoreState();
         onDataChange();
     }

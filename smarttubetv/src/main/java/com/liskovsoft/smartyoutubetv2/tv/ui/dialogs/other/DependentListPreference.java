@@ -11,13 +11,15 @@ import java.util.Set;
 
 /**
  * A checked list with special entries: ones disabled while another entry is checked (e.g. "Everything") or for good,
- * ones that open a menu instead of being checked, radio buttons that uncheck each other, and notes (a line of text)
+ * ones that open a menu instead of being checked, radio buttons that uncheck each other, "All" entries that check or uncheck
+ * other entries, and notes (a line of text)
  */
 public class DependentListPreference extends MultiSelectListPreference {
     private final Map<String, String> mDisabledBy = new HashMap<>(); // entry value -> entry value
     private final Set<String> mDisabled = new HashSet<>(); // entry values disabled whatever is checked
     private final Map<String, Runnable> mMenus = new HashMap<>(); // entry value -> opens the menu
     private final Map<String, Set<String>> mRadio = new HashMap<>(); // entry value -> entry values unchecked by it
+    private final Map<String, Set<String>> mSelectAll = new HashMap<>(); // entry value -> entry values checked and unchecked with it
     private final Set<String> mToggles = new HashSet<>(); // entry values shown as a switch
     private final Set<String> mNotes = new HashSet<>(); // entry values shown as a line of text
 
@@ -99,5 +101,39 @@ public class DependentListPreference extends MultiSelectListPreference {
         Set<String> result = mRadio.get(entryValue);
 
         return result != null ? result : Collections.emptySet();
+    }
+
+    public void setSelectAll(String entryValue, Set<String> otherEntryValues) {
+        mSelectAll.put(entryValue, otherEntryValues);
+    }
+
+    /**
+     * After the entry was checked or unchecked: an "All" entry checks or unchecks its entries along with it,
+     * and an "All" entry is checked while all its entries are
+     */
+    public void updateSelectAll(String entryValue, Set<String> selections) {
+        Set<String> entries = mSelectAll.get(entryValue);
+
+        if (entries != null) {
+            if (selections.contains(entryValue)) {
+                selections.addAll(entries);
+            } else {
+                selections.removeAll(entries);
+            }
+
+            return;
+        }
+
+        for (Map.Entry<String, Set<String>> all : mSelectAll.entrySet()) {
+            if (!all.getValue().contains(entryValue)) {
+                continue;
+            }
+
+            if (selections.containsAll(all.getValue())) {
+                selections.add(all.getKey());
+            } else {
+                selections.remove(all.getKey());
+            }
+        }
     }
 }

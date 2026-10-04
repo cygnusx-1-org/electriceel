@@ -291,6 +291,16 @@ public class AppPreferenceManager {
 
                     dependentPref.setRadio(item.toString(), radioValues);
                 }
+
+                if (item.getSelectAll() != null) {
+                    Set<String> allValues = new HashSet<>();
+
+                    for (OptionItem otherItem : item.getSelectAll()) {
+                        allValues.add(otherItem.toString());
+                    }
+
+                    dependentPref.setSelectAll(item.toString(), allValues);
+                }
             }
         }
 
@@ -299,7 +309,18 @@ public class AppPreferenceManager {
 
     private static boolean hasDependentItems(OptionCategory category) {
         for (OptionItem item : category.options) {
-            if (item.getDisabledBy() != null || !item.isEnabled() || item.isNote() || item.isMenu() || item.isToggle() || item.getRadio() != null) {
+            if (item.getDisabledBy() != null || !item.isEnabled() || item.isNote() || item.isMenu() || item.isToggle() || item.getRadio() != null
+                    || item.getSelectAll() != null) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean hasSelectAllItem(List<OptionItem> items) {
+        for (OptionItem item : items) {
+            if (item.getSelectAll() != null) {
                 return true;
             }
         }
@@ -340,6 +361,21 @@ public class AppPreferenceManager {
         pref.setValues(prefData.defaultValues);
 
         pref.setOnPreferenceChangeListener((preference, newValue) -> {
+            if (newValue instanceof Set && hasSelectAllItem(category.options)) {
+                // "All" changes its items at once, and an item changes "All". Not used with radio items.
+                Set<?> values = (Set<?>) newValue;
+
+                for (OptionItem item : category.options) {
+                    boolean isSelected = values.contains(item.toString());
+
+                    if (item.isSelected() != isSelected) {
+                        item.onSelect(isSelected);
+                    }
+                }
+
+                return true;
+            }
+
             if (newValue instanceof Set) {
                 Set<?> values = ((Set<?>) newValue); // All checked items. That don't means that this items is pressed recently.
                 for (OptionItem item : category.options) {

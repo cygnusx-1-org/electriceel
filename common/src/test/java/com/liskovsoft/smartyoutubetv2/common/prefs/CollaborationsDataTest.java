@@ -35,17 +35,36 @@ public class CollaborationsDataTest {
     }
 
     @Test
-    public void markedByDefaultInHomeAndSubscriptions() {
+    public void markedByDefaultInEverySection() {
         CollaborationsData data = getData();
 
         assertEquals(CollaborationsData.MODE_MARK, data.getMode());
-        assertTrue(data.isSectionEnabled(MediaGroup.TYPE_HOME));
-        assertTrue(data.isSectionEnabled(MediaGroup.TYPE_SUBSCRIPTIONS));
-        assertFalse(data.isSectionEnabled(MediaGroup.TYPE_GAMING));
-        assertTrue(data.isMarkingEnabled(MediaGroup.TYPE_HOME));
-        assertTrue(data.isMarkingEnabled(MediaGroup.TYPE_SUBSCRIPTIONS));
-        assertFalse(data.isHidingEnabled(MediaGroup.TYPE_HOME));
-        assertFalse(data.isEnabled(MediaGroup.TYPE_GAMING));
+        assertEquals(AiSListFilterData.MARK_COLOR_OFF, data.getMarkColor());
+
+        for (int sectionId : new int[] {MediaGroup.TYPE_HOME, MediaGroup.TYPE_SUBSCRIPTIONS, MediaGroup.TYPE_GAMING,
+                MediaGroup.TYPE_USER_PLAYLISTS, MediaGroup.TYPE_CHANNEL_UPLOADS, MediaGroup.TYPE_MY_VIDEOS}) {
+            assertTrue(data.isSectionEnabled(sectionId));
+            assertTrue(data.isMarkingEnabled(sectionId));
+            assertFalse(data.isHidingEnabled(sectionId));
+        }
+    }
+
+    /**
+     * Not in the Sections menu, so they can't be turned off there
+     */
+    @Test
+    public void historyAndLocalListsAreNeverFiltered() {
+        CollaborationsData data = getData();
+
+        data.setMode(CollaborationsData.MODE_HIDE);
+
+        for (int sectionId : new int[] {MediaGroup.TYPE_HISTORY, MediaGroup.TYPE_SETTINGS, MediaGroup.TYPE_PLAYBACK_QUEUE,
+                MediaGroup.TYPE_BLOCKED_CHANNELS, MediaGroup.TYPE_BLOCKED_AI_CHANNELS}) {
+            data.setSectionEnabled(sectionId, true);
+
+            assertFalse(data.isSectionEnabled(sectionId));
+            assertFalse(data.isEnabled(sectionId));
+        }
     }
 
     @Test
@@ -53,6 +72,7 @@ public class CollaborationsDataTest {
         CollaborationsData data = getData();
 
         data.setMode(CollaborationsData.MODE_HIDE);
+        data.setSectionEnabled(MediaGroup.TYPE_GAMING, false);
 
         assertTrue(data.isEnabled(MediaGroup.TYPE_HOME));
         assertTrue(data.isHidingEnabled(MediaGroup.TYPE_HOME));
@@ -94,7 +114,7 @@ public class CollaborationsDataTest {
     public void defaultsSurviveSavingLaterValues() {
         CollaborationsData data = getData();
 
-        data.setSectionEnabled(MediaGroup.TYPE_MUSIC, true);
+        data.setMarkColor(AiSListFilterData.MARK_COLOR_GREEN);
         data.persistNow();
         ShadowLooper.shadowMainLooper().idle();
         CollaborationsData.resetInstanceForTesting();
@@ -102,8 +122,30 @@ public class CollaborationsDataTest {
         CollaborationsData restored = getData();
 
         assertEquals(CollaborationsData.MODE_MARK, restored.getMode());
+        assertEquals(AiSListFilterData.MARK_COLOR_GREEN, restored.getMarkColor());
         assertTrue(restored.isSectionEnabled(MediaGroup.TYPE_MUSIC));
         assertTrue(restored.isSectionEnabled(MediaGroup.TYPE_HOME));
+    }
+
+    /**
+     * Unchecked one by one (e.g. by All), the sections stay off after a restart
+     */
+    @Test
+    public void uncheckedSectionsSurviveRestart() {
+        CollaborationsData data = getData();
+
+        for (int sectionId = 0; sectionId <= MediaGroup.TYPE_BLOCKED_AI_CHANNELS; sectionId++) {
+            data.setSectionEnabled(sectionId, false);
+        }
+
+        data.persistNow();
+        ShadowLooper.shadowMainLooper().idle();
+        CollaborationsData.resetInstanceForTesting();
+
+        CollaborationsData restored = getData();
+
+        assertFalse(restored.isSectionEnabled(MediaGroup.TYPE_HOME));
+        assertFalse(restored.isSectionEnabled(MediaGroup.TYPE_SUBSCRIPTIONS));
     }
 
     @Test
@@ -112,6 +154,7 @@ public class CollaborationsDataTest {
 
         data.setMode(CollaborationsData.MODE_MARK);
         data.setSectionEnabled(MediaGroup.TYPE_HOME, false);
+        data.setMarkColor(AiSListFilterData.MARK_COLOR_BLUE);
         data.persistNow();
         ShadowLooper.shadowMainLooper().idle();
         CollaborationsData.resetInstanceForTesting();
@@ -121,6 +164,7 @@ public class CollaborationsDataTest {
         assertEquals(CollaborationsData.MODE_MARK, restored.getMode());
         assertFalse(restored.isSectionEnabled(MediaGroup.TYPE_HOME));
         assertTrue(restored.isSectionEnabled(MediaGroup.TYPE_SUBSCRIPTIONS));
+        assertEquals(AiSListFilterData.MARK_COLOR_BLUE, restored.getMarkColor());
     }
 
     /**

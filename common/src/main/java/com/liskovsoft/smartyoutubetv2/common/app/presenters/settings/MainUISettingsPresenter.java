@@ -435,10 +435,8 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         for (ColorScheme colorScheme : colorSchemes) {
             styleOptions.add(UiOptionItem.from(
                     getContext().getString(colorScheme.nameResId),
-                    option -> {
-                        mMainUIData.setColorScheme(colorScheme);
-                        mRestartApp = true;
-                    },
+                    // The screens take the new colors by themselves once the settings are closed (see MotherActivity)
+                    option -> mMainUIData.setColorScheme(colorScheme),
                     colorScheme.equals(mMainUIData.getColorScheme())));
         }
 

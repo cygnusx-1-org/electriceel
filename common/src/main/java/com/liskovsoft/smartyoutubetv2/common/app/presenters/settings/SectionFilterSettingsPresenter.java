@@ -18,7 +18,8 @@ import java.util.List;
 import java.util.Map.Entry;
 
 /**
- * A card of the Content Filtering settings that shows, marks or hides a filter's videos, and where (e.g. Collaborations, Watch later)
+ * A card of the Content Filtering settings that shows, marks or hides a filter's videos, where, and the color of the label
+ * (e.g. Collaborations, Watch later)
  */
 public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
     private final SectionFilterData mData;
@@ -58,30 +59,42 @@ public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
     public void show() {
         AppDialogPresenter presenter = AppDialogPresenter.instance(getContext());
 
-        appendModeCategory(presenter);
+        OptionItem markMode = appendModeCategory(presenter);
         appendSectionsCategory(presenter);
+        appendMarkColorCategory(presenter, markMode);
 
         presenter.showDialog(getContext().getString(mTitleResId));
     }
 
-    private void appendModeCategory(AppDialogPresenter presenter) {
+    /**
+     * @return the mode that marks videos
+     */
+    private OptionItem appendModeCategory(AppDialogPresenter presenter) {
         List<OptionItem> options = new ArrayList<>();
+        OptionItem markMode = null;
 
         for (int[] pair : mModes) {
             String description = pair[1] == SectionFilterData.MODE_MARK ? getContext().getString(mMarkDescResId) : null;
-            options.add(UiOptionItem.from(getContext().getString(pair[0]), description,
-                    option -> mData.setMode(pair[1]),
-                    mData.getMode() == pair[1]));
+            OptionItem option = UiOptionItem.from(getContext().getString(pair[0]), description,
+                    optionItem -> mData.setMode(pair[1]),
+                    mData.getMode() == pair[1]);
+            options.add(option);
+
+            if (pair[1] == SectionFilterData.MODE_MARK) {
+                markMode = option;
+            }
         }
 
         presenter.appendRadioCategory(getContext().getString(mTitleResId), options);
+        return markMode;
     }
 
     /**
-     * The same sections as Hide videos older than
+     * The same sections as Hide videos older than. All is first: it checks or unchecks the others, and it's checked while they all are.
      */
     private void appendSectionsCategory(AppDialogPresenter presenter) {
-        List<OptionItem> options = new ArrayList<>();
+        List<OptionItem> sections = new ArrayList<>();
+        boolean isEverySectionEnabled = true;
 
         for (Entry<Integer, Integer> section : mSidebarService.getDefaultSections().entrySet()) {
             int sectionId = section.getValue();
@@ -90,11 +103,37 @@ public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
                 continue;
             }
 
-            options.add(UiOptionItem.from(getContext().getString(section.getKey()),
+            sections.add(UiOptionItem.from(getContext().getString(section.getKey()),
                     option -> mData.setSectionEnabled(sectionId, option.isSelected()),
                     mData.isSectionEnabled(sectionId)));
+            isEverySectionEnabled &= mData.isSectionEnabled(sectionId);
         }
 
+        // The sections save themselves as All checks or unchecks them
+        OptionItem all = UiOptionItem.from(getContext().getString(R.string.sections_all), null, isEverySectionEnabled);
+        all.setSelectAll(sections.toArray(new OptionItem[0]));
+
+        List<OptionItem> options = new ArrayList<>();
+        options.add(all);
+        options.addAll(sections);
+
         presenter.appendCheckedCategory(getContext().getString(mSectionsResId), options);
+    }
+
+    /**
+     * The colors of the AiSList marker. Greyed out while the mode isn't Mark.
+     */
+    private void appendMarkColorCategory(AppDialogPresenter presenter, OptionItem markMode) {
+        List<OptionItem> options = new ArrayList<>();
+
+        for (int[] pair : AiSListSettingsPresenter.MARK_COLORS) {
+            OptionItem option = UiOptionItem.from(getContext().getString(pair[0]),
+                    optionItem -> mData.setMarkColor(pair[1]),
+                    mData.getMarkColor() == pair[1]);
+            option.setRequired(markMode);
+            options.add(option);
+        }
+
+        presenter.appendRadioCategory(getContext().getString(R.string.aislist_mark_color), options);
     }
 }

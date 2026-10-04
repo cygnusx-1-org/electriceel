@@ -23,6 +23,8 @@ import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.smartyoutubetv2.common.R;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.PlaybackPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.ViewManager;
+import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs;
+import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs.ProfileChangeListener;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
@@ -52,6 +54,11 @@ public class MotherActivity extends FragmentActivity {
     private boolean mIsOculusQuestFixEnabled;
     private boolean mIsFullscreenModeEnabled;
     private boolean mIsBackPressed;
+    private int mColorSchemeId;
+    private final Runnable mRecreateIfColorSchemeChanged = this::recreateIfColorSchemeChanged;
+    // Posted, so the data classes have restored the new profile's settings before the check.
+    // A field, because AppPrefs holds its listeners weakly.
+    private final ProfileChangeListener mOnProfileChanged = () -> Utils.post(mRecreateIfColorSchemeChanged);
 
     public interface OnPermissions {
         void onPermissions(int requestCode, String[] permissions, int[] grantResults);
@@ -78,6 +85,7 @@ public class MotherActivity extends FragmentActivity {
 
         initDpi();
         initTheme();
+        mColorSchemeId = MainUIData.instance(this).getColorScheme().id;
 
         // Search Fullscreen routine inside onPause() method
         if (!mIsFullscreenModeEnabled) {
@@ -220,6 +228,32 @@ public class MotherActivity extends FragmentActivity {
 
         // Restore this activity's screensaver policy after returning to the foreground.
         mScreensaverManager.resume();
+
+        recreateIfColorSchemeChanged();
+        // Switching the account (e.g. the account button on Home) changes the profile without pausing this activity
+        AppPrefs.instance(this).addListener(mOnProfileChanged);
+    }
+
+    /**
+     * The theme is applied only in onCreate, so a scheme changed since then (picked in the settings or brought by
+     * another account's profile) left this activity in the old colors next to new activities in the new ones.<br/>
+     * Recreated in place rather than restarting the app, so the screen doesn't go blank. Activities below the top one
+     * are recreated as they come back (onResume).
+     */
+    private void recreateIfColorSchemeChanged() {
+        if (isFinishing() || !isRecreatedOnColorSchemeChange() || MainUIData.instance(this).getColorScheme().id == mColorSchemeId) {
+            return;
+        }
+
+        Log.d(TAG, "Color scheme changed. Recreating %s...", getClass().getSimpleName());
+        recreate();
+    }
+
+    /**
+     * Override to keep the activity in its old colors until it's closed, e.g. when recreating would lose what it shows.
+     */
+    protected boolean isRecreatedOnColorSchemeChange() {
+        return true;
     }
 
     @Override
@@ -228,6 +262,10 @@ public class MotherActivity extends FragmentActivity {
 
         // Stop managing the screensaver so a paused activity cannot keep the display awake.
         mScreensaverManager.suspend();
+
+        // onResume checks the scheme again
+        AppPrefs.instance(this).removeListener(mOnProfileChanged);
+        Utils.removeCallbacks(mRecreateIfColorSchemeChanged);
     }
 
     @Override

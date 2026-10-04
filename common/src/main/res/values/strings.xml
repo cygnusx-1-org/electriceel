@@ -419,6 +419,7 @@
     <string name="watch_later_desc">A video that is in your Watch later playlist. Needs a signed-in account. The playlist is read when a picked section opens, and again once it is 15 minutes old.</string>
     <string name="watch_later_sections">Sections</string>
     <string name="watch_later_label">Watch later</string>
+    <string name="sections_all">All</string>
     <string name="keyword_filter_keywords">Keywords</string>
     <string name="keyword_filter_common">Common keywords</string>
     <string name="keyword_filter_feed_words">Words from a feed</string>

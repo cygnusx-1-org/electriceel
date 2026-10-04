@@ -193,9 +193,12 @@ public class MarqueeTextViewCompat extends TextView {
     }
 
     private void onDrawLTR(Canvas canvas) {
-        // When left shift exceeds actual text length + space, reset mLeftX to create loop scrolling
-        if (mLeftX < -mTextView.getMeasuredWidth() - mSpace) {
-            mLeftX += (mTextView.getMeasuredWidth() + mSpace);
+        // When left shift exceeds actual text length + space, reset mLeftX to create loop scrolling.
+        // Modulo, not a single step: frames that weren't drawn may have left it many loops behind,
+        // and the text stays off-screen (an empty title) until it catches up.
+        int loopWidth = mTextView.getMeasuredWidth() + mSpace;
+        if (loopWidth > 0 && mLeftX < -loopWidth) {
+            mLeftX %= loopWidth;
         }
 
         int save = canvas.save();
@@ -214,9 +217,10 @@ public class MarqueeTextViewCompat extends TextView {
     }
 
     private void onDrawRTL(Canvas canvas) {
-        // When right shift exceeds actual text length + space, reset mLeftX to create loop scrolling
-        if (mLeftX > mTextView.getMeasuredWidth() + mSpace) {
-            mLeftX -= (mTextView.getMeasuredWidth() + mSpace);
+        // When right shift exceeds actual text length + space, reset mLeftX to create loop scrolling (modulo, see onDrawLTR)
+        int loopWidth = mTextView.getMeasuredWidth() + mSpace;
+        if (loopWidth > 0 && mLeftX > loopWidth) {
+            mLeftX %= loopWidth;
         }
 
         int save = canvas.save();
@@ -400,7 +404,9 @@ public class MarqueeTextViewCompat extends TextView {
         return !mIsMarqueeEnabled
                 || isTextFullyVisible()
                 || !(isFocused() || isSelected())
-                || (!mAttached || !mLaidOut || !isShown());
+                || (!mAttached || !mLaidOut || !isShown())
+                // E.g. the player is open: nothing draws the text, so it shouldn't keep scrolling
+                || getWindowVisibility() != VISIBLE;
     }
 
     private boolean isTextFullyVisible() {
@@ -420,6 +426,13 @@ public class MarqueeTextViewCompat extends TextView {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mAttached = true;
+    }
+
+    @Override
+    protected void onWindowVisibilityChanged(int visibility) {
+        super.onWindowVisibilityChanged(visibility);
+        // Stops the scrolling while the screen is hidden, restarts it from the start when the screen comes back
+        updateMarquee();
     }
 
     @Override

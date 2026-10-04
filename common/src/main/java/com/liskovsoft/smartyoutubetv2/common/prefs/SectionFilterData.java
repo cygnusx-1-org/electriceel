@@ -2,11 +2,12 @@ package com.liskovsoft.smartyoutubetv2.common.prefs;
 
 import android.content.Context;
 
-import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
+import com.liskovsoft.smartyoutubetv2.common.misc.OldVideoFilter;
 import com.liskovsoft.smartyoutubetv2.common.prefs.common.DataSaverBase;
 
 /**
  * A filter that shows, marks or hides its videos in the chosen sections (e.g. CollaborationsData, WatchLaterData).<br/>
+ * The label of a marked video has the colors of the AiSList marker (see AiSListFilterData.getMarkShade).<br/>
  * Each subclass is saved apart, under its own name. Each account has its own values while "Use separate settings per each account" is on.
  */
 public abstract class SectionFilterData extends DataSaverBase {
@@ -17,8 +18,9 @@ public abstract class SectionFilterData extends DataSaverBase {
     // Storage layout. Don't change: the values are saved by index.
     private static final int MODE_INDEX = 0;
     private static final int SECTIONS_INDEX = 1; // a bit per section, by the section id (MediaGroup.TYPE_*)
+    private static final int MARK_COLOR_INDEX = 2;
     private static final int MAX_SECTION_ID = 30; // the bits of an int. Pinned items use hash ids, they're never filtered.
-    private static final int DEFAULT_SECTIONS = (1 << MediaGroup.TYPE_HOME) | (1 << MediaGroup.TYPE_SUBSCRIPTIONS);
+    private static final int DEFAULT_SECTIONS = Integer.MAX_VALUE; // every section (bits 0-30), the ones added later too
 
     protected SectionFilterData(Context context) {
         // Saved right away: a save still pending when the account changes is dropped
@@ -40,7 +42,7 @@ public abstract class SectionFilterData extends DataSaverBase {
     }
 
     /**
-     * The mode applies to the section. Home and Subscriptions by default.
+     * The mode applies to the section. Every section by default, except the ones never filtered (see OldVideoFilter.isSupportedSection).
      */
     public boolean isSectionEnabled(int sectionId) {
         return isSection(sectionId) && (getSections() & (1 << sectionId)) != 0;
@@ -63,7 +65,21 @@ public abstract class SectionFilterData extends DataSaverBase {
     }
 
     private static boolean isSection(int sectionId) {
-        return sectionId >= 0 && sectionId <= MAX_SECTION_ID;
+        return sectionId >= 0 && sectionId <= MAX_SECTION_ID && OldVideoFilter.isSupportedSection(sectionId);
+    }
+
+    /**
+     * ARGB color of the label or {@link AiSListFilterData#MARK_COLOR_OFF} (the card text color, the default)
+     */
+    public int getMarkColor() {
+        // A value never set is saved as "null" when a later one is set, and comes back as -1 (not a color of the menu)
+        int color = getInt(MARK_COLOR_INDEX, AiSListFilterData.MARK_COLOR_OFF);
+
+        return color == -1 ? AiSListFilterData.MARK_COLOR_OFF : color;
+    }
+
+    public void setMarkColor(int color) {
+        setInt(MARK_COLOR_INDEX, color);
     }
 
     /**

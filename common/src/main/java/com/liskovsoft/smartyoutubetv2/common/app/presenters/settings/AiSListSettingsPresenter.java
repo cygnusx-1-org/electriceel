@@ -30,7 +30,8 @@ public class AiSListSettingsPresenter extends BasePresenter<Void> {
             {R.string.aislist_mark_in_mark_only, AiSListFilterData.MARK_MODE_MARK_ONLY_SECTIONS},
             {R.string.aislist_mark_instead_of_hide, AiSListFilterData.MARK_MODE_ALL}
     };
-    private static final int[][] MARK_COLORS = {
+    // Also the colors of the Collaborations and Watch later labels (see SectionFilterSettingsPresenter)
+    static final int[][] MARK_COLORS = {
             {R.string.aislist_mark_color_off, AiSListFilterData.MARK_COLOR_OFF},
             {R.string.aislist_color_red, AiSListFilterData.MARK_COLOR_RED},
             {R.string.aislist_color_orange, AiSListFilterData.MARK_COLOR_ORANGE},

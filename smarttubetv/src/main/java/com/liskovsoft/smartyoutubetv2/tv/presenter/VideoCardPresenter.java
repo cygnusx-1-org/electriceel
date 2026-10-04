@@ -28,7 +28,9 @@ import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AiSListFilterData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.CollaborationsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.WatchLaterData;
 import com.liskovsoft.smartyoutubetv2.common.utils.ClickbaitRemover;
 import com.liskovsoft.smartyoutubetv2.tv.R;
 import com.liskovsoft.smartyoutubetv2.tv.presenter.base.LongClickPresenter;
@@ -78,7 +80,7 @@ public class VideoCardPresenter extends LongClickPresenter {
             @Override
             public void setSelected(boolean selected) {
                 updateCardBackgroundColor(this, selected);
-                updateAiMarkShade(this, selected);
+                updateMarkShade(this, selected);
                 super.setSelected(selected);
             }
         };
@@ -202,43 +204,38 @@ public class VideoCardPresenter extends LongClickPresenter {
         CharSequence text = video.getSecondTitle();
 
         if (video.isInWatchLater) {
-            text = addBoldMark(context, text, R.string.watch_later_label);
+            text = addMark(context, text, R.string.watch_later_label, WatchLaterData.instance(context).getMarkColor(), selected);
         }
 
         if (video.isCollaboration) {
-            text = addBoldMark(context, text, R.string.collaboration_mark);
+            text = addMark(context, text, R.string.collaboration_mark, CollaborationsData.instance(context).getMarkColor(), selected);
         }
 
         if (video.aiMarkList != -1) {
-            text = addAiMark(context, text, video.aiMarkList, selected);
+            text = addMark(context, text, R.string.aislist_mark, AiSListFilterData.instance(context).getMarkColor(video.aiMarkList), selected);
         }
 
         return text;
     }
 
-    private static CharSequence addBoldMark(Context context, CharSequence secondTitle, int markResId) {
+    /**
+     * @param markColor the saved ARGB color of the marker or {@link AiSListFilterData#MARK_COLOR_OFF} (the card text color)
+     */
+    private static CharSequence addMark(Context context, CharSequence secondTitle, int markResId, int markColor, boolean selected) {
         SpannableString mark = new SpannableString(context.getString(markResId));
         mark.setSpan(new StyleSpan(Typeface.BOLD), 0, mark.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-        return secondTitle != null ? TextUtils.concat(mark, " " + Video.TERTIARY_TEXT_DELIM + " ", secondTitle) : mark;
-    }
-
-    private static CharSequence addAiMark(Context context, CharSequence secondTitle, int list, boolean selected) {
-        SpannableString mark = new SpannableString(context.getString(R.string.aislist_mark));
-        mark.setSpan(new StyleSpan(Typeface.BOLD), 0, mark.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        int markColor = AiSListFilterData.instance(context).getMarkColor(list);
-
         if (markColor != AiSListFilterData.MARK_COLOR_OFF) {
-            mark.setSpan(new AiMarkSpan(markColor, selected), 0, mark.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            mark.setSpan(new MarkSpan(markColor, selected), 0, mark.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
         return secondTitle != null ? TextUtils.concat(mark, " " + Video.TERTIARY_TEXT_DELIM + " ", secondTitle) : mark;
     }
 
     /**
-     * The selected card has a light background, so the marker switches to its darker shade
+     * The selected card has a light background, so the markers switch to their darker shade
      */
-    private static void updateAiMarkShade(ComplexImageCardView view, boolean selected) {
+    private static void updateMarkShade(ComplexImageCardView view, boolean selected) {
         CharSequence text = view.getContentText();
 
         if (!(text instanceof Spanned)) {
@@ -246,7 +243,7 @@ public class VideoCardPresenter extends LongClickPresenter {
         }
 
         Spanned spanned = (Spanned) text;
-        AiMarkSpan[] spans = spanned.getSpans(0, spanned.length(), AiMarkSpan.class);
+        MarkSpan[] spans = spanned.getSpans(0, spanned.length(), MarkSpan.class);
 
         if (spans.length == 0 || spans[0].mSelected == selected) {
             return;
@@ -254,24 +251,24 @@ public class VideoCardPresenter extends LongClickPresenter {
 
         SpannableString result = new SpannableString(text);
 
-        for (AiMarkSpan span : spans) {
+        for (MarkSpan span : spans) {
             int start = result.getSpanStart(span);
             int end = result.getSpanEnd(span);
             result.removeSpan(span);
-            result.setSpan(new AiMarkSpan(span.mColor, selected), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            result.setSpan(new MarkSpan(span.mColor, selected), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
         view.setContentText(result);
     }
 
     /**
-     * Colors the "AI" marker with the shade of the saved color that suits the card background
+     * Colors a marker ("AI", "Collab", "Watch later") with the shade of the saved color that suits the card background
      */
-    private static class AiMarkSpan extends ForegroundColorSpan {
+    private static class MarkSpan extends ForegroundColorSpan {
         private final int mColor;
         private final boolean mSelected;
 
-        AiMarkSpan(int color, boolean selected) {
+        MarkSpan(int color, boolean selected) {
             super(AiSListFilterData.getMarkShade(color, selected));
             mColor = color;
             mSelected = selected;

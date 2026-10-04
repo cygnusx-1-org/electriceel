@@ -36,17 +36,16 @@ public class WatchLaterDataTest {
     }
 
     @Test
-    public void markedByDefaultInHomeAndSubscriptions() {
+    public void markedByDefaultInEverySection() {
         WatchLaterData data = getData();
 
         assertEquals(WatchLaterData.MODE_MARK, data.getMode());
-        assertTrue(data.isSectionEnabled(MediaGroup.TYPE_HOME));
-        assertTrue(data.isSectionEnabled(MediaGroup.TYPE_SUBSCRIPTIONS));
-        assertFalse(data.isSectionEnabled(MediaGroup.TYPE_GAMING));
+        assertEquals(AiSListFilterData.MARK_COLOR_OFF, data.getMarkColor());
         assertTrue(data.isMarkingEnabled(MediaGroup.TYPE_HOME));
         assertTrue(data.isMarkingEnabled(MediaGroup.TYPE_SUBSCRIPTIONS));
+        assertTrue(data.isMarkingEnabled(MediaGroup.TYPE_GAMING));
         assertFalse(data.isHidingEnabled(MediaGroup.TYPE_HOME));
-        assertFalse(data.isEnabled(MediaGroup.TYPE_GAMING));
+        assertFalse(data.isEnabled(MediaGroup.TYPE_HISTORY));
     }
 
     @Test
@@ -55,12 +54,14 @@ public class WatchLaterDataTest {
         CollaborationsData collaborations = CollaborationsData.instance(RuntimeEnvironment.getApplication());
 
         watchLater.setMode(WatchLaterData.MODE_HIDE);
-        watchLater.setSectionEnabled(MediaGroup.TYPE_GAMING, true);
+        watchLater.setSectionEnabled(MediaGroup.TYPE_GAMING, false);
+        watchLater.setMarkColor(AiSListFilterData.MARK_COLOR_RED);
         collaborations.setMode(CollaborationsData.MODE_MARK);
 
         assertEquals(WatchLaterData.MODE_HIDE, watchLater.getMode());
         assertEquals(CollaborationsData.MODE_MARK, collaborations.getMode());
-        assertFalse(collaborations.isSectionEnabled(MediaGroup.TYPE_GAMING));
+        assertTrue(collaborations.isSectionEnabled(MediaGroup.TYPE_GAMING));
+        assertEquals(AiSListFilterData.MARK_COLOR_OFF, collaborations.getMarkColor());
     }
 
     @Test

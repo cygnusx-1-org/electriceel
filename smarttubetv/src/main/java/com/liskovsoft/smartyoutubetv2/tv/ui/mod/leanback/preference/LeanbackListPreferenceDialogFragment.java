@@ -386,10 +386,15 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
                 ((DependentListPreference) preference).openMenu(entry);
                 return;
             }
+            // MOD: kept to back out an "All" entry too (see DependentListPreference)
+            final Set<String> previousSelections = new HashSet<>(mSelections);
             if (mSelections.contains(entry)) {
                 mSelections.remove(entry);
             } else {
                 mSelections.add(entry);
+            }
+            if (preference instanceof DependentListPreference) {
+                ((DependentListPreference) preference).updateSelectAll(entry, mSelections);
             }
             final MultiSelectListPreference multiSelectListPreference
                     = (MultiSelectListPreference) preference;
@@ -404,11 +409,8 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
                 mInitialSelections = mSelections;
             } else {
                 // Change refused, back it out
-                if (mSelections.contains(entry)) {
-                    mSelections.remove(entry);
-                } else {
-                    mSelections.add(entry);
-                }
+                mSelections.clear();
+                mSelections.addAll(previousSelections);
             }
 
             notifyDataSetChanged();

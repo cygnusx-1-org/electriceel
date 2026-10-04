@@ -36,6 +36,11 @@ public interface OptionItem {
      */
     void setToggle(boolean isToggle);
     boolean isToggle();
+    /**
+     * Check or uncheck the other items of the same checked list along with this one (e.g. "All"). It's checked while they all are.
+     */
+    void setSelectAll(OptionItem... items);
+    OptionItem[] getSelectAll();
     ChatReceiver getChatReceiver();
     CommentsReceiver getCommentsReceiver();
 }
