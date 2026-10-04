@@ -83,3 +83,8 @@ You can select which categories you want to skip in the settings. Unlike the bro
 You can report in our Telegram group or via [issue tracker on Github](https://github.com/cygnusx-1-org/electriceel/issues) (account required).
 
 - **Discord group**: [CygnusX-1.org](https://discord.gg/vDuSpJEDrW)  
+
+## Donations
+[<img src="./assets/badges/buymeacoffee_badge.png"
+    alt="Buy me a coffee"
+    height="80">](https://buymeacoffee.com/edgan)
