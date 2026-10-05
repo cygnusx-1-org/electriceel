@@ -4,12 +4,15 @@
 
 ![The app screenshot](./images/browse_home.png)
 
-Electric Eel is a fork of [SmartTube](https://github.com/yuliskov/SmartTube), and a free and open-source media client for Android TVs and TV boxes. It allows you to browse and play content from various public sources in a TV-optimized interface.
+Electric Eel is a fork of [SmartTube](https://github.com/yuliskov/SmartTube), and a free and open-source media client for Android TVs and TV boxes. Its current focus is adding content filtering, but that will change with [feature requests](https://github.com/cygnusx-1-org/electriceel/issues).
 
 ### Features
 - Filtering of channels via AiSList's lists
 - Hide shorts checkboxes for Sports, Live, My videos, Gaming, News and Music
 - Hide videos older than setting with period, sections and quick toggle
+- Videos once marked as "Not interested" disappear in every row
+- Don't recommend channel and Not interested work available in Gaming, Music, Sports, etc
+- Marking videos as Collaborations and Watch later by default, but can also hide them
 - Shorts quick toggle
 - Quick toggles button next to the account button
 - Settings are per account by default
