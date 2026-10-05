@@ -11,7 +11,7 @@ Electric Eel is a fork of [SmartTube](https://github.com/yuliskov/SmartTube), an
 - Hide shorts checkboxes for Sports, Live, My videos, Gaming, News and Music
 - Hide videos older than setting with period, sections and quick toggle
 - Videos once marked as "Not interested" disappear in every row
-- Don't recommend channel and Not interested work available in Gaming, Music, Sports, etc
+- "Don't recommend channel" and "Not interested" are available in Gaming, Music, Sports, etc now
 - Marking videos as Collaborations and Watch later by default, but can also hide them
 - Shorts quick toggle
 - Quick toggles button next to the account button
