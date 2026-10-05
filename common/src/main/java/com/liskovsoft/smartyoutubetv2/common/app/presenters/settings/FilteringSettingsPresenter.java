@@ -12,7 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The Hide or mark content card of the Content Filtering settings: Collaborations, Watch later, Shows and Top channels you watch
+ * The Hide or mark content card of the Content Filtering settings: Collaborations, Watch later, Shows, Top channels you watch
+ * and Explore more topics
  */
 public class FilteringSettingsPresenter extends BasePresenter<Void> {
     private FilteringSettingsPresenter(Context context) {
@@ -31,6 +32,7 @@ public class FilteringSettingsPresenter extends BasePresenter<Void> {
         options.add(createMenuItem(R.string.watch_later, R.string.watch_later_desc, () -> SectionFilterSettingsPresenter.watchLater(getContext()).show()));
         options.add(createMenuItem(R.string.shows, R.string.shows_desc, () -> SectionFilterSettingsPresenter.shows(getContext()).show()));
         options.add(createMenuItem(R.string.top_channels, R.string.top_channels_desc, () -> SectionFilterSettingsPresenter.topChannels(getContext()).show()));
+        options.add(createMenuItem(R.string.explore_topics, R.string.explore_topics_desc, () -> SectionFilterSettingsPresenter.exploreTopics(getContext()).show()));
 
         String title = getContext().getString(R.string.content_filtering_filtering);
         presenter.appendCheckedCategory(title, options);

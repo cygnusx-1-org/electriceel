@@ -455,6 +455,11 @@ public class VideoCategoryManagerTest {
         public boolean isChannelRow() {
             return false;
         }
+
+        @Override
+        public boolean isSearchTopicRow() {
+            return false;
+        }
     }
 
     private static boolean contains(VideoGroup group, String videoId) {

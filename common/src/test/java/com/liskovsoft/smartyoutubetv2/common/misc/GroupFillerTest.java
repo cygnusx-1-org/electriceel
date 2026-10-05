@@ -363,5 +363,10 @@ public class GroupFillerTest {
         public boolean isChannelRow() {
             return false;
         }
+
+        @Override
+        public boolean isSearchTopicRow() {
+            return false;
+        }
     }
 }

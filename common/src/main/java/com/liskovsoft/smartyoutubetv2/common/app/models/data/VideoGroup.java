@@ -15,6 +15,7 @@ import com.liskovsoft.smartyoutubetv2.common.misc.OldVideoFilter;
 import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.WatchLaterManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.ExploreTopicsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.KeywordFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.SectionFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.ShowsData;
@@ -52,6 +53,7 @@ public class VideoGroup {
     private int mType = -1;
     private int mHiddenVideoCount;
     private boolean mIsChannelRow; // every item is a channel (see MediaGroup.isChannelRow), kept by the pages added later
+    private boolean mIsSearchTopicRow; // every item is a topic that opens a search (see MediaGroup.isSearchTopicRow), kept by the pages added later
     public boolean isQueue;
 
     public static VideoGroup from(BrowseSection section) {
@@ -126,6 +128,7 @@ public class VideoGroup {
 
         // Before the items: they're marked or hidden by it
         videoGroup.mIsChannelRow = mediaGroup.isChannelRow();
+        videoGroup.mIsSearchTopicRow = mediaGroup.isSearchTopicRow();
 
         if (mediaGroup.getMediaItems() == null) {
             Log.e(TAG, "MediaGroup doesn't contain media items. Title: " + mediaGroup.getTitle());
@@ -491,8 +494,8 @@ public class VideoGroup {
         }
 
         if (isChannelBlocked(video) || isAiListed(video) || isHiddenCategory(video) || isOld(video) || isHiddenCollaboration(video)
-                || isHiddenWatchLater(video) || isHiddenShow(video) || isHiddenTopChannel(video) || hasHiddenKeyword(video)
-                || isWatchedSuggestion(video)) {
+                || isHiddenWatchLater(video) || isHiddenShow(video) || isHiddenTopChannel(video) || isHiddenExploreTopic(video)
+                || hasHiddenKeyword(video) || isWatchedSuggestion(video)) {
             if (video.videoId != null) {
                 mHiddenVideoCount++;
             }
@@ -688,10 +691,11 @@ public class VideoGroup {
     }
 
     /**
-     * A row of channels (e.g. Top channels you watch) that the Top channels you watch setting hides. It isn't shown or continued.
+     * A row of channels (e.g. Top channels you watch) or of topics (e.g. Explore more topics) that its setting hides.
+     * It isn't shown or continued.
      */
     public boolean isHiddenRow() {
-        return getTopChannelsMode() == SectionFilterData.MODE_HIDE;
+        return getTopChannelsMode() == SectionFilterData.MODE_HIDE || getExploreTopicsMode() == SectionFilterData.MODE_HIDE;
     }
 
     /**
@@ -717,6 +721,33 @@ public class VideoGroup {
         }
 
         TopChannelsData data = TopChannelsData.instance(GlobalPreferences.context());
+
+        return data.isSectionEnabled(getSection().getId()) ? data.getMode() : SectionFilterData.MODE_SHOW;
+    }
+
+    /**
+     * A topic of a row of topics, hidden with its row. Also marks the topic when the setting marks instead of hiding.
+     */
+    private boolean isHiddenExploreTopic(Video video) {
+        int mode = getExploreTopicsMode();
+
+        if (mode == SectionFilterData.MODE_MARK) {
+            video.isExploreTopicMarked = true;
+        }
+
+        return mode == SectionFilterData.MODE_HIDE;
+    }
+
+    /**
+     * The mode of the Explore more topics setting for the row. Shown unless it's a row of topics of a section picked in the setting.
+     */
+    private int getExploreTopicsMode() {
+        // No context before the app is initialized (GlobalPreferences)
+        if (!mIsSearchTopicRow || getSection() == null || GlobalPreferences.context() == null) {
+            return SectionFilterData.MODE_SHOW;
+        }
+
+        ExploreTopicsData data = ExploreTopicsData.instance(GlobalPreferences.context());
 
         return data.isSectionEnabled(getSection().getId()) ? data.getMode() : SectionFilterData.MODE_SHOW;
     }

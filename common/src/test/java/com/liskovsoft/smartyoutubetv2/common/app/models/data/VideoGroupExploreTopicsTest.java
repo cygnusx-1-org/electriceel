@@ -5,6 +5,7 @@ import android.content.Context;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItem;
 import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
+import com.liskovsoft.smartyoutubetv2.common.prefs.ExploreTopicsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.TopChannelsData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
@@ -24,18 +25,18 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
- * The Top channels you watch setting in the rows of the sections (see TopChannelsData)
+ * The Explore more topics setting in the rows of the sections (see ExploreTopicsData)
  */
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 28)
-public class VideoGroupTopChannelsTest {
-    private TopChannelsData mData;
+public class VideoGroupExploreTopicsTest {
+    private ExploreTopicsData mData;
 
     @Before
     public void setUp() {
         Context context = RuntimeEnvironment.getApplication();
         GlobalPreferences.instance(context);
-        mData = TopChannelsData.instance(context);
+        mData = ExploreTopicsData.instance(context);
         mData.setSectionEnabled(MediaGroup.TYPE_HOME, true);
         mData.setSectionEnabled(MediaGroup.TYPE_GAMING, false);
     }
@@ -43,23 +44,24 @@ public class VideoGroupTopChannelsTest {
     @After
     public void tearDown() {
         // The defaults
-        mData.setMode(TopChannelsData.MODE_SHOW);
+        mData.setMode(ExploreTopicsData.MODE_SHOW);
         mData.setSectionEnabled(MediaGroup.TYPE_GAMING, true);
+        TopChannelsData.instance(RuntimeEnvironment.getApplication()).setMode(TopChannelsData.MODE_SHOW);
         Utils.sHandler.removeCallbacksAndMessages(null);
     }
 
     @Test
     public void rowIsHiddenOnlyInPickedSections() {
-        mData.setMode(TopChannelsData.MODE_HIDE);
+        mData.setMode(ExploreTopicsData.MODE_HIDE);
 
-        VideoGroup home = createGroup(MediaGroup.TYPE_HOME, createChannelRow());
-        VideoGroup gaming = createGroup(MediaGroup.TYPE_GAMING, createChannelRow());
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME, createTopicRow());
+        VideoGroup gaming = createGroup(MediaGroup.TYPE_GAMING, createTopicRow());
 
         assertTrue(home.isEmpty());
         assertTrue(home.isHiddenRow());
         assertEquals(3, gaming.getSize());
         assertFalse(gaming.isHiddenRow());
-        assertFalse(gaming.get(0).isTopChannelMarked);
+        assertFalse(gaming.get(0).isExploreTopicMarked);
     }
 
     /**
@@ -67,96 +69,126 @@ public class VideoGroupTopChannelsTest {
      */
     @Test
     public void hiddenRowHasNoHiddenVideos() {
-        mData.setMode(TopChannelsData.MODE_HIDE);
+        mData.setMode(ExploreTopicsData.MODE_HIDE);
 
-        VideoGroup home = createGroup(MediaGroup.TYPE_HOME, createChannelRow());
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME, createTopicRow());
 
         assertFalse(home.hasOnlyHiddenVideos());
         assertTrue(home.isHiddenRow());
     }
 
     @Test
-    public void channelsAreMarkedInMarkMode() {
-        mData.setMode(TopChannelsData.MODE_MARK);
+    public void topicsAreMarkedInMarkMode() {
+        mData.setMode(ExploreTopicsData.MODE_MARK);
 
-        VideoGroup home = createGroup(MediaGroup.TYPE_HOME, createChannelRow());
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME, createTopicRow());
 
         assertEquals(3, home.getSize());
         assertFalse(home.isHiddenRow());
 
         for (Video video : home.getVideos()) {
-            assertTrue(video.isTopChannelMarked);
+            assertTrue(video.isExploreTopicMarked);
+            assertFalse(video.isTopChannelMarked);
         }
     }
 
     @Test
     public void showModeLeavesThemAlone() {
-        mData.setMode(TopChannelsData.MODE_SHOW);
+        mData.setMode(ExploreTopicsData.MODE_SHOW);
 
-        VideoGroup home = createGroup(MediaGroup.TYPE_HOME, createChannelRow());
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME, createTopicRow());
 
         assertEquals(3, home.getSize());
         assertFalse(home.isHiddenRow());
-        assertFalse(home.get(0).isTopChannelMarked);
+        assertFalse(home.get(0).isExploreTopicMarked);
     }
 
     /**
-     * The row is found by the service, not by its cards: a channel in a row of videos stays
+     * The row is found by the service, not by its cards: a topic in a row of videos stays
      */
     @Test
-    public void channelOfAnotherRowIsLeftAlone() {
-        mData.setMode(TopChannelsData.MODE_HIDE);
+    public void topicOfAnotherRowIsLeftAlone() {
+        mData.setMode(ExploreTopicsData.MODE_HIDE);
 
-        VideoGroup home = createGroup(MediaGroup.TYPE_HOME, new TestMediaGroup(false, createChannel(), createVideo()));
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME, new TestMediaGroup(false, false, createTopic(), createVideo()));
 
         assertEquals(2, home.getSize());
         assertFalse(home.isHiddenRow());
-        assertFalse(home.get(0).isTopChannelMarked);
+        assertFalse(home.get(0).isExploreTopicMarked);
     }
 
     /**
-     * The next page of the row isn't a row of channels by itself (e.g. a continuation), the row is
+     * The next page of the row isn't a row of topics by itself (e.g. a continuation), the row is
      */
     @Test
     public void nextPageOfTheRowIsMarked() {
-        mData.setMode(TopChannelsData.MODE_MARK);
+        mData.setMode(ExploreTopicsData.MODE_MARK);
 
-        VideoGroup home = createGroup(MediaGroup.TYPE_HOME, createChannelRow());
-        VideoGroup.from(home, new TestMediaGroup(false, createChannel()));
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME, createTopicRow());
+        VideoGroup.from(home, new TestMediaGroup(false, false, createTopic()));
 
         assertEquals(4, home.getSize());
-        assertTrue(home.get(3).isTopChannelMarked);
+        assertTrue(home.get(3).isExploreTopicMarked);
     }
 
     @Test
     public void markIsKeptByTheCopy() {
-        mData.setMode(TopChannelsData.MODE_MARK);
+        mData.setMode(ExploreTopicsData.MODE_MARK);
 
-        VideoGroup home = createGroup(MediaGroup.TYPE_HOME, createChannelRow());
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME, createTopicRow());
 
-        assertTrue(Video.from(home.get(0)).isTopChannelMarked);
+        assertTrue(Video.from(home.get(0)).isExploreTopicMarked);
+    }
+
+    /**
+     * Each setting has its own kind of row: hiding the topics leaves a row of channels, and hiding the channels leaves a row of topics
+     */
+    @Test
+    public void topChannelsSettingIsApart() {
+        mData.setMode(ExploreTopicsData.MODE_HIDE);
+        TopChannelsData.instance(RuntimeEnvironment.getApplication()).setMode(TopChannelsData.MODE_MARK);
+
+        VideoGroup channels = createGroup(MediaGroup.TYPE_HOME, new TestMediaGroup(true, false, createChannel()));
+
+        assertFalse(channels.isHiddenRow());
+        assertTrue(channels.get(0).isTopChannelMarked);
+
+        mData.setMode(ExploreTopicsData.MODE_MARK);
+        TopChannelsData.instance(RuntimeEnvironment.getApplication()).setMode(TopChannelsData.MODE_HIDE);
+
+        VideoGroup topics = createGroup(MediaGroup.TYPE_HOME, createTopicRow());
+
+        assertFalse(topics.isHiddenRow());
+        assertTrue(topics.get(0).isExploreTopicMarked);
     }
 
     private static VideoGroup createGroup(int type, MediaGroup mediaGroup) {
         return VideoGroup.from(mediaGroup, new BrowseSection(type, "Section", BrowseSection.TYPE_ROW, 0), 0);
     }
 
-    private static MediaGroup createChannelRow() {
-        return new TestMediaGroup(true, createChannel(), createChannel(), createChannel());
+    private static MediaGroup createTopicRow() {
+        return new TestMediaGroup(false, true, createTopic(), createTopic(), createTopic());
     }
 
-    private static int sChannelCount;
+    private static int sTopicCount;
 
     /**
-     * Like the round tiles of Top channels you watch: a channel id, no video id
+     * Like the tiles of Explore more topics: a title and a search query, no video id and no second title
      */
+    private static Video createTopic() {
+        sTopicCount++;
+        Video video = new Video();
+        video.itemType = MediaItem.TYPE_UNDEFINED;
+        video.title = "Topic " + sTopicCount;
+        video.searchQuery = "Topic " + sTopicCount;
+        return video;
+    }
+
     private static Video createChannel() {
-        sChannelCount++;
         Video video = new Video();
         video.itemType = MediaItem.TYPE_CHANNEL;
-        video.channelId = "UCchannel" + sChannelCount;
-        video.title = "Channel " + sChannelCount;
-        video.secondTitle = "@channel" + sChannelCount + " • 19.9K subscribers";
+        video.channelId = "UCchannel1";
+        video.title = "Channel";
         return video;
     }
 
@@ -172,10 +204,12 @@ public class VideoGroupTopChannelsTest {
 
     private static final class TestMediaGroup implements MediaGroup {
         private final boolean mIsChannelRow;
+        private final boolean mIsSearchTopicRow;
         private final List<MediaItem> mItems = new ArrayList<>();
 
-        TestMediaGroup(boolean isChannelRow, Video... videos) {
+        TestMediaGroup(boolean isChannelRow, boolean isSearchTopicRow, Video... videos) {
             mIsChannelRow = isChannelRow;
+            mIsSearchTopicRow = isSearchTopicRow;
 
             for (Video video : videos) {
                 mItems.add(SimpleMediaItem.from(video));
@@ -194,7 +228,7 @@ public class VideoGroupTopChannelsTest {
 
         @Override
         public String getTitle() {
-            return "Top channels you watch";
+            return "Explore more topics";
         }
 
         @Override
@@ -239,7 +273,7 @@ public class VideoGroupTopChannelsTest {
 
         @Override
         public boolean isSearchTopicRow() {
-            return false;
+            return mIsSearchTopicRow;
         }
     }
 }

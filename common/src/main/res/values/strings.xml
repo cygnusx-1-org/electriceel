@@ -435,6 +435,14 @@
     <string name="top_channels_desc">A row of channels only, such as Top channels you watch in Home. Hiding it hides the whole row. Found in every language.</string>
     <string name="top_channels_sections">Sections</string>
     <string name="top_channel_label">Top channel</string>
+    <string name="explore_topics">Explore more topics</string>
+    <string name="explore_topics_show">Show</string>
+    <string name="explore_topics_mark">Mark</string>
+    <string name="explore_topics_mark_desc">The topics of the row stay with a \"Topic\" label</string>
+    <string name="explore_topics_hide">Hide</string>
+    <string name="explore_topics_desc">A row of topics that each open a search, such as Explore more topics in Home. Hiding it hides the whole row. Found in every language.</string>
+    <string name="explore_topics_sections">Sections</string>
+    <string name="explore_topic_label">Topic</string>
     <string name="sections_all">All</string>
     <string name="keyword_filter_keywords">Keywords</string>
     <string name="keyword_filter_common">Common keywords</string>

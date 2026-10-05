@@ -58,6 +58,7 @@ public final class Video {
     public boolean isInWatchLater; // marked as in Watch later (see WatchLaterManager)
     public boolean isShowMarked; // marked as a show (see ShowsData)
     public boolean isTopChannelMarked; // marked as a channel of a row of channels (see TopChannelsData)
+    public boolean isExploreTopicMarked; // marked as a topic of a row of topics (see ExploreTopicsData)
     public String videoId;
     public String playlistId;
     public String remotePlaylistId;
@@ -192,6 +193,7 @@ public final class Video {
         video.isInWatchLater = item.isInWatchLater;
         video.isShowMarked = item.isShowMarked;
         video.isTopChannelMarked = item.isTopChannelMarked;
+        video.isExploreTopicMarked = item.isExploreTopicMarked;
         video.bgImageUrl = item.bgImageUrl;
         video.cardImageUrl = item.cardImageUrl;
         video.author = item.author;

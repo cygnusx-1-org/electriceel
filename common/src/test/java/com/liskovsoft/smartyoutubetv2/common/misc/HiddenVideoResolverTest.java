@@ -422,5 +422,10 @@ public class HiddenVideoResolverTest {
         public boolean isChannelRow() {
             return false;
         }
+
+        @Override
+        public boolean isSearchTopicRow() {
+            return false;
+        }
     }
 }
