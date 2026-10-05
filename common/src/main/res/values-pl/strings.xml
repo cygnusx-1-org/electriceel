@@ -749,6 +749,7 @@
   <string name="comments_disabled">Komentarze do tego wideo są wyłączone</string>
   <string name="remove_video_to_watch_later">Usuń z listy Do obejrzenia</string>
     <string name="header_blocked_ai_channels">Zablokowane kanały AI</string>
+    <string name="blocked_ai_channels_message">Kanały, których filmy AiSList ukrył w Twoich feedach od uruchomienia aplikacji, a nie cała lista</string>
     <string name="aislist_mark_videos">Oznaczaj filmy</string>
     <string name="aislist_mark_off">Wyłączone</string>
     <string name="aislist_mark_in_mark_only">Oznaczaj filmy tylko w sekcjach \"tylko oznaczanie\"</string>

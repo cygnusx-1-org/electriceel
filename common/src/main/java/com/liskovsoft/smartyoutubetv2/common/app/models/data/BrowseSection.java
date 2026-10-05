@@ -20,6 +20,7 @@ public class BrowseSection {
     private final Object mData;
     private boolean mEnabled = true;
     private int mType;
+    private String mMessage;
 
     public BrowseSection(int id, String title, int type, int resId) {
         this(id, title, type, resId, false);
@@ -97,6 +98,18 @@ public class BrowseSection {
 
     public Object getData() {
         return mData;
+    }
+
+    /**
+     * Explains the section above its content
+     */
+    public void setMessage(String message) {
+        mMessage = message;
+    }
+
+    @Nullable
+    public String getMessage() {
+        return mMessage;
     }
 
     /**

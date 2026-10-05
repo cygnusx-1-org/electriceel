@@ -297,6 +297,7 @@
   <string name="action_playlist_add">Dodaj na seznam predvajanja</string>
   <string name="keyboard_auto_show">Samodejno prikaži tipkovnico</string>
     <string name="header_blocked_ai_channels">Blokirani kanali UI</string>
+    <string name="blocked_ai_channels_message">Kanali, katerih videoposnetke je AiSList skril iz vaših virov od zagona aplikacije, ne celoten seznam</string>
     <string name="aislist_mark_videos">Označi videoposnetke</string>
     <string name="aislist_mark_off">Izklopljeno</string>
     <string name="aislist_mark_in_mark_only">Označi videoposnetke samo v razdelkih \"samo oznaka\"</string>

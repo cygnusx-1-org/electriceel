@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 import androidx.leanback.app.BrowseSupportFragment;
 import androidx.leanback.transition.TransitionHelper;
@@ -27,10 +28,12 @@ import com.liskovsoft.smartyoutubetv2.tv.R;
 public class GridFragment extends Fragment implements BrowseSupportFragment.MainFragmentAdapterProvider {
     private static final String TAG = "VerticalGridFragment";
     private static boolean DEBUG = false;
+    private static final String ARG_MESSAGE = "message";
 
     private ObjectAdapter mAdapter;
     private VerticalGridPresenter mGridPresenter;
     private VerticalGridPresenter.ViewHolder mGridViewHolder;
+    private TextView mMessageView;
     private OnItemViewSelectedListener mOnItemViewSelectedListener;
     private OnItemViewClickedListener mOnItemViewClickedListener;
     private Object mSceneAfterEntranceTransition;
@@ -42,6 +45,16 @@ public class GridFragment extends Fragment implements BrowseSupportFragment.Main
                     GridFragment.this.setEntranceTransitionState(state);
                 }
             };
+
+    /**
+     * Explains the section above the first row. Call before the fragment is added.
+     */
+    public void setMessage(String message) {
+        Bundle args = getArguments() != null ? getArguments() : new Bundle();
+        args.putString(ARG_MESSAGE, message);
+        setArguments(args);
+    }
+
     /**
      * Sets the grid presenter.
      */
@@ -137,10 +150,17 @@ public class GridFragment extends Fragment implements BrowseSupportFragment.Main
                 == null || mMainFragmentAdapter.getFragmentHost() == null) {
             return;
         }
-        if (!mGridViewHolder.getGridView().hasPreviousViewInSameRow(mSelectedPosition)) {
-            mMainFragmentAdapter.getFragmentHost().showTitleView(true);
-        } else {
-            mMainFragmentAdapter.getFragmentHost().showTitleView(false);
+        boolean show = !mGridViewHolder.getGridView().hasPreviousViewInSameRow(mSelectedPosition);
+        mMainFragmentAdapter.getFragmentHost().showTitleView(show);
+        showMessage(show);
+    }
+
+    /**
+     * Goes with the title: the rows below the first one scroll through its space
+     */
+    private void showMessage(boolean show) {
+        if (mMessageView != null && mMessageView.getVisibility() != View.GONE) {
+            mMessageView.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
         }
     }
 
@@ -175,6 +195,14 @@ public class GridFragment extends Fragment implements BrowseSupportFragment.Main
         gridDock.addView(mGridViewHolder.view);
         mGridViewHolder.getGridView().setOnChildLaidOutListener(mChildLaidOutListener);
 
+        String message = getArguments() != null ? getArguments().getString(ARG_MESSAGE) : null;
+        mMessageView = view.findViewById(R.id.grid_message);
+
+        if (message != null) {
+            mMessageView.setText(message);
+            mMessageView.setVisibility(View.VISIBLE);
+        }
+
         mSceneAfterEntranceTransition = TransitionHelper.createScene(gridDock, new Runnable() {
             @Override
             public void run() {
@@ -193,6 +221,7 @@ public class GridFragment extends Fragment implements BrowseSupportFragment.Main
     public void onDestroyView() {
         super.onDestroyView();
         mGridViewHolder = null;
+        mMessageView = null;
     }
 
     @Override

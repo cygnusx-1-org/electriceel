@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:tools="http://schemas.android.com/tools"
              android:id="@+id/browse_dummy"
              android:layout_width="match_parent"
              android:layout_height="match_parent" >
@@ -18,4 +19,27 @@
                 android:layout_height="match_parent" />
 
     </androidx.leanback.widget.BrowseFrameLayout>
+
+    <!-- MOD: explains the section in the space above the first row, the grid doesn't move (see GridFragment.setMessage).
+         One line: a second one would run into the focused title buttons. A long translation is shrunk to fit
+         (ellipsized before Android 8). The open sidebar slides the content right by browseRowsMarginStart without
+         narrowing it: the end margin keeps the line on screen and the same size with the sidebar open or closed. -->
+    <TextView
+            android:id="@+id/grid_message"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/browseRowsMarginTop"
+            android:layout_marginEnd="?attr/browseRowsMarginStart"
+            android:paddingStart="?attr/browsePaddingStart"
+            android:paddingEnd="?attr/browsePaddingEnd"
+            android:paddingBottom="@dimen/grid_message_padding_bottom"
+            android:gravity="bottom|start"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textAppearance="@style/TextAppearance.Leanback.Row.Header.Description"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="10sp"
+            android:autoSizeMaxTextSize="@dimen/lb_browse_header_description_text_size"
+            android:autoSizeStepGranularity="1sp"
+            android:visibility="gone"
+            tools:targetApi="o" />
 </FrameLayout>

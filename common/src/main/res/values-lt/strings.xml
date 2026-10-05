@@ -411,6 +411,7 @@
     <string name="force_sw_codec">Naudoti programinį vaizdo dekoderį</string>
     <string name="force_sw_codec_desc">Gali atkurti beveik bet kurį vaizdo įrašą, bet atkūrimo sparta yra labai maža.</string>
     <string name="header_blocked_ai_channels">Užblokuoti DI kanalai</string>
+    <string name="blocked_ai_channels_message">Kanalai, kurių vaizdo įrašus AiSList paslėpė iš jūsų sklaidos kanalų nuo programos paleidimo, o ne visas sąrašas</string>
     <string name="aislist_mark_videos">Žymėti vaizdo įrašus</string>
     <string name="aislist_mark_off">Išjungta</string>
     <string name="aislist_mark_in_mark_only">Žymėti vaizdo įrašus tik skiltyse \"tik žymėjimas\"</string>

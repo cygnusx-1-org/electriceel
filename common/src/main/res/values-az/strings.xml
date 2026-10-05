@@ -721,6 +721,7 @@
     <string name="player_time_stretching">Audio vaxtını uzatmaq</string>
     <string name="player_time_stretching_desc">Sürəti dəyişdirərkən səsi təbii saxlayır. Bəzi cihazlarda məhsuldarlığı əhəmiyyətli dərəcədə azalda bilər.</string>
     <string name="header_blocked_ai_channels">Bloklanmış Sİ Kanalları</string>
+    <string name="blocked_ai_channels_message">AiSList-in tətbiq başlayandan bəri lentlərinizdən videolarını gizlətdiyi kanallar, siyahının tamamı deyil</string>
     <string name="aislist_mark_videos">Videoları işarələ</string>
     <string name="aislist_mark_off">Söndürülüb</string>
     <string name="aislist_mark_in_mark_only">Videoları yalnız \"yalnız işarə\" bölmələrində işarələ</string>

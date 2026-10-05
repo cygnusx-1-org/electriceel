@@ -324,6 +324,7 @@
     <string name="hide_shorts_from_history">ซ่อน shorts จากประวัติการเข้าชม</string>
     <string name="disable_screensaver">Disable screensaver</string>
     <string name="header_blocked_ai_channels">ช่อง AI ที่บล็อก</string>
+    <string name="blocked_ai_channels_message">ช่องที่ AiSList ซ่อนวิดีโอจากฟีดของคุณตั้งแต่เริ่มแอป ไม่ใช่รายการทั้งหมด</string>
     <string name="aislist_mark_videos">ทำเครื่องหมายวิดีโอ</string>
     <string name="aislist_mark_off">ปิด</string>
     <string name="aislist_mark_in_mark_only">ทำเครื่องหมายวิดีโอเฉพาะในส่วน \"ทำเครื่องหมายเท่านั้น\"</string>

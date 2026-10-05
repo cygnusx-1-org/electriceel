@@ -120,6 +120,7 @@
     <string name="sorting_alphabetically">Alfabētiski</string>
     <string name="sorting_last_viewed">Pēdējais skatītais</string>
     <string name="header_blocked_ai_channels">Bloķētie MI kanāli</string>
+    <string name="blocked_ai_channels_message">Kanāli, kuru videoklipus AiSList kopš lietotnes palaišanas ir paslēpis no jūsu plūsmām, nevis viss saraksts</string>
     <string name="aislist_mark_videos">Atzīmēt videoklipus</string>
     <string name="aislist_mark_off">Izslēgts</string>
     <string name="aislist_mark_in_mark_only">Atzīmēt videoklipus tikai sadaļās \"tikai atzīme\"</string>

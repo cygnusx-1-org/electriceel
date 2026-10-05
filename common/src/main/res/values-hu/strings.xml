@@ -749,6 +749,7 @@
   <string name="network_settings">Hálózati beállítások</string>
   <string name="comments_disabled">A komment szakasz letiltva</string>
     <string name="header_blocked_ai_channels">Blokkolt MI-csatornák</string>
+    <string name="blocked_ai_channels_message">Csatornák, amelyek videóit az AiSList az alkalmazás indítása óta elrejtette a hírfolyamaidból, nem a teljes lista</string>
     <string name="aislist_mark_videos">Videók megjelölése</string>
     <string name="aislist_mark_off">Ki</string>
     <string name="aislist_mark_in_mark_only">Videók megjelölése csak a \"csak jelölés\" szakaszokban</string>

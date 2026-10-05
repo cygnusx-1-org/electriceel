@@ -877,6 +877,7 @@
         <item quantity="other">%s hours</item>
     </plurals>
     <string name="header_blocked_ai_channels">Blocked AI Channels</string>
+    <string name="blocked_ai_channels_message">Channels whose videos AiSList hid from your feeds since the app started, not the whole list</string>
     <string name="aislist_mark_videos">Mark videos</string>
     <string name="aislist_mark_off">Off</string>
     <string name="aislist_mark_in_mark_only">Mark videos only in mark only sections</string>

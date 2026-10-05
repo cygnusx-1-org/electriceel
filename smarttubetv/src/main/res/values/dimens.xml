@@ -98,6 +98,8 @@
     <dimen name="grid_item_horizontal_spacing">15dp</dimen>
     <dimen name="grid_item_vertical_spacing">15dp</dimen>
     <dimen name="grid_horizontal_margin">25dp</dimen>
+    <!-- Between the section message and the first row, clears the zoom of a focused card -->
+    <dimen name="grid_message_padding_bottom">16dp</dimen>
 
     <!-- Browse headers spacing. Origin: 21dp -->
     <!--<dimen name="lb_browse_headers_vertical_spacing">10dp</dimen>-->

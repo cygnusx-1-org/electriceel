@@ -757,6 +757,7 @@
         <item quantity="other">%s secondi</item>
     </plurals>
     <string name="header_blocked_ai_channels">Canali IA bloccati</string>
+    <string name="blocked_ai_channels_message">Canali di cui AiSList ha nascosto i video dai tuoi feed dall\'avvio dell\'app, non l\'intero elenco</string>
     <string name="aislist_mark_videos">Contrassegna i video</string>
     <string name="aislist_mark_off">Disattivato</string>
     <string name="aislist_mark_in_mark_only">Contrassegna i video solo nelle sezioni \"solo contrassegno\"</string>

@@ -749,6 +749,7 @@
   <string name="comments_disabled">此影片已關閉留言</string>
   <string name="color_scheme_dark_blue_oled">深藍色 (OLED)</string>
     <string name="header_blocked_ai_channels">封鎖的 AI 頻道</string>
+    <string name="blocked_ai_channels_message">自應用程式啟動後 AiSList 從動態中隱藏過影片的頻道，並非完整清單</string>
     <string name="aislist_mark_videos">標記影片</string>
     <string name="aislist_mark_off">關閉</string>
     <string name="aislist_mark_in_mark_only">僅在「僅標記」區塊中標記影片</string>

@@ -709,6 +709,7 @@
   <string name="dont_resize_video_to_fit_dialog">Skaler ikke video til at passe dialog</string>
   <string name="typing_corrections">Deaktiver autokorrektion under indtastning</string>
     <string name="header_blocked_ai_channels">Blokerede AI-kanaler</string>
+    <string name="blocked_ai_channels_message">Kanaler, hvis videoer AiSList har skjult fra dine feeds, siden appen startede, ikke hele listen</string>
     <string name="aislist_mark_videos">Markér videoer</string>
     <string name="aislist_mark_off">Fra</string>
     <string name="aislist_mark_in_mark_only">Markér kun videoer i sektionerne \"kun markering\"</string>

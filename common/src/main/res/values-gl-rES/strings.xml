@@ -749,6 +749,7 @@
   <string name="remove_video_to_watch_later">Eliminar de Ver máis tarde</string>
   <string name="comments_disabled">Os comentarios están desactivados para este vídeo</string>
     <string name="header_blocked_ai_channels">Canles de IA bloqueadas</string>
+    <string name="blocked_ai_channels_message">Canles das que AiSList agochou vídeos dos teus feeds desde que se iniciou a aplicación, non a lista completa</string>
     <string name="aislist_mark_videos">Marcar os vídeos</string>
     <string name="aislist_mark_off">Desactivado</string>
     <string name="aislist_mark_in_mark_only">Marcar os vídeos só nas seccións \"só marcar\"</string>

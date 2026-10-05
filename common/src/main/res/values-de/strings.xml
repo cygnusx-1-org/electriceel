@@ -754,6 +754,7 @@
     </plurals>
     <string name="remove_from_search_history">Aus Suchverlauf entfernen</string>
     <string name="header_blocked_ai_channels">Blockierte KI-Kanäle</string>
+    <string name="blocked_ai_channels_message">Kanäle, deren Videos AiSList seit dem Start der App aus deinen Feeds ausgeblendet hat, nicht die ganze Liste</string>
     <string name="aislist_mark_videos">Videos markieren</string>
     <string name="aislist_mark_off">Aus</string>
     <string name="aislist_mark_in_mark_only">Videos nur in den Bereichen \"nur markieren\" markieren</string>

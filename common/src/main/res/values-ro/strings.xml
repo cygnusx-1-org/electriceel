@@ -665,6 +665,7 @@
   <string name="auto_backup">Copie de rezervă automată (o dată pe zi)</string>
   <string name="repeat_mode_reverse_list">Redă lista de redare sau videoclipurile canalului în ordine inversă</string>
     <string name="header_blocked_ai_channels">Canale IA blocate</string>
+    <string name="blocked_ai_channels_message">Canale ale căror videoclipuri AiSList le-a ascuns din fluxurile tale de la pornirea aplicației, nu întreaga listă</string>
     <string name="aislist_mark_videos">Marchează videoclipurile</string>
     <string name="aislist_mark_off">Dezactivat</string>
     <string name="aislist_mark_in_mark_only">Marchează videoclipurile doar în secțiunile \"doar marcare\"</string>

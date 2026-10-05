@@ -750,6 +750,7 @@ So, make a copy of values-he and name it values-iw. Keep both in your structure.
         <item quantity="other">%s שניות</item>
     </plurals>
     <string name="header_blocked_ai_channels">ערוצי AI חסומים</string>
+    <string name="blocked_ai_channels_message">ערוצים ש-AiSList הסתיר את הסרטונים שלהם מהפידים שלך מאז שהאפליקציה הופעלה, לא הרשימה המלאה</string>
     <string name="aislist_mark_videos">סימון סרטונים</string>
     <string name="aislist_mark_off">כבוי</string>
     <string name="aislist_mark_in_mark_only">סימון סרטונים רק במדורים \"סימון בלבד\"</string>

@@ -755,6 +755,7 @@
         <item quantity="other">%s saniye</item>
     </plurals>
     <string name="header_blocked_ai_channels">Engellenen YZ Kanalları</string>
+    <string name="blocked_ai_channels_message">Uygulama başladığından beri AiSList\'in akışlarınızdan videolarını gizlediği kanallar, listenin tamamı değil</string>
     <string name="aislist_mark_videos">Videoları işaretle</string>
     <string name="aislist_mark_off">Kapalı</string>
     <string name="aislist_mark_in_mark_only">Videoları yalnızca \"yalnızca işaret\" bölümlerinde işaretle</string>

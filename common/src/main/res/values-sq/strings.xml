@@ -710,6 +710,7 @@
   <string name="player_chapter_notification2">Kalo te kapitulli tjetër duke klikuar mbi njoftimin</string>
   <string name="suggestions_horizontally_scrolled">Sugjerime të lëvizura horizontalisht</string>
     <string name="header_blocked_ai_channels">Kanale IA të bllokuara</string>
+    <string name="blocked_ai_channels_message">Kanalet, videot e të cilëve AiSList i ka fshehur nga rrjedhat e tua që kur u nis aplikacioni, jo e gjithë lista</string>
     <string name="aislist_mark_videos">Shëno videot</string>
     <string name="aislist_mark_off">Joaktiv</string>
     <string name="aislist_mark_in_mark_only">Shëno videot vetëm në seksionet \"vetëm shënim\"</string>

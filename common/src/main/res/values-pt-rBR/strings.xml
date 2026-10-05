@@ -748,6 +748,7 @@
   <string name="sidebar_notification">Mostrar notificação na barra lateral</string>
   <string name="color_scheme_dark_blue_oled">Azul Escuro (OLED)</string>
     <string name="header_blocked_ai_channels">Canais de IA bloqueados</string>
+    <string name="blocked_ai_channels_message">Canais cujos vídeos o AiSList ocultou dos seus feeds desde que o app foi iniciado, não a lista completa</string>
     <string name="aislist_mark_videos">Marcar os vídeos</string>
     <string name="aislist_mark_off">Desativado</string>
     <string name="aislist_mark_in_mark_only">Marcar os vídeos somente nas seções \"somente marcar\"</string>

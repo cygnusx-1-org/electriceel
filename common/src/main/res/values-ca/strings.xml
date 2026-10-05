@@ -505,6 +505,7 @@
   <string name="disable_history">Desactiva l\'historial</string>
   <string name="enable_history">Activeu l\'historial</string>
     <string name="header_blocked_ai_channels">Canals d\'IA bloquejats</string>
+    <string name="blocked_ai_channels_message">Canals dels quals AiSList ha amagat vídeos dels teus feeds des que s\'ha iniciat l\'aplicació, no tota la llista</string>
     <string name="aislist_mark_videos">Marca els vídeos</string>
     <string name="aislist_mark_off">Desactivat</string>
     <string name="aislist_mark_in_mark_only">Marca els vídeos només a les seccions \"només marcar\"</string>

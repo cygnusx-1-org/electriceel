@@ -737,6 +737,7 @@
   <string name="card_unlocalized_titles">Tiêu đề video chưa được bản địa hóa</string>
   <string name="remove_video_to_watch_later">Xóa khỏi Xem sau</string>
     <string name="header_blocked_ai_channels">Kênh AI đã chặn</string>
+    <string name="blocked_ai_channels_message">Các kênh có video bị AiSList ẩn khỏi nguồn cấp của bạn kể từ khi ứng dụng khởi động, không phải toàn bộ danh sách</string>
     <string name="aislist_mark_videos">Đánh dấu video</string>
     <string name="aislist_mark_off">Tắt</string>
     <string name="aislist_mark_in_mark_only">Chỉ đánh dấu video trong các mục \"chỉ đánh dấu\"</string>

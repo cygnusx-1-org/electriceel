@@ -714,6 +714,7 @@
   <string name="header_blocked_channels">차단된 채널</string>
   <string name="msg_no_blocked_channels">차단된 채널 없음</string>
     <string name="header_blocked_ai_channels">차단된 AI 채널</string>
+    <string name="blocked_ai_channels_message">앱을 시작한 후 AiSList가 피드에서 동영상을 숨긴 채널이며, 전체 목록이 아닙니다</string>
     <string name="aislist_mark_videos">동영상 표시</string>
     <string name="aislist_mark_off">끄기</string>
     <string name="aislist_mark_in_mark_only">\"표시만\" 섹션에서만 동영상 표시</string>

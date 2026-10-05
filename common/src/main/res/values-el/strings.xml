@@ -747,6 +747,7 @@
   <string name="remove_from_search_history">Αφαίρεση από το ιστορικό αναζήτησης</string>
   <string name="player_unexpected_error">Απροσδόκητο σφάλμα αναπαραγωγής</string>
     <string name="header_blocked_ai_channels">Αποκλεισμένα κανάλια ΤΝ</string>
+    <string name="blocked_ai_channels_message">Κανάλια των οποίων τα βίντεο απέκρυψε το AiSList από τις ροές σας από την έναρξη της εφαρμογής, όχι ολόκληρη η λίστα</string>
     <string name="aislist_mark_videos">Σήμανση βίντεο</string>
     <string name="aislist_mark_off">Απενεργοποιημένο</string>
     <string name="aislist_mark_in_mark_only">Σήμανση βίντεο μόνο στις ενότητες \"μόνο σήμανση\"</string>

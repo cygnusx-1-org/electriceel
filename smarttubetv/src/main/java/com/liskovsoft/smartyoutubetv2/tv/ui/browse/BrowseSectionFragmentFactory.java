@@ -65,7 +65,11 @@ public class BrowseSectionFragmentFactory extends BrowseSupportFragment.Fragment
                 fragment = new VideoRowsFragment();
                 break;
             case BrowseSection.TYPE_GRID:
-                fragment = new VideoGridFragment();
+                VideoGridFragment gridFragment = new VideoGridFragment();
+                if (header instanceof SectionHeaderItem) {
+                    gridFragment.setMessage(((SectionHeaderItem) header).getSection().getMessage());
+                }
+                fragment = gridFragment;
                 break;
             case BrowseSection.TYPE_SHORTS_GRID:
                 fragment = new ShortsGridFragment();

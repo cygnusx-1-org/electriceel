@@ -749,6 +749,7 @@
         <item quantity="other">%s ثانية</item>
     </plurals>
     <string name="header_blocked_ai_channels">قنوات الذكاء الاصطناعي المحظورة</string>
+    <string name="blocked_ai_channels_message">القنوات التي أخفت AiSList فيديوهاتها من خلاصاتك منذ بدء التطبيق، وليست القائمة كاملة</string>
     <string name="aislist_mark_videos">تمييز الفيديوهات</string>
     <string name="aislist_mark_off">إيقاف</string>
     <string name="aislist_mark_in_mark_only">تمييز الفيديوهات في أقسام \"تمييز فقط\" فقط</string>

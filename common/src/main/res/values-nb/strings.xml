@@ -707,6 +707,7 @@
     <string name="card_unlocalized_titles">Ikke-lokaliserte videotitler</string>
     <string name="dont_resize_video_to_fit_dialog">Ikke endre størrelsen på videoen for å passe i dialogboksen</string>
     <string name="header_blocked_ai_channels">Blokkerte KI-kanaler</string>
+    <string name="blocked_ai_channels_message">Kanaler som AiSList har skjult videoer fra i feedene dine siden appen startet, ikke hele listen</string>
     <string name="aislist_mark_videos">Merk videoer</string>
     <string name="aislist_mark_off">Av</string>
     <string name="aislist_mark_in_mark_only">Merk videoer bare i seksjonene \"bare merking\"</string>

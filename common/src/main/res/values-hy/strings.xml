@@ -146,6 +146,7 @@
     <string name="player_seek_preview_carousel_fast">Կարուսել (արագ)</string>
     <string name="unsubscribe_from_channel">Ապաբաժանորդագրվել ալիքից</string>
     <string name="header_blocked_ai_channels">Արգելափակված AI ալիքներ</string>
+    <string name="blocked_ai_channels_message">Ալիքներ, որոնց տեսանյութերը AiSList-ը թաքցրել է ձեր լրահոսերից հավելվածի գործարկումից ի վեր, ոչ թե ամբողջ ցուցակը</string>
     <string name="aislist_mark_videos">Նշել տեսանյութերը</string>
     <string name="aislist_mark_off">Անջատված</string>
     <string name="aislist_mark_in_mark_only">Նշել տեսանյութերը միայն \"միայն նշում\" բաժիններում</string>

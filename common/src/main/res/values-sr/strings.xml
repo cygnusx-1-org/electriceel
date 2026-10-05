@@ -711,6 +711,7 @@
     <string name="typing_corrections">Онемогући аутоматско исправљање приликом куцања текста</string>
     <string name="suggestions_horizontally_scrolled">Хоризонтално померани предлози</string>
     <string name="header_blocked_ai_channels">Блокирани ВИ канали</string>
+    <string name="blocked_ai_channels_message">Канали чије је видео снимке AiSList сакрио из ваших фидова откад је апликација покренута, не цела листа</string>
     <string name="aislist_mark_videos">Означи видео снимке</string>
     <string name="aislist_mark_off">Искључено</string>
     <string name="aislist_mark_in_mark_only">Означи видео снимке само у одељцима \"само ознака\"</string>

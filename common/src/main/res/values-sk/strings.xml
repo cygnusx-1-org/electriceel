@@ -729,6 +729,7 @@
     <string name="header_blocked_channels">Zablokované kanály</string>
     <string name="msg_no_blocked_channels">Žiadne zablokované kanály</string>
     <string name="header_blocked_ai_channels">Zablokované AI kanály</string>
+    <string name="blocked_ai_channels_message">Kanály, ktorých videá AiSList skryl z vašich prehľadov od spustenia aplikácie, nie celý zoznam</string>
     <string name="aislist_mark_videos">Označiť videá</string>
     <string name="aislist_mark_off">Vypnuté</string>
     <string name="aislist_mark_in_mark_only">Označiť videá iba v sekciách \"iba označiť\"</string>

@@ -749,6 +749,7 @@
   <string name="comments_disabled">Komentar dimatikan</string>
   <string name="remove_video_to_watch_later">Hapus dari Tonton nanti</string>
     <string name="header_blocked_ai_channels">Channel AI Diblokir</string>
+    <string name="blocked_ai_channels_message">Channel yang videonya disembunyikan AiSList dari feed Anda sejak aplikasi dimulai, bukan seluruh daftar</string>
     <string name="aislist_mark_videos">Tandai video</string>
     <string name="aislist_mark_off">Mati</string>
     <string name="aislist_mark_in_mark_only">Tandai video hanya di bagian \"hanya tandai\"</string>

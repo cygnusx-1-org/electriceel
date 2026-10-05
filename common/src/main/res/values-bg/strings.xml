@@ -594,6 +594,7 @@
   <string name="unlock_high_bitrate_formats">Отключване на формати с висок битрейт 1080p vp9</string>
   <string name="unlock_high_bitrate_audio_formats">Отключване на формати mp4a с висок битрейт</string>
     <string name="header_blocked_ai_channels">Блокирани ИИ канали</string>
+    <string name="blocked_ai_channels_message">Канали, чиито видеоклипове AiSList е скрил от емисиите ви от стартирането на приложението, а не целият списък</string>
     <string name="aislist_mark_videos">Отбелязване на видеоклиповете</string>
     <string name="aislist_mark_off">Изкл.</string>
     <string name="aislist_mark_in_mark_only">Отбелязване на видеоклиповете само в разделите \"само маркиране\"</string>

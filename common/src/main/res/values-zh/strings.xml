@@ -750,6 +750,7 @@
   <string name="comments_disabled">此视频已关闭评论</string>
   <string name="remove_video_to_watch_later">从稍后观看移除</string>
     <string name="header_blocked_ai_channels">被屏蔽的 AI 频道</string>
+    <string name="blocked_ai_channels_message">自应用启动以来 AiSList 从信息流中隐藏过视频的频道，并非完整列表</string>
     <string name="aislist_mark_videos">标记视频</string>
     <string name="aislist_mark_off">关闭</string>
     <string name="aislist_mark_in_mark_only">仅在“仅标记”分区中标记视频</string>

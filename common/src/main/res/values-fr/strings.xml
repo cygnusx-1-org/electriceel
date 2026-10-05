@@ -749,6 +749,7 @@
   <string name="comments_disabled">Les commentaires sont désactivés pour cette vidéo</string>
   <string name="remove_video_to_watch_later">Supprimer de \"À regarder plus tard\"</string>
     <string name="header_blocked_ai_channels">Chaînes IA sur liste noire</string>
+    <string name="blocked_ai_channels_message">Chaînes dont AiSList a masqué des vidéos dans vos flux depuis le démarrage de l\'application, pas la liste complète</string>
     <string name="aislist_mark_videos">Marquer les vidéos</string>
     <string name="aislist_mark_off">Désactivé</string>
     <string name="aislist_mark_in_mark_only">Marquer les vidéos uniquement dans les sections \"marquage uniquement\"</string>

@@ -747,6 +747,7 @@
   <string name="comments_disabled">Kommentit on poistettu käytöstä tässä videossa</string>
   <string name="enable_conscrypt">Ota Conscrypt käyttöön</string>
     <string name="header_blocked_ai_channels">Estetyt tekoälykanavat</string>
+    <string name="blocked_ai_channels_message">Kanavat, joiden videoita AiSList on piilottanut syötteistäsi sovelluksen käynnistyksen jälkeen, ei koko lista</string>
     <string name="aislist_mark_videos">Merkitse videot</string>
     <string name="aislist_mark_off">Pois</string>
     <string name="aislist_mark_in_mark_only">Merkitse videot vain \"vain merkintä\" -osioissa</string>

@@ -728,6 +728,7 @@
     <string name="header_blocked_channels">Canais bloqueados</string>
     <string name="msg_no_blocked_channels">Nenhum canal bloqueado</string>
     <string name="header_blocked_ai_channels">Canais de IA bloqueados</string>
+    <string name="blocked_ai_channels_message">Canais cujos vídeos o AiSList ocultou dos seus feeds desde que a aplicação foi iniciada, não a lista completa</string>
     <string name="aislist_mark_videos">Marcar os vídeos</string>
     <string name="aislist_mark_off">Desativado</string>
     <string name="aislist_mark_in_mark_only">Marcar os vídeos apenas nas secções \"apenas marcar\"</string>

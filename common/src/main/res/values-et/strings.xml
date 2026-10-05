@@ -618,6 +618,7 @@
   <string name="keyboard_fix">Klaviatuuri kuvamise parandamine klahvivajutusega OK (G20s ja teised)</string>
   <string name="nothing_found">Midagi ei leitud</string>
     <string name="header_blocked_ai_channels">Blokeeritud TI-kanalid</string>
+    <string name="blocked_ai_channels_message">Kanalid, mille videod AiSList on rakenduse käivitamisest saati sinu voogudest peitnud, mitte kogu loend</string>
     <string name="aislist_mark_videos">Märgista videod</string>
     <string name="aislist_mark_off">Väljas</string>
     <string name="aislist_mark_in_mark_only">Märgista videod ainult jaotistes \"ainult märgis\"</string>

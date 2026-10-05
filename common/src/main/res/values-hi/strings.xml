@@ -570,6 +570,7 @@
   <string name="unlock_high_bitrate_formats">उच्च बिटरेट 1080p VP9 प्रारूप अनलॉक करें</string>
   <string name="unlock_high_bitrate_audio_formats">उच्च बिटरेट mp4a प्रारूप अनलॉक करें</string>
     <string name="header_blocked_ai_channels">ब्लॉक किए गए AI चैनल</string>
+    <string name="blocked_ai_channels_message">वे चैनल जिनके वीडियो AiSList ने ऐप शुरू होने के बाद से आपकी फ़ीड से छिपाए हैं, पूरी सूची नहीं</string>
     <string name="aislist_mark_videos">वीडियो चिह्नित करें</string>
     <string name="aislist_mark_off">बंद</string>
     <string name="aislist_mark_in_mark_only">वीडियो केवल \"केवल चिह्नित\" अनुभागों में चिह्नित करें</string>

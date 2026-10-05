@@ -694,6 +694,7 @@
   <string name="player_audio_focus">تمرکز صوتی (مکث در صورت شناسایی سایر پخش‌کننده‌ها)</string>
   <string name="paid_content_notification">اعلان محتوای پولی</string>
     <string name="header_blocked_ai_channels">کانال‌های هوش مصنوعی مسدودشده</string>
+    <string name="blocked_ai_channels_message">کانال‌هایی که AiSList از زمان شروع برنامه ویدیوهایشان را از فیدهای شما پنهان کرده است، نه کل فهرست</string>
     <string name="aislist_mark_videos">علامت‌گذاری ویدیوها</string>
     <string name="aislist_mark_off">خاموش</string>
     <string name="aislist_mark_in_mark_only">علامت‌گذاری ویدیوها فقط در بخش‌های \"فقط علامت‌گذاری\"</string>
