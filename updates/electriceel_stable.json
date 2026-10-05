@@ -1,13 +1,38 @@
 {
   "package": {
     "downloadUrlList_arm64-v8a": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.4/ElectricEel_stable_32.56.4_arm64-v8a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.5/ElectricEel_stable_32.56.5_arm64-v8a.apk"
     ],
     "downloadUrlList_armeabi-v7a": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.4/ElectricEel_stable_32.56.4_armeabi-v7a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.5/ElectricEel_stable_32.56.5_armeabi-v7a.apk"
     ],
     "downloadUrlList": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.4/ElectricEel_stable_32.56.4_armeabi-v7a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.5/ElectricEel_stable_32.56.5_armeabi-v7a.apk"
+    ]
+  },
+  "32.56.5": {
+    "versionCode": 2446,
+    "changelog": [
+      "Implemented Make the YouTube Data API key changeable #8",
+      "Implemented Make videos once marked as \"Not interested\" disappear in every row #3",
+      "Implemented Add option to hide or mark Explore more topics #10",
+      "Implemented Add option to mark or hide \"Top channels you watch\" #7",
+      "Implemented Add option to mark or hide \"X episodes cards\" #6",
+      "Implemented Make it draw enough of a first row to fill the screen everytime #5",
+      "Implemented Make \"Don't recommend channel\" and \"Not interested\" work available in every section #4",
+      "Applied the color scheme in place when switching accounts or settings, player included",
+      "Saved UI settings right away so a scheme picked before an account switch sticks",
+      "Fixed the card title going blank after returning from the player",
+      "Added an All entry to the Collaborations and Watch later sections",
+      "Added a label color for Collaborations and Watch later marks",
+      "Defaulted Collaborations and Watch later to every supported section",
+      "Moved Hide videos older than and Keyword filtering from Filtering to Hide content",
+      "Renamed the Filtering card to Hide or mark content",
+      "Turned on marking of Collaborations and Watch later by default",
+      "Widened the settings cards so their longer titles fit",
+      "Placed the settings cards and title the same way on every screen",
+      "Replaced the top bar in the Settings section with a Settings title",
+      "Pre-rendered the About QR code instead of downloading it"
     ]
   },
   "32.56.4": {
