@@ -2,7 +2,9 @@
   
 <!-- <img width="100" src="https://github.com/cygnusx-1-org/electriceel/blob/master/smarttubetv/src/ststable/res/mipmap-nodpi/app_icon.png" alt="logo"/> -->
 
-![The app screenshot](./images/browse_home.png)
+![The app collage 1](./images/collage1.png)
+![The app collage 2](./images/collage2.png)
+![The app collage 3](./images/collage3.png)
 
 Electric Eel is a fork of [SmartTube](https://github.com/yuliskov/SmartTube), and a free and open-source media client for Android TVs and TV boxes. Its current focus is adding content filtering, but that will change with [feature requests](https://github.com/cygnusx-1-org/electriceel/issues).
 
@@ -49,7 +51,21 @@ Electric Eel is a fork of [SmartTube](https://github.com/yuliskov/SmartTube), an
 
 ## Installation
 
+### LocalSend
 The recommend method of installation the first time is to use [LocalSend](https://localsend.org/).
+
+### Downloader codes
+5455150 ElectricEel_stable_32.56.5_arm64-v8a.apk
+
+6687518 ElectricEel_stable_32.56.5_armeabi-v7a.apk 
+
+### Discoverium
+You can install [Discoverium](https://github.com/cygnusx-1-org/Discoverium/), and then install `Electric Eel` via it.
+
+[Discoverium](https://github.com/cygnusx-1-org/Discoverium/) now has `Android TV` support.
+
+## Screenshots
+[Screenshots](/images/screenshots)
 
 ### Updating
 
