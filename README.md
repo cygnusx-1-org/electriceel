@@ -55,9 +55,9 @@ Electric Eel is a fork of [SmartTube](https://github.com/yuliskov/SmartTube), an
 The recommend method of installation the first time is to use [LocalSend](https://localsend.org/).
 
 ### Downloader codes
-5455150 ElectricEel_stable_32.56.5_arm64-v8a.apk
+**5455150** `ElectricEel_stable_32.56.5_arm64-v8a.apk`
 
-6687518 ElectricEel_stable_32.56.5_armeabi-v7a.apk 
+**6687518** `ElectricEel_stable_32.56.5_armeabi-v7a.apk`
 
 ### Discoverium
 You can install [Discoverium](https://github.com/cygnusx-1-org/Discoverium/), and then install `Electric Eel` via it.
