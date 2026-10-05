@@ -467,6 +467,7 @@
     <string name="api_keys">API keys</string>
     <string name="data_api_key">YouTube Data API key</string>
     <string name="data_api_key_hint">Free key from console.cloud.google.com</string>
+    <string name="data_api_key_change">Change YouTube Data API key</string>
     <string name="data_api_key_works">The YouTube Data API key works</string>
     <string name="data_api_key_fails">The YouTube Data API key doesn\'t work: %s</string>
     <string name="finish_on_disconnect">Close the app after disconnecting the phone/tablet</string>

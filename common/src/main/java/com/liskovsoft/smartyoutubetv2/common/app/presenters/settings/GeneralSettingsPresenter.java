@@ -126,8 +126,7 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
         AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
 
         appendDataApiKeySwitch(settingsPresenter);
-        // A lone category is opened directly, and a switch can't be: show the list
-        settingsPresenter.enableExpandable(false);
+        appendDataApiKeyButton(settingsPresenter);
 
         settingsPresenter.showDialog(getContext().getString(R.string.api_keys), mOnFinish);
     }
@@ -569,6 +568,14 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
                     }
                 },
                 mMediaServiceData.getDataApiKey() != null));
+    }
+
+    /**
+     * Opens the key in the editor: the switch can only enter a new key or remove the current one
+     */
+    private void appendDataApiKeyButton(AppDialogPresenter settingsPresenter) {
+        settingsPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.data_api_key_change),
+                option -> showDataApiKeyDialog(settingsPresenter)));
     }
 
     private void appendInternetCensorship(AppDialogPresenter settingsPresenter) {
