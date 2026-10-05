@@ -29,6 +29,7 @@ public class FilteringSettingsPresenter extends BasePresenter<Void> {
         List<OptionItem> options = new ArrayList<>();
         options.add(createMenuItem(R.string.collaborations, R.string.collaborations_desc, () -> SectionFilterSettingsPresenter.collaborations(getContext()).show()));
         options.add(createMenuItem(R.string.watch_later, R.string.watch_later_desc, () -> SectionFilterSettingsPresenter.watchLater(getContext()).show()));
+        options.add(createMenuItem(R.string.shows, R.string.shows_desc, () -> SectionFilterSettingsPresenter.shows(getContext()).show()));
 
         String title = getContext().getString(R.string.content_filtering_filtering);
         presenter.appendCheckedCategory(title, options);

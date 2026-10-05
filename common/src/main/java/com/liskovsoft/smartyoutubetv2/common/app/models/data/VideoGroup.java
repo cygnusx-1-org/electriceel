@@ -16,6 +16,7 @@ import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.WatchLaterManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.KeywordFilterData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.ShowsData;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -484,7 +485,7 @@ public class VideoGroup {
         }
 
         if (isChannelBlocked(video) || isAiListed(video) || isHiddenCategory(video) || isOld(video) || isHiddenCollaboration(video)
-                || isHiddenWatchLater(video) || hasHiddenKeyword(video) || isWatchedSuggestion(video)) {
+                || isHiddenWatchLater(video) || isHiddenShow(video) || hasHiddenKeyword(video) || isWatchedSuggestion(video)) {
             if (video.videoId != null) {
                 mHiddenVideoCount++;
             }
@@ -650,6 +651,31 @@ public class VideoGroup {
         }
 
         video.isInWatchLater = true;
+
+        return false;
+    }
+
+    /**
+     * A show (podcast), only in the sections picked in the Shows setting. Also marks the show when the setting marks instead of hiding.
+     */
+    private boolean isHiddenShow(Video video) {
+        // No context before the app is initialized (GlobalPreferences)
+        if (!video.isShow || getSection() == null || GlobalPreferences.context() == null) {
+            return false;
+        }
+
+        int sectionId = getSection().getId();
+        ShowsData data = ShowsData.instance(GlobalPreferences.context());
+
+        if (!data.isEnabled(sectionId)) {
+            return false;
+        }
+
+        if (data.isHidingEnabled(sectionId)) {
+            return true;
+        }
+
+        video.isShowMarked = true;
 
         return false;
     }

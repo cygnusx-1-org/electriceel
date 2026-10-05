@@ -28,13 +28,20 @@ public abstract class SectionFilterData extends DataSaverBase {
     }
 
     /**
-     * One of MODE_*. Marked by default.
+     * One of MODE_*. Marked by default, unless the filter has another default (see getDefaultMode).
      */
     public int getMode() {
         // A value never set is saved as "null" when a later one is set, and comes back as -1
-        int mode = getInt(MODE_INDEX, DEFAULT_MODE);
+        int mode = getInt(MODE_INDEX, getDefaultMode());
 
-        return mode == MODE_SHOW || mode == MODE_MARK || mode == MODE_HIDE ? mode : DEFAULT_MODE;
+        return mode == MODE_SHOW || mode == MODE_MARK || mode == MODE_HIDE ? mode : getDefaultMode();
+    }
+
+    /**
+     * The mode until one is picked
+     */
+    protected int getDefaultMode() {
+        return DEFAULT_MODE;
     }
 
     public void setMode(int mode) {

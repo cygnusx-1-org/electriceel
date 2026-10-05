@@ -11,6 +11,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.SidebarServi
 import com.liskovsoft.smartyoutubetv2.common.misc.OldVideoFilter;
 import com.liskovsoft.smartyoutubetv2.common.prefs.CollaborationsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.SectionFilterData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.ShowsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.WatchLaterData;
 
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ import java.util.Map.Entry;
 
 /**
  * A card of the Content Filtering settings that shows, marks or hides a filter's videos, where, and the color of the label
- * (e.g. Collaborations, Watch later)
+ * (e.g. Collaborations, Watch later, Shows)
  */
 public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
     private final SectionFilterData mData;
@@ -54,6 +55,12 @@ public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
         return new SectionFilterSettingsPresenter(context, WatchLaterData.instance(context), R.string.watch_later,
                 R.string.watch_later_show, R.string.watch_later_mark, R.string.watch_later_mark_desc, R.string.watch_later_hide,
                 R.string.watch_later_sections);
+    }
+
+    public static SectionFilterSettingsPresenter shows(Context context) {
+        return new SectionFilterSettingsPresenter(context, ShowsData.instance(context), R.string.shows,
+                R.string.shows_show, R.string.shows_mark, R.string.shows_mark_desc, R.string.shows_hide,
+                R.string.shows_sections);
     }
 
     public void show() {

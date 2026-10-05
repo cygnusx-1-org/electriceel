@@ -56,6 +56,7 @@ public final class Video {
     public int aiMarkList = -1; // AiSListFilterData.LIST_* the channel is marked for, or -1
     public boolean isCollaboration; // marked as a collaboration (see CollaborationManager)
     public boolean isInWatchLater; // marked as in Watch later (see WatchLaterManager)
+    public boolean isShowMarked; // marked as a show (see ShowsData)
     public String videoId;
     public String playlistId;
     public String remotePlaylistId;
@@ -81,6 +82,7 @@ public final class Video {
     public boolean isShorts;
     public boolean isChapter;
     public boolean isMovie;
+    public boolean isShow; // a show (podcast) of episodes, see MediaItem.isShow()
     public boolean isSubscribed;
     public boolean isRemote;
     public int groupPosition = -1; // group position in multi-grid fragments
@@ -164,6 +166,7 @@ public final class Video {
         video.isUpcoming = item.isUpcoming();
         video.isShorts = item.isShorts();
         video.isMovie = item.isMovie();
+        video.isShow = item.isShow();
         video.clickTrackingParams = item.getClickTrackingParams();
         video.durationMs = item.getDurationMs();
         video.searchQuery = item.getSearchQuery();
@@ -186,6 +189,7 @@ public final class Video {
         video.aiMarkList = item.aiMarkList;
         video.isCollaboration = item.isCollaboration;
         video.isInWatchLater = item.isInWatchLater;
+        video.isShowMarked = item.isShowMarked;
         video.bgImageUrl = item.bgImageUrl;
         video.cardImageUrl = item.cardImageUrl;
         video.author = item.author;
@@ -199,6 +203,7 @@ public final class Video {
         video.reloadPageKey = item.getReloadPageKey();
         video.isLive = item.isLive;
         video.isUpcoming = item.isUpcoming;
+        video.isShow = item.isShow;
         video.clickTrackingParams = item.clickTrackingParams;
         video.mediaItem = item.mediaItem;
         video.group = item.group;
