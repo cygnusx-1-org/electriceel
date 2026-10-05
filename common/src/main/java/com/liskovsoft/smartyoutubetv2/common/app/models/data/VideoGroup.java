@@ -16,7 +16,9 @@ import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.WatchLaterManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.KeywordFilterData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.SectionFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.ShowsData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.TopChannelsData;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,6 +51,7 @@ public class VideoGroup {
     private int mAction = ACTION_APPEND;
     private int mType = -1;
     private int mHiddenVideoCount;
+    private boolean mIsChannelRow; // every item is a channel (see MediaGroup.isChannelRow), kept by the pages added later
     public boolean isQueue;
 
     public static VideoGroup from(BrowseSection section) {
@@ -120,6 +123,9 @@ public class VideoGroup {
         if (mediaGroup == null) {
             return videoGroup;
         }
+
+        // Before the items: they're marked or hidden by it
+        videoGroup.mIsChannelRow = mediaGroup.isChannelRow();
 
         if (mediaGroup.getMediaItems() == null) {
             Log.e(TAG, "MediaGroup doesn't contain media items. Title: " + mediaGroup.getTitle());
@@ -485,7 +491,8 @@ public class VideoGroup {
         }
 
         if (isChannelBlocked(video) || isAiListed(video) || isHiddenCategory(video) || isOld(video) || isHiddenCollaboration(video)
-                || isHiddenWatchLater(video) || isHiddenShow(video) || hasHiddenKeyword(video) || isWatchedSuggestion(video)) {
+                || isHiddenWatchLater(video) || isHiddenShow(video) || isHiddenTopChannel(video) || hasHiddenKeyword(video)
+                || isWatchedSuggestion(video)) {
             if (video.videoId != null) {
                 mHiddenVideoCount++;
             }
@@ -678,6 +685,40 @@ public class VideoGroup {
         video.isShowMarked = true;
 
         return false;
+    }
+
+    /**
+     * A row of channels (e.g. Top channels you watch) that the Top channels you watch setting hides. It isn't shown or continued.
+     */
+    public boolean isHiddenRow() {
+        return getTopChannelsMode() == SectionFilterData.MODE_HIDE;
+    }
+
+    /**
+     * A channel of a row of channels, hidden with its row. Also marks the channel when the setting marks instead of hiding.
+     */
+    private boolean isHiddenTopChannel(Video video) {
+        int mode = getTopChannelsMode();
+
+        if (mode == SectionFilterData.MODE_MARK) {
+            video.isTopChannelMarked = true;
+        }
+
+        return mode == SectionFilterData.MODE_HIDE;
+    }
+
+    /**
+     * The mode of the Top channels you watch setting for the row. Shown unless it's a row of channels of a section picked in the setting.
+     */
+    private int getTopChannelsMode() {
+        // No context before the app is initialized (GlobalPreferences)
+        if (!mIsChannelRow || getSection() == null || GlobalPreferences.context() == null) {
+            return SectionFilterData.MODE_SHOW;
+        }
+
+        TopChannelsData data = TopChannelsData.instance(GlobalPreferences.context());
+
+        return data.isSectionEnabled(getSection().getId()) ? data.getMode() : SectionFilterData.MODE_SHOW;
     }
 
     /**

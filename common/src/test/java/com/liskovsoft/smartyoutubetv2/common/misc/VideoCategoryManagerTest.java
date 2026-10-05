@@ -450,6 +450,11 @@ public class VideoCategoryManagerTest {
         public int getTopic() {
             return mTopic;
         }
+
+        @Override
+        public boolean isChannelRow() {
+            return false;
+        }
     }
 
     private static boolean contains(VideoGroup group, String videoId) {

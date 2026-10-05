@@ -417,5 +417,10 @@ public class HiddenVideoResolverTest {
         public int getTopic() {
             return MediaGroup.TOPIC_NONE;
         }
+
+        @Override
+        public boolean isChannelRow() {
+            return false;
+        }
     }
 }

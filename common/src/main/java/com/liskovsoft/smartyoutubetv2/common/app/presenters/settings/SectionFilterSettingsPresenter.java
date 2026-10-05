@@ -12,6 +12,7 @@ import com.liskovsoft.smartyoutubetv2.common.misc.OldVideoFilter;
 import com.liskovsoft.smartyoutubetv2.common.prefs.CollaborationsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.SectionFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.ShowsData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.TopChannelsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.WatchLaterData;
 
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ import java.util.Map.Entry;
 
 /**
  * A card of the Content Filtering settings that shows, marks or hides a filter's videos, where, and the color of the label
- * (e.g. Collaborations, Watch later, Shows)
+ * (e.g. Collaborations, Watch later, Shows, Top channels you watch)
  */
 public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
     private final SectionFilterData mData;
@@ -61,6 +62,12 @@ public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
         return new SectionFilterSettingsPresenter(context, ShowsData.instance(context), R.string.shows,
                 R.string.shows_show, R.string.shows_mark, R.string.shows_mark_desc, R.string.shows_hide,
                 R.string.shows_sections);
+    }
+
+    public static SectionFilterSettingsPresenter topChannels(Context context) {
+        return new SectionFilterSettingsPresenter(context, TopChannelsData.instance(context), R.string.top_channels,
+                R.string.top_channels_show, R.string.top_channels_mark, R.string.top_channels_mark_desc, R.string.top_channels_hide,
+                R.string.top_channels_sections);
     }
 
     public void show() {

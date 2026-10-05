@@ -31,6 +31,7 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.AiSListFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.CollaborationsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.ShowsData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.TopChannelsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.WatchLaterData;
 import com.liskovsoft.smartyoutubetv2.common.utils.ClickbaitRemover;
 import com.liskovsoft.smartyoutubetv2.tv.R;
@@ -199,10 +200,14 @@ public class VideoCardPresenter extends LongClickPresenter {
     }
 
     /**
-     * The second title, after the "AI", "Collab", "Watch later" and "Show" markers the video has
+     * The second title, after the "AI", "Collab", "Watch later", "Show" and "Top channel" markers the video has
      */
     private static CharSequence getContentText(Context context, Video video, boolean selected) {
         CharSequence text = video.getSecondTitle();
+
+        if (video.isTopChannelMarked) {
+            text = addMark(context, text, R.string.top_channel_label, TopChannelsData.instance(context).getMarkColor(), selected);
+        }
 
         if (video.isShowMarked) {
             text = addMark(context, text, R.string.show_label, ShowsData.instance(context).getMarkColor(), selected);
@@ -267,7 +272,7 @@ public class VideoCardPresenter extends LongClickPresenter {
     }
 
     /**
-     * Colors a marker ("AI", "Collab", "Watch later", "Show") with the shade of the saved color that suits the card background
+     * Colors a marker ("AI", "Collab", "Watch later", "Show", "Top channel") with the shade of the saved color that suits the card background
      */
     private static class MarkSpan extends ForegroundColorSpan {
         private final int mColor;

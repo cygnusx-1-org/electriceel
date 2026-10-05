@@ -427,6 +427,14 @@
     <string name="shows_desc">A show (podcast) such as the ones in Recommended shows, with the number of episodes where a video has its length. Found in every language.</string>
     <string name="shows_sections">Sections</string>
     <string name="show_label">Show</string>
+    <string name="top_channels">Top channels you watch</string>
+    <string name="top_channels_show">Show</string>
+    <string name="top_channels_mark">Mark</string>
+    <string name="top_channels_mark_desc">The channels of the row stay with a \"Top channel\" label</string>
+    <string name="top_channels_hide">Hide</string>
+    <string name="top_channels_desc">A row of channels only, such as Top channels you watch in Home. Hiding it hides the whole row. Found in every language.</string>
+    <string name="top_channels_sections">Sections</string>
+    <string name="top_channel_label">Top channel</string>
     <string name="sections_all">All</string>
     <string name="keyword_filter_keywords">Keywords</string>
     <string name="keyword_filter_common">Common keywords</string>

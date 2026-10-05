@@ -816,8 +816,9 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
 
             VideoGroup videoGroup = VideoGroup.from(mediaGroup, section, groupIndex.get() + 1);
 
-            // A card alone says nothing, e.g. "More music" of a row that lost its videos to Hide content
-            if (videoGroup.hasOnlyHiddenVideos()) {
+            // A card alone says nothing, e.g. "More music" of a row that lost its videos to Hide content.
+            // A hidden row of channels isn't continued in search of cards to show (see GroupFiller).
+            if (videoGroup.hasOnlyHiddenVideos() || videoGroup.isHiddenRow()) {
                 continue;
             }
 

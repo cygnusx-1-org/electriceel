@@ -57,6 +57,7 @@ public final class Video {
     public boolean isCollaboration; // marked as a collaboration (see CollaborationManager)
     public boolean isInWatchLater; // marked as in Watch later (see WatchLaterManager)
     public boolean isShowMarked; // marked as a show (see ShowsData)
+    public boolean isTopChannelMarked; // marked as a channel of a row of channels (see TopChannelsData)
     public String videoId;
     public String playlistId;
     public String remotePlaylistId;
@@ -190,6 +191,7 @@ public final class Video {
         video.isCollaboration = item.isCollaboration;
         video.isInWatchLater = item.isInWatchLater;
         video.isShowMarked = item.isShowMarked;
+        video.isTopChannelMarked = item.isTopChannelMarked;
         video.bgImageUrl = item.bgImageUrl;
         video.cardImageUrl = item.cardImageUrl;
         video.author = item.author;
