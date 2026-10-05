@@ -669,9 +669,16 @@ public final class Video {
      * Home and the sections loaded by the same API, which get the Home feedback ("Not interested", "Don't recommend channel")
      */
     public boolean belongsToHomeLikeSection() {
-        return belongsToHome() || belongsToGroup(MediaGroup.TYPE_GAMING) || belongsToGroup(MediaGroup.TYPE_MUSIC)
-                || belongsToGroup(MediaGroup.TYPE_NEWS) || belongsToGroup(MediaGroup.TYPE_SPORTS) || belongsToGroup(MediaGroup.TYPE_LIVE)
-                || belongsToGroup(MediaGroup.TYPE_MOVIES);
+        return getGroup() != null && isHomeLikeType(getGroup().getType());
+    }
+
+    /**
+     * The type (MediaGroup.TYPE_*) of Home or of a section loaded by the same API
+     */
+    public static boolean isHomeLikeType(int type) {
+        return type == MediaGroup.TYPE_HOME || type == MediaGroup.TYPE_GAMING || type == MediaGroup.TYPE_MUSIC
+                || type == MediaGroup.TYPE_NEWS || type == MediaGroup.TYPE_SPORTS || type == MediaGroup.TYPE_LIVE
+                || type == MediaGroup.TYPE_MOVIES;
     }
 
     public boolean belongsToChannel() {

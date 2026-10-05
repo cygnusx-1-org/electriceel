@@ -33,6 +33,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.views.ChannelUploadsView;
 import com.liskovsoft.smartyoutubetv2.common.app.views.PlaybackView;
 import com.liskovsoft.smartyoutubetv2.common.misc.KeywordFilter;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.NotInterestedManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.StreamReminderService;
 import com.liskovsoft.smartyoutubetv2.common.misc.WatchLaterManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
@@ -422,6 +423,9 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
     }
 
     private void removeSuggestedItemAndClose() {
+        // Before the callback: the same video goes from the other rows too
+        NotInterestedManager.instance().addVideo(mVideo);
+
         if (mCallback != null) {
             mCallback.onItemAction(mVideo, VideoMenuCallback.ACTION_REMOVE);
         } else {
@@ -467,6 +471,9 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
                         var -> {},
                         error -> Log.e(TAG, "Mark as 'not interested' error: %s", error.getMessage()),
                         () -> {
+                            // Before the callback: the channel's videos go from the other rows too
+                            NotInterestedManager.instance().addChannel(mVideo);
+
                             if (mCallback != null) {
                                 mCallback.onItemAction(mVideo, VideoMenuCallback.ACTION_REMOVE);
                             } else {

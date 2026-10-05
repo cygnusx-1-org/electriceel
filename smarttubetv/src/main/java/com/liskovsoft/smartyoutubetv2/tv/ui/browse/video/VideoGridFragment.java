@@ -175,6 +175,8 @@ public class VideoGridFragment extends GridFragment implements VideoSection {
             clear();
         } else if (action == VideoGroup.ACTION_REMOVE) {
             mGridAdapter.remove(group);
+            // Marked "Don't recommend channel": the channel's other videos too
+            mGridAdapter.removeNotInterested();
             return;
         } else if (action == VideoGroup.ACTION_REMOVE_AUTHOR) {
             mGridAdapter.removeAuthor(group);

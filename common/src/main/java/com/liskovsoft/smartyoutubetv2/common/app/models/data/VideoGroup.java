@@ -11,6 +11,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.service.VideoSt
 import com.liskovsoft.smartyoutubetv2.common.misc.AiSListManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.KeywordFilter;
 import com.liskovsoft.smartyoutubetv2.common.misc.CollaborationManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.NotInterestedManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.OldVideoFilter;
 import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.WatchLaterManager;
@@ -493,7 +494,7 @@ public class VideoGroup {
             return;
         }
 
-        if (isChannelBlocked(video) || isAiListed(video) || isHiddenCategory(video) || isOld(video) || isHiddenCollaboration(video)
+        if (isChannelBlocked(video) || isNotInterested(video) || isAiListed(video) || isHiddenCategory(video) || isOld(video) || isHiddenCollaboration(video)
                 || isHiddenWatchLater(video) || isHiddenShow(video) || isHiddenTopChannel(video) || isHiddenExploreTopic(video)
                 || hasHiddenKeyword(video) || isWatchedSuggestion(video)) {
             if (video.videoId != null) {
@@ -536,6 +537,24 @@ public class VideoGroup {
         String channelName = video.getAuthor();
 
         return blockedChannelData.containsChannel(channelId, channelName);
+    }
+
+    /**
+     * Marked "Not interested", or its channel "Don't recommend channel", in the app (see NotInterestedManager).
+     * In the sections that offer them and in the player's suggestions, but not in the playlist that plays there.
+     */
+    public boolean isNotInterested(Video video) {
+        int type = getType();
+
+        if (!Video.isHomeLikeType(type) && type != MediaGroup.TYPE_SHORTS && type != MediaGroup.TYPE_SUGGESTIONS) {
+            return false;
+        }
+
+        if (type == MediaGroup.TYPE_SUGGESTIONS && video.playlistId != null) {
+            return false;
+        }
+
+        return NotInterestedManager.instance().isHidden(video);
     }
 
     /**

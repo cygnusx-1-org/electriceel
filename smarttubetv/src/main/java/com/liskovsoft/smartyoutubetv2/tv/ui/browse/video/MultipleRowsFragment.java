@@ -233,6 +233,21 @@ public abstract class MultipleRowsFragment extends RowsSupportFragment implement
             if (adapter != null) {
                 adapter.remove(group);
             }
+            // Marked "Not interested" or "Don't recommend channel": the other rows might have it too
+            for (Map.Entry<Integer, VideoGroupObjectAdapter> entry : new ArrayList<>(mVideoGroupAdapters.entrySet())) {
+                VideoGroupObjectAdapter rowAdapter = entry.getValue();
+
+                if (rowAdapter.isEmpty()) {
+                    continue;
+                }
+
+                rowAdapter.removeNotInterested();
+
+                // Like a row of hidden videos, which isn't added
+                if (rowAdapter.isEmpty()) {
+                    removeById(entry.getKey());
+                }
+            }
             return;
         } else if (action == VideoGroup.ACTION_SYNC) {
             VideoGroupObjectAdapter adapter = mVideoGroupAdapters.get(group.getId());

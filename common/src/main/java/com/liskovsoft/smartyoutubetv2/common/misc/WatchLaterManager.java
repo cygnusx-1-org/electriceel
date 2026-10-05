@@ -316,7 +316,7 @@ public class WatchLaterManager {
     /**
      * The key the list is kept by: the email or, when there's none, the name
      */
-    private static String getAccountKey(Account account) {
+    static String getAccountKey(Account account) {
         if (account == null) {
             return null;
         }

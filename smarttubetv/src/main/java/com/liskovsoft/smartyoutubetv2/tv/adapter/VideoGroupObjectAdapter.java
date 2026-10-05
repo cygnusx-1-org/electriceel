@@ -192,6 +192,24 @@ public class VideoGroupObjectAdapter extends ObjectAdapter {
         notifyOtherAdapters(group, TYPE_REMOVE);
     }
 
+    /**
+     * Removes the videos their rows hide as "Not interested" (see VideoGroup#isNotInterested), e.g. the same video or channel in another row.
+     * By position, not by Video#equals: a playlist card equals its first video.
+     */
+    public void removeNotInterested() {
+        for (int i = mVideoItems.size() - 1; i >= 0; i--) {
+            Video video = mVideoItems.get(i);
+            VideoGroup group = video.getGroup();
+
+            if (group != null && group.isNotInterested(video)) {
+                mVideoItems.remove(i);
+                notifyItemRangeRemoved(i, 1);
+                // The row continues from its size (see append)
+                group.remove(video);
+            }
+        }
+    }
+
     public void removeAuthor(VideoGroup group) {
         String author = group.getVideos().get(0).getAuthor(); // assume same author
         List<Video> result = Helpers.filter(mVideoItems, video -> Helpers.equals(author, video.getAuthor()));
