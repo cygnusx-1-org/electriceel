@@ -20,6 +20,7 @@ import com.bumptech.glide.request.target.Target;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
+import com.liskovsoft.smartyoutubetv2.common.prefs.AiSListFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.tv.R;
 import com.liskovsoft.smartyoutubetv2.tv.presenter.base.LongClickPresenter;
@@ -77,6 +78,12 @@ public class ChannelCardPresenter extends LongClickPresenter {
             textView.setBackgroundColor(backgroundColor);
             textView.setTextColor(textColor);
 
+            CharSequence shaded = VideoCardPresenter.getMarkShaded(textView.getText(), hasFocus);
+
+            if (shaded != null) {
+                textView.setText(shaded);
+            }
+
             if (!autoScrollEnabled) {
                 return;
             }
@@ -101,7 +108,7 @@ public class ChannelCardPresenter extends LongClickPresenter {
         ViewUtil.setDimensions(viewHolder.view.findViewById(R.id.channel_card_wrapper), mWidth, -1); // don't do auto height
 
         TextView textView = viewHolder.view.findViewById(R.id.channel_title);
-        textView.setText(video.getTitle());
+        textView.setText(getTitle(context, video, viewHolder.view.hasFocus()));
 
         // We should setup props each time because object may be reused by the underlying RecyclerView
         textView.setBackgroundColor(video.hasNewContent ? mNewContentBackgroundColor : mDefaultBackgroundColor);
@@ -117,6 +124,18 @@ public class ChannelCardPresenter extends LongClickPresenter {
                 .listener(mErrorListener)
                 //.error(R.drawable.card_placeholder) // R.color.lb_grey
                 .into(imageView);
+    }
+
+    /**
+     * The channel's name, after the "AI" marker the channel has
+     */
+    private static CharSequence getTitle(Context context, Video video, boolean selected) {
+        if (video.aiMarkList == -1) {
+            return video.getTitle();
+        }
+
+        return VideoCardPresenter.addMark(context, video.getTitle(), R.string.aislist_mark,
+                AiSListFilterData.instance(context).getMarkColor(video.aiMarkList), selected);
     }
 
     @Override

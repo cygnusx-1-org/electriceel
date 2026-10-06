@@ -7,6 +7,7 @@ import com.liskovsoft.mediaserviceinterfaces.data.MediaItem;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.BrowseSection;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.VideoGroup;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -57,21 +58,22 @@ public class HiddenVideoResolver {
         AiSListManager aiSListManager = AiSListManager.instance(context);
         CollaborationManager collaborationManager = CollaborationManager.instance(context);
         WatchLaterManager watchLaterManager = WatchLaterManager.instance(context);
-        // Collaborations and Watch later apply to the sidebar sections only (see VideoGroup)
-        boolean isCollaborationEnabled = section != null && collaborationManager.isEnabled(section.getId());
-        boolean isWatchLaterEnabled = section != null && watchLaterManager.isEnabled(section.getId());
         Map<String, String> videoIdByKey = new LinkedHashMap<>();
         Set<String> authors = new LinkedHashSet<>();
         boolean isAiSListUsed = false;
+        boolean isWatchLaterEnabled = false;
 
         for (MediaGroup mediaGroup : mediaGroups) {
             if (mediaGroup == null || mediaGroup.getMediaItems() == null) {
                 continue;
             }
 
-            // The section VideoGroup finds for the group
+            // The sections VideoGroup finds for the group
             int aiSListSection = AiSListManager.getSection(mediaGroup.getType(), section != null, mediaGroup.getChannelId());
+            int filterSectionId = VideoGroup.getFilterSectionId(section, aiSListSection);
             boolean isAiSListEnabled = aiSListManager.isSectionEnabled(aiSListSection);
+            boolean isCollaborationEnabled = filterSectionId != -1 && collaborationManager.isEnabled(filterSectionId);
+            isWatchLaterEnabled |= filterSectionId != -1 && watchLaterManager.isEnabled(filterSectionId);
 
             if (!isAiSListEnabled && !isCollaborationEnabled) {
                 continue;
@@ -83,7 +85,7 @@ public class HiddenVideoResolver {
                 // The card as the group sees it: the same channel name
                 Video video = Video.from(item);
 
-                // Channel cards aren't filtered
+                // A channel card has no video to look up by: it uses the handles its name got on videos (see VideoGroup)
                 if (video == null || video.videoId == null) {
                     continue;
                 }

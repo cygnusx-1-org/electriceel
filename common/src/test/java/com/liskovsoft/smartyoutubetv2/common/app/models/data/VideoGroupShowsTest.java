@@ -16,6 +16,8 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import java.util.ArrayList;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -73,6 +75,40 @@ public class VideoGroupShowsTest {
         assertEquals(2, home.getSize());
         assertTrue(home.get(0).isShowMarked);
         assertFalse(home.get(1).isShowMarked);
+    }
+
+    /**
+     * Search and channel pages have no sidebar section: they're picked in the setting as their own sections
+     */
+    @Test
+    public void showIsMarkedInSearchAndOnChannelPages() {
+        mData.setMode(ShowsData.MODE_MARK);
+
+        VideoGroup search = VideoGroup.from(new ArrayList<>());
+        search.setType(MediaGroup.TYPE_SEARCH);
+        search.add(createShow());
+        VideoGroup channel = VideoGroup.from(new ArrayList<>());
+        channel.setType(MediaGroup.TYPE_CHANNEL);
+        channel.add(createShow());
+        // The player's suggestions aren't a section of the setting
+        VideoGroup suggestions = VideoGroup.from(new ArrayList<>());
+        suggestions.setType(MediaGroup.TYPE_SUGGESTIONS);
+        suggestions.add(createShow());
+
+        assertTrue(search.get(0).isShowMarked);
+        assertTrue(channel.get(0).isShowMarked);
+        assertFalse(suggestions.get(0).isShowMarked);
+
+        mData.setSectionEnabled(MediaGroup.TYPE_SEARCH, false);
+
+        try {
+            VideoGroup search2 = VideoGroup.from(new ArrayList<>());
+            search2.setType(MediaGroup.TYPE_SEARCH);
+            search2.add(createShow());
+            assertFalse(search2.get(0).isShowMarked);
+        } finally {
+            mData.setSectionEnabled(MediaGroup.TYPE_SEARCH, true);
+        }
     }
 
     @Test

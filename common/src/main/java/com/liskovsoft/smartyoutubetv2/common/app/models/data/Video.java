@@ -897,8 +897,8 @@ public final class Video {
                 nextVideo = Helpers.findFirst(mediaItems,
                         item -> {
                             // TV cards carry only the channel name: its handle was looked up with the suggestions (see HiddenVideoResolver)
-                            String handle = item.getChannelHandle() != null ?
-                                    item.getChannelHandle() : aiSListManager.getCachedHandle(AiSListManager.getLookupKey(Video.from(item)));
+                            String handle = item.getChannelHandle() != null ? item.getChannelHandle() :
+                                    aiSListManager.getCachedHandle(AiSListManager.getLookupKey(Video.from(item)), AiSListFilterData.SECTION_SUGGESTIONS);
 
                             if (aiSListManager.isHidden(handle, AiSListFilterData.SECTION_SUGGESTIONS)) {
                                 return false;

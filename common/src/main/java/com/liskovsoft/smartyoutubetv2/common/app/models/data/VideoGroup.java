@@ -15,6 +15,7 @@ import com.liskovsoft.smartyoutubetv2.common.misc.NotInterestedManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.OldVideoFilter;
 import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.WatchLaterManager;
+import com.liskovsoft.smartyoutubetv2.common.prefs.AiSListFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.ExploreTopicsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.KeywordFilterData;
@@ -558,11 +559,13 @@ public class VideoGroup {
     }
 
     /**
-     * Also marks the video when the marking is enabled instead of hiding
+     * Also marks the video when the marking is enabled instead of hiding. A channel card is only marked.
      */
     private boolean isAiListed(Video video) {
-        // Channel cards and chapters aren't filtered
-        if (video.isChapter || video.videoId == null) {
+        boolean isChannel = isChannelCard(video);
+
+        // Chapters aren't filtered, nor the cards of neither a video nor a channel (e.g. a playlist)
+        if (video.isChapter || (video.videoId == null && !isChannel)) {
             return false;
         }
 
@@ -574,11 +577,17 @@ public class VideoGroup {
         }
 
         if (video.channelHandle == null) {
-            // Most TV cards have only the channel name. Its handle is looked up before the group is created (see HiddenVideoResolver).
-            video.channelHandle = manager.getCachedHandle(AiSListManager.getLookupKey(video));
+            // Most TV cards have only the channel name, a collaboration the names of its channels. The handles are looked up
+            // by a video before the group is created (see HiddenVideoResolver). A channel card has no video: its name was seen on one.
+            video.channelHandle = manager.getCachedHandle(AiSListManager.getLookupKey(video), section);
         }
 
         if (video.channelHandle == null) {
+            return false;
+        }
+
+        if (isChannel) {
+            video.aiMarkList = manager.getChannelMarkedList(video.channelHandle, section);
             return false;
         }
 
@@ -590,6 +599,14 @@ public class VideoGroup {
         video.aiMarkList = manager.getMarkedList(video.channelHandle, section);
 
         return false;
+    }
+
+    /**
+     * A card that opens a channel (e.g. in Top channels you watch, a channel search result or the channels of the Channels section).
+     * Not a show or a playlist, which open like a channel.
+     */
+    private static boolean isChannelCard(Video video) {
+        return video.videoId == null && !video.isShow && !video.isPlaylistAsChannel() && (video.isChannel() || video.hasNestedItems());
     }
 
     /**
@@ -627,12 +644,13 @@ public class VideoGroup {
      * Also marks the video when the setting marks instead of hiding. The names are looked up before the group is created (see HiddenVideoResolver).
      */
     private boolean isHiddenCollaboration(Video video) {
+        int sectionId = getFilterSectionId();
+
         // No context before the app is initialized (GlobalPreferences)
-        if (video.isChapter || video.videoId == null || getSection() == null || GlobalPreferences.context() == null) {
+        if (video.isChapter || video.videoId == null || sectionId == -1 || GlobalPreferences.context() == null) {
             return false;
         }
 
-        int sectionId = getSection().getId();
         String author = video.getAuthor();
 
         if (!CollaborationManager.isCandidate(author)) {
@@ -659,8 +677,10 @@ public class VideoGroup {
      * Also marks the video when the setting marks instead of hiding. The list is read before the group is created (see HiddenVideoResolver).
      */
     private boolean isHiddenWatchLater(Video video) {
+        int sectionId = getFilterSectionId();
+
         // No context before the app is initialized (GlobalPreferences)
-        if (video.isChapter || video.videoId == null || getSection() == null || GlobalPreferences.context() == null) {
+        if (video.isChapter || video.videoId == null || sectionId == -1 || GlobalPreferences.context() == null) {
             return false;
         }
 
@@ -668,7 +688,6 @@ public class VideoGroup {
             return false;
         }
 
-        int sectionId = getSection().getId();
         WatchLaterManager manager = WatchLaterManager.instance(GlobalPreferences.context());
 
         if (!manager.isEnabled(sectionId) || !manager.contains(video.videoId)) {
@@ -688,12 +707,13 @@ public class VideoGroup {
      * A show (podcast), only in the sections picked in the Shows setting. Also marks the show when the setting marks instead of hiding.
      */
     private boolean isHiddenShow(Video video) {
+        int sectionId = getFilterSectionId();
+
         // No context before the app is initialized (GlobalPreferences)
-        if (!video.isShow || getSection() == null || GlobalPreferences.context() == null) {
+        if (!video.isShow || sectionId == -1 || GlobalPreferences.context() == null) {
             return false;
         }
 
-        int sectionId = getSection().getId();
         ShowsData data = ShowsData.instance(GlobalPreferences.context());
 
         if (!data.isEnabled(sectionId)) {
@@ -792,6 +812,31 @@ public class VideoGroup {
 
     public int getAiSListSection() {
         return AiSListManager.getSection(getType(), getSection() != null, getMediaGroup() != null ? getMediaGroup().getChannelId() : null);
+    }
+
+    /**
+     * The section id the Collaborations, Watch later and Shows settings know the group by (see getFilterSectionId(BrowseSection, int))
+     */
+    public int getFilterSectionId() {
+        return getFilterSectionId(getSection(), getAiSListSection());
+    }
+
+    /**
+     * The section id the Collaborations, Watch later and Shows settings know a group by (see SectionFilterData):
+     * its sidebar section, MediaGroup.TYPE_SEARCH in search or MediaGroup.TYPE_CHANNEL on a channel page, otherwise -1
+     * (e.g. a playlist page or the player's suggestions)
+     * @param aiSListSection the section AiSListManager finds for the group
+     */
+    public static int getFilterSectionId(BrowseSection section, int aiSListSection) {
+        if (section != null) {
+            return section.getId();
+        }
+
+        if (aiSListSection == AiSListFilterData.SECTION_SEARCH) {
+            return MediaGroup.TYPE_SEARCH;
+        }
+
+        return aiSListSection == AiSListManager.SECTION_CHANNEL_PAGE ? MediaGroup.TYPE_CHANNEL : -1;
     }
 
     private boolean isWatchedSuggestion(Video video) {

@@ -236,7 +236,7 @@ public class VideoCardPresenter extends LongClickPresenter {
     /**
      * @param markColor the saved ARGB color of the marker or {@link AiSListFilterData#MARK_COLOR_OFF} (the card text color)
      */
-    private static CharSequence addMark(Context context, CharSequence secondTitle, int markResId, int markColor, boolean selected) {
+    static CharSequence addMark(Context context, CharSequence secondTitle, int markResId, int markColor, boolean selected) {
         SpannableString mark = new SpannableString(context.getString(markResId));
         mark.setSpan(new StyleSpan(Typeface.BOLD), 0, mark.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
@@ -251,17 +251,26 @@ public class VideoCardPresenter extends LongClickPresenter {
      * The selected card has a light background, so the markers switch to their darker shade
      */
     private static void updateMarkShade(ComplexImageCardView view, boolean selected) {
-        CharSequence text = view.getContentText();
+        CharSequence result = getMarkShaded(view.getContentText(), selected);
 
+        if (result != null) {
+            view.setContentText(result);
+        }
+    }
+
+    /**
+     * @return the text with the markers in the shade of the card state or null when they already are (or there's none)
+     */
+    static CharSequence getMarkShaded(CharSequence text, boolean selected) {
         if (!(text instanceof Spanned)) {
-            return;
+            return null;
         }
 
         Spanned spanned = (Spanned) text;
         MarkSpan[] spans = spanned.getSpans(0, spanned.length(), MarkSpan.class);
 
         if (spans.length == 0 || spans[0].mSelected == selected) {
-            return;
+            return null;
         }
 
         SpannableString result = new SpannableString(text);
@@ -273,7 +282,7 @@ public class VideoCardPresenter extends LongClickPresenter {
             result.setSpan(new MarkSpan(span.mColor, selected), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
-        view.setContentText(result);
+        return result;
     }
 
     /**

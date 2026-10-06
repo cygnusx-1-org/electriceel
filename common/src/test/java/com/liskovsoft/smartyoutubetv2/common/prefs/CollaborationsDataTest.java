@@ -42,7 +42,8 @@ public class CollaborationsDataTest {
         assertEquals(AiSListFilterData.MARK_COLOR_GREEN, data.getMarkColor());
 
         for (int sectionId : new int[] {MediaGroup.TYPE_HOME, MediaGroup.TYPE_SUBSCRIPTIONS, MediaGroup.TYPE_GAMING,
-                MediaGroup.TYPE_USER_PLAYLISTS, MediaGroup.TYPE_CHANNEL_UPLOADS, MediaGroup.TYPE_MY_VIDEOS}) {
+                MediaGroup.TYPE_USER_PLAYLISTS, MediaGroup.TYPE_CHANNEL_UPLOADS, MediaGroup.TYPE_MY_VIDEOS,
+                MediaGroup.TYPE_SEARCH, MediaGroup.TYPE_CHANNEL}) {
             assertTrue(data.isSectionEnabled(sectionId));
             assertTrue(data.isMarkingEnabled(sectionId));
             assertFalse(data.isHidingEnabled(sectionId));
@@ -146,6 +147,31 @@ public class CollaborationsDataTest {
 
         assertFalse(restored.isSectionEnabled(MediaGroup.TYPE_HOME));
         assertFalse(restored.isSectionEnabled(MediaGroup.TYPE_SUBSCRIPTIONS));
+    }
+
+    /**
+     * Search and Channel pages came after the sidebar sections: the sections saved before have them checked
+     */
+    @Test
+    public void searchAndChannelPagesAreCheckedInSectionsSavedBefore() {
+        CollaborationsData data = getData();
+
+        data.setSectionEnabled(MediaGroup.TYPE_HOME, false);
+        data.persistNow();
+        ShadowLooper.shadowMainLooper().idle();
+        CollaborationsData.resetInstanceForTesting();
+
+        CollaborationsData restored = getData();
+
+        assertFalse(restored.isSectionEnabled(MediaGroup.TYPE_HOME));
+        assertTrue(restored.isSectionEnabled(MediaGroup.TYPE_SEARCH));
+        assertTrue(restored.isSectionEnabled(MediaGroup.TYPE_CHANNEL));
+
+        restored.setSectionEnabled(MediaGroup.TYPE_SEARCH, false);
+        restored.setSectionEnabled(MediaGroup.TYPE_CHANNEL, false);
+        assertFalse(restored.isSectionEnabled(MediaGroup.TYPE_SEARCH));
+        assertFalse(restored.isSectionEnabled(MediaGroup.TYPE_CHANNEL));
+        assertFalse(restored.isSectionEnabled(MediaGroup.TYPE_HOME));
     }
 
     @Test

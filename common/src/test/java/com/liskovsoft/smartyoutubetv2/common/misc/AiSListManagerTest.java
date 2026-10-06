@@ -3,6 +3,7 @@ package com.liskovsoft.smartyoutubetv2.common.misc;
 import android.content.Context;
 
 import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
+import com.liskovsoft.mediaserviceinterfaces.data.MediaItem;
 import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.BrowseSection;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
@@ -19,13 +20,17 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
@@ -334,6 +339,77 @@ public class AiSListManagerTest {
         assertTrue(AiSListManager.instance(RuntimeEnvironment.getApplication()).getBlockedChannels().isEmpty());
     }
 
+    /**
+     * A channel card is never hidden, only marked where the list marks anything
+     */
+    @Test
+    public void channelCardIsOnlyMarked() {
+        mFilterData.setHideEnabled(AiSListFilterData.LIST_BLOCKLIST, AiSListFilterData.SECTION_SEARCH, true);
+
+        // The list hides and marks nothing: the card is left alone
+        VideoGroup search = createGroup(MediaGroup.TYPE_SEARCH);
+        search.add(createChannel(AI_HANDLE));
+        assertEquals(1, search.getSize());
+        assertEquals(-1, search.get(0).aiMarkList);
+
+        // The list hides here and marks in the mark only sections
+        setMarkMode(AiSListFilterData.MARK_MODE_MARK_ONLY_SECTIONS);
+        VideoGroup search2 = createGroup(MediaGroup.TYPE_SEARCH);
+        search2.add(createChannel(AI_HANDLE));
+        search2.add(createChannel(HUMAN_HANDLE));
+        addVideos(search2);
+        assertEquals(4, search2.getSize());
+        assertEquals(AiSListFilterData.LIST_BLOCKLIST, search2.get(0).aiMarkList);
+        assertEquals(-1, search2.get(1).aiMarkList);
+        assertFalse(containsVideo(search2, "1"));
+
+        // Not where the list is off
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME);
+        home.add(createChannel(AI_HANDLE));
+        assertEquals(-1, home.get(0).aiMarkList);
+    }
+
+    /**
+     * A playlist or a show opens like a channel, but it isn't one
+     */
+    @Test
+    public void playlistAndShowCardsAreNotChannelCards() {
+        mFilterData.setHideEnabled(AiSListFilterData.LIST_BLOCKLIST, AiSListFilterData.SECTION_SEARCH, true);
+        setMarkEnabled(true);
+
+        Video playlist = createChannel(AI_HANDLE);
+        playlist.itemType = MediaItem.TYPE_PLAYLIST;
+        playlist.channelId = "VLPLplaylist";
+        Video show = createChannel(AI_HANDLE);
+        show.isShow = true;
+        show.channelId = "VLPLshow";
+        VideoGroup search = createGroup(MediaGroup.TYPE_SEARCH);
+        search.add(playlist);
+        search.add(show);
+
+        assertEquals(2, search.getSize());
+        assertEquals(-1, search.get(0).aiMarkList);
+        assertEquals(-1, search.get(1).aiMarkList);
+    }
+
+    @Test
+    public void savedHandlesKeepEveryChannelInOrder() {
+        Map<String, String> handles = new LinkedHashMap<>();
+        handles.put("@uploader", "UCuploader");
+        handles.put("@guest", null);
+
+        assertEquals("@uploader:UCuploader,@guest", AiSListManager.formatHandles(handles));
+        assertEquals(handles, AiSListManager.parseHandles("@uploader:UCuploader,@guest"));
+        assertEquals(Arrays.asList("@uploader", "@guest"), new ArrayList<>(AiSListManager.parseHandles("@uploader:UCuploader,@guest").keySet()));
+        // Saved before collaborations had them all
+        assertEquals(Collections.singletonMap("@handle", null), AiSListManager.parseHandles("@handle"));
+        // Not handles
+        assertNull(AiSListManager.parseHandles("Channel Name"));
+        assertNull(AiSListManager.parseHandles("@handle,Channel"));
+        assertNull(AiSListManager.parseHandles("@"));
+        assertNull(AiSListManager.parseHandles(""));
+    }
+
     private void setMarkEnabled(boolean enable) {
         setMarkMode(enable ? AiSListFilterData.MARK_MODE_ALL : AiSListFilterData.MARK_MODE_OFF);
     }
@@ -371,6 +447,27 @@ public class AiSListManagerTest {
         video.title = "Video " + videoId;
         video.channelHandle = handle;
         return video;
+    }
+
+    /**
+     * A channel search result: no video, the channel's handle
+     */
+    private static Video createChannel(String handle) {
+        Video video = new Video();
+        video.channelId = "UC" + handle.substring(1);
+        video.title = handle.substring(1);
+        video.channelHandle = handle;
+        return video;
+    }
+
+    private static boolean containsVideo(VideoGroup group, String videoId) {
+        for (Video video : group.getVideos()) {
+            if (videoId.equals(video.videoId)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static boolean containsMarked(VideoGroup group) {

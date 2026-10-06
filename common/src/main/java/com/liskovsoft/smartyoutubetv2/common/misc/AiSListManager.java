@@ -36,7 +36,8 @@ import io.reactivex.subjects.BehaviorSubject;
  * Hidden channels are collected for the Blocked AI Channels section (this session only).<br/>
  * Most TV Home cards carry only the channel name. The handle of such a channel is looked up once
  * (one watch-next request for one of its videos), before the card is shown (see HiddenVideoResolver),
- * and cached on disk by the channel name.
+ * and cached on disk by the channel name. A collaboration ("X and Y") gets the handle of each of its channels.<br/>
+ * A channel card is never hidden, only marked (see {@link #getChannelMarkedList}).
  */
 public class AiSListManager implements OnDataChange {
     private static final String TAG = AiSListManager.class.getSimpleName();
@@ -50,7 +51,7 @@ public class AiSListManager implements OnDataChange {
     private static final String PLAYLIST_CHANNEL_ID_PREFIX = "VL"; // a playlist page is opened as a channel "VL<playlist id>"
     private static final String WATCH_LATER_CHANNEL_ID = "VLWL";
     private static final String HANDLES_FILE = "aislist/handles.tsv";
-    private static final String NO_HANDLE = ""; // the lookup failed, don't repeat it this session
+    private static final Map<String, String> NO_HANDLES = Collections.emptyMap(); // the lookup failed, don't repeat it this session
     private static final long SAVE_DELAY_MS = 10_000;
     private static final int MAX_PARALLEL_LOOKUPS = 4;
     @SuppressLint("StaticFieldLeak")
@@ -59,8 +60,9 @@ public class AiSListManager implements OnDataChange {
     private final MediaItemService mItemService;
     private HandleLookup mHandleLookup;
     private final File mHandlesFile;
-    private final Map<String, String> mHandleByAuthor = new ConcurrentHashMap<>();
-    private final Map<String, Observable<String>> mRunningLookups = new ConcurrentHashMap<>(); // see resolveHandles
+    // Channel name -> the handles of its channels (one, or one per channel of a collaboration) -> their channel ids or null
+    private final Map<String, Map<String, String>> mHandlesByAuthor = new ConcurrentHashMap<>();
+    private final Map<String, Observable<Map<String, String>>> mRunningLookups = new ConcurrentHashMap<>(); // see resolveHandles
     private final Runnable mSaveHandles = () -> RxHelper.runAsync(this::saveHandles);
     private volatile Set<String> mBlocklist = Collections.emptySet();
     private volatile Set<String> mWarnlist = Collections.emptySet();
@@ -85,7 +87,7 @@ public class AiSListManager implements OnDataChange {
         mIsBlocklistMarked = isMarkedEverywhere(AiSListFilterData.LIST_BLOCKLIST);
         mIsWarnlistMarked = isMarkedEverywhere(AiSListFilterData.LIST_WARNLIST);
         mItemService = YouTubeServiceManager.instance().getMediaItemService();
-        mHandleLookup = mItemService::getChannelHandleObserve;
+        mHandleLookup = mItemService::getChannelHandlesObserve;
         mHandlesFile = new File(FileHelpers.getFilesDir(context), HANDLES_FILE);
         RxHelper.runAsync(this::restoreHandles);
         loadIfNeeded();
@@ -93,9 +95,10 @@ public class AiSListManager implements OnDataChange {
 
     interface HandleLookup {
         /**
-         * @return the owner's handle of the video, an error when it isn't found
+         * @return the handles of the video's owners (one per channel of a collaboration) -> their channel ids or null,
+         * an error when none is found
          */
-        Observable<String> getChannelHandle(String videoId);
+        Observable<Map<String, String>> getChannelHandles(String videoId);
     }
 
     public static AiSListManager instance(Context context) {
@@ -155,6 +158,17 @@ public class AiSListManager implements OnDataChange {
     }
 
     /**
+     * The list a channel card is marked for. A channel card is never hidden: it's marked wherever the list marks anything,
+     * as in a mark only section.
+     * @return AiSListFilterData.LIST_* or -1 when not marked
+     */
+    public int getChannelMarkedList(String handle, int section) {
+        int list = getListedIn(handle, section);
+
+        return list != -1 && mFilterData.getMarkMode(list) != AiSListFilterData.MARK_MODE_OFF ? list : -1;
+    }
+
+    /**
      * The list's videos are marked in the section instead of hidden (or left alone in a mark only section)
      */
     private boolean isMarkedIn(int list, int section) {
@@ -182,10 +196,14 @@ public class AiSListManager implements OnDataChange {
                 return;
             }
 
-            String author = video.getAuthor();
+            String lookupKey = getLookupKey(video);
+            Map<String, String> handles = lookupKey != null ? mHandlesByAuthor.get(lookupKey) : null;
+            // A collaboration's card has the names of all its channels and the channel of the uploader
+            boolean isCollaboration = handles != null && handles.size() > 1;
+            String author = isCollaboration ? null : video.getAuthor();
 
             Video channel = new Video();
-            channel.channelId = video.channelId;
+            channel.channelId = !isCollaboration && video.channelId != null ? video.channelId : handles != null ? handles.get(video.channelHandle) : null;
             channel.channelHandle = video.channelHandle;
             channel.title = author != null ? author : video.channelHandle;
             channel.secondTitle = author != null ? video.channelHandle : null;
@@ -239,16 +257,38 @@ public class AiSListManager implements OnDataChange {
     }
 
     /**
-     * @return the handle found earlier for the channel name or null
+     * The handle found earlier for the channel name. A collaboration has one per channel: the listed one counts
+     * (the blocklist first), otherwise the uploader's.
+     * @param section one of AiSListFilterData.SECTION_* or -1
+     * @return null when none is known
      */
-    public String getCachedHandle(String author) {
-        if (author == null) {
+    public String getCachedHandle(String author, int section) {
+        Map<String, String> handles = author != null ? mHandlesByAuthor.get(author) : null;
+
+        if (handles == null || handles.isEmpty()) {
             return null;
         }
 
-        String handle = mHandleByAuthor.get(author);
+        String uploader = null;
+        String warnlisted = null;
 
-        return NO_HANDLE.equals(handle) ? null : handle;
+        for (String handle : handles.keySet()) {
+            int list = getListedIn(handle, section);
+
+            if (list == AiSListFilterData.LIST_BLOCKLIST) {
+                return handle;
+            }
+
+            if (list == AiSListFilterData.LIST_WARNLIST && warnlisted == null) {
+                warnlisted = handle;
+            }
+
+            if (uploader == null) {
+                uploader = handle;
+            }
+        }
+
+        return warnlisted != null ? warnlisted : uploader;
     }
 
     /**
@@ -257,10 +297,10 @@ public class AiSListManager implements OnDataChange {
      * @param videoIdByKey the key of the handle cache (see {@link #getLookupKey}) -> a video of the channel
      */
     public Observable<Boolean> resolveHandles(Map<String, String> videoIdByKey) {
-        List<Observable<String>> lookups = new ArrayList<>();
+        List<Observable<Map<String, String>>> lookups = new ArrayList<>();
 
         for (Map.Entry<String, String> entry : videoIdByKey.entrySet()) {
-            if (!mHandleByAuthor.containsKey(entry.getKey())) {
+            if (!mHandlesByAuthor.containsKey(entry.getKey())) {
                 lookups.add(getHandleLookup(entry.getKey(), entry.getValue()));
             }
         }
@@ -279,16 +319,17 @@ public class AiSListManager implements OnDataChange {
     /**
      * One lookup per channel name at a time, shared by the groups that need it
      */
-    private Observable<String> getHandleLookup(String author, String videoId) {
-        return mRunningLookups.computeIfAbsent(author, key -> mHandleLookup.getChannelHandle(videoId)
+    private Observable<Map<String, String>> getHandleLookup(String author, String videoId) {
+        return mRunningLookups.computeIfAbsent(author, key -> mHandleLookup.getChannelHandles(videoId)
+                .map(AiSListManager::copyHandles)
                 .onErrorReturn(error -> {
                     Log.e(TAG, "Can't find the handle of %s: %s", author, error.getMessage());
-                    return NO_HANDLE;
+                    return NO_HANDLES;
                 })
-                .doOnNext(handle -> {
-                    mHandleByAuthor.put(author, handle);
+                .doOnNext(handles -> {
+                    mHandlesByAuthor.put(author, handles);
 
-                    if (!NO_HANDLE.equals(handle)) {
+                    if (!handles.isEmpty()) {
                         Utils.postDelayed(mSaveHandles, SAVE_DELAY_MS);
                     }
                 })
@@ -305,9 +346,10 @@ public class AiSListManager implements OnDataChange {
 
         for (String line : content.split("\n")) {
             String[] pair = line.split("\t");
+            Map<String, String> handles = pair.length == 2 && !pair[0].isEmpty() ? parseHandles(pair[1]) : null;
 
-            if (pair.length == 2 && !pair[0].isEmpty() && pair[1].startsWith("@")) {
-                mHandleByAuthor.put(pair[0], pair[1]);
+            if (handles != null) {
+                mHandlesByAuthor.put(pair[0], handles);
             }
         }
     }
@@ -315,12 +357,12 @@ public class AiSListManager implements OnDataChange {
     private void saveHandles() {
         StringBuilder content = new StringBuilder();
 
-        for (Map.Entry<String, String> entry : mHandleByAuthor.entrySet()) {
-            if (NO_HANDLE.equals(entry.getValue()) || entry.getKey().contains("\t") || entry.getKey().contains("\n")) {
+        for (Map.Entry<String, Map<String, String>> entry : mHandlesByAuthor.entrySet()) {
+            if (entry.getValue().isEmpty() || entry.getKey().contains("\t") || entry.getKey().contains("\n")) {
                 continue;
             }
 
-            content.append(entry.getKey()).append('\t').append(entry.getValue()).append('\n');
+            content.append(entry.getKey()).append('\t').append(formatHandles(entry.getValue())).append('\n');
         }
 
         File parent = mHandlesFile.getParentFile();
@@ -332,6 +374,68 @@ public class AiSListManager implements OnDataChange {
 
     private static boolean isMarkOnly(int section) {
         return section == SECTION_CHANNEL_PAGE || AiSListFilterData.isMarkOnly(section);
+    }
+
+    /**
+     * The handles of a lookup, without the ones that aren't handles, in their order
+     */
+    private static Map<String, String> copyHandles(Map<String, String> handles) {
+        Map<String, String> result = new LinkedHashMap<>();
+
+        for (Map.Entry<String, String> entry : handles.entrySet()) {
+            if (isHandle(entry.getKey())) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return result.isEmpty() ? NO_HANDLES : Collections.unmodifiableMap(result);
+    }
+
+    /**
+     * The saved form: "@handle:channelId", the channel id being optional, one per channel joined by ",".
+     * A handle can't have either sign, nor can a channel id.
+     */
+    static String formatHandles(Map<String, String> handles) {
+        StringBuilder result = new StringBuilder();
+
+        for (Map.Entry<String, String> entry : handles.entrySet()) {
+            if (result.length() > 0) {
+                result.append(',');
+            }
+
+            result.append(entry.getKey());
+
+            if (entry.getValue() != null) {
+                result.append(':').append(entry.getValue());
+            }
+        }
+
+        return result.toString();
+    }
+
+    /**
+     * @return the handles of the saved form (see formatHandles), the older "@handle" too, or null when it isn't one
+     */
+    static Map<String, String> parseHandles(String value) {
+        Map<String, String> result = new LinkedHashMap<>();
+
+        for (String part : value.split(",")) {
+            int separator = part.indexOf(':');
+            String handle = separator != -1 ? part.substring(0, separator) : part;
+            String channelId = separator != -1 && separator < part.length() - 1 ? part.substring(separator + 1) : null;
+
+            if (!isHandle(handle)) {
+                return null;
+            }
+
+            result.put(handle, channelId);
+        }
+
+        return result.isEmpty() ? null : Collections.unmodifiableMap(result);
+    }
+
+    private static boolean isHandle(String text) {
+        return text != null && text.length() > 1 && text.startsWith("@") && text.indexOf(',') == -1 && text.indexOf(':') == -1;
     }
 
     /**
@@ -475,7 +579,7 @@ public class AiSListManager implements OnDataChange {
      */
     void setHandleLookupForTesting(HandleLookup lookup) {
         mHandleLookup = lookup;
-        mHandleByAuthor.clear();
+        mHandlesByAuthor.clear();
         mRunningLookups.clear();
     }
 
