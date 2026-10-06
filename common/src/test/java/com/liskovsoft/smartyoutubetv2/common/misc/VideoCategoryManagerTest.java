@@ -154,6 +154,38 @@ public class VideoCategoryManagerTest {
     }
 
     @Test
+    public void musicIsTheCategoryOrTheTopic() {
+        VideoCategoryManager manager = getManager();
+
+        // Whatever Hide music from Home is set to
+        assertTrue(manager.isMusic(MUSIC_ID));
+        assertTrue(manager.isMusic(MUSIC_MIX_ID));
+        assertFalse(manager.isMusic(VLOG_ID));
+        assertFalse(manager.isMusic(GAME_VLOG_ID));
+        assertFalse(manager.isMusic(PLAYER_VLOG_ID));
+        assertFalse(manager.isMusic(NO_CATEGORY_ID));
+        // Music autoplay stops before an unknown video
+        assertFalse(manager.isMusic(UNKNOWN_ID));
+        assertFalse(manager.isMusic(null));
+    }
+
+    @Test
+    public void playerVideosWithoutTopicsAreLookedUpOnceForMusic() {
+        VideoCategoryManager manager = getManager();
+        String newId = "newVideo";
+        String playerMusicId = "playerMusic";
+        String playerVlogId = "playerVlogForMusic"; // the topic lookup of PLAYER_VLOG_ID is tried by another test
+        manager.setCategoryForTesting(playerMusicId, "Music");
+        manager.setCategoryForTesting(playerVlogId, "People & Blogs");
+
+        // The unknown ones, then the ones whose category alone isn't music. Once each.
+        assertEquals(Arrays.asList(newId, playerVlogId),
+                manager.getUnknownMusicVideoIdsForTesting(playerVlogId, newId, playerMusicId, MUSIC_MIX_ID, VLOG_ID, newId, null));
+        // Not again this session (e.g. the key is out of quota)
+        assertEquals(Collections.singletonList(newId), manager.getUnknownMusicVideoIdsForTesting(playerVlogId, newId));
+    }
+
+    @Test
     public void nothingIsHiddenWithoutKey() {
         setHidden(MediaServiceData.CONTENT_MUSIC_HOME, true);
         setHidden(MediaServiceData.CONTENT_GAMING_HOME, true);

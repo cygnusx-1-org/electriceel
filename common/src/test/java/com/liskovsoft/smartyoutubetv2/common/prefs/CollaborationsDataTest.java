@@ -39,7 +39,7 @@ public class CollaborationsDataTest {
         CollaborationsData data = getData();
 
         assertEquals(CollaborationsData.MODE_MARK, data.getMode());
-        assertEquals(AiSListFilterData.MARK_COLOR_OFF, data.getMarkColor());
+        assertEquals(AiSListFilterData.MARK_COLOR_GREEN, data.getMarkColor());
 
         for (int sectionId : new int[] {MediaGroup.TYPE_HOME, MediaGroup.TYPE_SUBSCRIPTIONS, MediaGroup.TYPE_GAMING,
                 MediaGroup.TYPE_USER_PLAYLISTS, MediaGroup.TYPE_CHANNEL_UPLOADS, MediaGroup.TYPE_MY_VIDEOS}) {
@@ -114,7 +114,7 @@ public class CollaborationsDataTest {
     public void defaultsSurviveSavingLaterValues() {
         CollaborationsData data = getData();
 
-        data.setMarkColor(AiSListFilterData.MARK_COLOR_GREEN);
+        data.setMarkColor(AiSListFilterData.MARK_COLOR_RED);
         data.persistNow();
         ShadowLooper.shadowMainLooper().idle();
         CollaborationsData.resetInstanceForTesting();
@@ -122,7 +122,7 @@ public class CollaborationsDataTest {
         CollaborationsData restored = getData();
 
         assertEquals(CollaborationsData.MODE_MARK, restored.getMode());
-        assertEquals(AiSListFilterData.MARK_COLOR_GREEN, restored.getMarkColor());
+        assertEquals(AiSListFilterData.MARK_COLOR_RED, restored.getMarkColor());
         assertTrue(restored.isSectionEnabled(MediaGroup.TYPE_MUSIC));
         assertTrue(restored.isSectionEnabled(MediaGroup.TYPE_HOME));
     }
@@ -183,6 +183,21 @@ public class CollaborationsDataTest {
 
         assertEquals(CollaborationsData.MODE_SHOW, restored.getMode());
         assertFalse(restored.isEnabled(MediaGroup.TYPE_HOME));
+    }
+
+    /**
+     * Off is saved as 0, apart from the default green
+     */
+    @Test
+    public void markColorOffSurvivesRestart() {
+        CollaborationsData data = getData();
+
+        data.setMarkColor(AiSListFilterData.MARK_COLOR_OFF);
+        data.persistNow();
+        ShadowLooper.shadowMainLooper().idle();
+        CollaborationsData.resetInstanceForTesting();
+
+        assertEquals(AiSListFilterData.MARK_COLOR_OFF, getData().getMarkColor());
     }
 
     @Test

@@ -15,4 +15,5 @@ public interface SettingsCardsView {
      */
     void update(String title, String cardsTitle, List<SettingsItem> items, int selectedPosition);
     int getSelectedPosition();
+    void finish();
 }

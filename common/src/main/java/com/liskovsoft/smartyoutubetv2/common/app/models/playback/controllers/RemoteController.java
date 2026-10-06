@@ -19,6 +19,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.BasePlayerContr
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.manager.PlayerConstants;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.manager.PlayerUI;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
+import com.liskovsoft.smartyoutubetv2.common.misc.MusicAutoplayManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.common.DataChangeBase.OnDataChange;
 import com.liskovsoft.smartyoutubetv2.common.prefs.RemoteControlData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
@@ -105,7 +106,7 @@ public class RemoteController extends BasePlayerController implements OnDataChan
 
     @Override
     public void onPlayEnd() {
-        switch (getPlayerData().getPlaybackMode()) {
+        switch (MusicAutoplayManager.getPlaybackMode(getContext(), getVideo())) {
             // The IDLE state just hangs phone's current video (spinning circle)
             case PlayerConstants.PLAYBACK_MODE_CLOSE:
             case PlayerConstants.PLAYBACK_MODE_PAUSE:

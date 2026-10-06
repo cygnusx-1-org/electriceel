@@ -22,9 +22,13 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.VideoActionPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.PlaybackView;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.MusicAutoplayManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.service.YouTubeServiceManager;
+
+import java.util.Collections;
 
 import io.reactivex.disposables.Disposable;
 
@@ -36,6 +40,7 @@ public class VideoLoaderController extends BasePlayerController {
     private SuggestionsController mSuggestionsController;
     private ErrorFixerController mErrorFixerController;
     private Disposable mFormatInfoAction;
+    private Disposable mMusicAutoplayAction;
     private final Runnable mReloadVideo = () -> {
         getMainController().onNewVideo(getVideo());
     };
@@ -100,7 +105,7 @@ public class VideoLoaderController extends BasePlayerController {
         }
         
         loadVideo(Helpers.firstNonNull(mPendingVideo, getVideo()));
-        getPlayer().setButtonState(R.id.action_repeat, getPlayerData().getPlaybackMode());
+        updateRepeatButton();
         mPendingVideo = null;
     }
 
@@ -115,7 +120,8 @@ public class VideoLoaderController extends BasePlayerController {
             return;
         }
         
-        getPlayer().setButtonState(R.id.action_repeat, video.finishOnEnded ? PlayerConstants.PLAYBACK_MODE_CLOSE : getPlayerData().getPlaybackMode());
+        updateRepeatButton();
+        resolveMusicCategory(video);
         // Can't set title at this point
         //checkSleepTimer();
     }
@@ -388,7 +394,7 @@ public class VideoLoaderController extends BasePlayerController {
 
     private void disposeActions() {
         MediaServiceManager.instance().disposeActions();
-        RxHelper.disposeActions(mFormatInfoAction);
+        RxHelper.disposeActions(mFormatInfoAction, mMusicAutoplayAction);
         Utils.removeCallbacks(mReloadVideo, mLoadNext, mRestartEngine, mMetadataSync);
     }
 
@@ -413,8 +419,15 @@ public class VideoLoaderController extends BasePlayerController {
 
         if (isEmbedPlayer()) {
             playbackMode = PlayerConstants.PLAYBACK_MODE_CLOSE;
+        } else if (isNextVideoMode(video, playbackMode) && MusicAutoplayManager.isMusicVideo(getContext(), video)) {
+            applyMusicPlaybackMode(video, playbackMode);
+            return;
         }
 
+        applyPlaybackModeInt(video, playbackMode);
+    }
+
+    private void applyPlaybackModeInt(Video video, int playbackMode) {
         switch (playbackMode) {
             case PlayerConstants.PLAYBACK_MODE_REVERSE_LIST:
                 if (video.hasPlaylist() || video.belongsToChannelUploads() || video.belongsToChannel()) {
@@ -471,6 +484,97 @@ public class VideoLoaderController extends BasePlayerController {
                 Log.e(TAG, "Undetected repeat mode " + playbackMode);
                 break;
         }
+    }
+
+    /**
+     * A music video goes on to the next one only when it's music too, the playback mode of the other videos decides otherwise
+     * (e.g. a mix whose next video is a vlog stops with Pause after each video).<br/>
+     * Waits for the category of the next video when it isn't known yet: it's usually looked up with the metadata (see resolveMusicCategory).
+     * A video still unknown after that isn't music.
+     */
+    private void applyMusicPlaybackMode(Video video, int playbackMode) {
+        Video next = mSuggestionsController.getNext();
+        // Not ended when it's the Next button of the child mode (see onNextClicked)
+        boolean isEnded = isEnded();
+
+        RxHelper.disposeActions(mMusicAutoplayAction);
+        mMusicAutoplayAction = RxHelper.execute(
+                VideoCategoryManager.instance(getContext()).resolveVideos(Collections.singletonList(next != null ? next.videoId : null)),
+                error -> onNextVideoResolved(video, isEnded, playbackMode),
+                () -> onNextVideoResolved(video, isEnded, playbackMode));
+    }
+
+    private void onNextVideoResolved(Video video, boolean isEnded, int playbackMode) {
+        // Another video was opened, or the user went on with this one meanwhile
+        if (getPlayer() == null || video != getVideo() || (isEnded && !isEnded())) {
+            return;
+        }
+
+        // The next video may have changed meanwhile (e.g. added to the queue)
+        Video next = mSuggestionsController.getNext();
+
+        if (next == null || !VideoCategoryManager.instance(getContext()).isMusic(next.videoId)) {
+            Log.d(TAG, "Music autoplay: the next video isn't music, the playback mode of the other videos applies");
+            playbackMode = getPlayerData().getPlaybackMode();
+        }
+
+        applyPlaybackModeInt(video, playbackMode);
+    }
+
+    /**
+     * The mode goes on to the next video (the queue aside). The reverse order is the next video too outside a playlist or a channel.
+     */
+    private boolean isNextVideoMode(Video video, int playbackMode) {
+        return playbackMode == PlayerConstants.PLAYBACK_MODE_ALL || playbackMode == PlayerConstants.PLAYBACK_MODE_SHUFFLE ||
+                (playbackMode == PlayerConstants.PLAYBACK_MODE_LIST && video.hasNextPlaylist()) ||
+                (playbackMode == PlayerConstants.PLAYBACK_MODE_REVERSE_LIST &&
+                        !(video.hasPlaylist() || video.belongsToChannelUploads() || video.belongsToChannel()));
+    }
+
+    private boolean isEnded() {
+        return getPlayer() != null && getPlayer().getPositionMs() >= getPlayer().getDurationMs();
+    }
+
+    /**
+     * Music autoplay: the current video is looked up when it's loaded, the next one with the metadata. The player button shows the mode
+     * of the music videos once the current one is known to be music, and the end of the video doesn't wait for the next one.
+     */
+    private void resolveMusicCategory(Video item) {
+        Video current = getVideo();
+
+        if (item == null || current == null || !MusicAutoplayManager.isEnabled(getContext())) {
+            return;
+        }
+
+        // Not disposed with the video: the categories are kept for later
+        RxHelper.execute(VideoCategoryManager.instance(getContext()).resolveVideos(Collections.singletonList(item.videoId)),
+                () -> {
+                    if (current != getVideo()) {
+                        return;
+                    }
+
+                    updateRepeatButton();
+
+                    // The metadata came before the video was known to be music, with another mode (see onMetadata)
+                    if (Helpers.equals(item.videoId, current.videoId) && current.playlistInfo != null && !current.isShuffled &&
+                            MusicAutoplayManager.getPlaybackMode(getContext(), current) == PlayerConstants.PLAYBACK_MODE_SHUFFLE) {
+                        initRandomNext();
+                    }
+                });
+    }
+
+    /**
+     * The playback mode of the video: a music video has its own with Music autoplay on (see MusicAutoplayManager)
+     */
+    private void updateRepeatButton() {
+        Video video = getVideo();
+
+        if (getPlayer() == null || video == null) {
+            return;
+        }
+
+        getPlayer().setButtonState(R.id.action_repeat, video.finishOnEnded ? PlayerConstants.PLAYBACK_MODE_CLOSE :
+                MusicAutoplayManager.getPlaybackMode(getContext(), video));
     }
 
     private void stopPlayback() {
@@ -536,6 +640,7 @@ public class VideoLoaderController extends BasePlayerController {
     @Override
     public void onMetadata(MediaItemMetadata metadata) {
         initRandomNext();
+        resolveMusicCategory(mSuggestionsController.getNext());
     }
 
     private void initRandomNext() {
@@ -546,7 +651,7 @@ public class VideoLoaderController extends BasePlayerController {
         Video current = getVideo();
 
         if (player == null || playerData == null || current == null || current.playlistInfo == null ||
-                playerData.getPlaybackMode() != PlayerConstants.PLAYBACK_MODE_SHUFFLE) {
+                MusicAutoplayManager.getPlaybackMode(getContext(), current) != PlayerConstants.PLAYBACK_MODE_SHUFFLE) {
             return;
         }
 
@@ -587,9 +692,9 @@ public class VideoLoaderController extends BasePlayerController {
     }
 
     private int getPlaybackMode() {
-        int playbackMode = getPlayerData().getPlaybackMode();
-
         Video video = getVideo();
+        int playbackMode = MusicAutoplayManager.getPlaybackMode(getContext(), video);
+
         if (video != null && video.finishOnEnded) {
             playbackMode = PlayerConstants.PLAYBACK_MODE_CLOSE;
         } else if (video != null && video.belongsToShortsGroup() && getPlayerTweaksData().isLoopShortsEnabled()) {

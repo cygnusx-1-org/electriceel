@@ -3,6 +3,7 @@ package com.liskovsoft.smartyoutubetv2.tv.ui.common;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.KeyEvent;
+import android.view.WindowManager;
 
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.SearchPresenter;
@@ -21,11 +22,17 @@ import com.liskovsoft.smartyoutubetv2.tv.ui.search.tags.SearchTagsActivity;
  */
 public abstract class LeanbackActivity extends MotherActivity {
     private static final String TAG = LeanbackActivity.class.getSimpleName();
+    // A normal resume has the focus within ~0.6s (after a dialog closes), a key waits 5s before an ANR
+    private static final long WINDOW_FOCUS_CHECK_MS = 1_000;
+    // Several frames, so the window gets laid out unfocusable before it's made focusable again
+    private static final long UNFOCUSABLE_MS = 100;
     private UriBackgroundManager mBackgroundManager;
     private ModeSyncManager mModeSyncManager;
     private DoubleBackManager2 mDoubleBackManager;
     private GlobalKeyTranslator mGlobalKeyTranslator;
     private final Runnable sOnFinish = () -> Utils.forceFinishTheApp(this);
+    private final Runnable mRestoreWindowFocus = this::restoreWindowFocusIfLost;
+    private final Runnable mMakeWindowFocusable = () -> getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +83,32 @@ public abstract class LeanbackActivity extends MotherActivity {
         mModeSyncManager.restore(this);
 
         getViewManager().addTop(this);
+
+        Utils.postDelayed(mRestoreWindowFocus, WINDOW_FOCUS_CHECK_MS);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        Utils.removeCallbacks(mRestoreWindowFocus);
+    }
+
+    /**
+     * A link opened over this activity starts the splash in its own task, which hands straight back here (singleInstance).
+     * WindowManager may drop the focus during that hop and never give it back (seen on Android 14): the activity shows,
+     * but every key times out into an ANR ("does not have a focused window"). Changing the focusability of the window
+     * makes WindowManager look for the focus again.
+     */
+    private void restoreWindowFocusIfLost() {
+        if (isFinishing() || hasWindowFocus() || isInPictureInPictureMode()) {
+            return;
+        }
+
+        Log.d(TAG, "%s has no window focus. Making WindowManager look for it again...", getClass().getSimpleName());
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+        Utils.postDelayed(mMakeWindowFocusable, UNFOCUSABLE_MS);
     }
 
     @Override

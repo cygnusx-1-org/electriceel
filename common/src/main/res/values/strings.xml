@@ -121,6 +121,11 @@
     <string name="repeat_mode_pause">Pause playback after each video (except queue)</string>
     <string name="repeat_mode_pause_alt">Play only playlist videos continuously</string>
     <string name="repeat_mode_none">Stop playback after one video (except queue)</string>
+    <string name="music_autoplay">Music autoplay</string>
+    <string name="music_autoplay_enable">Keep playing music</string>
+    <string name="music_autoplay_description">Music videos get their own playback mode, set with the player button while one plays. They play on only into music.</string>
+    <string name="music_playback_mode">Music playback mode</string>
+    <string name="music_autoplay_needs_key">Enter a YouTube Data API key in System &gt; General &gt; API keys to unlock Music autoplay</string>
     <string name="subscribed_to_channel">Subscribed</string>
     <string name="unsubscribed_from_channel">Unsubscribed</string>
     <string name="subtitle_yellow_transparent">Yellow on transparent background</string>

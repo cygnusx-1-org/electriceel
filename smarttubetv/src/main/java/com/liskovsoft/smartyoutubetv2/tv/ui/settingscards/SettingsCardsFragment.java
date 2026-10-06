@@ -121,6 +121,13 @@ public class SettingsCardsFragment extends GridFragment implements SettingsCards
         setSelectedPosition(Math.max(0, Math.min(selectedPosition, items.size() - 1)));
     }
 
+    @Override
+    public void finish() {
+        if (getActivity() != null) {
+            getActivity().finish();
+        }
+    }
+
     /**
      * @return went back to the section before, the screen stays
      */

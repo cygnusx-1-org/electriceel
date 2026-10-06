@@ -16,6 +16,7 @@ import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -32,7 +33,8 @@ import io.reactivex.Observable;
  * so the hidden videos never appear, and cached on disk by the video id.<br/>
  * The category is whatever the uploader picked (e.g. many music mixes are People & Blogs). The lookup also brings
  * the topics YouTube finds in the video itself (e.g. Music), and either one hides the video.<br/>
- * Whole rows go too: the ones marked with a hidden topic (e.g. music shelves) and the ones left with a single video or none.
+ * Whole rows go too: the ones marked with a hidden topic (e.g. music shelves) and the ones left with a single video or none.<br/>
+ * The player uses the same lookup to tell music videos for Music autoplay (see {@link #isMusic}).
  */
 public class VideoCategoryManager {
     private static final String TAG = VideoCategoryManager.class.getSimpleName();
@@ -40,9 +42,11 @@ public class VideoCategoryManager {
     private static final int[] CONTENT = {
             MediaServiceData.CONTENT_MUSIC_HOME, MediaServiceData.CONTENT_GAMING_HOME,
             MediaServiceData.CONTENT_SPORTS_HOME, MediaServiceData.CONTENT_NEWS_HOME, MediaServiceData.CONTENT_TECH_HOME};
-    private static final String[] CATEGORIES = {"Music", "Gaming", "Sports", "News & Politics", "Science & Technology"};
+    private static final String MUSIC_CATEGORY = "Music";
+    private static final String MUSIC_TOPIC = "Music";
+    private static final String[] CATEGORIES = {MUSIC_CATEGORY, "Gaming", "Sports", "News & Politics", "Science & Technology"};
     // The parent topics of the Data API (Wikipedia page names), every sub-genre carries them too (e.g. Electronic_music + Music)
-    private static final String[] VIDEO_TOPICS = {"Music", "Video_game_culture", "Sport", "Politics", "Technology"};
+    private static final String[] VIDEO_TOPICS = {MUSIC_TOPIC, "Video_game_culture", "Sport", "Politics", "Technology"};
     private static final int[] TOPICS = {
             MediaGroup.TOPIC_MUSIC, MediaGroup.TOPIC_GAMING, MediaGroup.TOPIC_SPORTS, MediaGroup.TOPIC_NEWS, MediaGroup.TOPIC_NONE};
     private static final String CATEGORIES_FILE = "videocategory/categories.tsv";
@@ -116,6 +120,20 @@ public class VideoCategoryManager {
         }
 
         return false;
+    }
+
+    /**
+     * The category or one of the topics of the video found earlier is music, as "Hide music from Home" sees it
+     * (e.g. a mix the uploader put in People & Blogs). Unknown videos aren't.
+     */
+    public boolean isMusic(String videoId) {
+        VideoCategory category = getCached(videoId);
+
+        return category != null && isMusic(category.getCategory(), category.getTopics());
+    }
+
+    static boolean isMusic(String category, List<String> topics) {
+        return MUSIC_CATEGORY.equals(category) || (topics != null && topics.contains(MUSIC_TOPIC));
     }
 
     /**
@@ -193,15 +211,32 @@ public class VideoCategoryManager {
     }
 
     /**
-     * The unknown videos get the full lookup. The ones known without topics only get the Data API:
-     * the player would only repeat the category they have (e.g. while the key is out of quota).
+     * Holds until the categories of the videos are known (e.g. the current and the next video of the player, see {@link #isMusic}).
+     * The ones known without topics get them, unless their category is music already.
      */
+    public Observable<Boolean> resolveVideos(List<String> videoIds) {
+        List<String> unknownIds = new ArrayList<>();
+        List<String> topicVideoIds = new ArrayList<>();
+
+        getUnknownMusicVideoIds(videoIds, unknownIds, topicVideoIds);
+
+        return resolve(unknownIds, topicVideoIds);
+    }
+
     private Observable<Boolean> resolve(List<MediaGroup> mediaGroups) {
         List<String> videoIds = new ArrayList<>();
         List<String> topicVideoIds = new ArrayList<>();
 
         getUnknownVideoIds(mediaGroups, videoIds, topicVideoIds);
 
+        return resolve(videoIds, topicVideoIds);
+    }
+
+    /**
+     * The unknown videos get the full lookup. The ones known without topics only get the Data API:
+     * the player would only repeat the category they have (e.g. while the key is out of quota).
+     */
+    private Observable<Boolean> resolve(List<String> videoIds, List<String> topicVideoIds) {
         if (videoIds.isEmpty() && topicVideoIds.isEmpty()) {
             return Observable.just(true);
         }
@@ -260,6 +295,28 @@ public class VideoCategoryManager {
     }
 
     /**
+     * @param result the videos not looked up yet
+     * @param topicResult the videos found by the player, without topics, whose category isn't music
+     */
+    private void getUnknownMusicVideoIds(List<String> videoIds, List<String> result, List<String> topicResult) {
+        synchronized (mCategoryById) {
+            for (String videoId : videoIds) {
+                if (videoId == null || result.contains(videoId) || topicResult.contains(videoId)) {
+                    continue;
+                }
+
+                VideoCategory category = mCategoryById.get(videoId);
+
+                if (category == null) {
+                    result.add(videoId);
+                } else if (category.getTopics() == null && !isMusic(category.getCategory(), null) && tryTopicLookup(videoId)) {
+                    topicResult.add(videoId);
+                }
+            }
+        }
+    }
+
+    /**
      * Found by the player (no topics) and not hidden by the category alone, not tried this session
      */
     private boolean needsTopics(String videoId) {
@@ -269,6 +326,13 @@ public class VideoCategoryManager {
             return false;
         }
 
+        return tryTopicLookup(videoId);
+    }
+
+    /**
+     * The topic lookup of the video wasn't tried this session
+     */
+    private boolean tryTopicLookup(String videoId) {
         if (mTopicLookupTried.size() > MAX_CATEGORIES) {
             mTopicLookupTried.clear();
         }
@@ -469,6 +533,17 @@ public class VideoCategoryManager {
         List<String> result = new ArrayList<>();
         List<String> topicResult = new ArrayList<>();
         getUnknownVideoIds(Collections.singletonList(mediaGroup), result, topicResult);
+        result.addAll(topicResult);
+        return result;
+    }
+
+    /**
+     * @return the videos not looked up yet, then the ones that need topics
+     */
+    List<String> getUnknownMusicVideoIdsForTesting(String... videoIds) {
+        List<String> result = new ArrayList<>();
+        List<String> topicResult = new ArrayList<>();
+        getUnknownMusicVideoIds(Arrays.asList(videoIds), result, topicResult);
         result.addAll(topicResult);
         return result;
     }

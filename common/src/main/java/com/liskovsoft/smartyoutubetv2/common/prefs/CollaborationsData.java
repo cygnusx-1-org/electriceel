@@ -20,6 +20,11 @@ public class CollaborationsData extends SectionFilterData {
         return sInstance;
     }
 
+    @Override
+    protected int getDefaultMarkColor() {
+        return AiSListFilterData.MARK_COLOR_GREEN;
+    }
+
     /**
      * The next instance reads the saved values again
      */

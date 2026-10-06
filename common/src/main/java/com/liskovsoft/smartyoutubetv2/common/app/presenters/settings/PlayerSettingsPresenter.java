@@ -14,7 +14,9 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.SidebarService;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.TrackSelectorUtil;
+import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.MusicAutoplayData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.SearchData;
@@ -58,6 +60,13 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
      */
     public void showPlaybackMode() {
         showCategory(R.string.action_repeat_mode, this::appendPlaybackModeCategory);
+    }
+
+    /**
+     * The Music autoplay card of the Player settings, in General. Plays on from a music video where the playback mode stops.
+     */
+    public void showMusicAutoplay() {
+        showCategory(R.string.music_autoplay, this::appendMusicAutoplayCategory);
     }
 
     /**
@@ -642,6 +651,29 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
     private void appendPlaybackModeCategory(AppDialogPresenter settingsPresenter) {
         OptionCategory category = AppDialogUtil.createPlaybackModeCategory(getContext());
         settingsPresenter.appendCategory(category);
+    }
+
+    /**
+     * Only with the user's own Data API key (see VideoCategoryManager), the option keeps its state without one
+     */
+    private void appendMusicAutoplayCategory(AppDialogPresenter settingsPresenter) {
+        MusicAutoplayData musicAutoplayData = MusicAutoplayData.instance(getContext());
+        List<OptionItem> options = new ArrayList<>();
+
+        OptionItem musicAutoplay = UiOptionItem.from(getContext().getString(R.string.music_autoplay_enable),
+                getContext().getString(R.string.music_autoplay_description),
+                option -> musicAutoplayData.setEnabled(option.isSelected()),
+                musicAutoplayData.isEnabled());
+        options.add(musicAutoplay);
+
+        if (!VideoCategoryManager.isAvailable()) {
+            musicAutoplay.setEnabled(false);
+            OptionItem note = UiOptionItem.from(getContext().getString(R.string.music_autoplay_needs_key));
+            note.setNote(true);
+            options.add(note);
+        }
+
+        settingsPresenter.appendCheckedCategory(getContext().getString(R.string.music_autoplay), options);
     }
 
     private void appendNetworkEngineCategory(AppDialogPresenter settingsPresenter) {

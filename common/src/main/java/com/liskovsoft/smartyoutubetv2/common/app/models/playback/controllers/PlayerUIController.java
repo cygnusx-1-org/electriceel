@@ -35,6 +35,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.AutoFrameRa
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.track.SubtitleTrack;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.MusicAutoplayManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.ScreensaverManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.SearchData;
@@ -1059,7 +1060,8 @@ public class PlayerUIController extends BasePlayerController {
 
         int nextMode = getNextRepeatMode(buttonState);
 
-        getPlayerData().setPlaybackMode(nextMode);
+        // The mode of the music videos in a music video, with Music autoplay on
+        MusicAutoplayManager.setPlaybackMode(getContext(), getVideo(), nextMode);
         getPlayer().setButtonState(R.id.action_repeat, nextMode);
     }
 
@@ -1069,8 +1071,8 @@ public class PlayerUIController extends BasePlayerController {
         }
 
         OptionCategory category = AppDialogUtil.createPlaybackModeCategory(
-                getContext(), () -> {
-                    getPlayer().setButtonState(R.id.action_repeat, getPlayerData().getPlaybackMode());
+                getContext(), getVideo(), () -> {
+                    getPlayer().setButtonState(R.id.action_repeat, MusicAutoplayManager.getPlaybackMode(getContext(), getVideo()));
                 });
 
         AppDialogPresenter settingsPresenter = getAppDialogPresenter();

@@ -40,7 +40,7 @@ public class WatchLaterDataTest {
         WatchLaterData data = getData();
 
         assertEquals(WatchLaterData.MODE_MARK, data.getMode());
-        assertEquals(AiSListFilterData.MARK_COLOR_OFF, data.getMarkColor());
+        assertEquals(AiSListFilterData.MARK_COLOR_BLUE, data.getMarkColor());
         assertTrue(data.isMarkingEnabled(MediaGroup.TYPE_HOME));
         assertTrue(data.isMarkingEnabled(MediaGroup.TYPE_SUBSCRIPTIONS));
         assertTrue(data.isMarkingEnabled(MediaGroup.TYPE_GAMING));
@@ -61,7 +61,7 @@ public class WatchLaterDataTest {
         assertEquals(WatchLaterData.MODE_HIDE, watchLater.getMode());
         assertEquals(CollaborationsData.MODE_MARK, collaborations.getMode());
         assertTrue(collaborations.isSectionEnabled(MediaGroup.TYPE_GAMING));
-        assertEquals(AiSListFilterData.MARK_COLOR_OFF, collaborations.getMarkColor());
+        assertEquals(AiSListFilterData.MARK_COLOR_GREEN, collaborations.getMarkColor());
     }
 
     @Test

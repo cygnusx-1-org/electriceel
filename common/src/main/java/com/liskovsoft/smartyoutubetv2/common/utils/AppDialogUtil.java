@@ -40,6 +40,7 @@ import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem.Video
 import com.liskovsoft.smartyoutubetv2.common.misc.AppDataSourceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MotherActivity;
+import com.liskovsoft.smartyoutubetv2.common.misc.MusicAutoplayManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.WatchLaterManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.SponsorBlockData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
@@ -828,11 +829,14 @@ public class AppDialogUtil {
     }
 
     public static OptionCategory createPlaybackModeCategory(Context context) {
-        return createPlaybackModeCategory(context, () -> {});
+        return createPlaybackModeCategory(context, null, () -> {});
     }
 
-    public static OptionCategory createPlaybackModeCategory(Context context, Runnable onModeSelected) {
-        PlayerData playerData = PlayerData.instance(context);
+    /**
+     * @param video the mode of a music video is its own with Music autoplay on (see MusicAutoplayManager), null for the other videos
+     */
+    public static OptionCategory createPlaybackModeCategory(Context context, Video video, Runnable onModeSelected) {
+        int playbackMode = MusicAutoplayManager.getPlaybackMode(context, video);
         List<OptionItem> options = new ArrayList<>();
 
         for (int[] pair : new int[][] {
@@ -846,17 +850,17 @@ public class AppDialogUtil {
         }) {
             options.add(UiOptionItem.from(context.getString(pair[0]),
                     optionItem -> {
-                        playerData.setPlaybackMode(pair[1]);
+                        MusicAutoplayManager.setPlaybackMode(context, video, pair[1]);
                         onModeSelected.run();
                     },
-                    playerData.getPlaybackMode() == pair[1]
+                    playbackMode == pair[1]
             ));
         }
 
         return OptionCategory.from(
                 PLAYER_REPEAT_ID,
                 OptionCategory.TYPE_RADIO_LIST,
-                context.getString(R.string.action_repeat_mode),
+                context.getString(MusicAutoplayManager.isMusicVideo(context, video) ? R.string.music_playback_mode : R.string.action_repeat_mode),
                 options
         );
     }

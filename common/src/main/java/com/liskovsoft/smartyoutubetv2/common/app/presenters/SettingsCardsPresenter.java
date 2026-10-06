@@ -80,6 +80,14 @@ public class SettingsCardsPresenter extends BasePresenter<SettingsCardsView> {
 
     @Override
     public void onViewInitialized() {
+        // Restored after the app was killed (e.g. an ANR): the sections were only in memory, the screen would stay black
+        if (mStack.isEmpty()) {
+            if (getView() != null) {
+                getView().finish();
+            }
+            return;
+        }
+
         updateView(0);
     }
 

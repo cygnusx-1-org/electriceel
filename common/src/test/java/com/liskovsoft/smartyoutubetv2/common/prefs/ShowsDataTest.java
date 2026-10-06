@@ -70,7 +70,7 @@ public class ShowsDataTest {
         assertEquals(ShowsData.MODE_HIDE, shows.getMode());
         assertEquals(WatchLaterData.MODE_MARK, watchLater.getMode());
         assertTrue(watchLater.isSectionEnabled(MediaGroup.TYPE_GAMING));
-        assertEquals(AiSListFilterData.MARK_COLOR_OFF, watchLater.getMarkColor());
+        assertEquals(AiSListFilterData.MARK_COLOR_BLUE, watchLater.getMarkColor());
     }
 
     /**

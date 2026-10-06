@@ -76,13 +76,21 @@ public abstract class SectionFilterData extends DataSaverBase {
     }
 
     /**
-     * ARGB color of the label or {@link AiSListFilterData#MARK_COLOR_OFF} (the card text color, the default)
+     * ARGB color of the label or {@link AiSListFilterData#MARK_COLOR_OFF} (the card text color).
+     * The card text color by default, unless the filter has another default (see getDefaultMarkColor).
      */
     public int getMarkColor() {
         // A value never set is saved as "null" when a later one is set, and comes back as -1 (not a color of the menu)
-        int color = getInt(MARK_COLOR_INDEX, AiSListFilterData.MARK_COLOR_OFF);
+        int color = getInt(MARK_COLOR_INDEX, getDefaultMarkColor());
 
-        return color == -1 ? AiSListFilterData.MARK_COLOR_OFF : color;
+        return color == -1 ? getDefaultMarkColor() : color;
+    }
+
+    /**
+     * The label color until one is picked
+     */
+    protected int getDefaultMarkColor() {
+        return AiSListFilterData.MARK_COLOR_OFF;
     }
 
     public void setMarkColor(int color) {

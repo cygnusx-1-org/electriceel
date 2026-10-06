@@ -53,6 +53,8 @@ public class PlayerGeneralSettingsPresenter extends BasePresenter<Void> implemen
                 () -> PlayerSettingsPresenter.instance(context).showPixelRatio(), R.drawable.settings_pixel_ratio));
         items.add(new SettingsItem(context.getString(R.string.action_repeat_mode),
                 () -> PlayerSettingsPresenter.instance(context).showPlaybackMode(), R.drawable.settings_playback_mode));
+        items.add(new SettingsItem(context.getString(R.string.music_autoplay),
+                () -> PlayerSettingsPresenter.instance(context).showMusicAutoplay(), R.drawable.settings_music_autoplay));
         items.add(new SettingsItem(context.getString(R.string.player_sleep_timer),
                 () -> PlayerSettingsPresenter.instance(context).showSleepTimer(), R.drawable.settings_sleep_timer));
         items.add(new SettingsItem(context.getString(R.string.player_tweaks),

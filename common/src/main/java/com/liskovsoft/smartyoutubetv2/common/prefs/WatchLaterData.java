@@ -20,6 +20,11 @@ public class WatchLaterData extends SectionFilterData {
         return sInstance;
     }
 
+    @Override
+    protected int getDefaultMarkColor() {
+        return AiSListFilterData.MARK_COLOR_BLUE;
+    }
+
     /**
      * The next instance reads the saved values again
      */
