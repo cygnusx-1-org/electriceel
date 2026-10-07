@@ -22,6 +22,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.VideoGroup;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.interfaces.VideoGroupPresenter;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
+import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.smartyoutubetv2.tv.adapter.VideoGroupObjectAdapter;
 import com.liskovsoft.smartyoutubetv2.tv.presenter.ChannelHeaderPresenter;
 import com.liskovsoft.smartyoutubetv2.tv.presenter.ChannelHeaderPresenter.ChannelHeaderCallback;
@@ -42,6 +43,8 @@ import java.util.Map;
 
 public abstract class MultipleRowsFragment extends RowsSupportFragment implements VideoSection {
     private static final String TAG = MultipleRowsFragment.class.getSimpleName();
+    private static final int RESTORE_MAX_SIZE = 1_000;
+    private static final long RESTORE_CHECK_MS = 500;
     private UriBackgroundManager mBackgroundManager;
     private ArrayObjectAdapter mRowsAdapter;
     private ListRowPresenter mRowPresenter;
@@ -51,6 +54,9 @@ public abstract class MultipleRowsFragment extends RowsSupportFragment implement
     private VideoCardPresenter mCardPresenter;
     private ShortsCardPresenter mShortsPresenter;
     private int mSelectedRowIndex = -1;
+    private Video mSelectedItem;
+    private int mSelectedItemRowSize = -1;
+    private final Runnable mRestoreItemTask = this::restoreSelectedItem;
     private ChannelHeaderCallback mChannelHeaderCallback;
     private final RowContinuation mRowContinuation = new RowContinuation();
 
@@ -66,6 +72,13 @@ public abstract class MultipleRowsFragment extends RowsSupportFragment implement
         setupAdapter();
         setupEventListeners();
         applyPendingUpdates();
+    }
+
+    @Override
+    public void onDestroy() {
+        Utils.removeCallbacks(mRestoreItemTask);
+
+        super.onDestroy();
     }
 
     protected void addHeader(ChannelHeaderCallback callback) {
@@ -291,12 +304,128 @@ public abstract class MultipleRowsFragment extends RowsSupportFragment implement
         }
 
         restorePosition();
+        restoreSelectedItem();
     }
 
     private void restorePosition() {
         setPosition(mSelectedRowIndex);
 
         // Maybe we don't need to load next group since all rows already fetched?
+    }
+
+    /**
+     * Selects the card of {@link #selectItem} once it's loaded, e.g. the one the user left for the player before the
+     * screen was recreated. The same video may be in a few rows (e.g. Home), so the row it was in comes first.
+     */
+    private void restoreSelectedItem() {
+        Utils.removeCallbacks(mRestoreItemTask);
+
+        if (mSelectedItem == null || mRowsAdapter == null) {
+            return;
+        }
+
+        // Rows added before the view is created
+        if (getVerticalGridView() == null) {
+            Utils.postDelayed(mRestoreItemTask, RESTORE_CHECK_MS);
+            return;
+        }
+
+        int rowIndex = findOwnRowIndex(mSelectedItem);
+        int itemIndex = rowIndex != -1 ? getRowAdapter(rowIndex).indexOfAlt(mSelectedItem) : -1;
+
+        // The row it was in is unknown: any row will do
+        if (itemIndex == -1 && mSelectedItem.groupPosition == -1) {
+            rowIndex = findAnyRowIndex(mSelectedItem);
+            itemIndex = rowIndex != -1 ? getRowAdapter(rowIndex).indexOfAlt(mSelectedItem) : -1;
+        }
+
+        if (itemIndex == -1) {
+            // Its row isn't loaded or continued yet
+            if (mMainPresenter.hasPendingActions()) {
+                Utils.postDelayed(mRestoreItemTask, RESTORE_CHECK_MS);
+                return;
+            }
+
+            // Further in its row
+            if (rowIndex != -1 && continueRow(rowIndex)) {
+                return;
+            }
+
+            // No longer in its row
+            rowIndex = findAnyRowIndex(mSelectedItem);
+            itemIndex = rowIndex != -1 ? getRowAdapter(rowIndex).indexOfAlt(mSelectedItem) : -1;
+        }
+
+        mSelectedItem = null;
+        mSelectedItemRowSize = -1;
+
+        if (itemIndex == -1) {
+            return;
+        }
+
+        ListRowPresenter.SelectItemViewHolderTask selectItem = new ListRowPresenter.SelectItemViewHolderTask(itemIndex);
+        selectItem.setSmoothScroll(false);
+        setSelectedPosition(rowIndex, false, selectItem);
+    }
+
+    /**
+     * Loads the next page of the row to look for the card there
+     */
+    private boolean continueRow(int rowIndex) {
+        VideoGroupObjectAdapter adapter = getRowAdapter(rowIndex);
+        int size = adapter.size();
+
+        // The end of the row (the last page added nothing)
+        if (size >= RESTORE_MAX_SIZE || size == mSelectedItemRowSize) {
+            return false;
+        }
+
+        mSelectedItemRowSize = size;
+        mMainPresenter.onScrollEnd((Video) adapter.get(size - 1));
+        Utils.postDelayed(mRestoreItemTask, RESTORE_CHECK_MS);
+
+        return true;
+    }
+
+    /**
+     * The row the video was in: the cards of a row share its position (see {@link VideoGroup#add})
+     */
+    private int findOwnRowIndex(Video item) {
+        if (item.groupPosition == -1) {
+            return -1;
+        }
+
+        for (int i = 0; i < mRowsAdapter.size(); i++) {
+            VideoGroupObjectAdapter adapter = getRowAdapter(i);
+
+            if (adapter != null && !adapter.isEmpty() && ((Video) adapter.get(0)).groupPosition == item.groupPosition) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    private int findAnyRowIndex(Video item) {
+        for (int i = 0; i < mRowsAdapter.size(); i++) {
+            VideoGroupObjectAdapter adapter = getRowAdapter(i);
+
+            if (adapter != null && adapter.indexOfAlt(item) != -1) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Null for the channel header
+     */
+    @Nullable
+    private VideoGroupObjectAdapter getRowAdapter(int rowIndex) {
+        Object row = mRowsAdapter.get(rowIndex);
+
+        return row instanceof ListRow ? (VideoGroupObjectAdapter) ((ListRow) row).getAdapter() : null;
     }
 
     @Override
@@ -320,7 +449,14 @@ public abstract class MultipleRowsFragment extends RowsSupportFragment implement
 
     @Override
     public void selectItem(Video item) {
-        // NOP
+        if (item == null) {
+            return;
+        }
+
+        mSelectedItem = item;
+        mSelectedItemRowSize = -1;
+
+        restoreSelectedItem();
     }
 
     /**

@@ -12,6 +12,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.views.ViewManager;
 public class CrashRestorer {
     private static final String SELECTED_HEADER_INDEX = "SelectedHeaderIndex";
     private static final String SELECTED_VIDEO = "SelectedVideo";
+    private static final String SELECTED_VIDEO_GROUP_POSITION = "SelectedVideoGroupPosition";
     private static final String IS_PLAYER_IN_FOREGROUND = "IsPlayerInForeground";
     private int mSelectedHeaderIndex = -1;
     private Video mSelectedVideo;
@@ -34,6 +35,10 @@ public class CrashRestorer {
 
         mSelectedHeaderIndex = savedState.getInt(SELECTED_HEADER_INDEX, -1);
         mSelectedVideo = Video.fromString(savedState.getString(SELECTED_VIDEO));
+        if (mSelectedVideo != null) {
+            // Not a part of the string. The row of the video, which may be in a few rows.
+            mSelectedVideo.groupPosition = savedState.getInt(SELECTED_VIDEO_GROUP_POSITION, -1);
+        }
         mIsPlayerInForeground = savedState.getBoolean(IS_PLAYER_IN_FOREGROUND, false);
     }
 
@@ -52,6 +57,7 @@ public class CrashRestorer {
 
         if (currentVideo != null) {
             outState.putString(SELECTED_VIDEO, currentVideo.toString());
+            outState.putInt(SELECTED_VIDEO_GROUP_POSITION, currentVideo.groupPosition);
         }
         outState.putBoolean(IS_PLAYER_IN_FOREGROUND, ViewManager.instance(mContext).isPlayerInForeground());
     }
