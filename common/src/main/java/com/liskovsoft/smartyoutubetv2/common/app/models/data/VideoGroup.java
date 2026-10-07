@@ -295,7 +295,8 @@ public class VideoGroup {
     }
 
     public String getReloadPageKey() {
-        return getMediaGroup() != null ? getMediaGroup().getReloadPageKey() : null;
+        MediaGroup mediaGroup = getMediaGroup(); // read once: the history is written off the main thread
+        return mediaGroup != null ? mediaGroup.getReloadPageKey() : null;
     }
 
     public String getNextPageKey() {

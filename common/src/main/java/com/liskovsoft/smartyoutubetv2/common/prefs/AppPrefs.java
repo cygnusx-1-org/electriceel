@@ -83,13 +83,23 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
     }
 
     public String getStateUpdaterData() {
-        // Always use multiple profiles for the history
-        return getData(getProfileKey(STATE_UPDATER_DATA, true));
+        return getData(getStateUpdaterKey());
     }
 
-    public void setStateUpdaterData(String data) {
+    /**
+     * Not decoded: thousands of states are decoded in parts, at once
+     */
+    public byte[] getStateUpdaterBytes() {
+        return getDataBytes(getStateUpdaterKey());
+    }
+
+    /**
+     * The key of the history of the current profile. Taken before a write off the main thread, so the history goes to its own
+     * profile even if the profile changes before the write.
+     */
+    public String getStateUpdaterKey() {
         // Always use multiple profiles for the history
-        setData(getProfileKey(STATE_UPDATER_DATA, true), data);
+        return getProfileKey(STATE_UPDATER_DATA, true);
     }
 
     public String getChannelGroupData() {

@@ -606,8 +606,8 @@ public final class Video {
      * Persist on Channels and User playlists sections
      */
     public String getReloadPageKey() {
-        return reloadPageKey != null ? reloadPageKey :
-                getGroup() != null ? getGroup().getReloadPageKey() : null;
+        VideoGroup group = getGroup(); // read once: a weak reference, and the history is written off the main thread
+        return reloadPageKey != null ? reloadPageKey : group != null ? group.getReloadPageKey() : null;
     }
 
     public String getNextPageKey() {
