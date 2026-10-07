@@ -46,7 +46,7 @@ Electric Eel is a fork of [SmartTube](https://github.com/yuliskov/SmartTube), an
 > Starting in October 2025 new Amazon FireTV devices no longer run Android under the hood. Electric Eel will **not** be compatible with the Fire Stick 4k Select and newer devices which run Amazon's own VegaOS.
 
 ![Device support image](images/new/compatibility.png)
-* **Supported:** all Android TVs and TV boxes (incl. All FireTV devices released before Oct. 2025, NVIDIA Shield & Chromecast with Google TV), even older ones with Android 4.3 (Kitkat).
+* **Supported:** all Android TVs and TV boxes (incl. All FireTV devices released before Oct. 2025, NVIDIA Shield & Chromecast with Google TV), even older ones with Android 7.0 (Nougat).
 * **Not supported:** Smartphones, non-Android platforms like Samsung Tizen, LG webOS, Apple TV, etc.
 
 ## Installation
