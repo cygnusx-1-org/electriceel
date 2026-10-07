@@ -241,5 +241,10 @@ public class VideoGroupTopChannelsTest {
         public boolean isSearchTopicRow() {
             return false;
         }
+
+        @Override
+        public int getFilteredVideoCount() {
+            return 0;
+        }
     }
 }

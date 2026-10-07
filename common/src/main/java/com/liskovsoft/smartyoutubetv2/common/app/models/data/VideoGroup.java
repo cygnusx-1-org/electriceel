@@ -131,6 +131,8 @@ public class VideoGroup {
         // Before the items: they're marked or hidden by it
         videoGroup.mIsChannelRow = mediaGroup.isChannelRow();
         videoGroup.mIsSearchTopicRow = mediaGroup.isSearchTopicRow();
+        // E.g. the watched videos of Hide watched videos from Home
+        videoGroup.mHiddenVideoCount = mediaGroup.getFilteredVideoCount();
 
         if (mediaGroup.getMediaItems() == null) {
             Log.e(TAG, "MediaGroup doesn't contain media items. Title: " + mediaGroup.getTitle());
@@ -152,6 +154,8 @@ public class VideoGroup {
         if (mediaGroup == null) {
             return baseGroup;
         }
+
+        baseGroup.mHiddenVideoCount += mediaGroup.getFilteredVideoCount();
 
         if (mediaGroup.getMediaItems() == null) {
             Log.e(TAG, "MediaGroup doesn't contain media items. Title: " + mediaGroup.getTitle());
@@ -451,7 +455,8 @@ public class VideoGroup {
     }
 
     /**
-     * Every video was hidden and only cards without a video are left (e.g. "More music" of a music row)
+     * Every video was hidden, here or by the service (see MediaGroup.getFilteredVideoCount), and only cards without a video are left
+     * (e.g. "More music" of a music row, or of "Listen again" with Hide watched videos from Home)
      */
     public boolean hasOnlyHiddenVideos() {
         if (mHiddenVideoCount == 0 || isEmpty()) {

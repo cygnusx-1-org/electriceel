@@ -610,5 +610,10 @@ public class HiddenVideoResolverTest {
         public boolean isSearchTopicRow() {
             return false;
         }
+
+        @Override
+        public int getFilteredVideoCount() {
+            return 0;
+        }
     }
 }

@@ -492,6 +492,11 @@ public class VideoCategoryManagerTest {
         public boolean isSearchTopicRow() {
             return false;
         }
+
+        @Override
+        public int getFilteredVideoCount() {
+            return 0;
+        }
     }
 
     private static boolean contains(VideoGroup group, String videoId) {

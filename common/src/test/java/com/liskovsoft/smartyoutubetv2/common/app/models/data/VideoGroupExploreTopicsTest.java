@@ -275,5 +275,10 @@ public class VideoGroupExploreTopicsTest {
         public boolean isSearchTopicRow() {
             return mIsSearchTopicRow;
         }
+
+        @Override
+        public int getFilteredVideoCount() {
+            return 0;
+        }
     }
 }
