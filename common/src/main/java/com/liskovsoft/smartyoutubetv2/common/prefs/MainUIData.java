@@ -119,6 +119,7 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
     private final Runnable mPersistStateInt = this::persistStateInt;
     private boolean mIsUnlocalizedTitlesEnabled;
     private long mUiTweaks;
+    private boolean mIsShortsDateEnabled;
 
     private MainUIData(Context context) {
         mContext = context;
@@ -365,6 +366,18 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
         persistState();
     }
 
+    /**
+     * The cards of shorts show the date, looked up since they come without it (see ShortsDateManager)
+     */
+    public boolean isShortsDateEnabled() {
+        return mIsShortsDateEnabled;
+    }
+
+    public void setShortsDateEnabled(boolean enabled) {
+        mIsShortsDateEnabled = enabled;
+        persistState();
+    }
+
     public boolean isUiTweakEnabled(long uiTweaks) {
         return (mUiTweaks & uiTweaks) == uiTweaks;
     }
@@ -475,6 +488,7 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
         mCardPreviewType = Helpers.parseInt(split, 21, CARD_PREVIEW_DISABLED);
         mIsUnlocalizedTitlesEnabled = Helpers.parseBoolean(split, 22, false);
         mUiTweaks = Helpers.parseLong(split, 23, UI_TWEAK_DEFAULT);
+        mIsShortsDateEnabled = Helpers.parseBoolean(split, 24, false);
 
         int idx = -1;
         for (Long menuItem : MENU_ITEM_DEFAULT_ORDER) {
@@ -520,7 +534,7 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
                 mIsUploadsOldLookEnabled, mIsUploadsAutoLoadEnabled, mCardTextScrollSpeed, mMenuItems, mTopButtons,
                 null, mThumbQuality, mIsCardMultilineSubtitleEnabled, Helpers.mergeList(mMenuItemsOrdered),
                 mIsChannelsFilterEnabled, mIsChannelSearchBarEnabled, mIsPinnedChannelRowsEnabled, mCardPreviewType,
-                mIsUnlocalizedTitlesEnabled, mUiTweaks));
+                mIsUnlocalizedTitlesEnabled, mUiTweaks, mIsShortsDateEnabled));
     }
 
     public static class ColorScheme {

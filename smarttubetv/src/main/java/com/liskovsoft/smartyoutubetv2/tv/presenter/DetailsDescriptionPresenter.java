@@ -19,6 +19,7 @@ package com.liskovsoft.smartyoutubetv2.tv.presenter;
 import androidx.leanback.widget.AbstractDetailsDescriptionPresenter;
 
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
+import com.liskovsoft.smartyoutubetv2.common.utils.CompactInfo;
 
 public class DetailsDescriptionPresenter extends AbstractDetailsDescriptionPresenter {
 
@@ -29,7 +30,7 @@ public class DetailsDescriptionPresenter extends AbstractDetailsDescriptionPrese
         if (video != null) {
             viewHolder.getTitle().setText(video.getTitle());
             viewHolder.getSubtitle().setText(video.getAuthor());
-            viewHolder.getBody().setText(video.getSecondTitle());
+            viewHolder.getBody().setText(video.isShorts ? CompactInfo.compact(video.getSecondTitle()) : video.getSecondTitle());
         }
     }
 }

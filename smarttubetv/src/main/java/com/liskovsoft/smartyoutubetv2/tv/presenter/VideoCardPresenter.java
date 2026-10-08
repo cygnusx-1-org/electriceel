@@ -35,6 +35,7 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.ShowsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.TopChannelsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.WatchLaterData;
 import com.liskovsoft.smartyoutubetv2.common.utils.ClickbaitRemover;
+import com.liskovsoft.smartyoutubetv2.common.utils.CompactInfo;
 import com.liskovsoft.smartyoutubetv2.tv.R;
 import com.liskovsoft.smartyoutubetv2.tv.presenter.base.LongClickPresenter;
 import com.liskovsoft.smartyoutubetv2.tv.ui.browse.video.GridFragmentHelper;
@@ -165,7 +166,7 @@ public class VideoCardPresenter extends LongClickPresenter {
 
         Glide.with(context)
                 //.asBitmap() // disable animation (webp, gif)
-                .load(ClickbaitRemover.updateThumbnail(video, mThumbQuality))
+                .load(getCardImageUrl(video, mThumbQuality))
                 //.placeholder(mDefaultCardImage)
                 .apply(ViewUtil.glideOptions())
                 // improve image compression on low end devices
@@ -201,10 +202,10 @@ public class VideoCardPresenter extends LongClickPresenter {
     }
 
     /**
-     * The second title, after the "AI", "Collab", "Watch later", "Show", "Top channel" and "Topic" markers the video has
+     * The second title, shortened for a short (see CompactInfo), after the "AI", "Collab", "Watch later", "Show", "Top channel" and "Topic" markers the video has
      */
     private static CharSequence getContentText(Context context, Video video, boolean selected) {
-        CharSequence text = video.getSecondTitle();
+        CharSequence text = video.isShorts ? CompactInfo.compact(video.getSecondTitle()) : video.getSecondTitle();
 
         if (video.isExploreTopicMarked) {
             text = addMark(context, text, R.string.explore_topic_label, ExploreTopicsData.instance(context).getMarkColor(), selected);
@@ -244,7 +245,7 @@ public class VideoCardPresenter extends LongClickPresenter {
             mark.setSpan(new MarkSpan(markColor, selected), 0, mark.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
-        return secondTitle != null ? TextUtils.concat(mark, " " + Video.TERTIARY_TEXT_DELIM + " ", secondTitle) : mark;
+        return !TextUtils.isEmpty(secondTitle) ? TextUtils.concat(mark, " " + Video.TERTIARY_TEXT_DELIM + " ", secondTitle) : mark;
     }
 
     /**
@@ -306,6 +307,10 @@ public class VideoCardPresenter extends LongClickPresenter {
         mHeight = dimens.second;
     }
     
+    protected String getCardImageUrl(Video video, int thumbQuality) {
+        return ClickbaitRemover.updateThumbnail(video, thumbQuality);
+    }
+
     protected Pair<Integer, Integer> getCardDimensPx(Context context) {
         return GridFragmentHelper.getCardDimensPx(context, R.dimen.card_width, R.dimen.card_height, MainUIData.instance(context).getVideoGridScale());
     }

@@ -110,6 +110,11 @@ public final class SimpleMediaItem implements MediaItem {
     }
 
     @Override
+    public boolean isDateMissing() {
+        return false;
+    }
+
+    @Override
     public boolean isMovie() {
         return mIsMovie;
     }

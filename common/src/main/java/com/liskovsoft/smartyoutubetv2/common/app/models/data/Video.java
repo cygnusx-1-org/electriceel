@@ -59,6 +59,7 @@ public final class Video {
     public boolean isShowMarked; // marked as a show (see ShowsData)
     public boolean isTopChannelMarked; // marked as a channel of a row of channels (see TopChannelsData)
     public boolean isExploreTopicMarked; // marked as a topic of a row of topics (see ExploreTopicsData)
+    public boolean isDateAdded; // the date of a short is in the second title (see ShortsDateManager)
     public String videoId;
     public String playlistId;
     public String remotePlaylistId;
@@ -194,6 +195,7 @@ public final class Video {
         video.isShowMarked = item.isShowMarked;
         video.isTopChannelMarked = item.isTopChannelMarked;
         video.isExploreTopicMarked = item.isExploreTopicMarked;
+        video.isDateAdded = item.isDateAdded;
         video.bgImageUrl = item.bgImageUrl;
         video.cardImageUrl = item.cardImageUrl;
         video.author = item.author;

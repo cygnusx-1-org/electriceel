@@ -473,6 +473,9 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         OptionItem unlocalizedTitle = UiOptionItem.from(getContext().getString(R.string.card_unlocalized_titles),
                 option -> mMainUIData.setUnlocalizedTitlesEnabled(option.isSelected()), mMainUIData.isUnlocalizedTitlesEnabled());
 
+        OptionItem shortsDate = UiOptionItem.from(getContext().getString(R.string.card_shorts_date),
+                option -> mMainUIData.setShortsDateEnabled(option.isSelected()), mMainUIData.isShortsDateEnabled());
+
         OptionItem roundedCardCorners = UiOptionItem.from(getContext().getString(R.string.rounded_card_corners),
                 option -> {
                     if (option.isSelected()) {
@@ -490,6 +493,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
             options.add(autoScrolledTitle);
         }
         options.add(unlocalizedTitle);
+        options.add(shortsDate);
         options.add(roundedCardCorners);
 
         settingsPresenter.appendCheckedCategory(getContext().getString(R.string.cards_style), options);

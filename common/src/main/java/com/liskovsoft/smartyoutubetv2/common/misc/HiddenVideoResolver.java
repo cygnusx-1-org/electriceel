@@ -22,6 +22,7 @@ import io.reactivex.Observable;
  * Holds each emission until what hides its videos after a lookup is known: the channel handles of AiSList,
  * the collaborations and Watch later, in the sections they apply to. The groups are then built without those videos (see VideoGroup),
  * so a hidden video never appears first and vanishes after. The categories of Home are held the same way (see VideoCategoryManager).<br/>
+ * The dates of shorts are held too (see ShortsDateManager): the card never gets its date after it's shown, and Hide old videos reads it.<br/>
  * A failed lookup doesn't hold the group back: its videos are shown.
  */
 public class HiddenVideoResolver {
@@ -106,8 +107,10 @@ public class HiddenVideoResolver {
             }
         }
 
+        Observable<Boolean> shortsDates = ShortsDateManager.instance(context).resolve(mediaGroups);
+
         if (!isAiSListUsed && authors.isEmpty() && !isWatchLaterEnabled) {
-            return Observable.just(true);
+            return shortsDates;
         }
 
         return Observable.zip(
@@ -116,7 +119,8 @@ public class HiddenVideoResolver {
                 aiSListManager.resolveHandles(videoIdByKey),
                 collaborationManager.resolve(authors),
                 isWatchLaterEnabled ? watchLaterManager.resolve() : Observable.just(true),
-                (lists, handles, collaborations, watchLater) -> true)
+                shortsDates,
+                (lists, handles, collaborations, watchLater, dates) -> true)
                 // Show the videos rather than nothing
                 .onErrorReturn(error -> {
                     Log.e(TAG, "Can't resolve the hidden videos: %s", error.getMessage());

@@ -924,4 +924,33 @@
         <item quantity="one">%s year</item>
         <item quantity="other">%s years</item>
     </plurals>
+    <string name="card_shorts_date">Dates on shorts</string>
+    <plurals name="seconds_ago">
+        <item quantity="one">%s second ago</item>
+        <item quantity="other">%s seconds ago</item>
+    </plurals>
+    <plurals name="minutes_ago">
+        <item quantity="one">%s minute ago</item>
+        <item quantity="other">%s minutes ago</item>
+    </plurals>
+    <plurals name="hours_ago">
+        <item quantity="one">%s hour ago</item>
+        <item quantity="other">%s hours ago</item>
+    </plurals>
+    <plurals name="days_ago">
+        <item quantity="one">%s day ago</item>
+        <item quantity="other">%s days ago</item>
+    </plurals>
+    <plurals name="weeks_ago">
+        <item quantity="one">%s week ago</item>
+        <item quantity="other">%s weeks ago</item>
+    </plurals>
+    <plurals name="months_ago">
+        <item quantity="one">%s month ago</item>
+        <item quantity="other">%s months ago</item>
+    </plurals>
+    <plurals name="years_ago">
+        <item quantity="one">%s year ago</item>
+        <item quantity="other">%s years ago</item>
+    </plurals>
 </resources>

@@ -64,6 +64,7 @@ import com.liskovsoft.smartyoutubetv2.common.exoplayer.versions.selector.Restore
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
+import com.liskovsoft.smartyoutubetv2.common.utils.CompactInfo;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.smartyoutubetv2.tv.R;
 import com.liskovsoft.smartyoutubetv2.tv.adapter.VideoGroupObjectAdapter;
@@ -859,7 +860,7 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
     }
 
     private CharSequence createSubtitle(Video video) {
-        CharSequence result = video.getSecondTitleFull();
+        CharSequence result = video.isShorts ? CompactInfo.compact(getShortInfo(video)) : video.getSecondTitleFull();
 
         if (getContext() != null && video.isLive) {
             result = TextUtils.concat( result, " ", Video.TERTIARY_TEXT_DELIM, " ", Utils.color(getContext().getString(R.string.badge_live), ContextCompat.getColor(getContext(), R.color.red)));
@@ -878,6 +879,13 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
         }
 
         return result;
+    }
+
+    /**
+     * The card's line when it tells the age: the player's has the day alone (e.g. "Published on Oct 7, 2026")
+     */
+    private static CharSequence getShortInfo(Video video) {
+        return CompactInfo.hasAge(video.getSecondTitle()) ? video.getSecondTitle() : video.getSecondTitleFull();
     }
 
     private CharSequence createNextTitle(Video video) {

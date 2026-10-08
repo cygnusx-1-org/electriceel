@@ -13,6 +13,7 @@ import com.liskovsoft.smartyoutubetv2.common.misc.KeywordFilter;
 import com.liskovsoft.smartyoutubetv2.common.misc.CollaborationManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.NotInterestedManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.OldVideoFilter;
+import com.liskovsoft.smartyoutubetv2.common.misc.ShortsDateManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.WatchLaterManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AiSListFilterData;
@@ -501,6 +502,8 @@ public class VideoGroup {
             return;
         }
 
+        addShortsDate(video);
+
         if (isChannelBlocked(video) || isNotInterested(video) || isAiListed(video) || isHiddenCategory(video) || isOld(video) || isHiddenCollaboration(video)
                 || isHiddenWatchLater(video) || isHiddenShow(video) || isHiddenTopChannel(video) || isHiddenExploreTopic(video)
                 || hasHiddenKeyword(video) || isWatchedSuggestion(video)) {
@@ -631,6 +634,19 @@ public class VideoGroup {
         }
 
         return manager.isVideoHidden(video.videoId);
+    }
+
+    /**
+     * The date of a short that comes without it, looked up before the group is created (see ShortsDateManager).
+     * Before the filters: Hide old videos reads it too.
+     */
+    private static void addShortsDate(Video video) {
+        // No context before the app is initialized (GlobalPreferences)
+        if (video.isChapter || video.videoId == null || GlobalPreferences.context() == null) {
+            return;
+        }
+
+        ShortsDateManager.instance(GlobalPreferences.context()).addDate(video);
     }
 
     /**
