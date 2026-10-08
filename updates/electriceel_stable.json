@@ -1,13 +1,32 @@
 {
   "package": {
     "downloadUrlList_arm64-v8a": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.5/ElectricEel_stable_32.56.5_arm64-v8a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.6/ElectricEel_stable_32.56.6_arm64-v8a.apk"
     ],
     "downloadUrlList_armeabi-v7a": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.5/ElectricEel_stable_32.56.5_armeabi-v7a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.6/ElectricEel_stable_32.56.6_armeabi-v7a.apk"
     ],
     "downloadUrlList": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.5/ElectricEel_stable_32.56.5_armeabi-v7a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.6/ElectricEel_stable_32.56.6_armeabi-v7a.apk"
+    ]
+  },
+  "32.56.6": {
+    "versionCode": 2446,
+    "changelog": [
+      "Implemented Allow playlists to be remote with local faillback #24",
+      "Added a \"Create local playlist\" option",
+      "Added a \"Copy to YouTube\" for local playlists",
+      "Implemented Implement frame by frame playback in the player #31",
+      "Implemented Add option to show date for shorts #18",
+      "Implemented Add back About options #26",
+      "Fixed Adding a second account seems to default to the existing account's theme, not the actual default #33",
+      "Removed \"Use separate settings per each account\" setting",
+      "Added \"Copy settings from another account\" option",
+      "Implemented Make \"Show keyboard automatically\" in \"Settings | Search | General\" default to on #21",
+      "Kept 5000(high mem) or 500(low mem) watched shorts",
+      "Fixed Hide the \"More music\" card in the \"Listen again\" row when Music is hidden in Home #13",
+      "Applied Collaborations, Watch later, and Shows marks to Search and Channel pages",
+      "Add a separate music autoplay setting #15"
     ]
   },
   "32.56.5": {
