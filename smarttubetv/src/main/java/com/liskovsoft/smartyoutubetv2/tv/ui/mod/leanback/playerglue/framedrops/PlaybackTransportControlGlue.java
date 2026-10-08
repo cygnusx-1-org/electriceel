@@ -352,7 +352,8 @@ public class PlaybackTransportControlGlue<T extends PlayerAdapter>
             // if we seek thumbnails, we don't need save original position because current
             // position is not changed during seeking.
             // otherwise we will call seekTo() and may need to restore the original position.
-            mPositionBeforeSeek = mSeekProvider == null ? mPlayerAdapter.getCurrentPosition() : -1;
+            // MOD: the glue's position (a stepped frame may be ahead of the player's)
+            mPositionBeforeSeek = mSeekProvider == null ? getCurrentPosition() : -1;
             mLastUserPosition = -1;
             if (!mPlayerData.isSeekConfirmPlayEnabled()) {
                 pause();

@@ -25,6 +25,7 @@ public abstract class MaxControlsVideoPlayerGlue<T extends PlayerAdapter>
         extends PlaybackTransportControlGlue<T> implements TopEdgeFocusListener, PlayerView {
     private String mQualityInfo;
     private Video mVideo;
+    private long mFramePositionMs = -1;
     private WeakReference<PlaybackTransportRowPresenter.ViewHolder> mTransportViewHolder;
     private WeakReference<AbstractDetailsDescriptionPresenter.ViewHolder> mDescriptionViewHolder;
 
@@ -132,6 +133,20 @@ public abstract class MaxControlsVideoPlayerGlue<T extends PlayerAdapter>
     @Override
     public void setVideo(Video video) {
         mVideo = video;
+    }
+
+    @Override
+    public void setFramePositionMs(long positionMs) {
+        mFramePositionMs = positionMs;
+        onUpdateProgress();
+    }
+
+    /**
+     * MOD: after frame stepping, the frame on screen is ahead of the player's own position
+     */
+    @Override
+    public long getCurrentPosition() {
+        return mFramePositionMs != -1 ? mFramePositionMs : super.getCurrentPosition();
     }
 
     @Override

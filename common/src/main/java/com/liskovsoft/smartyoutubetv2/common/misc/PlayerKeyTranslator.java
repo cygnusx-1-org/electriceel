@@ -199,6 +199,14 @@ public class PlayerKeyTranslator extends GlobalKeyTranslator {
         return PlaybackPresenter.instance(mContext);
     }
 
+    /**
+     * Keys that pause and show the next frame: the media step key, and '.' like on youtube.com.<br/>
+     * Handled by the player itself rather than mapped here, so '.' still types in dialogs.
+     */
+    public static boolean isNextFrameKey(int keyCode) {
+        return keyCode == KeyEvent.KEYCODE_MEDIA_STEP_FORWARD || keyCode == KeyEvent.KEYCODE_PERIOD;
+    }
+
     private Context getContext() {
         return mContext;
     }

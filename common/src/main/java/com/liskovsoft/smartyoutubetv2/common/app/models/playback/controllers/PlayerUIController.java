@@ -36,6 +36,7 @@ import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.track.SubtitleTrack;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MusicAutoplayManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.PlayerKeyTranslator;
 import com.liskovsoft.smartyoutubetv2.common.misc.ScreensaverManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.SearchData;
@@ -136,7 +137,7 @@ public class PlayerUIController extends BasePlayerController {
 
         boolean isHandled = handleBackKey(keyCode) || handleMenuKey(keyCode) ||
                 handleConfirmKey(keyCode) || handleStopKey(keyCode) || handleNumKeys(keyCode) ||
-                handlePlayPauseKey(keyCode) || handleLeftRightSkip(keyCode) || handleUpDownSkip(keyCode);
+                handlePlayPauseKey(keyCode) || handleNextFrameKey(keyCode) || handleLeftRightSkip(keyCode) || handleUpDownSkip(keyCode);
 
         if (isHandled) {
             return true; // don't show UI
@@ -603,6 +604,8 @@ public class PlayerUIController extends BasePlayerController {
             onVideoZoom();
         } else if (buttonId == R.id.action_seek_interval) {
             onSeekInterval();
+        } else if (buttonId == R.id.action_next_frame) {
+            getPlayer().nextFrame();
         } else if (buttonId == R.id.action_share) {
             onShareLink();
         } else if (buttonId == R.id.action_info) {
@@ -782,6 +785,16 @@ public class PlayerUIController extends BasePlayerController {
         if (keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE && getPlayer() != null) {
             getPlayer().setPlayWhenReady(!getPlayer().getPlayWhenReady());
             enableUiAutoHideTimeout(); // TODO: move out somehow
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean handleNextFrameKey(int keyCode) {
+        if (PlayerKeyTranslator.isNextFrameKey(keyCode) && getPlayer() != null) {
+            getPlayer().nextFrame();
+            enableUiAutoHideTimeout();
             return true;
         }
 

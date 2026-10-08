@@ -23,6 +23,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.listener.PlayerEventListener;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.ExoMediaSourceFactory;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.errors.TrackErrorFixer;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.other.FrameStepper;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.other.VolumeBooster;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.ExoFormatItem;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
@@ -32,6 +33,7 @@ import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.TrackSelectorUti
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.track.MediaTrack;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.track.VideoTrack;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.versions.ExoUtils;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.versions.renderer.DebugInfoMediaCodecVideoRenderer;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
 
@@ -46,6 +48,7 @@ public class ExoPlayerController implements Player.EventListener {
     private final TrackSelectorManager mTrackSelectorManager;
     private final TrackInfoFormatter2 mTrackFormatter;
     private final TrackErrorFixer mTrackErrorFixer;
+    private final FrameStepper mFrameStepper;
     private boolean mOnSourceChanged;
     private WeakReference<Video> mVideo;
     private final PlayerEventListener mEventListener;
@@ -63,6 +66,7 @@ public class ExoPlayerController implements Player.EventListener {
         mTrackFormatter = new TrackInfoFormatter2();
         mTrackFormatter.enableBitrate(PlayerTweaksData.instance(context).isQualityInfoBitrateEnabled());
         mTrackErrorFixer = new TrackErrorFixer(mTrackSelectorManager);
+        mFrameStepper = new FrameStepper(this::onFramePositionChanged);
 
         mMediaSourceFactory.setTrackErrorFixer(mTrackErrorFixer);
         mEventListener = eventListener;
@@ -122,6 +126,7 @@ public class ExoPlayerController implements Player.EventListener {
     }
 
     private void openMediaSource(MediaSource mediaSource) {
+        mFrameStepper.reset();
         resetPlayerState(); // fixes occasional video artifacts and problems with quality switching
         setQualityInfo("");
 
@@ -137,7 +142,9 @@ public class ExoPlayerController implements Player.EventListener {
             return -1;
         }
 
-        return mPlayer.getCurrentPosition();
+        long framePositionMs = mFrameStepper.getPositionMs();
+
+        return framePositionMs != -1 ? framePositionMs : mPlayer.getCurrentPosition();
     }
 
     /**
@@ -206,6 +213,24 @@ public class ExoPlayerController implements Player.EventListener {
     public void setPlayer(SimpleExoPlayer player) {
         mPlayer = player;
         player.addListener(this);
+    }
+
+    /**
+     * Enables {@link #nextFrame()}. Pass the video renderer of the player set with {@link #setPlayer(SimpleExoPlayer)}.
+     */
+    public void setVideoRenderer(DebugInfoMediaCodecVideoRenderer renderer) {
+        mFrameStepper.setPlayer(mPlayer, renderer);
+    }
+
+    /**
+     * Pauses (if playing) and shows the next frame. Live streams aren't stepped.
+     */
+    public void nextFrame() {
+        if (getVideo() != null && getVideo().isLive) {
+            return;
+        }
+
+        mFrameStepper.stepForward();
     }
 
     //@Override
@@ -349,6 +374,10 @@ public class ExoPlayerController implements Player.EventListener {
             return;
         }
 
+        if (playWhenReady) {
+            mFrameStepper.onPlay();
+        }
+
         if (isPlayPressed) {
             mEventListener.onPlay();
         } else if (isPausePressed) {
@@ -368,6 +397,10 @@ public class ExoPlayerController implements Player.EventListener {
     @Override
     public void onPositionDiscontinuity(int reason) {
         Log.e(TAG, "onPositionDiscontinuity");
+
+        if (reason == Player.DISCONTINUITY_REASON_SEEK) {
+            mFrameStepper.onSeek();
+        }
 
         // Fix video loop on 480p with legacy codes enabled
         if (reason == Player.DISCONTINUITY_REASON_PERIOD_TRANSITION) {
@@ -448,6 +481,12 @@ public class ExoPlayerController implements Player.EventListener {
         mOnVideoLoaded = onVideoLoaded;
     }
 
+    private void onFramePositionChanged(long positionMs) {
+        if (mPlayerView != null) {
+            mPlayerView.setFramePositionMs(positionMs);
+        }
+    }
+
     private void setQualityInfo(String qualityInfoStr) {
         if (mPlayerView != null && qualityInfoStr != null) {
             mPlayerView.setQualityInfo(qualityInfoStr);
@@ -487,6 +526,8 @@ public class ExoPlayerController implements Player.EventListener {
     }
 
     private void releasePlayer() {
+        mFrameStepper.setPlayer(null, null);
+
         if (mPlayer == null) {
             return;
         }

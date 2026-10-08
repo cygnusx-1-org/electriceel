@@ -329,6 +329,11 @@ public class EmbedPlayerView extends PlayerView implements PlaybackView {
     }
 
     @Override
+    public void nextFrame() {
+        // NOP: previews don't step frames
+    }
+
+    @Override
     public boolean isPlaying() {
         return mExoPlayerController.isPlaying();
     }

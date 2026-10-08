@@ -31,6 +31,7 @@ public class CustomOverridesRenderersFactory extends CustomRenderersFactoryBase 
     };
     private final PlayerData mPlayerData;
     private final PlayerTweaksData mPlayerTweaksData;
+    private DebugInfoMediaCodecVideoRenderer mVideoRenderer;
     // 2.12, 2.13
     //private int mOperationMode = MediaCodecRenderer.OPERATION_MODE_SYNCHRONOUS;
 
@@ -162,6 +163,7 @@ public class CustomOverridesRenderersFactory extends CustomRenderersFactoryBase 
             videoRenderer.enableSetOutputSurfaceWorkaround(true); // Force enable?
 
             replaceVideoRenderer(out, videoRenderer);
+            mVideoRenderer = videoRenderer;
 
             return;
         }
@@ -176,6 +178,15 @@ public class CustomOverridesRenderersFactory extends CustomRenderersFactoryBase 
         videoRenderer.enableSetOutputSurfaceWorkaround(true); // Force enable?
 
         replaceVideoRenderer(out, videoRenderer);
+        mVideoRenderer = videoRenderer;
+    }
+
+    /**
+     * The video renderer built for the player, once the player has been created with this factory.
+     */
+    @Nullable
+    public DebugInfoMediaCodecVideoRenderer getVideoRenderer() {
+        return mVideoRenderer;
     }
 
     // Exo 2.12, 2.13

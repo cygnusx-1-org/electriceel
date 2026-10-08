@@ -20,6 +20,10 @@ public interface PlayerEngine extends PlayerConstants {
     long getDurationMs();
     void setPlayWhenReady(boolean play);
     boolean getPlayWhenReady();
+    /**
+     * Pauses (if playing) and shows the next frame
+     */
+    void nextFrame();
     boolean isPlaying();
     boolean isLoading();
     List<FormatItem> getVideoFormats();

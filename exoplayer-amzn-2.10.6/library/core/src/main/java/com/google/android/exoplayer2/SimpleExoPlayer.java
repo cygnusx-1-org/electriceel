@@ -971,6 +971,12 @@ public class SimpleExoPlayer extends BasePlayer
     player.seekTo(windowIndex, positionMs);
   }
 
+  /** MOD: see {@link ExoPlayerImpl#setPositionKeepingVideo(long)}. */
+  public void setPositionKeepingVideo(long periodPositionUs) {
+    verifyApplicationThread();
+    player.setPositionKeepingVideo(periodPositionUs);
+  }
+
   @Override
   public void setPlaybackParameters(@Nullable PlaybackParameters playbackParameters) {
     verifyApplicationThread();

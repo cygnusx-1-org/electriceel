@@ -37,7 +37,6 @@ import com.github.vkay94.dtpv.youtube.YouTubeOverlay;
 import com.github.vkay94.dtpv.youtube.YouTubeOverlay.PerformListener;
 import com.google.android.exoplayer2.ControlDispatcher;
 import com.google.android.exoplayer2.DefaultControlDispatcher;
-import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter;
@@ -484,10 +483,11 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
         DefaultTrackSelector trackSelector = new RestoreTrackSelector(new AdaptiveTrackSelection.Factory());
         mExoPlayerController.setTrackSelector(trackSelector);
 
-        DefaultRenderersFactory renderersFactory = new CustomOverridesRenderersFactory(getContext());
+        CustomOverridesRenderersFactory renderersFactory = new CustomOverridesRenderersFactory(getContext());
         mPlayer = mPlayerInitializer.createPlayer(getContext(), renderersFactory, trackSelector);
 
         mExoPlayerController.setPlayer(mPlayer);
+        mExoPlayerController.setVideoRenderer(renderersFactory.getVideoRenderer());
     }
 
     private void createPlayerGlue() {
@@ -1018,6 +1018,11 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
     @Override
     public boolean getPlayWhenReady() {
         return mExoPlayerController.getPlayWhenReady();
+    }
+
+    @Override
+    public void nextFrame() {
+        mExoPlayerController.nextFrame();
     }
 
     @Override

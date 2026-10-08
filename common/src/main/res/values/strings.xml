@@ -519,6 +519,7 @@
     <string name="simple_edit_value_hint">Enter value</string>
     <string name="seek_interval">Seek interval</string>
     <string name="seek_interval_sec">%s sec</string>
+    <string name="action_next_frame">Next frame</string>
     <string name="subtitle_system">System style (Android settings &gt; Accessibility)</string>
     <string name="subtitle_scale">Subtitle scale</string>
     <string name="audio_sync_fix_desc">An alternative way to synchronize audio/video. It\'s considered obsolete, but in some cases, may help.</string>

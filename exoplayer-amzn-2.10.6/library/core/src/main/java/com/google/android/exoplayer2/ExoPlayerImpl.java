@@ -358,6 +358,27 @@ import java.util.concurrent.CopyOnWriteArrayList;
     notifyListeners(listener -> listener.onPositionDiscontinuity(DISCONTINUITY_REASON_SEEK));
   }
 
+  /**
+   * MOD: like an exact seek within the current period, except that the video renderer keeps its decoder: it must already
+   * show the frame at the position (frame stepping), and goes on decoding from there instead of from the previous keyframe.
+   * Where a stream can't move on its own, it's an ordinary seek. Listeners hear of no seek.
+   *
+   * @param periodPositionUs The position in the current period.
+   */
+  public void setPositionKeepingVideo(long periodPositionUs) {
+    Timeline timeline = playbackInfo.timeline;
+    if (timeline.isEmpty() || isPlayingAd()) {
+      return;
+    }
+    pendingOperationAcks++;
+    Object periodUid = playbackInfo.periodId.periodUid;
+    timeline.getPeriodByUid(periodUid, period);
+    maskingWindowIndex = period.windowIndex;
+    maskingPeriodIndex = timeline.getIndexOfPeriod(periodUid);
+    maskingWindowPositionMs = C.usToMs(periodPositionUs + period.getPositionInWindowUs());
+    internalPlayer.setPositionKeepingVideo(periodPositionUs);
+  }
+
   @Override
   public void setPlaybackParameters(@Nullable PlaybackParameters playbackParameters) {
     if (playbackParameters == null) {

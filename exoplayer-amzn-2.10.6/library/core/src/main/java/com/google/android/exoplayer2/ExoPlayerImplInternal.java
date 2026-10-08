@@ -29,7 +29,9 @@ import com.google.android.exoplayer2.Player.DiscontinuityReason;
 import com.google.android.exoplayer2.source.MediaPeriod;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MediaSource.MediaPeriodId;
+import com.google.android.exoplayer2.source.EmptySampleStream;
 import com.google.android.exoplayer2.source.SampleStream;
+import com.google.android.exoplayer2.source.chunk.ChunkSampleStream;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
@@ -81,6 +83,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
   private static final int MSG_SEND_MESSAGE = 15;
   private static final int MSG_SEND_MESSAGE_TO_TARGET_THREAD = 16;
   private static final int MSG_PLAYBACK_PARAMETERS_CHANGED_INTERNAL = 17;
+  private static final int MSG_SET_POSITION_KEEPING_VIDEO = 18; // MOD
 
   private static final int PREPARING_SOURCE_INTERVAL_MS = 10;
   private static final int RENDERING_INTERVAL_MS = 10;
@@ -194,6 +197,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
   public void seekTo(Timeline timeline, int windowIndex, long positionUs) {
     handler.obtainMessage(MSG_SEEK_TO, new SeekPosition(timeline, windowIndex, positionUs))
         .sendToTarget();
+  }
+
+  /** MOD: see {@link ExoPlayerImpl#setPositionKeepingVideo(long)}. */
+  public void setPositionKeepingVideo(long periodPositionUs) {
+    handler.obtainMessage(MSG_SET_POSITION_KEEPING_VIDEO, periodPositionUs).sendToTarget();
   }
 
   public void setPlaybackParameters(PlaybackParameters playbackParameters) {
@@ -358,6 +366,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
           break;
         case MSG_PLAYBACK_PARAMETERS_CHANGED_INTERNAL:
           handlePlaybackParameters((PlaybackParameters) msg.obj);
+          break;
+        case MSG_SET_POSITION_KEEPING_VIDEO:
+          setPositionKeepingVideoInternal((Long) msg.obj);
           break;
         case MSG_SEND_MESSAGE:
           sendMessageInternal((PlayerMessage) msg.obj);
@@ -766,6 +777,66 @@ import java.util.concurrent.atomic.AtomicBoolean;
     handleLoadingMediaPeriodChanged(/* loadingTrackSelectionChanged= */ false);
     handler.sendEmptyMessage(MSG_DO_SOME_WORK);
     return periodPositionUs;
+  }
+
+  /**
+   * MOD: moves the position like a seek, but every renderer except the video one moves on its own (with its sample stream),
+   * so the video decoder keeps the frames it holds.
+   */
+  private void setPositionKeepingVideoInternal(long periodPositionUs) throws ExoPlaybackException {
+    if (playbackInfo.timeline.isEmpty()) {
+      playbackInfoUpdate.incrementPendingOperationAcks(/* operationAcks= */ 1);
+      return;
+    }
+
+    MediaPeriodHolder playingPeriodHolder = queue.getPlayingPeriod();
+    boolean canKeepVideo =
+        playingPeriodHolder != null && playingPeriodHolder == queue.getReadingPeriod();
+    for (Renderer renderer : enabledRenderers) {
+      SampleStream stream = renderer.getStream();
+      if (renderer.getTrackType() != C.TRACK_TYPE_VIDEO
+          && !(stream instanceof ChunkSampleStream)
+          && !(stream instanceof EmptySampleStream)) {
+        canKeepVideo = false;
+      }
+    }
+
+    if (!canKeepVideo) {
+      // A stream that can't move on its own (or a period change in progress): an ordinary seek
+      playbackInfo.timeline.getPeriodByUid(playbackInfo.periodId.periodUid, period);
+      seekToInternal(
+          new SeekPosition(
+              playbackInfo.timeline,
+              period.windowIndex,
+              periodPositionUs + period.getPositionInWindowUs()));
+      return;
+    }
+
+    playbackInfoUpdate.incrementPendingOperationAcks(/* operationAcks= */ 1);
+    // As a seek does: playback resumes once the reset renderers are ready again
+    stopRenderers();
+    rebuffering = false;
+    setState(Player.STATE_BUFFERING);
+    rendererPositionUs = playingPeriodHolder.toRendererTime(periodPositionUs);
+    mediaClock.resetPosition(rendererPositionUs);
+    for (Renderer renderer : enabledRenderers) {
+      if (renderer.getTrackType() != C.TRACK_TYPE_VIDEO) {
+        SampleStream stream = renderer.getStream();
+        if (stream instanceof ChunkSampleStream) {
+          ((ChunkSampleStream<?>) stream).seekToUs(periodPositionUs);
+        }
+        renderer.resetPosition(rendererPositionUs);
+      }
+    }
+    notifyTrackSelectionDiscontinuity();
+    playbackInfo =
+        playbackInfo.copyWithNewPosition(
+            playbackInfo.periodId,
+            periodPositionUs,
+            playbackInfo.contentPositionUs,
+            getTotalBufferedDurationUs());
+    maybeContinueLoading();
+    handler.sendEmptyMessage(MSG_DO_SOME_WORK);
   }
 
   private void resetRendererPosition(long periodPositionUs) throws ExoPlaybackException {
