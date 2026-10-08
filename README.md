@@ -17,7 +17,8 @@ Electric Eel is a fork of [SmartTube](https://github.com/yuliskov/SmartTube), an
 - Marking videos as Collaborations and Watch later by default, but can also hide them
 - Shorts quick toggle
 - Quick toggles button next to the account button
-- Settings are per account by default
+- Settings are per account
+- Apply to copy all settings from one account to another
 - Refactored Settings to use more cards
 - Keyword filtering that hides videos by the words in their titles
 - Full-screen word picker for keywords and a Hide words item to the context menu
