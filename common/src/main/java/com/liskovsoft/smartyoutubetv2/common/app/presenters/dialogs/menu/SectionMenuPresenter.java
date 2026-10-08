@@ -101,6 +101,7 @@ public class SectionMenuPresenter extends BaseMenuPresenter {
         appendMoveSectionButton();
         appendRenameSectionButton();
         appendCreatePlaylistButton();
+        appendCreateLocalPlaylistButton();
         appendToggleHistoryButton();
         appendClearHistoryButton();
         appendUpdateCheckButton();

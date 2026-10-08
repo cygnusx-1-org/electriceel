@@ -24,6 +24,7 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.utils.AppDialogUtil;
 import com.liskovsoft.smartyoutubetv2.common.utils.SimpleEditDialog;
+import com.liskovsoft.youtubeapi.playlist.LocalPlaylistException;
 import com.liskovsoft.youtubeapi.service.YouTubeMediaItemService;
 import io.reactivex.Observable;
 
@@ -34,6 +35,7 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
     private boolean mIsPinToSidebarEnabled;
     private boolean mIsSaveRemovePlaylistEnabled;
     private boolean mIsCreatePlaylistEnabled;
+    private boolean mIsCreateLocalPlaylistEnabled;
     private boolean mIsAccountSelectionEnabled;
     private boolean mIsAddToNewPlaylistEnabled;
     private boolean mIsToggleHistoryEnabled;
@@ -41,6 +43,7 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
     private boolean mIsUpdateCheckEnabled;
     private boolean mIsExcludeFromContentBlockEnabled;
     private boolean mIsRenamePlaylistEnabled;
+    private boolean mIsCopyPlaylistToYouTubeEnabled;
 
     protected BaseMenuPresenter(Context context) {
         super(context);
@@ -336,6 +339,46 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
                         ));
     }
 
+    /**
+     * Only offered signed in: signed out, Create playlist already keeps the playlist on this device
+     */
+    protected void appendCreateLocalPlaylistButton() {
+        if (!mIsCreateLocalPlaylistEnabled) {
+            return;
+        }
+
+        Video original = getVideo() != null ? getVideo() : new Video();
+
+        BrowsePresenter presenter = BrowsePresenter.instance(getContext());
+
+        if (original.hasVideo() || !(presenter.isPlaylistsSection() && presenter.inForeground())) {
+            return;
+        }
+
+        getDialogPresenter().appendSingleButton(
+                UiOptionItem.from(
+                        getContext().getString(R.string.create_local_playlist),
+                        optionItem -> showCreateLocalPlaylistDialog()
+                ));
+    }
+
+    private void showCreateLocalPlaylistDialog() {
+        closeDialog();
+        SimpleEditDialog.show(
+                getContext(),
+                getContext().getString(R.string.create_local_playlist),
+                getContext().getString(R.string.create_playlist_note),
+                null,
+                newValue -> {
+                    RxHelper.execute(
+                            YouTubeMediaItemService.instance().createLocalPlaylistObserve(newValue),
+                            (error) -> MessageHelpers.showMessage(getContext(), error.getLocalizedMessage()),
+                            () -> BrowsePresenter.instance(getContext()).refresh()
+                    );
+                    return true;
+                });
+    }
+
     protected void appendAddToNewPlaylistButton() {
         if (!mIsAddToNewPlaylistEnabled) {
             return;
@@ -356,10 +399,12 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
 
     private void showCreatePlaylistDialog(Video video) {
         closeDialog();
+        String title = getContext().getString(R.string.create_playlist);
         SimpleEditDialog.show(
                 getContext(),
-                getContext().getString(R.string.create_playlist),
-                getContext().getString(R.string.create_playlist_note),
+                title,
+                // Signed out, the playlist is kept on this device only
+                getSignInService().isSigned() ? title : getContext().getString(R.string.create_playlist_note),
                 null,
                 newValue -> {
                     MediaItemService manager = YouTubeMediaItemService.instance();
@@ -371,7 +416,18 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
                             manager.createPlaylistObserve(newValue, mediaItem);
                     RxHelper.execute(
                             action,
-                            (error) -> MessageHelpers.showMessage(getContext(), error.getLocalizedMessage()),
+                            (error) -> {
+                                if (!(error instanceof LocalPlaylistException)) {
+                                    MessageHelpers.showMessage(getContext(), error.getLocalizedMessage());
+                                    return;
+                                }
+
+                                // Signed in, YouTube refused it: the playlist was kept on this device only
+                                MessageHelpers.showLongMessage(getContext(), R.string.create_playlist_note);
+                                if (!video.hasVideo()) { // Playlists section
+                                    BrowsePresenter.instance(getContext()).refresh();
+                                }
+                            },
                             () -> {
                                 if (!video.hasVideo()) { // Playlists section
                                     BrowsePresenter.instance(getContext()).refresh();
@@ -382,6 +438,39 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
                     );
                     return true;
                 });
+    }
+
+    protected void appendCopyPlaylistToYouTubeButton() {
+        if (!mIsCopyPlaylistToYouTubeEnabled) {
+            return;
+        }
+
+        Video original = getVideo();
+
+        BrowsePresenter presenter = BrowsePresenter.instance(getContext());
+
+        if (original == null || !(presenter.isPlaylistsSection() && presenter.inForeground())
+                || !YouTubeMediaItemService.instance().isLocalPlaylist(original.playlistId)) {
+            return;
+        }
+
+        getDialogPresenter().appendSingleButton(
+                UiOptionItem.from(
+                        getContext().getString(R.string.copy_playlist_to_youtube),
+                        optionItem -> copyPlaylistToYouTube(original)
+                ));
+    }
+
+    private void copyPlaylistToYouTube(Video video) {
+        closeDialog();
+        RxHelper.execute(
+                YouTubeMediaItemService.instance().copyPlaylistToYouTubeObserve(video.playlistId),
+                (error) -> MessageHelpers.showMessage(getContext(), error.getLocalizedMessage()),
+                () -> {
+                    MessageHelpers.showMessage(getContext(), R.string.copied_to_youtube);
+                    BrowsePresenter.instance(getContext()).refresh();
+                }
+        );
     }
 
     protected void appendRenamePlaylistButton() {
@@ -535,7 +624,9 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
         mIsPinToSidebarEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_PIN_TO_SIDEBAR);
         mIsSaveRemovePlaylistEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_SAVE_REMOVE_PLAYLIST);
         mIsCreatePlaylistEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_CREATE_PLAYLIST);
+        mIsCreateLocalPlaylistEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_CREATE_LOCAL_PLAYLIST);
         mIsRenamePlaylistEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_RENAME_PLAYLIST);
+        mIsCopyPlaylistToYouTubeEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_COPY_PLAYLIST_TO_YOUTUBE);
         mIsAccountSelectionEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_SELECT_ACCOUNT);
         mIsAddToNewPlaylistEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_ADD_TO_NEW_PLAYLIST);
         mIsToggleHistoryEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_TOGGLE_HISTORY);

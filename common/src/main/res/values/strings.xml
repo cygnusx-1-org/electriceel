@@ -561,11 +561,14 @@
     <string name="removed_from_playlists">Removed from Playlists section</string>
     <string name="saved_to_playlists">Added to Playlists section</string>
     <string name="create_playlist">Create playlist</string>
+    <string name="create_local_playlist">Create local playlist</string>
     <string name="create_playlist_note">NOTE: It won\'t be seen in the YouTube app</string>
     <string name="add_video_to_new_playlist">Add to new playlist</string>
     <string name="cant_delete_empty_playlist">Can\'t delete empty playlist</string>
     <string name="playlist">Playlist</string>
     <string name="rename_playlist">Rename playlist</string>
+    <string name="copy_playlist_to_youtube">Copy to YouTube</string>
+    <string name="copied_to_youtube">Copied to YouTube</string>
     <string name="cant_rename_empty_playlist">Can\'t rename empty playlist</string>
     <string name="cant_rename_foreign_playlist">Can\'t rename foreign playlist</string>
     <string name="cant_save_playlist">This playlist cannot be added</string>
