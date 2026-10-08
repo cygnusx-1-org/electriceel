@@ -19,18 +19,16 @@ import static org.junit.Assert.assertTrue;
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 28)
 public class MusicAutoplayDataTest {
-    private static final String ANONYMOUS_PROFILE_KEY = "anonymous_" + MusicAutoplayData.class.getSimpleName();
-
     @Before
     public void setUp() {
-        getPrefs().enableMultiProfiles(false);
+        getPrefs().onAccountChanged(null); // the anonymous account
         clearSaved();
     }
 
     @After
     public void tearDown() {
         Utils.sHandler.removeCallbacksAndMessages(null);
-        getPrefs().enableMultiProfiles(false);
+        getPrefs().onAccountChanged(null);
         clearSaved();
     }
 
@@ -76,33 +74,31 @@ public class MusicAutoplayDataTest {
         AppPrefs prefs = getPrefs();
         MusicAutoplayData data = getData();
 
+        prefs.onAccountChanged(TestAccounts.FIRST);
         data.setEnabled(true);
         ShadowLooper.shadowMainLooper().idle(); // saved before the account changes
 
-        prefs.enableMultiProfiles(true);
-        prefs.onAccountChanged(null); // the anonymous account
+        prefs.onAccountChanged(TestAccounts.SECOND);
 
-        // Starts from the shared value
-        assertTrue(data.isEnabled());
+        // Starts from the default, not the other account's value
+        assertFalse(data.isEnabled());
 
-        data.setEnabled(false);
+        data.setMusicPlaybackMode(PlayerConstants.PLAYBACK_MODE_PAUSE);
         ShadowLooper.shadowMainLooper().idle();
 
-        prefs.enableMultiProfiles(false);
+        prefs.onAccountChanged(TestAccounts.FIRST);
 
         assertTrue(data.isEnabled());
+        assertEquals(PlayerConstants.PLAYBACK_MODE_ALL, data.getMusicPlaybackMode());
 
-        prefs.enableMultiProfiles(true);
+        prefs.onAccountChanged(TestAccounts.SECOND);
 
         assertFalse(data.isEnabled());
+        assertEquals(PlayerConstants.PLAYBACK_MODE_PAUSE, data.getMusicPlaybackMode());
     }
 
-    /**
-     * AppPrefs outlives the test, so do the saved values
-     */
     private static void clearSaved() {
-        getPrefs().setData(MusicAutoplayData.class.getSimpleName(), "");
-        getPrefs().setData(ANONYMOUS_PROFILE_KEY, "");
+        TestAccounts.clearSaved(getPrefs(), MusicAutoplayData.class.getSimpleName());
         MusicAutoplayData.resetInstanceForTesting();
     }
 

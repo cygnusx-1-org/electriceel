@@ -617,7 +617,6 @@
   <string name="color_scheme_dark_blue">Albastru închis</string>
   <string name="player_speed_per_channel">Pentru fiecare canal</string>
   <string name="disable_popular_searches">Dezactivați interogările de căutare populare</string>
-  <string name="multi_profiles">Utilizați setări separate pentru fiecare cont</string>
   <string name="protect_account_with_password">Protejați acest cont cu parolă</string>
   <string name="enter_account_password">Introduceți parola contului</string>
   <string name="show_connect_messages">Afișați mesajele de conectare</string>

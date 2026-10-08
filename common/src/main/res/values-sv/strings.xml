@@ -637,7 +637,6 @@
   <string name="color_scheme_dark_blue_oled">Mörkblått (OLED)</string>
   <string name="player_speed_per_channel">För varje kanal</string>
   <string name="disable_popular_searches">Inaktivera populära sökfrågor</string>
-  <string name="multi_profiles">Använd egna inställningar för varje konto</string>
   <string name="protect_account_with_password">Skydda det här kontot med ett lösenord</string>
   <string name="enter_account_password">Ange kontolösenord</string>
   <string name="show_connect_messages">Visa anslutningsmeddelanden</string>

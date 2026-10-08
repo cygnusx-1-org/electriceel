@@ -17,36 +17,43 @@ import static org.junit.Assert.assertEquals;
 @Config(sdk = 28)
 public class LocaleDataTest {
     private static final String DATA_KEY = "locale_data";
-    private static final String ANONYMOUS_PROFILE_KEY = "anonymous_" + DATA_KEY;
 
     @Before
     public void setUp() {
-        getPrefs().enableMultiProfiles(false);
+        getPrefs().onAccountChanged(null); // the anonymous account
+        getPrefs().resetSharedSettingsProfileForTesting();
         clearSaved();
     }
 
     @After
     public void tearDown() {
         Utils.sHandler.removeCallbacksAndMessages(null);
-        getPrefs().enableMultiProfiles(false);
+        getPrefs().onAccountChanged(null);
+        getPrefs().resetSharedSettingsProfileForTesting();
         clearSaved();
     }
 
     /**
-     * The language and country were for all the accounts before
+     * The language and country were for all the accounts before: kept as the shared ones, for the account they were made with
      */
     @Test
     public void earlierValuesAreTheSharedOnes() {
+        AppPrefs prefs = getPrefs();
         getGlobalPrefs().setPreferredLanguage("de");
         getGlobalPrefs().setPreferredCountry("DE");
 
         LocaleData data = getData();
+        prefs.initSharedSettingsProfile(); // the app starts with these settings: the anonymous account's
 
-        getPrefs().enableMultiProfiles(true);
-        getPrefs().onAccountChanged(null); // the anonymous account
+        prefs.onAccountChanged(null);
 
         assertEquals("de", data.getLanguage());
         assertEquals("DE", data.getCountry());
+
+        prefs.onAccountChanged(TestAccounts.FIRST);
+
+        assertEquals("", data.getLanguage());
+        assertEquals("", data.getCountry());
     }
 
     @Test
@@ -54,26 +61,26 @@ public class LocaleDataTest {
         AppPrefs prefs = getPrefs();
         LocaleData data = getData();
 
+        prefs.onAccountChanged(TestAccounts.FIRST);
         data.setLanguage("fr");
         data.setCountry("FR");
 
-        prefs.enableMultiProfiles(true);
-        prefs.onAccountChanged(null); // the anonymous account
+        prefs.onAccountChanged(TestAccounts.SECOND);
 
-        // Starts from the shared ones
-        assertEquals("fr", data.getLanguage());
-        assertEquals("FR", data.getCountry());
+        // Starts from the system ones, not the other account's
+        assertEquals("", data.getLanguage());
+        assertEquals("", data.getCountry());
 
         data.setLanguage("ja");
         data.setCountry("");
 
-        prefs.enableMultiProfiles(false);
+        prefs.onAccountChanged(TestAccounts.FIRST);
 
         assertEquals("fr", data.getLanguage());
         assertEquals("FR", data.getCountry());
         assertEquals("fr", getGlobalPrefs().getPreferredLanguage()); // the ones in use
 
-        prefs.enableMultiProfiles(true);
+        prefs.onAccountChanged(TestAccounts.SECOND);
 
         assertEquals("ja", data.getLanguage());
         assertEquals("", data.getCountry());
@@ -88,14 +95,14 @@ public class LocaleDataTest {
         AppPrefs prefs = getPrefs();
         LocaleData data = getData();
 
+        prefs.onAccountChanged(TestAccounts.FIRST);
         data.setLanguage("");
         data.setCountry("US");
 
-        prefs.enableMultiProfiles(true);
-        prefs.onAccountChanged(null);
+        prefs.onAccountChanged(TestAccounts.SECOND);
         data.setCountry("GB");
 
-        prefs.enableMultiProfiles(false);
+        prefs.onAccountChanged(TestAccounts.FIRST);
 
         assertEquals("", data.getLanguage());
         assertEquals("US", data.getCountry());
@@ -105,8 +112,7 @@ public class LocaleDataTest {
      * AppPrefs and GlobalPreferences outlive the test, so do the saved values
      */
     private static void clearSaved() {
-        getPrefs().setData(DATA_KEY, "");
-        getPrefs().setData(ANONYMOUS_PROFILE_KEY, "");
+        TestAccounts.clearSaved(getPrefs(), DATA_KEY);
         getGlobalPrefs().setPreferredLanguage("");
         getGlobalPrefs().setPreferredCountry("");
         LocaleData.resetInstanceForTesting();

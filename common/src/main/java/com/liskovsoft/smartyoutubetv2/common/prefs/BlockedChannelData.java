@@ -18,7 +18,7 @@ import java.util.Map.Entry;
 import java.util.TreeSet;
 
 public class BlockedChannelData implements ProfileChangeListener {
-    private static final String BLOCKED_CHANNEL_DATA = "blocked_channel_data";
+    static final String BLOCKED_CHANNEL_DATA = "blocked_channel_data";
     @SuppressLint("StaticFieldLeak")
     private static BlockedChannelData sInstance;
     private final AppPrefs mPrefs;

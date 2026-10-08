@@ -8,7 +8,7 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.common.DataSaverBase;
 /**
  * A filter that shows, marks or hides its videos in the chosen sections (e.g. CollaborationsData, WatchLaterData).<br/>
  * The label of a marked video has the colors of the AiSList marker (see AiSListFilterData.getMarkShade).<br/>
- * Each subclass is saved apart, under its own name. Each account has its own values while "Use separate settings per each account" is on.
+ * Each subclass is saved apart, under its own name. Each account has its own values.
  */
 public abstract class SectionFilterData extends DataSaverBase {
     public static final int MODE_SHOW = 0;

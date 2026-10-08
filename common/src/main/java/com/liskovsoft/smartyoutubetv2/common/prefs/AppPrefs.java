@@ -5,11 +5,17 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.liskovsoft.mediaserviceinterfaces.oauth.Account;
+import com.liskovsoft.sharedutils.helpers.FileHelpers;
 import com.liskovsoft.sharedutils.misc.WeakHashSet;
 import com.liskovsoft.sharedutils.prefs.SharedPreferencesBase;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.SidebarService;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager.AccountChangeListener;
+
+import java.io.File;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class AppPrefs extends SharedPreferencesBase implements AccountChangeListener {
     private static final String TAG = AppPrefs.class.getSimpleName();
@@ -17,6 +23,9 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
     @SuppressLint("StaticFieldLeak")
     private static AppPrefs sInstance;
     private static final String ANONYMOUS_PROFILE_NAME = "anonymous";
+    /**
+     * The removed "Use separate settings per each account": off, every account used the shared settings
+     */
     private static final String MULTI_PROFILES = "multi_profiles";
     private static final String STATE_UPDATER_DATA = "state_updater_data";
     private static final String CHANNEL_GROUP_DATA = "channel_group_data";
@@ -25,11 +34,29 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
     private static final String WEB_PROXY_URI = "web_proxy_uri";
     private static final String WEB_PROXY_ENABLED = "web_proxy_enabled";
     private static final String LAST_PROFILE_NAME = "last_profile_name";
+    private static final String SHARED_SETTINGS_PROFILE_NAME = "shared_settings_profile_name";
+    /**
+     * The settings each account has its own of (see getProfileData): a new kind of them goes here too, to be copied
+     */
+    private static final String[] PROFILE_DATA_KEYS = {
+            MainUIData.MAIN_UI_DATA, GeneralData.GENERAL_DATA, PlayerData.VIDEO_PLAYER_DATA, PlayerTweaksData.VIDEO_PLAYER_TWEAKS_DATA,
+            LocaleData.LOCALE_DATA, BlockedChannelData.BLOCKED_CHANNEL_DATA, KeywordFilterData.KEYWORD_FILTER_DATA,
+            CollaborationsData.class.getSimpleName(), TopChannelsData.class.getSimpleName(), ExploreTopicsData.class.getSimpleName(),
+            ShowsData.class.getSimpleName(), WatchLaterData.class.getSimpleName(), MusicAutoplayData.class.getSimpleName(),
+            OldVideosData.class.getSimpleName()
+    };
     private String mBootResolution;
     private final WeakHashSet<ProfileChangeListener> mListeners = new WeakHashSet<>();
 
     public interface ProfileChangeListener {
         void onProfileChanged();
+
+        /**
+         * The settings of another account were copied to the current one (see copyProfileData)
+         */
+        default void onProfileDataCopied() {
+            onProfileChanged();
+        }
     }
 
     private AppPrefs(Context context) {
@@ -40,7 +67,83 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
     }
 
     private void initProfiles() {
+        migrateSharedSettings();
+        initSharedSettingsProfile();
         MediaServiceManager.instance().addAccountListener(this);
+    }
+
+    /**
+     * Each account has its own settings now: with "Use separate settings per each account" off, every account used the shared ones,
+     * so each account that has been used gets them as its own
+     */
+    void migrateSharedSettings() {
+        if (getBoolean(MULTI_PROFILES, true)) {
+            return;
+        }
+
+        for (String profileName : getUsedProfileNames()) {
+            for (String key : PROFILE_DATA_KEYS) {
+                String data = getData(key);
+                // Empty: the defaults
+                setData(profileName + "_" + key, data != null ? data : "");
+            }
+        }
+
+        // All of them have their own now
+        putString(SHARED_SETTINGS_PROFILE_NAME, "");
+        putString(MULTI_PROFILES, null);
+    }
+
+    /**
+     * Found by the data each account has its own of: the history and the sidebar are kept per account even with the shared settings
+     */
+    private Set<String> getUsedProfileNames() {
+        Set<String> result = new LinkedHashSet<>();
+        String profileName = getProfileName();
+
+        if (!TextUtils.isEmpty(profileName)) {
+            result.add(profileName);
+        }
+
+        String[] names = new File(FileHelpers.getFilesDir(getContext()), PREFS_DIR).list();
+
+        if (names == null) {
+            return result;
+        }
+
+        for (String name : names) {
+            for (String key : getProfileKeys()) {
+                String suffix = "_" + key;
+
+                if (name.length() > suffix.length() && name.endsWith(suffix)) {
+                    result.add(name.substring(0, name.length() - suffix.length()));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private static Set<String> getProfileKeys() {
+        Set<String> result = new LinkedHashSet<>();
+
+        result.add(STATE_UPDATER_DATA);
+        result.add(SIDEBAR_DATA);
+        result.add(CHANNEL_GROUP_DATA);
+        Collections.addAll(result, PROFILE_DATA_KEYS);
+
+        return result;
+    }
+
+    /**
+     * Settings without the name are from SmartTube's backup or from a version before this one: all of them are shared,
+     * and they're the current account's. Kept for that account only (see getProfileData). Empty: no account had any yet.
+     */
+    void initSharedSettingsProfile() {
+        if (getString(SHARED_SETTINGS_PROFILE_NAME, null) == null) {
+            String profileName = getProfileName();
+            putString(SHARED_SETTINGS_PROFILE_NAME, profileName != null ? profileName : "");
+        }
     }
 
     @Override
@@ -55,23 +158,6 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
         }
 
         return sInstance;
-    }
-
-    /**
-     * On by default. An account without its own settings yet starts from the shared ones (see getProfileData).
-     */
-    public boolean isMultiProfilesEnabled() {
-        return getBoolean(MULTI_PROFILES, true);
-    }
-
-    public void enableMultiProfiles(boolean enabled) {
-        if (isMultiProfilesEnabled() == enabled) {
-            return;
-        }
-
-        putBoolean(MULTI_PROFILES, enabled);
-        onProfileChanged();
-        //selectAccount(enabled ? MediaServiceManager.instance().getSelectedAccount() : null);
     }
 
     public String getBootResolution() {
@@ -98,41 +184,80 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
      * profile even if the profile changes before the write.
      */
     public String getStateUpdaterKey() {
-        // Always use multiple profiles for the history
-        return getProfileKey(STATE_UPDATER_DATA, true);
+        return getProfileKey(STATE_UPDATER_DATA);
     }
 
     public String getChannelGroupData() {
-        // Always use multiple profiles
-        return getData(getProfileKey(CHANNEL_GROUP_DATA,  true));
+        return getData(getProfileKey(CHANNEL_GROUP_DATA));
     }
 
     public void setChannelGroupData(String data) {
-        // Always use multiple profiles
-        setData(getProfileKey(CHANNEL_GROUP_DATA,  true), data);
+        setData(getProfileKey(CHANNEL_GROUP_DATA), data);
     }
 
     public String getSidebarData() {
-        // Always use multiple profiles
-        return getData(getProfileKey(SIDEBAR_DATA,  true));
+        return getData(getProfileKey(SIDEBAR_DATA));
     }
 
     public void setSidebarData(String data) {
-        // Always use multiple profiles
-        setData(getProfileKey(SIDEBAR_DATA,  true), data);
+        setData(getProfileKey(SIDEBAR_DATA), data);
     }
 
+    /**
+     * An account without its own settings starts from the defaults, not from the shared ones: they're the first account's, so
+     * every account added after it got that account's theme and the rest.<br/>
+     * The account the shared settings were made with keeps them (see initSharedSettingsProfile): copied to its own when first read.
+     */
     public String getProfileData(String key) {
-        String profileKey = getProfileKey(key, isMultiProfilesEnabled());
+        String profileKey = getProfileKey(key);
         String data = getData(profileKey);
 
-        // Fallback to non-profile settings: the account has none of its own yet (e.g. the separate settings were just turned on).
-        // They're saved for the account from its first change.
-        return TextUtils.isEmpty(data) && !profileKey.equals(key) ? getData(key) : data;
+        if (TextUtils.isEmpty(data) && !profileKey.equals(key) && isSharedSettingsProfile()) {
+            data = getData(key);
+
+            if (!TextUtils.isEmpty(data)) {
+                setData(profileKey, data);
+            }
+        }
+
+        return data;
     }
 
     public void setProfileData(String key, String data) {
-        setData(getProfileKey(key, isMultiProfilesEnabled()), data);
+        setData(getProfileKey(key), data);
+    }
+
+    /**
+     * Replaces the settings of the current account with the ones the given account has in use (see getProfileData).
+     * The history, channel groups and sidebar stay the current account's.
+     */
+    public void copyProfileData(Account from) {
+        String fromName = getProfileName(from);
+        String toName = getProfileName();
+
+        if (TextUtils.isEmpty(toName) || fromName.equals(toName)) {
+            return;
+        }
+
+        boolean isFromSharedSettingsProfile = fromName.equals(getString(SHARED_SETTINGS_PROFILE_NAME, null));
+
+        for (String key : PROFILE_DATA_KEYS) {
+            String data = getData(fromName + "_" + key);
+
+            if (TextUtils.isEmpty(data) && isFromSharedSettingsProfile) {
+                data = getData(key);
+            }
+
+            // Empty: the defaults
+            setData(getProfileKey(key), data != null ? data : "");
+        }
+
+        // All its settings are its own now: the shared ones aren't kept for it anymore
+        if (isSharedSettingsProfile()) {
+            putString(SHARED_SETTINGS_PROFILE_NAME, "");
+        }
+
+        mListeners.forEach(ProfileChangeListener::onProfileDataCopied);
     }
 
     //public String getData(String key) {
@@ -170,10 +295,25 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
         putString(LAST_PROFILE_NAME, profileName);
     }
 
-    private void selectProfile(Account account) {
-        String profileName = account != null && account.getName() != null ? account.getName().replace(" ", "_") : ANONYMOUS_PROFILE_NAME;
+    private boolean isSharedSettingsProfile() {
+        String profileName = getString(SHARED_SETTINGS_PROFILE_NAME, null);
 
-        setProfileName(profileName);
+        return !TextUtils.isEmpty(profileName) && profileName.equals(getProfileName());
+    }
+
+    /**
+     * The settings are from SmartTube's backup or from a version before this one again (see initSharedSettingsProfile)
+     */
+    void resetSharedSettingsProfileForTesting() {
+        putString(SHARED_SETTINGS_PROFILE_NAME, null);
+    }
+
+    private void selectProfile(Account account) {
+        setProfileName(getProfileName(account));
+    }
+
+    private static String getProfileName(Account account) {
+        return account != null && account.getName() != null ? account.getName().replace(" ", "_") : ANONYMOUS_PROFILE_NAME;
     }
 
     private void onProfileChanged() {
@@ -196,18 +336,12 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
         mListeners.remove(listener);
     }
 
-    //private String getProfileKey(String key) {
-    //    String profileName = getProfileName();
-    //    if (!TextUtils.isEmpty(profileName)) {
-    //        key = profileName + "_" + key;
-    //    }
-    //
-    //    return key;
-    //}
-
-    private String getProfileKey(String key, boolean isMultiProfilesEnabled) {
+    /**
+     * The shared key until the first account (or none) is selected
+     */
+    private String getProfileKey(String key) {
         String profileName = getProfileName();
-        if (!TextUtils.isEmpty(profileName) && isMultiProfilesEnabled) {
+        if (!TextUtils.isEmpty(profileName)) {
             key = profileName + "_" + key;
         }
 

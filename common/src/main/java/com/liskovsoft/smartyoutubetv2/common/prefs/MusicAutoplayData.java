@@ -8,7 +8,7 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.common.DataSaverBase;
 /**
  * Music autoplay: music videos have their own playback mode, the other videos keep the one of PlayerData (see MusicAutoplayManager).<br/>
  * Only with the user's own Data API key (see VideoCategoryManager.isAvailable). The values are kept without one.<br/>
- * Each account has its own values while "Use separate settings per each account" is on.
+ * Each account has its own values.
  */
 public class MusicAutoplayData extends DataSaverBase {
     // Music plays on, as the option says, until the player button of a music video picks another mode

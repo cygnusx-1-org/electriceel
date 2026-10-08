@@ -637,7 +637,6 @@
     <string name="color_scheme_dark_blue_oled">Tmavě modré (OLED)</string>
     <string name="player_speed_per_channel">Pro každý kanál</string>
     <string name="disable_popular_searches">Nezobrazovat oblíbené vyhledávání</string>
-    <string name="multi_profiles">Použít samostatná nastavení pro každý účet</string>
     <string name="protect_account_with_password">Chránit tento účet heslem</string>
     <string name="enter_account_password">Zadejte heslo účtu</string>
     <string name="show_connect_messages">Upozornění na připojená zařízení</string>

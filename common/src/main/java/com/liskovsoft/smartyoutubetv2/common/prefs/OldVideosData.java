@@ -8,7 +8,7 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.common.DataSaverBase;
 /**
  * Hides videos older than the chosen period from the chosen sections (see OldVideoFilter).<br/>
  * The period is kept while the filter is off, so the quick toggle on the main screen turns it back on as it was.<br/>
- * Each account has its own values while "Use separate settings per each account" is on.
+ * Each account has its own values.
  */
 public class OldVideosData extends DataSaverBase {
     public static final int[] PERIODS_MONTHS = {1, 3, 6, 12, 24};

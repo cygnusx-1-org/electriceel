@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 public class PlayerData extends DataChangeBase implements PlayerConstants, ProfileChangeListener {
-    private static final String VIDEO_PLAYER_DATA = "video_player_data";
+    static final String VIDEO_PLAYER_DATA = "video_player_data";
     public static final int OK_ONLY_UI = 0;
     public static final int OK_UI_AND_PAUSE = 1;
     public static final int OK_ONLY_PAUSE = 2;

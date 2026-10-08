@@ -17,7 +17,6 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.BrowsePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
-import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.NetworkData;
@@ -524,13 +523,6 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
 
     private void appendMiscCategory(AppDialogPresenter settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.multi_profiles),
-                option -> {
-                    AppPrefs.instance(getContext()).enableMultiProfiles(option.isSelected());
-                    BrowsePresenter.instance(getContext()).updateSections();
-                },
-                AppPrefs.instance(getContext()).isMultiProfilesEnabled()));
 
         options.add(UiOptionItem.from(getContext().getString(R.string.child_mode),
                 getContext().getString(R.string.child_mode_desc),

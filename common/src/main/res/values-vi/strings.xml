@@ -611,7 +611,6 @@
   <string name="unknown_renderer_error">Lỗi kết xuất không xác định</string>
   <string name="unlock_high_bitrate_formats">Mở khóa các định dạng 1080p vp9 bitrate cao</string>
   <string name="unlock_high_bitrate_audio_formats">Mở khóa các định dạng mp4a bitrate cao</string>
-  <string name="multi_profiles">Sử dụng các thiết lập riêng biệt cho từng tài khoản</string>
   <string name="protect_account_with_password">Bảo vệ tài khoản bằng mật khẩu</string>
   <string name="play_next">Phát video tiếp theo</string>
   <string name="hide_watched_from_subscriptions">Ẩn video đã xem khỏi mục Kênh đăng ký</string>

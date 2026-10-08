@@ -23,14 +23,14 @@ import static org.junit.Assert.assertTrue;
 public class ExploreTopicsDataTest {
     @Before
     public void setUp() {
-        getPrefs().enableMultiProfiles(false);
+        getPrefs().onAccountChanged(null); // the anonymous account
         clearSaved();
     }
 
     @After
     public void tearDown() {
         Utils.sHandler.removeCallbacksAndMessages(null);
-        getPrefs().enableMultiProfiles(false);
+        getPrefs().onAccountChanged(null); // the anonymous account
         clearSaved();
     }
 
@@ -65,9 +65,8 @@ public class ExploreTopicsDataTest {
      * AppPrefs outlives the test, so do the saved values
      */
     private static void clearSaved() {
-        getPrefs().setData(ExploreTopicsData.class.getSimpleName(), "");
-        getPrefs().setData("anonymous_" + ExploreTopicsData.class.getSimpleName(), "");
-        getPrefs().setData(TopChannelsData.class.getSimpleName(), "");
+        TestAccounts.clearSaved(getPrefs(), ExploreTopicsData.class.getSimpleName());
+        TestAccounts.clearSaved(getPrefs(), TopChannelsData.class.getSimpleName());
         ExploreTopicsData.resetInstanceForTesting();
         TopChannelsData.resetInstanceForTesting();
     }

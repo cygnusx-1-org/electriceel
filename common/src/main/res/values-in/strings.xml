@@ -608,7 +608,6 @@
   <string name="color_scheme_dark_blue">Biru Tua</string>
   <string name="player_speed_per_channel">Pada setiap channel</string>
   <string name="disable_popular_searches">Nonaktifkan kueri penelusuran unggulan</string>
-  <string name="multi_profiles">Gunakan setelam terpisah untuk tiap akun</string>
   <string name="protect_account_with_password">Lindungi akun ini dengan kata sandi</string>
   <string name="enter_account_password">Masukkan kata sandi akun</string>
   <string name="show_connect_messages">Tampilkan pesan penghubungan</string>

@@ -596,7 +596,6 @@
   <string name="player_speed_per_channel">Minden csatornánként</string>
   <string name="disable_popular_searches">Népszerű keresési lekérdezések letiltása</string>
   <string name="protect_account_with_password">Védje ezt a fiókot jelszóval</string>
-  <string name="multi_profiles">Használjon külön beállításokat minden fiókhoz</string>
   <string name="enter_account_password">Adja meg a fiók jelszavát</string>
   <string name="show_connect_messages">Csatlakozási üzenetek megjelenítése</string>
   <string name="prefer_avc_over_vp9_desc">Figyelem!: Maximum 1080p</string>

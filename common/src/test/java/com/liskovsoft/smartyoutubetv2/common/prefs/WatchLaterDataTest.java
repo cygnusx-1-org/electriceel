@@ -24,14 +24,14 @@ import static org.junit.Assert.assertTrue;
 public class WatchLaterDataTest {
     @Before
     public void setUp() {
-        getPrefs().enableMultiProfiles(false);
+        getPrefs().onAccountChanged(null); // the anonymous account
         clearSaved();
     }
 
     @After
     public void tearDown() {
         Utils.sHandler.removeCallbacksAndMessages(null);
-        getPrefs().enableMultiProfiles(false);
+        getPrefs().onAccountChanged(null); // the anonymous account
         clearSaved();
     }
 
@@ -85,9 +85,8 @@ public class WatchLaterDataTest {
      * AppPrefs outlives the test, so do the saved values
      */
     private static void clearSaved() {
-        getPrefs().setData(WatchLaterData.class.getSimpleName(), "");
-        getPrefs().setData("anonymous_" + WatchLaterData.class.getSimpleName(), "");
-        getPrefs().setData(CollaborationsData.class.getSimpleName(), "");
+        TestAccounts.clearSaved(getPrefs(), WatchLaterData.class.getSimpleName());
+        TestAccounts.clearSaved(getPrefs(), CollaborationsData.class.getSimpleName());
         WatchLaterData.resetInstanceForTesting();
         CollaborationsData.resetInstanceForTesting();
     }

@@ -603,7 +603,6 @@
   <string name="color_scheme_dark_blue">Tumesinine</string>
   <string name="player_speed_per_channel">Jäta meelde iga kanali kohta</string>
   <string name="disable_popular_searches">Keela populaarsed otsingupäringud</string>
-  <string name="multi_profiles">Kasuta iga konto jaoks eraldi sätteid</string>
   <string name="protect_account_with_password">Kaitse kontot parooliga</string>
   <string name="enter_account_password">Sisesta konto parool</string>
   <string name="show_connect_messages">Kuva ühendussõnumid</string>

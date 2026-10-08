@@ -11,7 +11,7 @@ import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
 
 public class PlayerTweaksData implements ProfileChangeListener {
-    private static final String VIDEO_PLAYER_TWEAKS_DATA = "video_player_tweaks_data";
+    static final String VIDEO_PLAYER_TWEAKS_DATA = "video_player_tweaks_data";
     public static final int PLAYER_DATA_SOURCE_DEFAULT = 0;
     public static final int PLAYER_DATA_SOURCE_OKHTTP = 1;
     public static final int PLAYER_DATA_SOURCE_CRONET = 2;

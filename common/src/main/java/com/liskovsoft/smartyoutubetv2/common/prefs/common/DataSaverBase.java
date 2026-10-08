@@ -33,7 +33,7 @@ public abstract class DataSaverBase extends DataChangeBase {
     }
 
     /**
-     * @param isProfileData each account has its own values while "Use separate settings per each account" is on
+     * @param isProfileData each account has its own values (see AppPrefs.PROFILE_DATA_KEYS)
      */
     public DataSaverBase(Context context, boolean persistImmediately, boolean isProfileData) {
         mAppPrefs = AppPrefs.instance(context);

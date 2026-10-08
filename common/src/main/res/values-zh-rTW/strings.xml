@@ -581,7 +581,6 @@
   <string name="color_scheme_dark_blue">深藍色</string>
   <string name="player_speed_per_channel">針對單一頻道</string>
   <string name="disable_popular_searches">停用熱門搜尋建議</string>
-  <string name="multi_profiles">分帳號獨立設定</string>
   <string name="protect_account_with_password">使用密碼保護本帳號</string>
   <string name="enter_account_password">請輸入您的帳號密碼</string>
   <string name="share_qr_link">分享連結（QR Code）</string>

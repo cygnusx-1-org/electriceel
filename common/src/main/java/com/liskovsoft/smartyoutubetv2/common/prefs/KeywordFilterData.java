@@ -16,10 +16,10 @@ import java.util.TreeSet;
 
 /**
  * The keywords that hide videos by their title (see KeywordFilter). Kept as lower case words split by a space.<br/>
- * Each account has its own keywords while "Use separate settings per each account" is on.
+ * Each account has its own keywords.
  */
 public class KeywordFilterData implements ProfileChangeListener {
-    private static final String KEYWORD_FILTER_DATA = "keyword_filter_data";
+    static final String KEYWORD_FILTER_DATA = "keyword_filter_data";
     @SuppressLint("StaticFieldLeak")
     private static KeywordFilterData sInstance;
     private final AppPrefs mPrefs;

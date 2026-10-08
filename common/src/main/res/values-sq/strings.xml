@@ -614,7 +614,6 @@
   <string name="color_scheme_dark_blue">Blu e Errët</string>
   <string name="player_speed_per_channel">Për çdo kanal</string>
   <string name="disable_popular_searches">Çaktivizo pyetjet për kërkimet popullore</string>
-  <string name="multi_profiles">Përdor cilësime të veçanta për secilën llogari</string>
   <string name="protect_account_with_password">Mbro këtë llogari me një fjalëkalim</string>
   <string name="enter_account_password">Fut fjalëkalimin e llogarisë</string>
   <string name="show_connect_messages">Shfaq mesazhet e lidhjes</string>

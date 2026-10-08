@@ -633,7 +633,6 @@
     <string name="color_scheme_dark_blue">Tmavo-modrá</string>
     <string name="player_speed_per_channel">Pre každý kanál</string>
     <string name="disable_popular_searches">Nezobrazovať obľúbené vyhľadávanie</string>
-    <string name="multi_profiles">Použiť samostatné nastavenia pre každý účet</string>
     <string name="protect_account_with_password">Chrániť toto konto heslom</string>
     <string name="enter_account_password">Zadajte heslo účtu</string>
     <string name="show_connect_messages">Zobrazovať správy o pripojení</string>

@@ -8,13 +8,14 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs.ProfileChangeListener;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public class GeneralData implements ProfileChangeListener {
     public static final int SCREENSAVER_TIMEOUT_NEVER = 0;
-    private static final String GENERAL_DATA = "general_data";
+    static final String GENERAL_DATA = "general_data";
     public static final int EXIT_NONE = 0;
     public static final int EXIT_DOUBLE_BACK = 1;
     public static final int EXIT_SINGLE_BACK = 2;
@@ -692,5 +693,23 @@ public class GeneralData implements ProfileChangeListener {
     public void onProfileChanged() {
         Utils.removeCallbacks(mPersistStateInt);
         restoreState();
+    }
+
+    /**
+     * The recent playlist and the stream reminders are the account's own, not settings: they stay
+     */
+    @Override
+    public void onProfileDataCopied() {
+        String lastPlaylistId = mLastPlaylistId;
+        String lastPlaylistTitle = mLastPlaylistTitle;
+        List<Video> pendingStreams = new ArrayList<>(mPendingStreams);
+
+        onProfileChanged();
+
+        mLastPlaylistId = lastPlaylistId;
+        mLastPlaylistTitle = lastPlaylistTitle;
+        mPendingStreams.clear();
+        mPendingStreams.addAll(pendingStreams);
+        persistNow();
     }
 }

@@ -21,18 +21,17 @@ import static org.junit.Assert.assertTrue;
 @Config(sdk = 28)
 public class KeywordFilterDataTest {
     private static final String DATA_KEY = "keyword_filter_data";
-    private static final String ANONYMOUS_PROFILE_KEY = "anonymous_" + DATA_KEY;
 
     @Before
     public void setUp() {
-        getPrefs().enableMultiProfiles(false);
+        getPrefs().onAccountChanged(null); // the anonymous account
         clearSaved();
     }
 
     @After
     public void tearDown() {
         Utils.sHandler.removeCallbacksAndMessages(null);
-        getPrefs().enableMultiProfiles(false);
+        getPrefs().onAccountChanged(null);
         clearSaved();
     }
 
@@ -87,33 +86,29 @@ public class KeywordFilterDataTest {
         AppPrefs prefs = getPrefs();
         KeywordFilterData data = getData();
 
+        prefs.onAccountChanged(TestAccounts.FIRST);
         data.addKeyword("reaction");
 
-        prefs.enableMultiProfiles(true);
-        prefs.onAccountChanged(null); // the anonymous account
+        prefs.onAccountChanged(TestAccounts.SECOND);
 
-        // Starts from the shared keywords
-        assertEquals(Collections.singletonList("reaction"), data.getKeywords());
+        // Starts with no keywords, not the other account's
+        assertTrue(data.getKeywords().isEmpty());
 
         data.addKeyword("prank");
 
-        prefs.enableMultiProfiles(false);
+        prefs.onAccountChanged(TestAccounts.FIRST);
 
         assertEquals(Collections.singletonList("reaction"), data.getKeywords());
         assertFalse(data.isHidden("Best prank"));
 
-        prefs.enableMultiProfiles(true);
+        prefs.onAccountChanged(TestAccounts.SECOND);
 
-        assertEquals(Arrays.asList("prank", "reaction"), data.getKeywords());
+        assertEquals(Collections.singletonList("prank"), data.getKeywords());
         assertTrue(data.isHidden("Best prank"));
     }
 
-    /**
-     * AppPrefs outlives the test, so do the saved values
-     */
     private static void clearSaved() {
-        getPrefs().setData(DATA_KEY, "");
-        getPrefs().setData(ANONYMOUS_PROFILE_KEY, "");
+        TestAccounts.clearSaved(getPrefs(), DATA_KEY);
         KeywordFilterData.resetInstanceForTesting();
     }
 

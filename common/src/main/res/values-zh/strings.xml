@@ -611,7 +611,6 @@
   <string name="color_scheme_dark_blue">深蓝</string>
   <string name="player_speed_per_channel">每个频道</string>
   <string name="disable_popular_searches">禁用热门搜索查询</string>
-  <string name="multi_profiles">每个账号使用单独的设置</string>
   <string name="protect_account_with_password">使用密码保护此账号</string>
   <string name="enter_account_password">输入账号密码</string>
   <string name="show_connect_messages">显示连接信息</string>

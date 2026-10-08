@@ -18,7 +18,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class MainUIData extends DataChangeBase implements ProfileChangeListener {
-    private static final String MAIN_UI_DATA = "main_ui_data2";
+    static final String MAIN_UI_DATA = "main_ui_data2";
     public static final int CARD_PREVIEW_DISABLED = 0;
     public static final int CARD_PREVIEW_MUTED = 1;
     public static final int CARD_PREVIEW_FULL = 2;
@@ -566,5 +566,12 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
         Utils.removeCallbacks(mPersistStateInt);
         restoreState();
         onDataChange();
+    }
+
+    /**
+     * The next instance reads the saved values again
+     */
+    static void resetInstanceForTesting() {
+        sInstance = null;
     }
 }

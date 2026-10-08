@@ -596,7 +596,6 @@
   <string name="color_scheme_dark_blue">آبی تیره</string>
   <string name="player_speed_per_channel">برای هر کانال</string>
   <string name="disable_popular_searches">غیرفعال کردن جستجوهای محبوب</string>
-  <string name="multi_profiles">استفاده از تنظیمات جداگانه برای هر حساب</string>
   <string name="protect_account_with_password">محافظت از این حساب با رمز عبور</string>
   <string name="enter_account_password">رمز عبور حساب را وارد کنید</string>
   <string name="show_connect_messages">نمایش پیام‌های اتصال</string>

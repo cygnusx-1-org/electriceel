@@ -633,7 +633,6 @@
     <string name="color_scheme_dark_blue">Azul escuro</string>
     <string name="player_speed_per_channel">Por canal</string>
     <string name="disable_popular_searches">Desativar pesquisas populares</string>
-    <string name="multi_profiles">Utilizar definições distintas por conta</string>
     <string name="protect_account_with_password">Proteger esta conta com palavra-passe</string>
     <string name="enter_account_password">Introduza a palavra-passe</string>
     <string name="show_connect_messages">Mostrar mensagens de ligação</string>

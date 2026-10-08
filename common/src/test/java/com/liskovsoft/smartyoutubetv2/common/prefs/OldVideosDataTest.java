@@ -1,6 +1,7 @@
 package com.liskovsoft.smartyoutubetv2.common.prefs;
 
 import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
+import com.liskovsoft.mediaserviceinterfaces.oauth.Account;
 import com.liskovsoft.smartyoutubetv2.common.prefs.common.DataChangeBase.OnDataChange;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
@@ -20,18 +21,19 @@ import static org.junit.Assert.assertTrue;
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 28)
 public class OldVideosDataTest {
-    private static final String ANONYMOUS_PROFILE_KEY = "anonymous_" + OldVideosData.class.getSimpleName();
+    private static final Account FIRST_ACCOUNT = TestAccounts.FIRST;
+    private static final Account SECOND_ACCOUNT = TestAccounts.SECOND;
 
     @Before
     public void setUp() {
-        getPrefs().enableMultiProfiles(false);
+        getPrefs().onAccountChanged(null); // the anonymous account
         clearSaved();
     }
 
     @After
     public void tearDown() {
         Utils.sHandler.removeCallbacksAndMessages(null);
-        getPrefs().enableMultiProfiles(false);
+        getPrefs().onAccountChanged(null);
         clearSaved();
     }
 
@@ -147,30 +149,46 @@ public class OldVideosDataTest {
         AppPrefs prefs = getPrefs();
         OldVideosData data = getData();
 
+        prefs.onAccountChanged(FIRST_ACCOUNT);
         data.setPeriodMonths(3);
         data.setQuickToggleEnabled(true);
         ShadowLooper.shadowMainLooper().idle(); // saved before the account changes
 
-        prefs.enableMultiProfiles(true);
-        prefs.onAccountChanged(null); // the anonymous account
+        prefs.onAccountChanged(SECOND_ACCOUNT);
 
-        // Starts from the shared values
-        assertEquals(3, data.getPeriodMonths());
-        assertTrue(data.isQuickToggleEnabled());
+        // Starts from the defaults, not the other account's values
+        assertEquals(12, data.getPeriodMonths());
+        assertFalse(data.isQuickToggleEnabled());
 
         data.setPeriodMonths(6);
-        data.setQuickToggleEnabled(false);
         ShadowLooper.shadowMainLooper().idle();
 
-        prefs.enableMultiProfiles(false);
+        prefs.onAccountChanged(FIRST_ACCOUNT);
 
         assertEquals(3, data.getPeriodMonths());
         assertTrue(data.isQuickToggleEnabled());
 
-        prefs.enableMultiProfiles(true);
+        prefs.onAccountChanged(SECOND_ACCOUNT);
 
         assertEquals(6, data.getPeriodMonths());
         assertFalse(data.isQuickToggleEnabled());
+    }
+
+    @Test
+    public void copiedFromAnotherAccount() {
+        AppPrefs prefs = getPrefs();
+        OldVideosData data = getData();
+
+        prefs.onAccountChanged(FIRST_ACCOUNT);
+        data.setPeriodMonths(3);
+        ShadowLooper.shadowMainLooper().idle();
+        prefs.onAccountChanged(SECOND_ACCOUNT);
+
+        assertEquals(12, data.getPeriodMonths());
+
+        prefs.copyProfileData(FIRST_ACCOUNT);
+
+        assertEquals(3, data.getPeriodMonths());
     }
 
     @Test
@@ -180,17 +198,13 @@ public class OldVideosDataTest {
         OnDataChange listener = () -> changes[0]++;
         data.setOnChange(listener);
 
-        getPrefs().enableMultiProfiles(true);
+        getPrefs().onAccountChanged(FIRST_ACCOUNT);
 
         assertTrue(changes[0] > 0);
     }
 
-    /**
-     * AppPrefs outlives the test, so do the saved values
-     */
     private static void clearSaved() {
-        getPrefs().setData(OldVideosData.class.getSimpleName(), "");
-        getPrefs().setData(ANONYMOUS_PROFILE_KEY, "");
+        TestAccounts.clearSaved(getPrefs(), OldVideosData.class.getSimpleName());
         OldVideosData.resetInstanceForTesting();
     }
 

@@ -69,7 +69,7 @@ public class AccountSettingsPresenter extends BasePresenter<Void> {
         appendSignInButton(settingsPresenter);
         appendSignOutSection(accounts, icons, settingsPresenter);
         appendProtectAccountWithPassword(settingsPresenter);
-        appendSeparateSettings(settingsPresenter);
+        appendCopySettingsSection(accounts, icons, settingsPresenter);
         appendSelectAccountOnBoot(settingsPresenter);
 
         Account account = getSignInService().getSelectedAccount();
@@ -163,13 +163,43 @@ public class AccountSettingsPresenter extends BasePresenter<Void> {
         }, AccountsData.instance(getContext()).getAccountPassword() != null));
     }
 
-    private void appendSeparateSettings(AppDialogPresenter settingsPresenter) {
-        settingsPresenter.appendSingleSwitch(UiOptionItem.from(getContext().getString(R.string.multi_profiles),
-                option -> {
-                    AppPrefs.instance(getContext()).enableMultiProfiles(option.isSelected());
-                    BrowsePresenter.instance(getContext()).updateSections();
-                },
-                AppPrefs.instance(getContext()).isMultiProfilesEnabled()));
+    /**
+     * Into the selected account (or none) from another one
+     */
+    private void appendCopySettingsSection(List<Account> accounts, List<Drawable> icons, AppDialogPresenter settingsPresenter) {
+        if (accounts == null) {
+            return;
+        }
+
+        List<OptionItem> optionItems = new ArrayList<>();
+
+        int index = -1;
+
+        for (Account account : accounts) {
+            index++;
+
+            if (account.isSelected()) {
+                continue;
+            }
+
+            CharSequence icon = Utils.icon(icons.get(index));
+            optionItems.add(UiOptionItem.from(
+                    TextUtils.concat(icon, " ", getFullName(account)), option ->
+                        AppDialogUtil.showConfirmationDialog(
+                                getContext(), getContext().getString(R.string.copy_settings_from_account_confirm, getSimpleName(account)), () -> {
+                                    AppPrefs.instance(getContext()).copyProfileData(account);
+                                    BrowsePresenter.instance(getContext()).updateSections();
+                                    settingsPresenter.closeDialog();
+                                    MessageHelpers.showMessage(getContext(), R.string.msg_done);
+                                })
+            ));
+        }
+
+        if (optionItems.isEmpty()) {
+            return;
+        }
+
+        settingsPresenter.appendStringsCategory(getContext().getString(R.string.copy_settings_from_account), optionItems);
     }
 
     private String getFullName(Account account) {

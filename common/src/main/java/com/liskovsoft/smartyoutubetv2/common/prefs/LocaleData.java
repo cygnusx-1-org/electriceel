@@ -12,13 +12,13 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs.ProfileChangeListene
 
 /**
  * The language and the country of the Language/Country settings.
- * Each account has its own while "Use separate settings per each account" is on.<br/>
+ * Each account has its own.<br/>
  * The ones in use stay in GlobalPreferences: the locale code of the shared modules reads them from there when the app starts.
  * This keeps a copy per account and puts the account's into GlobalPreferences when the account changes. The app needs a restart then,
  * like after a change in the settings.
  */
 public class LocaleData implements ProfileChangeListener {
-    private static final String LOCALE_DATA = "locale_data";
+    static final String LOCALE_DATA = "locale_data";
     @SuppressLint("StaticFieldLeak")
     private static LocaleData sInstance;
     private final Context mContext;
@@ -30,7 +30,7 @@ public class LocaleData implements ProfileChangeListener {
         mPrefs = AppPrefs.instance(context);
         mGlobalPrefs = GlobalPreferences.instance(context);
 
-        // They were for all the accounts before: an account without its own starts from them
+        // They were for all the accounts before: kept as the shared ones (see AppPrefs.getProfileData)
         if (TextUtils.isEmpty(mPrefs.getData(LOCALE_DATA))) {
             mPrefs.setData(LOCALE_DATA, merge(getLanguage(), getCountry()));
         }

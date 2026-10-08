@@ -632,7 +632,6 @@
     <string name="color_scheme_dark_blue_oled">Темно-блакитна (OLED)</string>
     <string name="player_speed_per_channel">Для кожного каналу</string>
     <string name="disable_popular_searches">Не показувати популяні пошукові запити</string>
-    <string name="multi_profiles">Використовувати окремі налаштування для кожного облікового запису</string>
     <string name="protect_account_with_password">Захистити цей обліковий запис паролем</string>
     <string name="enter_account_password">Введіть пароль від облікового запису</string>
     <string name="show_connect_messages">Сповіщення про підключені пристрої</string>

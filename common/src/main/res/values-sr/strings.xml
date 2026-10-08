@@ -631,7 +631,6 @@
     <string name="color_scheme_dark_blue">Тамно плава</string>
     <string name="player_speed_per_channel">За сваки канал посебно</string>
     <string name="disable_popular_searches">Искључи популарне претраге</string>
-    <string name="multi_profiles">Користи посебне поставке за сваки налог</string>
     <string name="protect_account_with_password">Заштити овај налог лозинком</string>
     <string name="enter_account_password">Унесите лозинку за налог</string>
     <string name="show_connect_messages">Прикажи поруке о повезивању</string>

@@ -621,7 +621,6 @@
   <string name="color_scheme_dark_blue">Donkerblauw</string>
   <string name="player_speed_per_channel">Per kanaal</string>
   <string name="disable_popular_searches">Populaire zoekopdrachten uitschakelen</string>
-  <string name="multi_profiles">Gebruik aparte instellingen voor elk account</string>
   <string name="protect_account_with_password">Bescherm dit account met een wachtwoord</string>
   <string name="enter_account_password">Voer het wachtwoord van uw account in</string>
   <string name="show_connect_messages">Toon verbindingsberichten</string>

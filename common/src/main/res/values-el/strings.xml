@@ -577,7 +577,6 @@
   <string name="color_scheme_dark_blue">Σκούρο Μπλε</string>
   <string name="player_speed_per_channel">Για κάθε κανάλι</string>
   <string name="disable_popular_searches">Απενεργοποιήστε δημοφιλή ερωτήματα αναζήτησης</string>
-  <string name="multi_profiles">Χρησιμοποιήστε ξεχωριστές ρυθμίσεις για κάθε λογαριασμό</string>
   <string name="protect_account_with_password">Προστατέψτε αυτόν τον λογαριασμό με κωδικό πρόσβασης</string>
   <string name="enter_account_password">Εισαγάγετε τον κωδικό πρόσβασης λογαριασμού</string>
   <string name="show_connect_messages">Εμφάνιση μηνυμάτων σύνδεσης</string>
