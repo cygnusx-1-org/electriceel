@@ -74,7 +74,7 @@ You can install [Discoverium](https://github.com/cygnusx-1-org/Discoverium/), an
 
 The app has a built-in updater. You only need to follow the installation procedure **once**. A few seconds after launching Electric Eel, it will notify you if there is any update and also show a changelog. You can disable automatic update checks or manually update in the settings under `Settings | Updates`.
 
-If the installation fails, either your **disk space is full** or the update didn't download correctly; clear up space and try updating again (_Settings > About > Check for updates_).
+If the installation fails, either your **disk space is full** or the update didn't download correctly; clear up space and try updating again (_Settings > Updates > Check for updates_).
 
 
 ## Compatibility
