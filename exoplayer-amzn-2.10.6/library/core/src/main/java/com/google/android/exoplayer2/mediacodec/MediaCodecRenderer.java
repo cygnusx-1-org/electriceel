@@ -167,6 +167,73 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
 
   }
 
+  /**
+   * SmartTube fix: a MediaCodec error the in-place recovery couldn't fix (see {@code
+   * maybeRecoverFromCodecError}). Names the decoder and the format it was decoding, so the app can
+   * tell which track failed.
+   */
+  public static final class DecoderErrorException extends IllegalStateException {
+
+    /** The {@code C.TRACK_TYPE_*} of the renderer whose decoder failed. */
+    public final int trackType;
+
+    /** The name of the decoder that failed. */
+    public final String decoderName;
+
+    /** The format the decoder was decoding. Null if unknown. */
+    public final @Nullable Format format;
+
+    /* package */ DecoderErrorException(
+        int trackType,
+        String decoderName,
+        @Nullable Format format,
+        @Nullable String diagnosticInfo,
+        IllegalStateException cause) {
+      super(buildMessage(trackType, decoderName, format, diagnosticInfo), cause);
+      this.trackType = trackType;
+      this.decoderName = decoderName;
+      this.format = format;
+    }
+
+    /**
+     * E.g. "MediaCodec video decoder error (OMX.allwinner.video.decoder.vp9, vp9 3840x2160@60)".
+     */
+    @VisibleForTesting
+    /* package */ static String buildMessage(
+        int trackType, String decoderName, @Nullable Format format, @Nullable String diagnosticInfo) {
+      StringBuilder message = new StringBuilder("MediaCodec ");
+      if (trackType == C.TRACK_TYPE_VIDEO) {
+        message.append("video ");
+      } else if (trackType == C.TRACK_TYPE_AUDIO) {
+        message.append("audio ");
+      }
+      message.append("decoder error (").append(decoderName);
+      String codecs =
+          format == null ? null : format.codecs != null ? format.codecs : format.sampleMimeType;
+      if (codecs != null) {
+        message.append(", ").append(codecs);
+        if (format.width != Format.NO_VALUE && format.height != Format.NO_VALUE) {
+          message.append(' ').append(format.width).append('x').append(format.height);
+          if (format.frameRate != Format.NO_VALUE) {
+            message.append('@').append(Math.round(format.frameRate));
+          }
+        }
+        if (format.channelCount != Format.NO_VALUE) {
+          message.append(' ').append(format.channelCount).append("ch");
+        }
+        if (format.sampleRate != Format.NO_VALUE) {
+          message.append(' ').append(format.sampleRate).append("Hz");
+        }
+      }
+      message.append(')');
+      if (diagnosticInfo != null) {
+        message.append(": ").append(diagnosticInfo);
+      }
+      return message.toString();
+    }
+
+  }
+
   /** Indicates no codec operating rate should be set. */
   protected static final float CODEC_OPERATING_RATE_UNSET = -1;
 
@@ -746,8 +813,8 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
 
   /**
    * Wraps a MediaCodec {@link IllegalStateException} (which normally carries a {@code null} message)
-   * with the decoder name and, when available, the codec's diagnostic info, and reports it as an
-   * {@code UNEXPECTED} error.
+   * in a {@link DecoderErrorException} with the track type, the decoder name, the format and, when
+   * available, the codec's diagnostic info, and reports it as an {@code UNEXPECTED} error.
    *
    * <p>We deliberately do NOT use {@link ExoPlaybackException#createForRenderer} here. A
    * {@code TYPE_RENDERER} video error routes into the app's ErrorFixerController, which reacts by
@@ -757,10 +824,11 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
    * one so it's no longer reported as "Unexpected playback error null".
    */
   private ExoPlaybackException createDecoderException(IllegalStateException error) {
-    String diagnosticInfo = getCodecDiagnosticInfo(error);
-    String message = "MediaCodec decoder error (" + codecName + ")"
-        + (diagnosticInfo != null ? ": " + diagnosticInfo : "");
-    return ExoPlaybackException.createForUnexpected(new IllegalStateException(message, error));
+    // The codec format is gone when the error came from re-initializing a released codec
+    Format format = codecFormat != null ? codecFormat : inputFormat;
+    return ExoPlaybackException.createForUnexpected(
+        new DecoderErrorException(
+            getTrackType(), codecName, format, getCodecDiagnosticInfo(error), error));
   }
 
   private static String getCodecDiagnosticInfo(IllegalStateException error) {
@@ -954,7 +1022,8 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
     long codecInitializingTimestamp;
     long codecInitializedTimestamp;
     MediaCodec codec = null;
-    String codecName = codecInfo.name;
+    // SmartTube fix: sets the field (a local used to shadow it), so errors and logs name the decoder
+    codecName = codecInfo.name;
 
     float codecOperatingRate =
         Util.SDK_INT < 23

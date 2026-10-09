@@ -282,6 +282,13 @@
     <string name="unpin_from_sidebar">Remove from the sidebar</string>
     <string name="unpin_group_from_sidebar">Remove the subscription group</string>
     <string name="unpinned_from_sidebar">Removed from the sidebar</string>
+    <string name="home_screen">Home screen</string>
+    <string name="home_screen_channels">Home screen channels</string>
+    <string name="add_remove_from_home_screen">Add/Remove from the home screen</string>
+    <string name="add_playlist_to_home_screen">Add playlist to the home screen</string>
+    <string name="remove_playlist_from_home_screen">Remove playlist from the home screen</string>
+    <string name="added_to_home_screen">Added to the home screen</string>
+    <string name="removed_from_home_screen">Removed from the home screen</string>
     <string name="dialog_select_country">Country</string>
     <string name="settings_language_country">Language/Country</string>
     <string name="share_embed_link">Share embed link</string>
@@ -841,6 +848,7 @@
     <string name="lb_playback_controls_closed_captioning_disable">Disable Closed Captioning</string>
     <string name="lb_playback_controls_closed_captioning_enable">Enable Closed Captioning</string>
     <string name="my_videos">My videos</string>
+    <string name="my_videos_shorts">My videos - Shorts</string>
     <string name="player_audio_focus">Audio focus (pause if other players detected)</string>
     <string name="paid_content_notification">Paid content notification</string>
     <string name="you_liked">you liked</string>

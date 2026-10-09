@@ -4,9 +4,13 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.TextUtils;
 
+import androidx.annotation.Nullable;
+
 import com.liskovsoft.mediaserviceinterfaces.oauth.Account;
 import com.liskovsoft.sharedutils.helpers.FileHelpers;
+import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.misc.WeakHashSet;
+import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
 import com.liskovsoft.sharedutils.prefs.SharedPreferencesBase;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.SidebarService;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
@@ -15,6 +19,7 @@ import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager.AccountCha
 import java.io.File;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 public class AppPrefs extends SharedPreferencesBase implements AccountChangeListener {
@@ -30,11 +35,17 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
     private static final String STATE_UPDATER_DATA = "state_updater_data";
     private static final String CHANNEL_GROUP_DATA = "channel_group_data";
     private static final String SIDEBAR_DATA = "sidebar_data";
+    private static final String HOME_SCREEN_PLAYLISTS_DATA = "home_screen_playlists_data";
+    private static final String HOME_SCREEN_CHANNELS_DATA = "home_screen_channels_data";
     private static final String VIEW_MANAGER_DATA = "view_manager_data";
     private static final String WEB_PROXY_URI = "web_proxy_uri";
     private static final String WEB_PROXY_ENABLED = "web_proxy_enabled";
     private static final String LAST_PROFILE_NAME = "last_profile_name";
     private static final String SHARED_SETTINGS_PROFILE_NAME = "shared_settings_profile_name";
+    /**
+     * The profiles that got a copy of the one they shared (see copySharedProfiles)
+     */
+    private static final String COPIED_PROFILE_NAMES = "copied_profile_names";
     /**
      * The settings each account has its own of (see getProfileData): a new kind of them goes here too, to be copied
      */
@@ -70,6 +81,82 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
         migrateSharedSettings();
         initSharedSettingsProfile();
         MediaServiceManager.instance().addAccountListener(this);
+        initAccountProfile();
+    }
+
+    /**
+     * The accounts with the same name shared the profile named after them: each has its own now (see Account.getProfileName),
+     * the selected account's from the start
+     */
+    private void initAccountProfile() {
+        // The accounts are kept in it
+        GlobalPreferences.instance(getContext());
+
+        copySharedProfiles(MediaServiceManager.instance().getAccounts());
+
+        Account account = MediaServiceManager.instance().getSelectedAccount();
+
+        if (account != null) {
+            selectProfile(account);
+        }
+    }
+
+    /**
+     * An account that shared the profile named after it with the others of its name gets a copy of it, once
+     * (see Account.getSharedProfileName). Not its home screen channels: the launcher would show each channel twice.
+     */
+    void copySharedProfiles(@Nullable List<Account> accounts) {
+        if (accounts == null) {
+            return;
+        }
+
+        Set<String> copied = new LinkedHashSet<>();
+        String[] copiedNames = Helpers.splitArray(getString(COPIED_PROFILE_NAMES, null));
+
+        if (copiedNames != null) {
+            Collections.addAll(copied, copiedNames);
+        }
+
+        for (Account account : accounts) {
+            String from = account != null ? account.getSharedProfileName() : null;
+            String to = account != null ? account.getProfileName() : null;
+
+            if (from == null || to == null || from.equals(to) || copied.contains(to)) {
+                continue;
+            }
+
+            boolean isFromSharedSettingsProfile = from.equals(getString(SHARED_SETTINGS_PROFILE_NAME, null));
+
+            for (String key : getProfileKeys()) {
+                if (HOME_SCREEN_PLAYLISTS_DATA.equals(key) || HOME_SCREEN_CHANNELS_DATA.equals(key)) {
+                    continue;
+                }
+
+                String data = getData(from + "_" + key);
+
+                // The shared settings are its own too (see getProfileData)
+                if (TextUtils.isEmpty(data) && isFromSharedSettingsProfile && isProfileDataKey(key)) {
+                    data = getData(key);
+                }
+
+                if (data != null) {
+                    setData(to + "_" + key, data);
+                }
+            }
+
+            copied.add(to);
+            putString(COPIED_PROFILE_NAMES, Helpers.mergeList(copied));
+        }
+    }
+
+    private static boolean isProfileDataKey(String key) {
+        for (String profileDataKey : PROFILE_DATA_KEYS) {
+            if (profileDataKey.equals(key)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -130,6 +217,8 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
         result.add(STATE_UPDATER_DATA);
         result.add(SIDEBAR_DATA);
         result.add(CHANNEL_GROUP_DATA);
+        result.add(HOME_SCREEN_PLAYLISTS_DATA);
+        result.add(HOME_SCREEN_CHANNELS_DATA);
         Collections.addAll(result, PROFILE_DATA_KEYS);
 
         return result;
@@ -148,6 +237,7 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
 
     @Override
     public void onAccountChanged(Account account) {
+        copySharedProfiles(MediaServiceManager.instance().getAccounts());
         selectProfile(account);
         onProfileChanged();
     }
@@ -203,6 +293,38 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
         setData(getProfileKey(SIDEBAR_DATA), data);
     }
 
+    public String getHomeScreenPlaylistsData() {
+        return getData(getProfileKey(HOME_SCREEN_PLAYLISTS_DATA));
+    }
+
+    public void setHomeScreenPlaylistsData(String data) {
+        setData(getProfileKey(HOME_SCREEN_PLAYLISTS_DATA), data);
+    }
+
+    public String getHomeScreenChannelsData() {
+        return getData(getProfileKey(HOME_SCREEN_CHANNELS_DATA));
+    }
+
+    public void setHomeScreenChannelsData(String data) {
+        setData(getProfileKey(HOME_SCREEN_CHANNELS_DATA), data);
+    }
+
+    /**
+     * The given account's, whichever is selected
+     * @param account null: signed out
+     */
+    public String getHomeScreenPlaylistsData(@Nullable Account account) {
+        return getData(getProfileKey(account, HOME_SCREEN_PLAYLISTS_DATA));
+    }
+
+    /**
+     * The given account's, whichever is selected
+     * @param account null: signed out
+     */
+    public String getHomeScreenChannelsData(@Nullable Account account) {
+        return getData(getProfileKey(account, HOME_SCREEN_CHANNELS_DATA));
+    }
+
     /**
      * An account without its own settings starts from the defaults, not from the shared ones: they're the first account's, so
      * every account added after it got that account's theme and the rest.<br/>
@@ -229,7 +351,7 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
 
     /**
      * Replaces the settings of the current account with the ones the given account has in use (see getProfileData).
-     * The history, channel groups and sidebar stay the current account's.
+     * The history, channel groups, sidebar and home screen channels stay the current account's.
      */
     public void copyProfileData(Account from) {
         String fromName = getProfileName(from);
@@ -313,7 +435,9 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
     }
 
     private static String getProfileName(Account account) {
-        return account != null && account.getName() != null ? account.getName().replace(" ", "_") : ANONYMOUS_PROFILE_NAME;
+        String profileName = account != null ? account.getProfileName() : null;
+
+        return profileName != null ? profileName : ANONYMOUS_PROFILE_NAME;
     }
 
     private void onProfileChanged() {
@@ -346,6 +470,20 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
         }
 
         return key;
+    }
+
+    /**
+     * The selected one's is the key above: signed out, it's the shared one until an account is selected
+     */
+    private String getProfileKey(@Nullable Account account, String key) {
+        String profileName = getProfileName(account);
+        String selectedProfileName = getProfileName();
+
+        if (profileName.equals(selectedProfileName) || (account == null && TextUtils.isEmpty(selectedProfileName))) {
+            return getProfileKey(key);
+        }
+
+        return profileName + "_" + key;
     }
     
     @Override

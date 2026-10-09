@@ -9,7 +9,9 @@ import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
@@ -47,6 +49,39 @@ public class VideoTest {
     @Test
     public void videoWithoutGroupIsNotHomeLike() {
         assertFalse(new Video().belongsToHomeLikeSection());
+    }
+
+    @Test
+    public void playlistIdFoundFromItsOwn() {
+        Video video = new Video();
+        video.videoId = "video";
+        video.playlistId = "PLplaylist";
+        video.channelId = "UCchannel";
+
+        assertEquals("PLplaylist", video.findPlaylistId());
+    }
+
+    /**
+     * A card of the Playlists section is the playlist opened as a channel
+     */
+    @Test
+    public void playlistIdFoundFromPlaylistOpenedAsChannel() {
+        Video video = new Video();
+        video.channelId = "VLPLplaylist";
+
+        assertEquals("PLplaylist", video.findPlaylistId());
+    }
+
+    @Test
+    public void noPlaylistIdForChannel() {
+        Video channel = new Video();
+        channel.channelId = "UCchannel";
+        Video prefixOnly = new Video();
+        prefixOnly.channelId = "VL";
+
+        assertNull(channel.findPlaylistId());
+        assertNull(prefixOnly.findPlaylistId());
+        assertNull(new Video().findPlaylistId());
     }
 
     private static VideoGroup createGroup(int type) {

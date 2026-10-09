@@ -305,6 +305,8 @@ public class SplashPresenter extends BasePresenter<SplashView> {
                 sectionId = MediaGroup.TYPE_HISTORY;
             } else if (IntentExtractor.isRecommendedUrl(intent)) {
                 sectionId = MediaGroup.TYPE_HOME;
+            } else if (IntentExtractor.isMyVideosUrl(intent)) {
+                sectionId = MediaGroup.TYPE_MY_VIDEOS;
             }
 
             if (sectionId != -1) {

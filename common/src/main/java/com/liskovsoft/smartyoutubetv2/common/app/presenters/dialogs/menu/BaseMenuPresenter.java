@@ -21,9 +21,11 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.AppUpdatePre
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.VideoMenuPresenter.VideoMenuCallback;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.HomeScreenPlaylistsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.utils.AppDialogUtil;
 import com.liskovsoft.smartyoutubetv2.common.utils.SimpleEditDialog;
+import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.playlist.LocalPlaylistException;
 import com.liskovsoft.youtubeapi.service.YouTubeMediaItemService;
 import io.reactivex.Observable;
@@ -44,6 +46,7 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
     private boolean mIsExcludeFromContentBlockEnabled;
     private boolean mIsRenamePlaylistEnabled;
     private boolean mIsCopyPlaylistToYouTubeEnabled;
+    private boolean mIsAddToHomeScreenEnabled;
 
     protected BaseMenuPresenter(Context context) {
         super(context);
@@ -136,6 +139,50 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
         section.title = video.createChannelTitle();
 
         return section;
+    }
+
+    /**
+     * The playlist as a channel of the launcher's home screen, for the current account (see HomeScreenPlaylistsData)
+     */
+    protected void appendToggleHomeScreenPlaylistButton() {
+        if (!mIsAddToHomeScreenEnabled || !HomeScreenPlaylistsData.isSupported(getContext())) {
+            return;
+        }
+
+        Video original = getVideo();
+        String playlistId = original != null ? original.findPlaylistId() : null;
+
+        if (playlistId == null) {
+            return;
+        }
+
+        HomeScreenPlaylistsData data = HomeScreenPlaylistsData.instance(getContext());
+
+        getDialogPresenter().appendSingleButton(
+                UiOptionItem.from(
+                        getContext().getString(data.contains(playlistId) ? R.string.remove_playlist_from_home_screen : R.string.add_playlist_to_home_screen),
+                        optionItem -> {
+                            boolean isAdded = data.contains(playlistId);
+
+                            if (isAdded) {
+                                data.remove(playlistId);
+                            } else {
+                                data.add(playlistId, createHomeScreenTitle(original));
+                            }
+
+                            Utils.updateChannels(getContext());
+                            closeDialog();
+                            MessageHelpers.showMessage(getContext(), isAdded ? R.string.removed_from_home_screen : R.string.added_to_home_screen);
+                        }));
+    }
+
+    /**
+     * A card is the playlist itself. A video in it is named after the playlist, as when it's added to the sidebar.
+     */
+    private String createHomeScreenTitle(Video video) {
+        String title = video.hasVideo() ? video.createPlaylistTitle() : video.getTitle();
+
+        return title != null && !title.isEmpty() ? title : getContext().getString(R.string.playlist);
     }
 
     protected void appendUnpinVideoFromSidebarButton() {
@@ -539,6 +586,10 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
                             () -> {
                                 video.title = newValue;
                                 BrowsePresenter.instance(getContext()).syncItem(video);
+
+                                if (HomeScreenPlaylistsData.instance(getContext()).rename(video.getPlaylistId(), newValue)) {
+                                    Utils.updateChannels(getContext());
+                                }
                             }
                     );
                     return true;
@@ -627,6 +678,7 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
         mIsCreateLocalPlaylistEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_CREATE_LOCAL_PLAYLIST);
         mIsRenamePlaylistEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_RENAME_PLAYLIST);
         mIsCopyPlaylistToYouTubeEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_COPY_PLAYLIST_TO_YOUTUBE);
+        mIsAddToHomeScreenEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_ADD_TO_HOME_SCREEN);
         mIsAccountSelectionEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_SELECT_ACCOUNT);
         mIsAddToNewPlaylistEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_ADD_TO_NEW_PLAYLIST);
         mIsToggleHistoryEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_TOGGLE_HISTORY);

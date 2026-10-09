@@ -451,6 +451,10 @@ public class MediaServiceManager implements OnAccountChange {
         return mSignInService.getSelectedAccount();
     }
 
+    public List<Account> getAccounts() {
+        return mSignInService.getAccounts();
+    }
+
     public String printAccountDebugInfo() {
         return mSignInService.printDebugInfo();
     }

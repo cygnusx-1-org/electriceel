@@ -9,4 +9,6 @@
     <string name="header_subscriptions">Subscriptions</string>
     <string name="header_history">History</string>
     <string name="recommended">Recommended</string>
+    <string name="my_videos">My videos</string>
+    <string name="my_videos_shorts">My videos - Shorts</string>
 </resources>

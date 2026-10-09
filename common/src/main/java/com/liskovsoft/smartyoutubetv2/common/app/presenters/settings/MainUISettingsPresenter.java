@@ -3,9 +3,12 @@ package com.liskovsoft.smartyoutubetv2.common.app.presenters.settings;
 import android.content.Context;
 import android.os.Build;
 
+import com.liskovsoft.leanbackassistant.media.ClipService;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
+import com.liskovsoft.mediaserviceinterfaces.data.MediaItem;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
+import com.liskovsoft.sharedutils.rx.RxHelper;
 import com.liskovsoft.smartyoutubetv2.common.R;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
@@ -18,14 +21,17 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.provide
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.SidebarService;
 import com.liskovsoft.smartyoutubetv2.common.prefs.DeArrowData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.HomeScreenPlaylistsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData.ColorScheme;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
 import com.liskovsoft.smartyoutubetv2.common.utils.ClickbaitRemover;
+import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -201,6 +207,99 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
      */
     public void showContextMenuItems() {
         showCategory(R.string.context_menu, this::appendContextMenuItemsCategory);
+    }
+
+    /**
+     * The Home screen channels card of the User interface settings, in General: the app's own channels (History, My videos...),
+     * then the playlists of the Playlists section, shown as channels of the launcher's home screen. The ones added that aren't
+     * there (deleted since) come after them.
+     */
+    public void showHomeScreenChannels() {
+        MessageHelpers.showMessage(getContext(), R.string.wait_data_loading);
+
+        // Not getPlaylistsInfo: it has only the account's own playlists, not Liked videos and the saved ones
+        RxHelper.execute(
+                getContentService().getPlaylistsObserve(),
+                this::showHomeScreenChannels,
+                error -> showHomeScreenChannels(null) // the added ones still can be removed
+        );
+    }
+
+    private void showHomeScreenChannels(MediaGroup myPlaylists) {
+        HomeScreenPlaylistsData data = HomeScreenPlaylistsData.instance(getContext());
+        Map<String, String> added = data.getPlaylists();
+        Map<String, String> playlists = new LinkedHashMap<>();
+        boolean[] isChanged = {false};
+        List<MediaItem> mediaItems = myPlaylists != null ? myPlaylists.getMediaItems() : null;
+
+        if (mediaItems != null) {
+            for (MediaItem mediaItem : mediaItems) {
+                Video video = Video.from(mediaItem);
+                String playlistId = video != null ? video.findPlaylistId() : null;
+
+                if (playlistId == null) {
+                    continue;
+                }
+
+                String title = video.getTitle() != null ? video.getTitle() : playlistId;
+                playlists.put(playlistId, title);
+
+                // Renamed somewhere else
+                if (added.containsKey(playlistId) && !title.equals(added.get(playlistId))) {
+                    isChanged[0] |= data.rename(playlistId, title);
+                }
+            }
+        }
+
+        for (Entry<String, String> playlist : added.entrySet()) {
+            if (!playlists.containsKey(playlist.getKey())) {
+                playlists.put(playlist.getKey(), playlist.getValue());
+            }
+        }
+
+        List<OptionItem> options = new ArrayList<>();
+
+        // The app's own channels, named as in the launcher's list (sorted by name)
+        appendHomeScreenChannel(options, data, R.string.header_history, ClipService.HISTORY_PROVIDER_ID, isChanged);
+        appendHomeScreenChannel(options, data, R.string.my_videos, ClipService.MY_VIDEOS_PROVIDER_ID, isChanged);
+        appendHomeScreenChannel(options, data, R.string.my_videos_shorts, ClipService.MY_SHORTS_PROVIDER_ID, isChanged);
+        appendHomeScreenChannel(options, data, R.string.recommended, ClipService.RECOMMENDED_PROVIDER_ID, isChanged);
+        appendHomeScreenChannel(options, data, R.string.header_subscriptions, ClipService.SUBSCRIPTIONS_PROVIDER_ID, isChanged);
+
+        for (Entry<String, String> playlist : playlists.entrySet()) {
+            options.add(UiOptionItem.from(playlist.getValue(), optionItem -> {
+                if (optionItem.isSelected()) {
+                    data.add(playlist.getKey(), playlist.getValue());
+                } else {
+                    data.remove(playlist.getKey());
+                }
+
+                isChanged[0] = true;
+            }, added.containsKey(playlist.getKey())));
+        }
+
+        MessageHelpers.cancelToasts();
+
+        String title = getContext().getString(R.string.home_screen_channels);
+        String accountName = data.getAccountName();
+
+        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        // Whose channels these are, named as in the launcher: it shows every account's. The title of the list (its only one).
+        settingsPresenter.appendCheckedCategory(accountName != null ? String.format("%s - %s", title, accountName) : title, options);
+        settingsPresenter.showDialog(title, () -> {
+            // Once for all the changes
+            if (isChanged[0]) {
+                Utils.updateChannels(getContext());
+            }
+        });
+    }
+
+    private void appendHomeScreenChannel(List<OptionItem> options, HomeScreenPlaylistsData data, int titleResId, String providerId,
+                                         boolean[] isChanged) {
+        options.add(UiOptionItem.from(getContext().getString(titleResId), optionItem -> {
+            data.setChannelEnabled(providerId, optionItem.isSelected());
+            isChanged[0] = true;
+        }, data.isChannelEnabled(providerId)));
     }
 
     private interface CategoryAppender {
@@ -386,6 +485,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         menuNames.put(MainUIData.MENU_ITEM_REMOVE_FROM_HISTORY, R.string.remove_from_history);
         menuNames.put(MainUIData.MENU_ITEM_REMOVE_FROM_SUBSCRIPTIONS, R.string.remove_from_subscriptions);
         menuNames.put(MainUIData.MENU_ITEM_PIN_TO_SIDEBAR, R.string.pin_unpin_from_sidebar);
+        menuNames.put(MainUIData.MENU_ITEM_ADD_TO_HOME_SCREEN, R.string.add_remove_from_home_screen);
         menuNames.put(MainUIData.MENU_ITEM_SHARE_LINK, R.string.share_link);
         menuNames.put(MainUIData.MENU_ITEM_SHARE_EMBED_LINK, R.string.share_embed_link);
         menuNames.put(MainUIData.MENU_ITEM_SHARE_QR_LINK, R.string.share_qr_link);

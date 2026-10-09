@@ -17,6 +17,9 @@ package com.google.android.exoplayer2.mediacodec;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.Format;
+import com.google.android.exoplayer2.util.MimeTypes;
 import org.junit.Test;
 
 /**
@@ -69,6 +72,56 @@ public class MediaCodecRendererTest {
     error.setStackTrace(new StackTraceElement[0]);
 
     assertThat(MediaCodecRenderer.isMediaCodecException(error)).isFalse();
+  }
+
+  @Test
+  public void decoderErrorMessage_forVideo_namesDecoderCodecsSizeAndFps() {
+    Format format =
+        Format.createVideoSampleFormat(
+            "315", MimeTypes.VIDEO_VP9, "vp9", 26427788, Format.NO_VALUE, 3840, 2160, 59.94f, null,
+            null);
+
+    assertThat(
+            MediaCodecRenderer.DecoderErrorException.buildMessage(
+                C.TRACK_TYPE_VIDEO, "OMX.allwinner.video.decoder.vp9", format, null))
+        .isEqualTo(
+            "MediaCodec video decoder error (OMX.allwinner.video.decoder.vp9, vp9 3840x2160@60)");
+  }
+
+  @Test
+  public void decoderErrorMessage_forAudio_namesDecoderCodecsChannelsAndSampleRate() {
+    Format format =
+        Format.createAudioSampleFormat(
+            "251", MimeTypes.AUDIO_OPUS, "opus", 133157, Format.NO_VALUE, 2, 48000, null, null, 0,
+            "en");
+
+    assertThat(
+            MediaCodecRenderer.DecoderErrorException.buildMessage(
+                C.TRACK_TYPE_AUDIO, "c2.android.opus.decoder", format, "diag_42"))
+        .isEqualTo(
+            "MediaCodec audio decoder error (c2.android.opus.decoder, opus 2ch 48000Hz): diag_42");
+  }
+
+  @Test
+  public void decoderErrorMessage_withoutCodecs_fallsBackToMimeType() {
+    Format format =
+        Format.createVideoSampleFormat(
+            null, MimeTypes.VIDEO_H264, null, Format.NO_VALUE, Format.NO_VALUE, 1920, 1080,
+            Format.NO_VALUE, null, null);
+
+    assertThat(
+            MediaCodecRenderer.DecoderErrorException.buildMessage(
+                C.TRACK_TYPE_VIDEO, "OMX.allwinner.video.decoder.avc", format, null))
+        .isEqualTo(
+            "MediaCodec video decoder error (OMX.allwinner.video.decoder.avc, video/avc 1920x1080)");
+  }
+
+  @Test
+  public void decoderErrorMessage_withoutFormat_namesOnlyTheDecoder() {
+    assertThat(
+            MediaCodecRenderer.DecoderErrorException.buildMessage(
+                C.TRACK_TYPE_UNKNOWN, "CodecNameUnknown", null, null))
+        .isEqualTo("MediaCodec decoder error (CodecNameUnknown)");
   }
 
   private static IllegalStateException illegalStateExceptionWithTopFrame(

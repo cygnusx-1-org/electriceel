@@ -72,17 +72,25 @@ public class AccountsData implements AccountChangeListener {
     }
 
     public void setAccountPassword(String password) {
-        mPasswords.put(getAccountName(), new PasswordItem(getAccountName(), password));
+        String profileName = getProfileName();
+        mPasswords.put(profileName, new PasswordItem(profileName, password));
 
         persistState();
     }
 
     public String getAccountPassword() {
-        if (getAccountName() == null) {
+        Account account = MediaServiceManager.instance().getSelectedAccount();
+
+        if (account == null) {
             return null;
         }
 
-        PasswordItem passwordItem = mPasswords.get(getAccountName());
+        PasswordItem passwordItem = mPasswords.get(account.getProfileName());
+
+        // Kept by the name before each account had a profile of its own: the accounts with the name shared it
+        if (passwordItem == null && account.getName() != null) {
+            passwordItem = mPasswords.get(account.getName());
+        }
 
         return passwordItem != null ? passwordItem.password : null;
     }
@@ -119,9 +127,12 @@ public class AccountsData implements AccountChangeListener {
         ));
     }
 
-    private String getAccountName() {
+    /**
+     * Each account has its own password, even when another has its name (see Account.getProfileName)
+     */
+    private String getProfileName() {
         Account account = MediaServiceManager.instance().getSelectedAccount();
-        return account != null ? account.getName() : null;
+        return account != null ? account.getProfileName() : null;
     }
 
     @Override

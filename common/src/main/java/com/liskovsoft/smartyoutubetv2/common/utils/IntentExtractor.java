@@ -34,6 +34,7 @@ public class IntentExtractor {
     private static final String SUBSCRIPTIONS_URL = "https://www.youtube.com/tv#/zylon-surface?c=FEsubscriptions"; // last 'resume' param isn't parsed by intent and should be removed
     private static final String HISTORY_URL = "https://www.youtube.com/tv#/zylon-surface?c=FEmy_youtube"; // last 'resume' param isn't parsed by intent and should be removed
     private static final String RECOMMENDED_URL = "https://www.youtube.com/tv#/zylon-surface?c=default"; // last 'resume' param isn't parsed by intent and should be removed
+    private static final String MY_VIDEOS_URL = "https://www.youtube.com/tv#/zylon-surface?c=FEmy_videos"; // last 'resume' param isn't parsed by intent and should be removed
     private static final String PLAYLIST_KEY = "list";
     private static final String VND_SCHEME = "vnd.youtube"; // vnd.youtube://8kKDjRmHp0g
     private static final Pattern timePattern = Pattern.compile("(\\d+)([A-Za-z]{0,2})");
@@ -183,7 +184,7 @@ public class IntentExtractor {
     public static boolean isATVChannelUrl(Intent intent) {
         return intent != null
                 && extractUri(intent) != null
-                && Helpers.startsWithAny(extractUri(intent).toString(), SUBSCRIPTIONS_URL, HISTORY_URL, RECOMMENDED_URL);
+                && Helpers.startsWithAny(extractUri(intent).toString(), SUBSCRIPTIONS_URL, HISTORY_URL, RECOMMENDED_URL, MY_VIDEOS_URL);
     }
 
     /**
@@ -211,6 +212,15 @@ public class IntentExtractor {
         return intent != null
                 && extractUri(intent) != null
                 && Helpers.startsWith(extractUri(intent).toString(), RECOMMENDED_URL);
+    }
+
+    /**
+     * ATV: My videos icon url (its videos and its shorts)
+     */
+    public static boolean isMyVideosUrl(Intent intent) {
+        return intent != null
+                && extractUri(intent) != null
+                && Helpers.startsWith(extractUri(intent).toString(), MY_VIDEOS_URL);
     }
 
     public static boolean isRootUrl(Intent intent) {

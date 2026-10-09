@@ -51,6 +51,7 @@ public class PlayerData extends DataChangeBase implements PlayerConstants, Profi
     private FormatItem mVideoFormat;
     private FormatItem mTempVideoFormat;
     private FormatItem mAudioFormat;
+    private FormatItem mTempAudioFormat;
     private FormatItem mSubtitleFormat;
     private int mVideoBufferType;
     private final List<SubtitleStyle> mSubtitleStyles = new ArrayList<>();
@@ -387,9 +388,12 @@ public class PlayerData extends DataChangeBase implements PlayerConstants, Profi
         switch (format.getType()) {
             case FormatItem.TYPE_VIDEO:
                 mVideoFormat = format;
+                // Not overridden by a temp format (e.g. a decoder error fallback) on the next engine restart
+                mTempVideoFormat = null;
                 break;
             case FormatItem.TYPE_AUDIO:
                 mAudioFormat = format;
+                mTempAudioFormat = null;
                 break;
             case FormatItem.TYPE_SUBTITLE:
                 setLastSubtitleFormat(format);
@@ -406,6 +410,17 @@ public class PlayerData extends DataChangeBase implements PlayerConstants, Profi
 
     public FormatItem getTempVideoFormat() {
         return mTempVideoFormat;
+    }
+
+    /**
+     * Like the temp video format: kept between engine restarts, not saved
+     */
+    public void setTempAudioFormat(FormatItem format) {
+        mTempAudioFormat = format;
+    }
+
+    public FormatItem getTempAudioFormat() {
+        return mTempAudioFormat;
     }
 
     public FormatItem getLastSubtitleFormat() {

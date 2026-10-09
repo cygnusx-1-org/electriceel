@@ -32,6 +32,7 @@ import com.liskovsoft.sharedutils.mylogger.Log;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -342,6 +343,23 @@ public class ChannelsProvider {
              deleteChannel(context, channel.getId());
              return true;
          });
+    }
+
+    /**
+     * Deletes the channels of the app, except the given ones
+     */
+    @WorkerThread
+    public static void deleteChannelsExcept(Context context, Set<String> keptProviderIds) {
+        visitChannels(context, (Channel channel) -> {
+            String providerId = channel.getInternalProviderId();
+
+            if (!keptProviderIds.contains(providerId)) {
+                Log.d(TAG, "Channel deleted. ProviderId: " + providerId);
+                deleteChannel(context, channel.getId());
+            }
+
+            return true; // continue visiting
+        });
     }
 
     @WorkerThread

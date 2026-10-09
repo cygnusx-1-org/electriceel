@@ -2,6 +2,8 @@ package com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers;
 
 import android.annotation.SuppressLint;
 
+import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer.DecoderErrorException;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.sharedutils.mylogger.Log;
@@ -9,6 +11,7 @@ import com.liskovsoft.smartyoutubetv2.common.R;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.BasePlayerController;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.listener.PlayerEventListener;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.errors.DecoderErrorFallback;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
 import com.liskovsoft.smartyoutubetv2.common.misc.BufferingDetector;
 import com.liskovsoft.smartyoutubetv2.common.misc.BufferingDetector.OnLongBuffering;
@@ -24,6 +27,7 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
     private static final long STREAM_END_THRESHOLD_MS = 180_000;
     private final BufferingDetector mBufferingDetector = new BufferingDetector(this);
     private VideoLoaderController mVideoLoaderController;
+    private int mDecoderErrorCount;
 
     @Override
     public void onInit() {
@@ -101,6 +105,7 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
     @Override
     public void onNewVideo(Video item) {
         mBufferingDetector.start();
+        mDecoderErrorCount = 0;
     }
 
     @Override
@@ -203,6 +208,12 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
         } else if (type == PlayerEventListener.ERROR_TYPE_RENDERER && rendererIndex == PlayerEventListener.RENDERER_INDEX_AUDIO) {
             getPlayerData().setFormat(FormatItem.AUDIO_HQ_MP4A);
             restartEngine = false;
+        } else if (error instanceof DecoderErrorException) {
+            // The decoder failed even after the renderer re-initialized it. A restart may be enough, but once the video fails again it
+            // goes on with a format most devices decode, until another video opens. The saved formats stay.
+            if (++mDecoderErrorCount > 1) {
+                applyDecoderErrorFallback((DecoderErrorException) error);
+            }
         } else if (type == PlayerEventListener.ERROR_TYPE_UNEXPECTED) {
             // IllegalStateException: Buffer too small (5242880 < 7208383)
             if (Helpers.startsWithAny(errorContent, "Buffer too small", "Invalid to call at Released state; only valid in executing state")) {
@@ -372,6 +383,31 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
         }
 
         return !getVideo().isLive && !getVideo().isLiveEnd;
+    }
+
+    /**
+     * NOTE: Applied with restartEngine(), as reloadVideo() resets the temp formats
+     */
+    private void applyDecoderErrorFallback(DecoderErrorException error) {
+        FormatItem fallback = null;
+
+        if (error.trackType == C.TRACK_TYPE_VIDEO) {
+            fallback = DecoderErrorFallback.getVideoFormat(error.format);
+
+            if (fallback != null) {
+                getPlayerData().setTempVideoFormat(fallback);
+            }
+        } else if (error.trackType == C.TRACK_TYPE_AUDIO) {
+            FormatItem audioFormat = getPlayerData().getFormat(FormatItem.TYPE_AUDIO);
+            fallback = DecoderErrorFallback.getAudioFormat(error.format, audioFormat != null ? audioFormat.getLanguage() : null);
+
+            if (fallback != null) {
+                getPlayerData().setTempAudioFormat(fallback);
+            }
+        }
+
+        // Null: nothing left to fall back to, the restart is all there is
+        Log.e(TAG, "Decoder error fallback: %s", fallback != null ? fallback.getTrack().format : null);
     }
 
     /**

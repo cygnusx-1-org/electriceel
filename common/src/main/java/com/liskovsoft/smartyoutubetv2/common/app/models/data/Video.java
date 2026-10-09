@@ -42,6 +42,7 @@ public final class Video {
     public static final float MIN_WATCHED_PERCENT = 10; // min value for immediately closed videos
     private static final int MAX_AUTHOR_LENGTH_CHARS = 20;
     private static final String BLACK_PLACEHOLDER_URL = "https://via.placeholder.com/1280x720/000000/000000";
+    private static final String PLAYLIST_CHANNEL_ID_PREFIX = "VL"; // a playlist page is opened as a channel "VL<playlist id>"
     public int id;
     public String title;
     public String deArrowTitle;
@@ -528,6 +529,20 @@ public final class Video {
     //public boolean hasPlaylist() {
     //    return playlistId != null || (playlistParams != null && !Helpers.containsAny(playlistParams, sNotPlaylistParams));
     //}
+
+    /**
+     * Also of a playlist opened as a channel, e.g. a card of the Playlists section
+     */
+    public String findPlaylistId() {
+        String playlistId = getPlaylistId();
+
+        if (playlistId != null) {
+            return playlistId;
+        }
+
+        return channelId != null && channelId.length() > PLAYLIST_CHANNEL_ID_PREFIX.length() && channelId.startsWith(PLAYLIST_CHANNEL_ID_PREFIX) ?
+                channelId.substring(PLAYLIST_CHANNEL_ID_PREFIX.length()) : null;
+    }
 
     public boolean hasNextPlaylist() {
         return hasNextItem() && getPlaylistId() != null && getPlaylistId().equals(nextMediaItem.getPlaylistId());

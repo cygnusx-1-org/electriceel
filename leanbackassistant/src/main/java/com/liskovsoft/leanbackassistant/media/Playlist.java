@@ -189,7 +189,7 @@ public final class Playlist {
                     }
 
                     MediaGroup mediaGroup = contentService.continueGroup(selectedGroup);
-                    if (mediaGroup == null) {
+                    if (mediaGroup == null || mediaGroup.getMediaItems() == null) {
                         break;
                     }
                     mediaItems.addAll(mediaGroup.getMediaItems());
@@ -215,6 +215,10 @@ public final class Playlist {
             List<Clip> clips = new ArrayList<>();
 
             for (MediaItem v : videos) {
+                if (v == null) {
+                    continue;
+                }
+
                 clips.add(new Clip(
                         v.getTitle(),
                         Helpers.toString(v.getSecondTitle()),
