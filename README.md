@@ -46,6 +46,11 @@ Electric Eel is a fork of [SmartTube](https://github.com/yuliskov/SmartTube), an
 - Comment functionality is unstable  
 - Voice search and casting performance may be inferior to official apps, depending on your device  
 
+## Test hardware
+- Nvidia Shield Pro 2019 (3gb RAM, 16gb storage, WiFi 802.11ac, Gigabit Ethernet)
+- FireTV Stick 4K MAX Gen2 (2gb RAM, 16gb storage, WiFi 6E)
+- Interested in your device make and model being explicitly tested? Please [donation](https://buymeacoffee.com/edgan)
+
 ## Device support
 > [!IMPORTANT]  
 > Starting in October 2025 new Amazon FireTV devices no longer run Android under the hood. Electric Eel will **not** be compatible with the Fire Stick 4k Select and newer devices which run Amazon's own VegaOS.
