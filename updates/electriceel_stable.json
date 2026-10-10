@@ -1,13 +1,20 @@
 {
   "package": {
     "downloadUrlList_arm64-v8a": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.6/ElectricEel_stable_32.56.6_arm64-v8a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.7/ElectricEel_stable_32.56.7_arm64-v8a.apk"
     ],
     "downloadUrlList_armeabi-v7a": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.6/ElectricEel_stable_32.56.6_armeabi-v7a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.7/ElectricEel_stable_32.56.7_armeabi-v7a.apk"
     ],
     "downloadUrlList": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.6/ElectricEel_stable_32.56.6_armeabi-v7a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.7/ElectricEel_stable_32.56.7_armeabi-v7a.apk"
+    ]
+  },
+  "32.56.7": {
+    "versionCode": 2446,
+    "changelog": [
+      "Implemented Publish Playlists and Pinned Videos to Android TV Home Screen using Projectivity Launcher #35",
+      "Enhanced Child mode to do better at not allowing escape"
     ]
   },
   "32.56.6": {
