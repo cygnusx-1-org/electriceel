@@ -79,6 +79,13 @@ You can install [Discoverium](https://github.com/cygnusx-1-org/Discoverium/), an
 ## Screenshots
 [Screenshots](/images/screenshots)
 
+### YouTube Data API key creation / YDAKC
+
+Certain content filtering features require the YouTube Data API, and using it requires a personal key. The
+ydakc command line tool allows you to create one after logging into your `Google` account.
+
+See [YDAKC](https://github.com/cygnusx-1-org/YoutubeDataAPIKeyCreation/).
+
 ### Updating
 
 The app has a built-in updater. You only need to follow the installation procedure **once**. A few seconds after launching Electric Eel, it will notify you if there is any update and also show a changelog. You can disable automatic update checks or manually update in the settings under `Settings | Updates`.
