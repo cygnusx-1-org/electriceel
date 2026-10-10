@@ -62,7 +62,8 @@ public class SidebarService implements ProfileChangeListener {
         }
         persistState();
 
-        return idx;
+        // Not idx: appended, it's moved before Settings (see keepSettingsLast)
+        return mPinnedItems.indexOf(item);
     }
 
     public void removePinnedItem(Video item) {
@@ -165,6 +166,19 @@ public class SidebarService implements ProfileChangeListener {
 
     public boolean canMoveSectionDown(int sectionId) {
         return canShiftSection(sectionId, 1);
+    }
+
+    /**
+     * The sections in the default order (see initSections), then the pinned items as they were, and Settings last
+     */
+    public void sortSectionsByDefault() {
+        // Stable: the pinned items keep their order
+        Collections.sort(mPinnedItems, (o1, o2) -> Integer.compare(getDefaultOrder(o1), getDefaultOrder(o2)));
+        persistState();
+    }
+
+    private int getDefaultOrder(Video item) {
+        return item == null || item.sectionId == -1 ? Integer.MAX_VALUE : getDefaultSectionIndex(item.sectionId);
     }
 
     private boolean canShiftSection(int sectionId, int shift) {
@@ -308,6 +322,8 @@ public class SidebarService implements ProfileChangeListener {
         enableSection(MediaGroup.TYPE_SETTINGS, true);
 
         cleanupPinnedItems();
+
+        keepSettingsLast();
     }
 
     private void transferOldPinnedItems() {
@@ -322,7 +338,20 @@ public class SidebarService implements ProfileChangeListener {
         }
     }
 
+    /**
+     * Settings is always the last section: the sections and pinned items are added at the end, e.g. all of them again when
+     * Child mode is turned off, and a sidebar saved before kept it first.
+     */
+    private void keepSettingsLast() {
+        int index = findPinnedItemIndex(MediaGroup.TYPE_SETTINGS);
+
+        if (index != -1 && index != mPinnedItems.size() - 1) {
+            mPinnedItems.add(mPinnedItems.remove(index));
+        }
+    }
+
     public void persistState() {
+        keepSettingsLast();
         mPrefs.setSidebarData(Helpers.mergeData(mPinnedItems, mBootSectionId, mIsSettingsSectionEnabled));
     }
 

@@ -39,6 +39,8 @@ public class SystemGeneralSettingsPresenter extends BasePresenter<Void> implemen
                 () -> GeneralSettingsPresenter.instance(context).showApiKeys(), R.drawable.settings_api_keys));
         items.add(new SettingsItem(context.getString(R.string.category_background_playback),
                 () -> GeneralSettingsPresenter.instance(context).showBackgroundPlayback(), R.drawable.settings_background_playback));
+        items.add(new SettingsItem(context.getString(R.string.child_mode),
+                () -> GeneralSettingsPresenter.instance(context).showChildMode(), R.drawable.settings_child_mode));
         items.add(new SettingsItem(context.getString(R.string.settings_disable_options),
                 () -> GeneralSettingsPresenter.instance(context).showDisable(), R.drawable.settings_disable));
         items.add(new SettingsItem(context.getString(R.string.settings_exit_options),

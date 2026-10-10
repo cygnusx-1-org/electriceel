@@ -245,8 +245,9 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
         MainUIData mainUIData = MainUIData.instance(getContext());
 
         mIsSearchOrbEnabled = !mainUIData.isTopButtonEnabled(MainUIData.TOP_BUTTON_SEARCH);
-        mIsAccountViewEnabled = mainUIData.isTopButtonEnabled(MainUIData.TOP_BUTTON_BROWSE_ACCOUNTS);
-        mIsQuickToggleViewEnabled = QuickTogglePresenter.instance(getContext()).isEnabled();
+        // Another account would leave Child mode (it's kept per account)
+        mIsAccountViewEnabled = !isChildMode() && mainUIData.isTopButtonEnabled(MainUIData.TOP_BUTTON_BROWSE_ACCOUNTS);
+        mIsQuickToggleViewEnabled = isQuickToggleShown();
         mIsLanguageViewEnabled = mainUIData.isTopButtonEnabled(MainUIData.TOP_BUTTON_CHANGE_LANGUAGE);
         mIsGlobalClockEnabled = GeneralData.instance(getContext()).isGlobalClockEnabled();
 
@@ -329,9 +330,23 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
             return;
         }
 
-        mIsQuickToggleViewEnabled = QuickTogglePresenter.instance(getContext()).isEnabled();
+        mIsQuickToggleViewEnabled = isQuickToggleShown();
         mQuickToggleView.setVisibility(mIsQuickToggleViewEnabled ? mSearchVisibility : View.GONE);
         updateQuickToggleIcon();
+    }
+
+    /**
+     * Not in Child mode: the filters are set by the parent
+     */
+    private boolean isQuickToggleShown() {
+        return !isChildMode() && QuickTogglePresenter.instance(getContext()).isEnabled();
+    }
+
+    /**
+     * Turning it on or off changes the top buttons too (see GeneralSettingsPresenter.enableChildMode), so the buttons are updated
+     */
+    private boolean isChildMode() {
+        return GeneralData.instance(getContext()).isChildModeEnabled();
     }
 
     /**

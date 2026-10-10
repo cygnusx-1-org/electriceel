@@ -172,7 +172,8 @@ public class SectionMenuPresenter extends BaseMenuPresenter {
             return;
         }
 
-        if (mSection == null) {
+        // Settings is always last (see SidebarService.keepSettingsLast)
+        if (mSection == null || mSection.getId() == MediaGroup.TYPE_SETTINGS) {
             return;
         }
 

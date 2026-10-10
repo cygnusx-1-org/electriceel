@@ -260,6 +260,24 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
                 }
             }
         }
+
+        // Child mode: Channels, then Subscriptions first. Settings is last (see SidebarService.keepSettingsLast).
+        if (getGeneralData().isChildModeEnabled()) {
+            moveSection(MediaGroup.TYPE_SUBSCRIPTIONS);
+            moveSection(MediaGroup.TYPE_CHANNEL_UPLOADS);
+        }
+    }
+
+    /**
+     * To the top of the sidebar, when it's shown
+     */
+    private void moveSection(int sectionId) {
+        BrowseSection section = Helpers.findFirst(mSections, item -> item.getId() == sectionId);
+
+        if (section != null) {
+            mSections.remove(section);
+            mSections.add(0, section);
+        }
     }
 
     private void initPinnedCallbacks() {
@@ -573,6 +591,11 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         updateSections();
     }
 
+    public void sortSectionsByDefault() {
+        getSidebarService().sortSectionsByDefault();
+        updateSections();
+    }
+
     public void renameSection(BrowseSection section) {
         mCurrentSection = section; // move current focus
         getSidebarService().renameSection(section.getId(), section.getTitle());
@@ -593,8 +616,19 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         enableSection(MediaGroup.TYPE_MUSIC, enable);
         enableSection(MediaGroup.TYPE_NEWS, enable);
         enableSection(MediaGroup.TYPE_HOME, enable);
-        enableSection(MediaGroup.TYPE_TRENDING, enable);
         enableSection(MediaGroup.TYPE_SHORTS, enable);
+        enableSection(MediaGroup.TYPE_KIDS_HOME, enable);
+        enableSection(MediaGroup.TYPE_SPORTS, enable);
+        enableSection(MediaGroup.TYPE_LIVE, enable);
+        enableSection(MediaGroup.TYPE_MY_VIDEOS, enable);
+
+        // Hidden by default (see SidebarService.initPinnedItems): only ever hidden here
+        if (!enable) {
+            enableSection(MediaGroup.TYPE_TRENDING, false);
+            enableSection(MediaGroup.TYPE_NOTIFICATIONS, false);
+            enableSection(MediaGroup.TYPE_BLOCKED_CHANNELS, false);
+            enableSection(MediaGroup.TYPE_BLOCKED_AI_CHANNELS, false);
+        }
     }
 
     public void enableSection(int sectionId, boolean enable) {
@@ -618,13 +652,15 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
 
         BrowseSection newSection = createPinnedSection(item);
         if (!mSections.contains(newSection)) {
-            if (idx != -1) {
+            // Past the end when stored items aren't shown (e.g. a section that isn't there anymore)
+            if (idx != -1 && idx <= mSections.size()) {
                 mSections.add(idx, newSection);
             } else {
                 mSections.add(newSection);
             }
         }
-        getView().addSection(idx, newSection);
+        // The error sections are shown first (see refreshSections)
+        getView().addSection(idx != -1 ? idx + mErrorSections.size() : -1, newSection);
     }
 
     public void pinItem(String title, int resId, ErrorFragmentData data) {

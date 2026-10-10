@@ -9,6 +9,7 @@ import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.service.VideoStateService;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.service.VideoStateService.State;
 import com.liskovsoft.smartyoutubetv2.common.misc.AiSListManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.ChildModeManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.KeywordFilter;
 import com.liskovsoft.smartyoutubetv2.common.misc.CollaborationManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.NotInterestedManager;
@@ -506,7 +507,7 @@ public class VideoGroup {
 
         if (isChannelBlocked(video) || isNotInterested(video) || isAiListed(video) || isHiddenCategory(video) || isOld(video) || isHiddenCollaboration(video)
                 || isHiddenWatchLater(video) || isHiddenShow(video) || isHiddenTopChannel(video) || isHiddenExploreTopic(video)
-                || hasHiddenKeyword(video) || isWatchedSuggestion(video)) {
+                || hasHiddenKeyword(video) || isWatchedSuggestion(video) || isUnsubscribedChannel(video)) {
             if (video.videoId != null) {
                 mHiddenVideoCount++;
             }
@@ -659,6 +660,21 @@ public class VideoGroup {
         }
 
         return OldVideoFilter.isHidden(GlobalPreferences.context(), getSection().getId(), video.getSecondTitle());
+    }
+
+    /**
+     * In Child mode, the card of a channel the account isn't subscribed to on a channel page (e.g. its featured channels).
+     * It wouldn't open (see ChildModeManager).
+     */
+    private boolean isUnsubscribedChannel(Video video) {
+        boolean isChannelCard = video.isChannel() || (video.videoId == null && video.itemType == MediaItem.TYPE_CHANNEL);
+
+        // No context before the app is initialized (GlobalPreferences)
+        if (getType() != MediaGroup.TYPE_CHANNEL || !isChannelCard || GlobalPreferences.context() == null) {
+            return false;
+        }
+
+        return ChildModeManager.instance(GlobalPreferences.context()).isHidden(video.channelId);
     }
 
     /**

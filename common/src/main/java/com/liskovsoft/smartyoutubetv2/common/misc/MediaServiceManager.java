@@ -476,6 +476,11 @@ public class MediaServiceManager implements OnAccountChange {
             return;
         }
 
+        // Child mode keeps to the subscribed channels
+        ChildModeManager.instance(context).checkChannel(context, item.channelId, () -> loadChannelPresenter(context, item));
+    }
+
+    private static void loadChannelPresenter(Context context, Video item) {
         LoadingManager.showLoading(context, true);
 
         AtomicInteger atomicIndex = new AtomicInteger(-1);

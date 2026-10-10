@@ -34,6 +34,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.VideoMe
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.AutoFrameRateSettingsPresenter;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.track.SubtitleTrack;
+import com.liskovsoft.smartyoutubetv2.common.misc.ChildModeManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MusicAutoplayManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.PlayerKeyTranslator;
@@ -1180,8 +1181,13 @@ public class PlayerUIController extends BasePlayerController {
     }
 
     private void openChannel() {
-        startTempBackgroundMode(ChannelPresenter.class);
-        ChannelPresenter.instance(getContext()).openChannel(getVideo());
+        Video video = getVideo();
+
+        // Child mode keeps to the subscribed channels. Checked before the player goes to the background.
+        ChildModeManager.instance(getContext()).checkChannel(getContext(), video != null ? video.channelId : null, () -> {
+            startTempBackgroundMode(ChannelPresenter.class);
+            ChannelPresenter.instance(getContext()).openChannel(video);
+        });
     }
 
     private void showDebugInfo() {

@@ -18,6 +18,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.VideoMe
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.interfaces.VideoGroupPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.ChannelView;
 import com.liskovsoft.smartyoutubetv2.common.misc.BrowseProcessorManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.ChildModeManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.HiddenVideoResolver;
 import com.liskovsoft.sharedutils.rx.RxHelper;
 import com.liskovsoft.smartyoutubetv2.common.utils.LoadingManager;
@@ -155,8 +156,17 @@ public class ChannelPresenter extends BasePresenter<ChannelView> implements Vide
     }
 
     public void openChannel(Video item) {
-        mChannel = item;
-        extractChannelId(item, this::openChannel);
+        extractChannelId(item, channelId -> {
+            if (channelId == null) {
+                return;
+            }
+
+            // Kept only when it opens: the channel shown might be another (e.g. its search, see getChannelId)
+            ChildModeManager.instance(getContext()).checkChannel(getContext(), channelId, () -> {
+                mChannel = item;
+                openChannelInt(channelId);
+            });
+        });
     }
 
     public void openChannel(String channelId) {
@@ -164,6 +174,11 @@ public class ChannelPresenter extends BasePresenter<ChannelView> implements Vide
             return;
         }
 
+        // Child mode keeps to the subscribed channels
+        ChildModeManager.instance(getContext()).checkChannel(getContext(), channelId, () -> openChannelInt(channelId));
+    }
+
+    private void openChannelInt(String channelId) {
         disposeActions();
 
         mChannelId = channelId;

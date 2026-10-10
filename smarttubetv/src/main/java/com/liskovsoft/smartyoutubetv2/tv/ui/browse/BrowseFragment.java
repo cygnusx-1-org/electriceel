@@ -490,6 +490,20 @@ public class BrowseFragment extends BrowseSupportFragment implements BrowseView 
     }
 
     /**
+     * Over the Settings section the title only hides. Its buttons aren't shown first (e.g. the account, when the section is
+     * the first one of the sidebar), they'd appear while it slides out.
+     */
+    @Override
+    public void showTitle(int flags) {
+        if (getMainFragment() instanceof SettingsGridFragment) {
+            showTitle(false);
+            return;
+        }
+
+        super.showTitle(flags);
+    }
+
+    /**
      * Fix suddenly invisible search orb<br/>
      * Could happen on topmost category when the page partially scrolled<br/>
      * More info: {@link TitleHelper}

@@ -679,7 +679,8 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
         mIsRenamePlaylistEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_RENAME_PLAYLIST);
         mIsCopyPlaylistToYouTubeEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_COPY_PLAYLIST_TO_YOUTUBE);
         mIsAddToHomeScreenEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_ADD_TO_HOME_SCREEN);
-        mIsAccountSelectionEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_SELECT_ACCOUNT);
+        // Another account would leave Child mode (it's kept per account)
+        mIsAccountSelectionEnabled = !GeneralData.instance(getContext()).isChildModeEnabled() && mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_SELECT_ACCOUNT);
         mIsAddToNewPlaylistEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_ADD_TO_NEW_PLAYLIST);
         mIsToggleHistoryEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_TOGGLE_HISTORY);
         mIsClearHistoryEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_CLEAR_HISTORY);
