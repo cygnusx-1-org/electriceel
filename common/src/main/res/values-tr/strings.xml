@@ -348,7 +348,6 @@
     <string name="hide_upcoming_channel">Yaklaşan yayınları Kanalda gizle</string>
     <string name="hide_upcoming_home">Yaklaşan yayınları Ana Sayfa\'da gizle</string>
     <string name="search_background_playback">Arama yaparken/Kanalda gezinirken arka planda oynat</string>
-    <string name="trending_row_name">Trendler</string>
     <string name="player_seek_type">Arama davranışı</string>
     <string name="player_seek_regular">Normal</string>
     <string name="player_seek_confirmation_pause">Onay ile (ararken duraklat)</string>
@@ -358,7 +357,6 @@
     <string name="update_error">Güncelleme hatası</string>
     <string name="hide_shorts_from_search">Shortsları Arama\'te gizle</string>
     <string name="hide_shorts_from_history">Shortsları Geçmiş\'te gizle</string>
-    <string name="hide_shorts_from_trending">Shortsları Trendler\'de gizle</string>
     <string name="disable_screensaver">Ekran koruyucuyu devre dışı bırak</string>
     <string name="description_not_found">Açıklama bulunamadı</string>
     <string name="proxy_port_hint">Vekil Sunucu port</string>
@@ -594,7 +592,6 @@
     <string name="play_from_start">Baştan oyna</string>
     <string name="header_kids_home">Kids</string>
     <string name="player_section_playlist">Geçerli bölüm içeriklerini oynatma listesi olarak kullan</string>
-    <string name="header_trending">Trendler</string>
     <string name="screensaver">Ekran koruyucu</string>
     <string name="player_screen_off_timeout">Ekran kapatma zaman aşımı</string>
     <string name="old_update_notifications">Güncelleme bildirimlerinin eski görünümü</string>

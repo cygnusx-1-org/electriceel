@@ -347,7 +347,6 @@
   <string name="hide_upcoming_channel">Ocultar \"Em breve\" da seção \"Canais\"</string>
   <string name="hide_upcoming_home">Ocultar \"Em breve\" da seção \"Início\"</string>
   <string name="search_background_playback">Reprodução em segundo plano durante a pesquisa ou navegação em algum canal</string>
-  <string name="trending_row_name">Em alta</string>
   <string name="player_seek_type">Comportamento do avanço/retrocesso</string>
   <string name="player_seek_regular">Normal</string>
   <string name="player_seek_confirmation_pause">Com confirmação (pausa enquanto avança/retrocede)</string>
@@ -357,7 +356,6 @@
   <string name="update_error">Erro de atualização</string>
   <string name="hide_shorts_from_search">Ocultar os shorts (vídeos curtos) nos resultados da pesquisa</string>
   <string name="hide_shorts_from_history">Ocultar os shorts (vídeos curtos) na seção \"Histórico\"</string>
-  <string name="hide_shorts_from_trending">Ocultar os shorts (vídeos curtos) na seção \"Em alta\"</string>
   <string name="disable_screensaver">Desativar o protetor de tela</string>
   <string name="description_not_found">Descrição não encontrada</string>
   <string name="proxy_port_hint">Porta do proxy</string>
@@ -592,7 +590,6 @@
   <string name="play_from_start">Play from start</string>
   <string name="header_kids_home">Crianças</string>
   <string name="player_section_playlist">Utilizar os conteúdos da seção atual como lista de reprodução (playlist)</string>
-  <string name="header_trending">Em alta</string>
   <string name="screensaver">Protetor de tela</string>
   <string name="player_screen_off_timeout">Tempo de desligamento/desativação da tela</string>
   <string name="old_update_notifications">Voltar para a aparência antiga das notificações de atualização</string>

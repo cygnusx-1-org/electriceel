@@ -501,7 +501,6 @@ public class AiSListManager implements OnDataChange {
             case MediaGroup.TYPE_NEWS:
             case MediaGroup.TYPE_GAMING:
             case MediaGroup.TYPE_KIDS_HOME:
-            case MediaGroup.TYPE_TRENDING:
             case MediaGroup.TYPE_SHORTS:
             case MediaGroup.TYPE_SPORTS:
             case MediaGroup.TYPE_MOVIES:

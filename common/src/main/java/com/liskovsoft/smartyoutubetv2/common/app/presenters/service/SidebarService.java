@@ -253,7 +253,6 @@ public class SidebarService implements ProfileChangeListener {
         mDefaultSections.put(R.string.header_notifications, MediaGroup.TYPE_NOTIFICATIONS);
         mDefaultSections.put(R.string.header_home, MediaGroup.TYPE_HOME);
         mDefaultSections.put(R.string.header_shorts, MediaGroup.TYPE_SHORTS);
-        mDefaultSections.put(R.string.header_trending, MediaGroup.TYPE_TRENDING);
         mDefaultSections.put(R.string.header_kids_home, MediaGroup.TYPE_KIDS_HOME);
         mDefaultSections.put(R.string.header_sports, MediaGroup.TYPE_SPORTS);
         mDefaultSections.put(R.string.badge_live, MediaGroup.TYPE_LIVE);
@@ -277,7 +276,6 @@ public class SidebarService implements ProfileChangeListener {
             enableSection(sectionId, !Helpers.equalsAny(sectionId, new int[] {
                     MediaGroup.TYPE_NOTIFICATIONS,
                     MediaGroup.TYPE_PLAYBACK_QUEUE,
-                    MediaGroup.TYPE_TRENDING,
                     MediaGroup.TYPE_BLOCKED_CHANNELS,
                     MediaGroup.TYPE_BLOCKED_AI_CHANNELS
             }));
@@ -299,6 +297,11 @@ public class SidebarService implements ProfileChangeListener {
                 return true;
             }
 
+            // A section that isn't there anymore (e.g. Trending)
+            if (item.sectionId != -1 && !mDefaultSections.containsValue(item.sectionId)) {
+                return true;
+            }
+
             return !item.hasPlaylist() && item.channelId == null && item.sectionId == -1 && item.channelGroupId == null && !item.hasReloadPageKey();
         });
     }
@@ -310,6 +313,12 @@ public class SidebarService implements ProfileChangeListener {
 
         mPinnedItems = Helpers.parseList(split, 0, Video::fromString);
         mBootSectionId = Helpers.parseInt(split, 1, MediaGroup.TYPE_HOME);
+
+        // A section that isn't there anymore (e.g. Trending). Pinned items have ids past RESERVED_ID (see cleanupPinnedItems).
+        if (mBootSectionId >= 0 && mBootSectionId < RESERVED_ID && !mDefaultSections.containsValue(mBootSectionId)) {
+            mBootSectionId = MediaGroup.TYPE_HOME;
+        }
+
         mIsSettingsSectionEnabled = Helpers.parseBoolean(split, 2, true);
 
         transferOldPinnedItems();

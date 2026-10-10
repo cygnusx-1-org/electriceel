@@ -341,14 +341,12 @@
   <string name="hide_upcoming_channel">Ascundeți fluxurile în viitor din Canale</string>
   <string name="hide_upcoming_home">Ascundeți fluxurile în viitor din Acasă</string>
   <string name="search_background_playback">Redare în fundal în timp ce căutați/navigați pe un canal</string>
-  <string name="trending_row_name">Tendințe</string>
   <string name="player_seek_confirmation_pause">Cu confirmare (întrerupeți în timp ce căutați)</string>
   <string name="player_seek_confirmation_play">Cu confirmare (redare în timp ce căutați)</string>
   <string name="hide_shorts_from_home">Ascundeți shorts din Acasă</string>
   <string name="finish_on_disconnect">Închideți aplicația după deconectarea telefonului/tabletei</string>
   <string name="update_error">Eroare de actualizare</string>
   <string name="hide_shorts_from_history">Ascundeți shorts din Istoric</string>
-  <string name="hide_shorts_from_trending">Ascundeți shorts din Tendințe</string>
   <string name="disable_screensaver">Dezactivați economizatorul de ecran</string>
   <string name="description_not_found">Descrierea nu a fost găsită</string>
   <string name="proxy_port_hint">Port proxy</string>
@@ -576,7 +574,6 @@
   <string name="volume_boost_warning">Orice setări care depășesc limita pot deteriora difuzoarele</string>
   <string name="play_video_incognito">Redare în incognito</string>
   <string name="header_kids_home">Copii</string>
-  <string name="header_trending">Tendințe</string>
   <string name="screensaver">Economizor de ecran</string>
   <string name="player_section_playlist">Utilizați conținutul secțiunii curente ca listă de redare</string>
   <string name="player_screen_off_timeout">Expirare oprire ecran</string>

@@ -310,7 +310,6 @@
   <string name="keyboard_auto_show">Hiển thị bàn phím tự động</string>
   <string name="msg_player_error_source2">Liên kết không hoạt động hoặc thời gian của thiết bị không chính xác.\nThông thường thì đây là lỗi từ ứng dụng.</string>
   <string name="hide_upcoming">Ẩn mục \"sắp tới\" khỏi Kênh đăng ký</string>
-  <string name="trending_row_name">Thịnh hành</string>
   <string name="player_seek_regular">Bình thường</string>
   <string name="hide_shorts_from_home">Ẩn Shorts từ Trang chủ</string>
   <string name="update_error">Lỗi cập nhật</string>
@@ -522,7 +521,6 @@
   <string name="unlock_all_formats">Mở khoá tất cả định dạng video</string>
   <string name="update_found">Cập nhật</string>
   <string name="header_kids_home">Trẻ em</string>
-  <string name="header_trending">Thịnh hành</string>
   <string name="player_likes_count">Hiển thị lượt thích/không thích</string>
   <string name="mark_as_watched">Đánh dấu là đã xem</string>
   <string name="content_block_exclude_channel">Loại trừ kênh này khỏi SponsorBlock</string>
@@ -572,7 +570,6 @@
   <string name="action_sound_off">Tắt âm thanh</string>
   <string name="hide_upcoming_channel">Ẩn mục \"sắp tới\" khỏi Kênh</string>
   <string name="hide_upcoming_home">Ẩn mục \"sắp tới\" khỏi Trang chủ</string>
-  <string name="hide_shorts_from_trending">Ẩn Shorts từ Thịnh hành</string>
   <string name="save_playlist">Thêm danh sách phát này vào vào mục Danh sách phát</string>
   <string name="skip_shorts">Bỏ qua Shorts</string>
   <string name="speech_engine">Công cụ tìm kiếm bằng giọng nói</string>

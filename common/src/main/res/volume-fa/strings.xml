@@ -308,7 +308,6 @@
   <string name="msg_player_error_source2">آدرس URL کار نمی‌کند یا زمان دستگاه نادرست است.\nمعمولا این یک خطای برنامه است.</string>
   <string name="hide_upcoming">پنهان کردن آینده از اشتراک‌ها</string>
   <string name="search_background_playback">فعال‌سازی پنجره در پنجره هنگام جستجو از پخش کننده</string>
-  <string name="trending_row_name">محبوب‌ها</string>
   <string name="player_seek_type">رفتار جستجو</string>
   <string name="player_seek_regular">عادی</string>
   <string name="player_seek_confirmation_pause">با تأیید (توقف هنگام جستجو)</string>
@@ -547,7 +546,6 @@
   <string name="play_video_incognito">پخش در حالت ناشناس</string>
   <string name="header_kids_home">کودکان</string>
   <string name="player_section_playlist">استفاده از محتوای بخش فعلی به عنوان لیست پخش</string>
-  <string name="header_trending">محتواهای محبوب</string>
   <string name="screensaver">محافظ صفحه</string>
   <string name="player_screen_off_timeout">زمان خاموش شدن صفحه</string>
   <string name="old_update_notifications">ظاهر قدیمی اعلان‌های بروزرسانی</string>
@@ -615,7 +613,6 @@
   <string name="action_sound_off">خاموش کردن صدا</string>
   <string name="hide_upcoming_channel">پنهان کردن آینده از کانال</string>
   <string name="hide_upcoming_home">پنهان کردن آینده از صفحه اصلی</string>
-  <string name="hide_shorts_from_trending">پنهان کردن کوته ویدیوها از محبوب‌ها</string>
   <string name="remember_position_of_live_videos">به خاطر سپردن موقعیت پخش زنده</string>
   <string name="save_playlist">افزودن لیست پخش به بخش لیست‌های پخش</string>
   <string name="skip_shorts">رد کردن کوته ویدیوها</string>

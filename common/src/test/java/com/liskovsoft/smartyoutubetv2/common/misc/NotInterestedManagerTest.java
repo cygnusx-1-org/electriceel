@@ -90,7 +90,7 @@ public class NotInterestedManagerTest {
         }
 
         int[] showing = {MediaGroup.TYPE_SUBSCRIPTIONS, MediaGroup.TYPE_HISTORY, MediaGroup.TYPE_SEARCH, MediaGroup.TYPE_CHANNEL,
-                MediaGroup.TYPE_CHANNEL_UPLOADS, MediaGroup.TYPE_USER_PLAYLISTS, MediaGroup.TYPE_TRENDING};
+                MediaGroup.TYPE_CHANNEL_UPLOADS, MediaGroup.TYPE_USER_PLAYLISTS};
 
         for (int type : showing) {
             VideoGroup group = createGroup(type);

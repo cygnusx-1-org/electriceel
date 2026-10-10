@@ -339,7 +339,6 @@
   <string name="hide_upcoming_channel">Ocultar próximos desde canle</string>
   <string name="hide_upcoming_home">Ocultar próximos desde inicio</string>
   <string name="search_background_playback">Reprodución en segundo plano mentres busca/navega por unha canle</string>
-  <string name="trending_row_name">Tendencias</string>
   <string name="player_seek_type">Comportamento de busca</string>
   <string name="player_seek_regular">Regular</string>
   <string name="player_seek_confirmation_pause">Con confirmación (pausa mentres busca)</string>
@@ -348,7 +347,6 @@
   <string name="finish_on_disconnect">Pecha a aplicación despois de desconectar o teléfono/tableta</string>
   <string name="update_error">Erro de actualización</string>
   <string name="hide_shorts_from_history">Ocultar curtas no Historial</string>
-  <string name="hide_shorts_from_trending">Ocultar curtas nas Tendencias</string>
   <string name="disable_screensaver">Desactivar o protector de pantalla</string>
   <string name="description_not_found">Non se atopou a descrición</string>
   <string name="proxy_port_hint">Porto proxy</string>
@@ -577,7 +575,6 @@
   <string name="play_video_incognito">Reprodución de incógnito</string>
   <string name="header_kids_home">Nenos</string>
   <string name="player_section_playlist">Usa o contido da sección actual como lista de reprodución</string>
-  <string name="header_trending">Tendencias</string>
   <string name="screensaver">Salvapantallas</string>
   <string name="player_screen_off_timeout">Tempo de espera de apagado da pantalla</string>
   <string name="old_update_notifications">Aspecto antigo das notificacións de actualización</string>

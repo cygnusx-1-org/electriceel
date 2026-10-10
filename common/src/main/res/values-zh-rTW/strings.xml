@@ -317,7 +317,6 @@
   <string name="msg_player_error_source2">網址錯誤或裝置時間不正確。\n通常是應用程式的問題。</string>
   <string name="hide_upcoming">隱藏訂閱頻道中的即將播出內容</string>
   <string name="search_background_playback">搜尋/瀏覽頻道時繼續於背景播放</string>
-  <string name="trending_row_name">熱門影片</string>
   <string name="player_seek_type">跳轉行為</string>
   <string name="player_seek_regular">一般</string>
   <string name="player_seek_confirmation_pause">確認後再跳轉（快轉時暫停播放）</string>
@@ -534,7 +533,6 @@
   <string name="play_video_incognito">無痕播放</string>
   <string name="header_kids_home">兒童</string>
   <string name="player_section_playlist">將目前區塊內容用作播放清單</string>
-  <string name="header_trending">熱門</string>
   <string name="screensaver">螢幕保護程式</string>
   <string name="player_screen_off_timeout">螢幕關閉逾時</string>
   <string name="old_update_notifications">舊版更新通知外觀</string>
@@ -591,7 +589,6 @@
   <string name="news_row_name">新聞</string>
   <string name="hide_upcoming_channel">隱藏頻道中的即將播出內容</string>
   <string name="hide_upcoming_home">隱藏首頁中的即將播出內容</string>
-  <string name="hide_shorts_from_trending">在熱門影片中隱藏 Shorts</string>
   <string name="show_connect_messages">顯示連線訊息</string>
   <string name="prefer_avc_over_vp9_desc">警告：最高支援 1080p</string>
   <string name="play_next">播放下一個</string>

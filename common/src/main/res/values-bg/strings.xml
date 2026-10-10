@@ -330,7 +330,6 @@
   <string name="msg_player_error_subtitle_source">SUBTITLE URLNне работи или времето на устройството е неправилно.\nОбикновено това е проблем на приложението.</string>
   <string name="hide_upcoming">Скриване на предстоящи от абонаменти</string>
   <string name="search_background_playback">Въвеждане на прозорец в прозореца при търсене/откриване на канал</string>
-  <string name="trending_row_name">Тенденции</string>
   <string name="player_seek_type">Търсене на поведение</string>
   <string name="player_seek_regular">Обикновено</string>
   <string name="player_seek_confirmation_pause">С потвърждение (пауза по време на търсенето)</string>
@@ -560,7 +559,6 @@
   <string name="play_video_incognito">Възпроизвеждане инкогнито</string>
   <string name="header_kids_home">Деца</string>
   <string name="player_section_playlist">Използване на съдържанието на текущия раздел като списък за възпроизвеждане</string>
-  <string name="header_trending">Тенденции</string>
   <string name="screensaver">Скрийнсейвър</string>
   <string name="player_screen_off_timeout">Време за изключване на екрана</string>
   <string name="old_update_notifications">Стар вид на известията за актуализация</string>

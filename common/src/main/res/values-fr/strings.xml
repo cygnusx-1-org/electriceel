@@ -327,7 +327,6 @@
   <string name="msg_player_error_subtitle_source">La source (URL) des SOUS-TITRES ne fonctionne pas ou la date et l\'heure de votre appareil sont incorrectes. Il s\'agit généralement d\'un problème lié à l\'application.</string>
   <string name="hide_upcoming">Masquer les diffusions à venir des abonnements</string>
   <string name="search_background_playback">Mettre la vidéo en arrière-plan lors d\'une recherche ou de l\'ouverture de la chaîne à partir du lecteur</string>
-  <string name="trending_row_name">Tendances</string>
   <string name="player_seek_type">Comportement de la navigation vidéo</string>
   <string name="player_seek_regular">Standard</string>
   <string name="player_seek_confirmation_pause">Avec confirmation (mettre en pause pendant la navigation)</string>
@@ -557,7 +556,6 @@
   <string name="play_video_incognito">Lire en mode navigation privée</string>
   <string name="header_kids_home">Enfants</string>
   <string name="player_section_playlist">Utiliser le contenu de la section actuelle comme playlist</string>
-  <string name="header_trending">Tendances</string>
   <string name="screensaver">Économiseur d\'écran</string>
   <string name="player_screen_off_timeout">Délai avant extinction de l\'écran</string>
   <string name="old_update_notifications">Utiliser l\'ancienne apparence pour les notifications de mise à jour</string>
@@ -606,7 +604,6 @@
   <string name="news_row_name">Nouvelles</string>
   <string name="hide_upcoming_channel">Masquer les nouvelles de la chaîne</string>
   <string name="hide_upcoming_home">Masquer les nouvelles depuis la page d’accueil</string>
-  <string name="hide_shorts_from_trending">Masquer les shorts des tendances</string>
   <string name="play_next">Lire ensuite</string>
   <string name="hide_watched_from_subscriptions">Masquer les vidéos regardées des abonnements</string>
   <string name="hide_unwanted_content">Masquer le contenu indésirable</string>

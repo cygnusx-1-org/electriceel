@@ -344,7 +344,6 @@
     <string name="hide_upcoming_channel">Скрывать анонсы на Канале</string>
     <string name="hide_upcoming_home">Скрывать анонсы из Главного раздела</string>
     <string name="search_background_playback">Фоновое воспроизведение при поиске/просмотре канала</string>
-    <string name="trending_row_name">В тренде</string>
     <string name="player_seek_type">Поведение перемотки</string>
     <string name="player_seek_regular">Обычное</string>
     <string name="player_seek_confirmation_pause">С подтверждением (пауза во время перемотки)</string>
@@ -354,7 +353,6 @@
     <string name="update_error">Ошибка обновления</string>
     <string name="hide_shorts_from_search">Скрывать shorts из Поиска</string>
     <string name="hide_shorts_from_history">Скрывать shorts из Истории</string>
-    <string name="hide_shorts_from_trending">Скрывать shorts из Трендов</string>
     <string name="disable_screensaver">Отключить скринсейвер</string>
     <string name="description_not_found">Описание не найдено</string>
     <string name="proxy_port_hint">Порт прокси</string>
@@ -589,7 +587,6 @@
     <string name="play_from_start">Воспроизвести сначала</string>
     <string name="header_kids_home">Детям</string>
     <string name="player_section_playlist">Использовать содержимое текущего раздела в качестве плейлиста</string>
-    <string name="header_trending">В тренде</string>
     <string name="screensaver">Заставка</string>
     <string name="player_screen_off_timeout">Тайм-аут выключения экрана</string>
     <string name="old_update_notifications">Старый вид уведомлений о доступном обновлении</string>

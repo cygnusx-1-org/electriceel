@@ -313,7 +313,6 @@
   <string name="msg_player_error_source2">URL virker ikke, ellers er enhedens ur forkert.\nDette er normalt en fejl i Electric Eel.</string>
   <string name="hide_upcoming">Skjul kommende fra Abonnementer</string>
   <string name="search_background_playback">Afspil i baggrunden, mens du søger/browser på en kanal</string>
-  <string name="trending_row_name">Populært lige nu</string>
   <string name="player_seek_type">Spoleadfærd</string>
   <string name="player_seek_regular">Standard</string>
   <string name="player_seek_confirmation_pause">Med bekræftelse (pause, mens du spoler)</string>
@@ -356,7 +355,6 @@
   <string name="old_update_notifications">Det gamle udseende af opdateringsnotifikationer</string>
   <string name="player_screen_off_timeout">Timeout for skærmdæmpning</string>
   <string name="screensaver">Pauseskærm</string>
-  <string name="header_trending">Populært lige nu</string>
   <string name="player_section_playlist">Brug det aktuelle sektionsindhold som playliste</string>
   <string name="header_kids_home">Børn</string>
   <string name="play_video_incognito">Afspil inkognito</string>
@@ -609,7 +607,6 @@
   <string name="hide_upcoming_channel">Skjul kommende fra Kanaler</string>
   <string name="hide_upcoming_home">Skjul kommende fra Hjem</string>
   <string name="hide_shorts_from_search">Skjul shorts fra søgeresultaterne</string>
-  <string name="hide_shorts_from_trending">Skjul shorts fra Populært lige nu</string>
   <string name="remember_position_of_live_videos">Husk position af livestreams</string>
   <string name="save_playlist">Føj playliste til Playlister-sektionen</string>
   <string name="skip_shorts">Spring shorts over</string>

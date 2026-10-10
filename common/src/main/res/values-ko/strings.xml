@@ -339,7 +339,6 @@
   <string name="hide_upcoming_channel">채널에서 예정된 항목 숨기기</string>
   <string name="hide_upcoming_home">홈에서 예정된 항목 숨기기</string>
   <string name="search_background_playback">검색/오픈 채널에 PIP 입력</string>
-  <string name="trending_row_name">트렌드</string>
   <string name="player_seek_type">탐색 동작</string>
   <string name="player_seek_regular">정기적</string>
   <string name="player_seek_confirmation_pause">확인 포함 (찾는 동안 일시정지)</string>
@@ -348,7 +347,6 @@
   <string name="finish_on_disconnect">휴대폰/태블릿 연결을 해제한 후 앱 종료</string>
   <string name="update_error">업데이트 오류</string>
   <string name="hide_shorts_from_history">기록에서 쇼츠 숨기기</string>
-  <string name="hide_shorts_from_trending">트렌드에서 쇼츠 숨기기</string>
   <string name="disable_screensaver">화면 보호기 비활성화</string>
   <string name="description_not_found">설명을 찾을 수 없음</string>
   <string name="proxy_port_hint">프록시 포트</string>
@@ -576,7 +574,6 @@
   <string name="play_video_incognito">시크릿 모드로 플레이</string>
   <string name="header_kids_home">아동</string>
   <string name="player_section_playlist">현재 섹션 콘텐츠를 재생 목록으로 사용</string>
-  <string name="header_trending">트렌드</string>
   <string name="screensaver">화면 보호기</string>
   <string name="player_screen_off_timeout">화면 자동 꺼짐 시간</string>
   <string name="old_update_notifications">업데이트 알림의 이전 모습</string>

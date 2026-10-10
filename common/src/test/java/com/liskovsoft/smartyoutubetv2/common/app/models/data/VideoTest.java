@@ -37,7 +37,7 @@ public class VideoTest {
     @Test
     public void otherSectionsAreNotHomeLike() {
         int[] types = {MediaGroup.TYPE_SHORTS, MediaGroup.TYPE_SUBSCRIPTIONS, MediaGroup.TYPE_HISTORY, MediaGroup.TYPE_SEARCH,
-                MediaGroup.TYPE_SUGGESTIONS, MediaGroup.TYPE_TRENDING, MediaGroup.TYPE_KIDS_HOME, MediaGroup.TYPE_CHANNEL,
+                MediaGroup.TYPE_SUGGESTIONS, MediaGroup.TYPE_KIDS_HOME, MediaGroup.TYPE_CHANNEL,
                 MediaGroup.TYPE_CHANNEL_UPLOADS, MediaGroup.TYPE_USER_PLAYLISTS, MediaGroup.TYPE_NOTIFICATIONS, MediaGroup.TYPE_MY_VIDEOS};
 
         for (int type : types) {

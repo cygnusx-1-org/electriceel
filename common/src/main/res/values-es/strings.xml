@@ -321,7 +321,6 @@
   <string name="msg_player_error_source2">La fuente de vídeo no funciona o la hora es incorrecta</string>
   <string name="hide_upcoming">Ocultar próximos de las Suscripciones</string>
   <string name="search_background_playback">Introducir PIP al buscar desde el reproductor</string>
-  <string name="trending_row_name">Tendencia</string>
   <string name="player_seek_type">Comportamiento de búsqueda</string>
   <string name="player_seek_regular">Regular</string>
   <string name="player_seek_confirmation_pause">Con confirmación (pause mientras busca)</string>
@@ -548,7 +547,6 @@
   <string name="header_kids_home">Niños</string>
   <string name="player_screen_off_timeout">Tiempo de espera de apagado de pantalla</string>
   <string name="screensaver">Salvapantallas</string>
-  <string name="header_trending">Tendencias</string>
   <string name="player_section_playlist">Utilizar el contenido de la sección actual como lista de reproducción</string>
   <string name="old_update_notifications">Antiguo aspecto de las notificaciones de actualización</string>
   <string name="mark_as_watched">Marcar como visto</string>
@@ -624,7 +622,6 @@
   <string name="hide_shorts_channel">Ocultar Shorts del Canal</string>
   <string name="hide_upcoming_channel">Ocultar próximos del Canal</string>
   <string name="hide_upcoming_home">Ocultar próximos del Inicio</string>
-  <string name="hide_shorts_from_trending">Ocultar Shorts de Tendencias</string>
   <string name="remember_position_of_live_videos">Recordar posición en el directo</string>
   <string name="save_playlist">Añadir lista de reproducción a la sección listas de reproducción</string>
   <string name="header_sports">Deportes</string>

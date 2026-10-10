@@ -344,7 +344,6 @@
     <string name="hide_upcoming_channel">Приховувати анонси на Каналі</string>
     <string name="hide_upcoming_home">Приховувати анонси з Головної</string>
     <string name="search_background_playback">Фонове відтворення під час пошуку/перегляду каналу</string>
-    <string name="trending_row_name">Популярне</string>
     <string name="player_seek_type">Поведінка перемотування</string>
     <string name="player_seek_regular">Звичайна</string>
     <string name="player_seek_confirmation_pause">З підтвердженням (пауза під час перемотування)</string>
@@ -354,7 +353,6 @@
     <string name="update_error">Помилка оновлення</string>
     <string name="hide_shorts_from_search">Приховувати короткі відео з Пошуку</string>
     <string name="hide_shorts_from_history">Приховувати короткі відео з Історії</string>
-    <string name="hide_shorts_from_trending">Приховувати короткі відео з Трендів</string>
     <string name="disable_screensaver">Вимкнути скрінсейвер</string>
     <string name="description_not_found">Опис не знайдено</string>
     <string name="proxy_port_hint">Порт проксі-сервера</string>
@@ -589,7 +587,6 @@
     <string name="play_from_start">Відтворити спочатку</string>
     <string name="header_kids_home">Дітям</string>
     <string name="player_section_playlist">Використовувати вміст поточного розділу як список відтворення</string>
-    <string name="header_trending">Популярне</string>
     <string name="screensaver">Заставка</string>
     <string name="player_screen_off_timeout">Тайм-аут вимкнення екрана</string>
     <string name="old_update_notifications">Старий вигляд сповіщень про оновлення</string>

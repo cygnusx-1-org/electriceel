@@ -348,7 +348,6 @@
   <string name="hide_upcoming_channel">Dölj kommande i kanaler</string>
   <string name="hide_upcoming_home">Dölj kommande i Hem</string>
   <string name="search_background_playback">Uppspelning i bakgrunden medan du söker/bläddrar i en kanal</string>
-  <string name="trending_row_name">Populärt</string>
   <string name="player_seek_type">Sökningsbeteende</string>
   <string name="player_seek_regular">Vanligt</string>
   <string name="player_seek_confirmation_pause">Med bekräftelse (pausa medan du söker)</string>
@@ -358,7 +357,6 @@
   <string name="update_error">Uppdateringsfel</string>
   <string name="hide_shorts_from_search">Dölj Shorts-videor i sökresultat</string>
   <string name="hide_shorts_from_history">Dölj Shorts-videor i Historik</string>
-  <string name="hide_shorts_from_trending">Dölj Shorts-videor i Populärt</string>
   <string name="disable_screensaver">Inaktivera skärmsläckare</string>
   <string name="description_not_found">Beskrivning hittades inte</string>
   <string name="proxy_port_hint">Proxyport</string>
@@ -594,7 +592,6 @@
   <string name="play_from_start">Spela upp från början</string>
   <string name="header_kids_home">Barn</string>
   <string name="player_section_playlist">Andvänd det aktuella avsnittets innehåll som spellista</string>
-  <string name="header_trending">Populärt</string>
   <string name="screensaver">Skärmsläckare</string>
   <string name="player_screen_off_timeout">Tidsgräns för att stänga av skärmen</string>
   <string name="old_update_notifications">Gammalt utseende för aviseringar om uppdatering</string>

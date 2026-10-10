@@ -351,7 +351,6 @@ So, make a copy of values-he and name it values-iw. Keep both in your structure.
     <string name="hide_upcoming_channel">הסתרת \'בקרוב\' מהערוצים</string>
     <string name="hide_upcoming_home">הסתרת \'בקרוב\' מהבית</string>
     <string name="search_background_playback">הפעלה ברקע בזמן חיפוש/עיון בערוץ</string>
-    <string name="trending_row_name">מגמות</string>
     <string name="player_seek_type">התנהגות דילוג</string>
     <string name="player_seek_regular">רגילה</string>
     <string name="player_seek_confirmation_pause">עם אישור (הפסקה בזמן דילוג)</string>
@@ -361,7 +360,6 @@ So, make a copy of values-he and name it values-iw. Keep both in your structure.
     <string name="update_error">שגיאת עדכון</string>
     <string name="hide_shorts_from_search">הסתרת Shorts מתוצאת החיפוש</string>
     <string name="hide_shorts_from_history">הסתרת Shorts מההיסטוריה</string>
-    <string name="hide_shorts_from_trending">הסתרת Shorts מהמגמות</string>
     <string name="disable_screensaver">השבתת שומר מסך</string>
     <string name="description_not_found">לא נמצא תיאור</string>
     <string name="proxy_port_hint">יציאת פרוקסי</string>
@@ -596,7 +594,6 @@ So, make a copy of values-he and name it values-iw. Keep both in your structure.
     <string name="play_from_start">הפעלה מהתחלה</string>
     <string name="header_kids_home">ילדים</string>
     <string name="player_section_playlist">שימוש בתכני המדור הנוכחי כפלייליסט</string>
-    <string name="header_trending">מגמות</string>
     <string name="screensaver">שומר מסך</string>
     <string name="player_screen_off_timeout">פסק זמן לכיבוי מסך</string>
     <string name="old_update_notifications">מראה ישן של הודעות העדכון</string>

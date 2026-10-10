@@ -313,7 +313,6 @@
     <string name="msg_player_error_source2">Video source isn\'t working or incorrect time</string>
     <string name="hide_upcoming">Hide upcoming from Subscriptions</string>
     <string name="search_background_playback">แสดงภาพซ้อนภาพเมื่อค้นหาจากเครื่องเล่นวิดีโอ</string>
-    <string name="trending_row_name">ที่ได้รับความนิยม</string>
     <string name="player_seek_type">ค่ากำหนดการกรอวิดีโอ</string>
     <string name="player_seek_regular">ปกติ</string>
     <string name="player_seek_confirmation_pause">With confirmation (หยุดชั่วคราวเมื่อกรอวิดีโอ)</string>

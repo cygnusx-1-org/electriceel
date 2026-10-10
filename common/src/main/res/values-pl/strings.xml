@@ -339,7 +339,6 @@
   <string name="hide_upcoming_channel">Ukryj nadchodzące w sekcji Kanały</string>
   <string name="hide_upcoming_home">Ukryj nadchodzące w sekcji Główna</string>
   <string name="search_background_playback">Przełącz na tryb \'obraz w obrazie\', jeśli wyszukiwanie jest uruchamiane z odtwarzacza</string>
-  <string name="trending_row_name">Trendy</string>
   <string name="player_seek_type">Zachowanie przewijania</string>
   <string name="player_seek_regular">Regularny</string>
   <string name="player_seek_confirmation_pause">Z potwierdzeniem (pauza podczas przewijania)</string>
@@ -348,7 +347,6 @@
   <string name="finish_on_disconnect">Zamknij aplikację po odłączeniu urządzenia zdalnego sterowania (telefon/tablet)</string>
   <string name="update_error">Błąd aktualizacji</string>
   <string name="hide_shorts_from_history">Ukryj Szorty w sekcji Historia</string>
-  <string name="hide_shorts_from_trending">Ukryj Szorty w sekcji Na czasie</string>
   <string name="disable_screensaver">Wyłącz wygaszacz ekranu</string>
   <string name="description_not_found">Nie znaleziono opisu</string>
   <string name="proxy_port_hint">Port proxy</string>
@@ -576,7 +574,6 @@
   <string name="play_video_incognito">Odtwarzaj w trybie incognito</string>
   <string name="header_kids_home">Dla dzieci</string>
   <string name="player_section_playlist">Użyj bieżącej zawartości jako listy odtwarzania</string>
-  <string name="header_trending">Na Czasie</string>
   <string name="screensaver">Wygaszacz ekranu</string>
   <string name="player_screen_off_timeout">Automatyczne wyłączanie ekranu</string>
   <string name="old_update_notifications">Poprzedni wygląd powiadomienia o aktualizacji</string>

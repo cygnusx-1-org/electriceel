@@ -360,7 +360,6 @@
     <string name="hide_upcoming_channel">Skjul kommende fra Kanal</string>
     <string name="hide_upcoming_home">Skjul kommende fra Hjem</string>
     <string name="search_background_playback">Bakgrunnsavspilling mens du søker/blar i en kanal</string>
-    <string name="trending_row_name">Populært</string>
     <string name="player_seek_type">Spolingsatferd</string>
     <string name="player_seek_regular">Vanlig</string>
     <string name="player_seek_confirmation_pause">Med bekreftelse (pause under spoling)</string>
@@ -370,7 +369,6 @@
     <string name="update_error">Oppdateringsfeil</string>
     <string name="hide_shorts_from_search">Skjul Shorts fra søkeresultatet</string>
     <string name="hide_shorts_from_history">Skjul Shorts fra Historikk</string>
-    <string name="hide_shorts_from_trending">Skjul Shorts fra Populært</string>
     <string name="disable_screensaver">Deaktiver skjermsparer</string>
     <string name="description_not_found">Beskrivelse ikke funnet</string>
     <string name="proxy_port_hint">Proxy-port</string>
@@ -589,7 +587,6 @@
     <string name="play_video_incognito">Spill av inkognito</string>
     <string name="header_kids_home">Barn</string>
     <string name="player_section_playlist">Bruk innholdet i gjeldende seksjon som en spilleliste</string>
-    <string name="header_trending">Populært</string>
     <string name="screensaver">Skjermsparer</string>
     <string name="player_screen_off_timeout">Tidsavbrudd for skjerm av</string>
     <string name="old_update_notifications">Gammelt utseende for oppdateringsvarsler</string>

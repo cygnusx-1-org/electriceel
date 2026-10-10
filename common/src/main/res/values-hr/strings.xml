@@ -318,7 +318,6 @@
     <string name="msg_player_error_source2">Video izvor ne radi ili je vrijeme netočno</string>
     <string name="hide_upcoming">Sakrij najavljene iz Pretplata</string>
     <string name="search_background_playback">Prebaci na sliku u slici pri pretrazi/otvaranju kanala</string>
-    <string name="trending_row_name">U trendu</string>
     <string name="player_seek_type">Ponašanje premotavanja</string>
     <string name="player_seek_regular">Uobičajeno</string>
     <string name="player_seek_confirmation_pause">S potvrdom (pauziraj pri premotavanju)</string>

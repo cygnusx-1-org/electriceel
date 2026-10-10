@@ -314,7 +314,6 @@
     <string name="msg_player_error_source2">Vaizdo įrašo šaltinis neveikia arba laikas neteisingas</string>
     <string name="hide_upcoming">Slėpti būsimus vaizdo įrašus prenumeratų skyriuje</string>
     <string name="search_background_playback">Pradedant paiešką grotuve, esamą vaizdo įrašą rodyti paveikslėlio paveikslėlyje režimu</string>
-    <string name="trending_row_name">Populiaru</string>
     <string name="player_seek_type">Vaizdo prasukimo elgsena</string>
     <string name="player_seek_regular">Įprasta</string>
     <string name="player_seek_confirmation_pause">Su patvirtinimu (pristabdyti prasukant)</string>

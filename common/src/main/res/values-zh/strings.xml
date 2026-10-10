@@ -339,7 +339,6 @@
   <string name="hide_upcoming_channel">隐藏频道分区的即将上线</string>
   <string name="hide_upcoming_home">隐藏首页的即将上线</string>
   <string name="search_background_playback">搜索/浏览频道时后台播放</string>
-  <string name="trending_row_name">热门</string>
   <string name="player_seek_type">快进方式</string>
   <string name="player_seek_regular">常规</string>
   <string name="player_seek_confirmation_pause">带确认（快进时暂停）</string>
@@ -348,7 +347,6 @@
   <string name="finish_on_disconnect">手机/平板断开连接后关闭应用</string>
   <string name="update_error">更新错误</string>
   <string name="hide_shorts_from_history">隐藏历史记录的短视频</string>
-  <string name="hide_shorts_from_trending">隐藏热门分区的短视频</string>
   <string name="disable_screensaver">禁用屏保</string>
   <string name="description_not_found">未找到视频描述</string>
   <string name="proxy_port_hint">代理端口</string>
@@ -575,7 +573,6 @@
   <string name="play_video_incognito">隐私模式播放</string>
   <string name="header_kids_home">儿童</string>
   <string name="player_section_playlist">将当前分区内容作为播放列表</string>
-  <string name="header_trending">热门</string>
   <string name="screensaver">屏保</string>
   <string name="player_screen_off_timeout">息屏超时</string>
   <string name="old_update_notifications">旧版更新通知</string>

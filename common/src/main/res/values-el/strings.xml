@@ -312,7 +312,6 @@
   <string name="msg_player_error_source2">Η πηγή του βίντεο δε λειτουργεί ή έχει λάθος ώρα</string>
   <string name="hide_upcoming">Απόκρυψη επερχόμενων από τις Εγγραφές</string>
   <string name="search_background_playback">Εκκίνηση PIP κατά την αναζήτηση/άνοιγμα καναλιού</string>
-  <string name="trending_row_name">Τάσεις</string>
   <string name="player_seek_type">Συμπεριφορά κατά την αναζήτηση</string>
   <string name="player_seek_regular">Κανονική</string>
   <string name="player_seek_confirmation_pause">Με επιβεβαίωση (παύση κατά την αναζήτηση)</string>
@@ -541,7 +540,6 @@
   <string name="play_video_incognito">Αναπαραγωγή σε ανώνυμη περιήγηση</string>
   <string name="header_kids_home">Παιδιά</string>
   <string name="player_section_playlist">Χρήση περιεχομένου τρέχοντος τμήματος ως λίστα αναπαραγωγής</string>
-  <string name="header_trending">Τάσεις</string>
   <string name="screensaver">Προφύλαξη οθόνης</string>
   <string name="player_screen_off_timeout">Λήξη χρονικού ορίου οθόνης</string>
   <string name="old_update_notifications">Η παλιά εμφάνιση ειδοποίησης ενημέρωσης</string>
@@ -603,7 +601,6 @@
   <string name="save_playlist">Προσθήκη λίστας αναπαραγωγής στην ενότητα Λίστες αναπαραγωγής</string>
   <string name="player_volume">Ένταση</string>
   <string name="live_stream_fix_4k_desc">Προειδοποίηση, αυτή η παραμετροποίηση απενεργοποιεί την επαναφορά των ροών. Βελτιώνει σημαντικά την απόδοση της ζωντανής ροής. Η μέγιστη ανάλυση είναι 4K.</string>
-  <string name="hide_shorts_from_trending">Απόκρυψη Shorts από τις Τάσεις</string>
   <string name="hide_upcoming_home">Απόκρυψη επερχόμενων από την Αρχική σελίδα</string>
   <string name="hide_upcoming_channel">Απόκρυψη επερχόμενων από το Κανάλι</string>
   <string name="msg_player_error_subtitle_source">Το URL ΥΠΟΤΙΤΛΟΥ δεν λειτουργεί ή η ώρα της συσκευής είναι εσφαλμένη.\nΣυνήθως, είναι το πρόβλημα της εφαρμογής.</string>

@@ -335,7 +335,6 @@
   <string name="hide_upcoming_channel">Peida tulevased videod kanalilt</string>
   <string name="hide_upcoming_home">Peida tulevased videod avalehelt</string>
   <string name="search_background_playback">Kanali avamisel lülitu pilt-pildis režiimi</string>
-  <string name="trending_row_name">Populaarne</string>
   <string name="player_seek_type">Video kerimise viis</string>
   <string name="player_seek_regular">Keri ja mängi</string>
   <string name="player_seek_confirmation_pause">Keri ja kinnita (peatatud)</string>
@@ -344,7 +343,6 @@
   <string name="finish_on_disconnect">Lülita äpp pärast seadme lahtiühenamist välja</string>
   <string name="update_error">Viga uuendamisel</string>
   <string name="hide_shorts_from_history">Peida lühivideod ajaloost</string>
-  <string name="hide_shorts_from_trending">Peida lühivideod populaarsetest videotest</string>
   <string name="disable_screensaver">Keela ekraanisäästja</string>
   <string name="description_not_found">Kirjeldust ei leitud</string>
   <string name="proxy_port_hint">Puhverserveri port</string>
@@ -566,7 +564,6 @@
   <string name="play_video_incognito">Mängi privaatselt</string>
   <string name="header_kids_home">Lapsed</string>
   <string name="player_section_playlist">Kasuta praeguse jaotise sisu esitusloendina</string>
-  <string name="header_trending">Populaarsed</string>
   <string name="screensaver">Ekraanisäästja</string>
   <string name="player_screen_off_timeout">Ekraani väljalülitamise aeg</string>
   <string name="old_update_notifications">Uuendusteatiste vana stiil</string>

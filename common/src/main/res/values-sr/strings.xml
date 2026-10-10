@@ -294,7 +294,6 @@
     <string name="content_block_action_toast">прескок уз обавештење</string>
     <string name="content_block_action_dialog">приказ дијалога за потврду</string>
     <string name="cancel_dialog">Откажи</string>
-    <string name="trending_row_name">У тренду</string>
     <string name="player_seek_type">Понашање премотавања</string>
     <string name="player_seek_regular">Обично</string>
     <string name="player_seek_confirmation_pause">са потврдом (пауза при премотавању)</string>
@@ -304,7 +303,6 @@
     <string name="update_error">Грешка ажурирања</string>
     <string name="hide_shorts_from_search">Сакриј кратке са резултата претраге</string>
     <string name="hide_shorts_from_history">Сакриј кратке са Историје</string>
-    <string name="hide_shorts_from_trending">Сакриј кратке са Трендинга</string>
     <string name="disable_screensaver">Искључи чувара екрана</string>
     <string name="description_not_found">Опис није нађен</string>
     <string name="proxy_port_hint">Порт проксија</string>
@@ -590,7 +588,6 @@
     <string name="play_from_start">Пусти од почетка</string>
     <string name="header_kids_home">Деца</string>
     <string name="player_section_playlist">Користи садржај тренутног одељка као листу</string>
-    <string name="header_trending">У тренду</string>
     <string name="screensaver">Чувар екрана</string>
     <string name="player_screen_off_timeout">Време до искључења екрана</string>
     <string name="old_update_notifications">Стари изглед обавештења ажурирања</string>

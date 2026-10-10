@@ -308,7 +308,6 @@
   <string name="msg_player_error_source2">عنوان URL لا يعمل أو وقت الجهاز غير صحيح.\nعادةً ما يكون ذلك خطأً في التطبيق.</string>
   <string name="hide_upcoming">إخفاء الفيديوهات القادمة من الاشتراكات</string>
   <string name="search_background_playback">تشغيل في الخلفية أثناء البحث أو تصفح القناة</string>
-  <string name="trending_row_name">الرائجة</string>
   <string name="player_seek_type">سلوك التسريع</string>
   <string name="player_seek_regular">عادي</string>
   <string name="player_seek_confirmation_pause">مع التأكيد (إيقاف أثناء التسريع)</string>
@@ -547,7 +546,6 @@
   <string name="play_video_incognito">التشغيل بوضع التصفّح المتخفي</string>
   <string name="header_kids_home">أطفال</string>
   <string name="player_section_playlist">استخدم محتويات القسم الحالي كقائمة تشغيل</string>
-  <string name="header_trending">المحتوى الرائج</string>
   <string name="screensaver">شاشة التوقف</string>
   <string name="player_screen_off_timeout">مهلة إيقاف تشغيل الشاشة</string>
   <string name="old_update_notifications">المظهر القديم لإشعارات التحديث</string>
@@ -615,7 +613,6 @@
   <string name="action_sound_off">كتم الصوت</string>
   <string name="hide_upcoming_channel">إخفاء الفيديوهات القادمة من القناة</string>
   <string name="hide_upcoming_home">إخفاء الفيديوهات القادمة من الصفحة الرئيسية</string>
-  <string name="hide_shorts_from_trending">إخفاء فيديوهات Shorts من الأكثر رواجًا</string>
   <string name="remember_position_of_live_videos">تذكر تقدم البث المباشر</string>
   <string name="save_playlist">إضافة قائمة التشغيل إلى قسم قوائم التشغيل</string>
   <string name="skip_shorts">تخطي Shorts</string>

@@ -347,7 +347,6 @@
     <string name="hide_upcoming_channel">Skryť nadchádzajúce z Kanálov</string>
     <string name="hide_upcoming_home">Skryť nadchádzajúce z Domov</string>
     <string name="search_background_playback">Prehrávanie na pozadí počas vyhľadávania/prezerania kanála</string>
-    <string name="trending_row_name">Trendy</string>
     <string name="player_seek_type">Typ pratáčania</string>
     <string name="player_seek_regular">Bežné</string>
     <string name="player_seek_confirmation_pause">S potvrdením (pozastavenie pri pratáčaní)</string>
@@ -357,7 +356,6 @@
     <string name="update_error">Chyba aktualizácie</string>
     <string name="hide_shorts_from_search">Skryť Shorts z výsledkov vyhľadávania</string>
     <string name="hide_shorts_from_history">Skryť Shorts z Histórie</string>
-    <string name="hide_shorts_from_trending">Skryť Shorts z Trendy</string>
     <string name="disable_screensaver">Vypnúť šetrič obrazovky</string>
     <string name="description_not_found">Popis nenájdený</string>
     <string name="proxy_port_hint">Proxy port</string>
@@ -592,7 +590,6 @@
     <string name="play_from_start">Prehrať od začiatku</string>
     <string name="header_kids_home">Deti</string>
     <string name="player_section_playlist">Použiť aktuálny obsah sekcie ako playlist</string>
-    <string name="header_trending">Trendy</string>
     <string name="screensaver">Šetrič obrazovky</string>
     <string name="player_screen_off_timeout">Časový limit vypnutia obrazovky</string>
     <string name="old_update_notifications">Starý vzhľad notifikácií o aktualizáciách</string>

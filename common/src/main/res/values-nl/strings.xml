@@ -342,7 +342,6 @@
   <string name="hide_upcoming_channel">Aankomende verbergen van kanaal</string>
   <string name="hide_upcoming_home">Aankomende verbergen van Home</string>
   <string name="search_background_playback">PIP tijdens het zoeken/browsen van een kanaal</string>
-  <string name="trending_row_name">Trending</string>
   <string name="player_seek_type">Zoek gedrag</string>
   <string name="player_seek_regular">Normaal</string>
   <string name="player_seek_confirmation_pause">Met bevestiging (pauze tijdens zoeken)</string>
@@ -351,7 +350,6 @@
   <string name="finish_on_disconnect">Voltooi de app nadat de telefoon/tablet is losgekoppeld</string>
   <string name="update_error">Update fout</string>
   <string name="hide_shorts_from_history">Shorts verbergen bij geschiedenis</string>
-  <string name="hide_shorts_from_trending">Shorts verbergen bij Trending</string>
   <string name="disable_screensaver">Schermbeveiliging uitschakelen</string>
   <string name="description_not_found">Beschrijving niet gevonden</string>
   <string name="proxy_port_hint">Proxy poort</string>
@@ -581,7 +579,6 @@
   <string name="play_video_incognito">Incognito afspelen</string>
   <string name="header_kids_home">Kinderen</string>
   <string name="player_section_playlist">Gebruik de inhoud van de huidige sectie als afspeellijst</string>
-  <string name="header_trending">Trending</string>
   <string name="screensaver">Schermbeveiliging</string>
   <string name="player_screen_off_timeout">Scherm uit time-out</string>
   <string name="old_update_notifications">Oude look van de updatemeldingen</string>

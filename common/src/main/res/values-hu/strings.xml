@@ -319,7 +319,6 @@
   <string name="msg_player_error_source2">A videoforrás nem működik, vagy helytelen az idő.\nÁltalában az alkalmazással van a probléma.</string>
   <string name="hide_upcoming">Közelgő premierek elrejtése a Feliratkozások menüből</string>
   <string name="search_background_playback">PIP lejátszás keresés/böngészés közben</string>
-  <string name="trending_row_name">Felkapott</string>
   <string name="player_seek_type">Gyorstekerés viselkedése</string>
   <string name="player_seek_regular">Szabályos</string>
   <string name="player_seek_confirmation_pause">Megerősítéssel (szünet tekerés közben)</string>
@@ -546,7 +545,6 @@
   <string name="player_section_playlist">Az aktuális kategória tartalmának használata lejátszási listaként</string>
   <string name="not_recommend_channel">Nem ajánlom a csatornát</string>
   <string name="you_wont_see_this_channel">Ez a csatorna nem jelenik meg az ajánlások között</string>
-  <string name="header_trending">Felkapott</string>
   <string name="screensaver">Képernyővédő</string>
   <string name="player_screen_off_timeout">Képernyő kikapcsolása</string>
   <string name="old_update_notifications">A frissítési értesítések régi megjelenése</string>
@@ -607,7 +605,6 @@
   <string name="player_corner_ending_time">Lejátszó: befejezési idő a jobb felső sarokban</string>
   <string name="hide_upcoming_channel">Közelgő premierek elrejtése a Csatornák menüből</string>
   <string name="hide_upcoming_home">Közelgő premierek elrejtése a Főoldalon</string>
-  <string name="hide_shorts_from_trending">Rövid klipek elrejtése a Felkapott menüből</string>
   <string name="hide_watched_from_subscriptions">Megnézett videók elrejtése a Feliratkozások menüből</string>
   <string name="hide_unwanted_content">Kéretlen tartalom elrejtése</string>
   <string name="hide_watched_from_home">Megnézett videók elrejtése a Főoldalról</string>

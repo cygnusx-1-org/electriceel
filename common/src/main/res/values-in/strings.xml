@@ -340,7 +340,6 @@
   <string name="hide_upcoming_channel">Sembunyikan yang akan datang dari Channel</string>
   <string name="hide_upcoming_home">Sembunyikan yang akan datang dari Beranda</string>
   <string name="search_background_playback">Putar di latar belakang saat mencari/menelusuri channel</string>
-  <string name="trending_row_name">Unggulan</string>
   <string name="player_seek_type">Perilaku pencarian</string>
   <string name="player_seek_regular">Reguler</string>
   <string name="player_seek_confirmation_pause">Dengan konfirmasi (jeda saat mencari)</string>
@@ -350,7 +349,6 @@
   <string name="update_error">Update eror</string>
   <string name="hide_shorts_from_search">Sembunyikan Shorts dari hasil penelusuran</string>
   <string name="hide_shorts_from_history">Sembunyikan Shorts dari Histori</string>
-  <string name="hide_shorts_from_trending">Sembunyikan Shorts dari Unggulan</string>
   <string name="disable_screensaver">Nonaktifkan screensaver</string>
   <string name="description_not_found">Deskripsi tidak ditemukan</string>
   <string name="proxy_port_hint">Port proxy</string>
@@ -569,7 +567,6 @@
   <string name="play_video_incognito">Putar di mode samaran</string>
   <string name="header_kids_home">Anak-anak</string>
   <string name="player_section_playlist">Menggunakan konten ini sebagai playlist</string>
-  <string name="header_trending">Unggulan</string>
   <string name="player_screen_off_timeout">Batas waktu layar mati</string>
   <string name="old_update_notifications">Tampilan lama dari notifikasi update</string>
   <string name="dialog_notification">Beritahu bila ada update lewat dialog pop-up</string>

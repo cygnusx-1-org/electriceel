@@ -309,7 +309,6 @@
   <string name="msg_player_error_source2">Videolähde ei toimi tai kellon aika on väärä</string>
   <string name="hide_upcoming">Piilota tulevat videot tilauksista</string>
   <string name="search_background_playback">Käytä kuva-kuvassa (PIP) kun haet soittimesta</string>
-  <string name="trending_row_name">Trendaavat</string>
   <string name="player_seek_type">Hakutapa</string>
   <string name="player_seek_regular">Tavallinen</string>
   <string name="player_seek_confirmation_pause">Vahvistuksella (tauko etsimisen aikana)</string>
@@ -546,7 +545,6 @@
   <string name="you_wont_see_this_channel">Et näe tätä kanavaa suosituksissa</string>
   <string name="not_recommend_channel">Älä suosittele tätä kanavaa</string>
   <string name="player_section_playlist">Käytä nykyisen osion sisältöä soittolistana</string>
-  <string name="header_trending">Suosittua nyt</string>
   <string name="screensaver">Näytönsäästäjä</string>
   <string name="player_screen_off_timeout">Näytön sammuttamisen aikakatkaisu</string>
   <string name="old_update_notifications">Päivitysilmoitusten vanha ulkoasu</string>
@@ -622,7 +620,6 @@
   <string name="share_qr_link">Jaa linkki (QR-koodi)</string>
   <string name="hide_upcoming_channel">Piilota tulevat kanavalta</string>
   <string name="hide_upcoming_home">Piilota tulevat koti-näkymästä</string>
-  <string name="hide_shorts_from_trending">Piilota Shorts-videot trendaavista</string>
   <string name="player_exit_shortcut">Poistu soittimesta</string>
   <string name="action_sound_off">Ääni pois</string>
   <string name="remember_position_of_live_videos">Muista livestriimin kohta</string>

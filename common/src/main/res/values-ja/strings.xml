@@ -348,7 +348,6 @@
     <string name="hide_upcoming_channel">チャンネル欄から配信予定を非表示</string>
     <string name="hide_upcoming_home">ホームから配信予定を非表示</string>
     <string name="search_background_playback">チャンネルの検索または閲覧中のバックグラウンド再生</string>
-    <string name="trending_row_name">急上昇</string>
     <string name="player_seek_type">シークの挙動</string>
     <string name="player_seek_regular">通常</string>
     <string name="player_seek_confirmation_pause">確認あり (シーク時に一時停止)</string>
@@ -358,7 +357,6 @@
     <string name="update_error">更新エラー</string>
     <string name="hide_shorts_from_search">検索結果からショートを非表示</string>
     <string name="hide_shorts_from_history">履歴からショートを非表示</string>
-    <string name="hide_shorts_from_trending">急上昇からショートを非表示</string>
     <string name="disable_screensaver">スクリーンセーバーを無効化</string>
     <string name="description_not_found">概要はありません</string>
     <string name="proxy_port_hint">プロキシのポート</string>
@@ -594,7 +592,6 @@
     <string name="play_from_start">最初から再生</string>
     <string name="header_kids_home">キッズ</string>
     <string name="player_section_playlist">現在のセクションを再生リストとして扱う</string>
-    <string name="header_trending">急上昇</string>
     <string name="screensaver">スクリーンセーバー</string>
     <string name="player_screen_off_timeout">一定時間後に画面を OFF</string>
     <string name="old_update_notifications">更新の通知を旧仕様に戻す</string>

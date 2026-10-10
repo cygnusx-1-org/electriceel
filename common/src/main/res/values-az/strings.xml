@@ -343,7 +343,6 @@
     <string name="hide_upcoming_channel">Kanaldan gələni gizlət</string>
     <string name="hide_upcoming_home">Ev gələni gizlədin</string>
     <string name="search_background_playback">Axtarış/açıq kanalda PIP daxil edin</string>
-    <string name="trending_row_name">Trendlər</string>
     <string name="player_seek_type">Davranış axtarın</string>
     <string name="player_seek_regular">Adi</string>
     <string name="player_seek_confirmation_pause">Təsdiqlə (axtararkən fasilə verin)</string>
@@ -353,7 +352,6 @@
     <string name="update_error">Yeniləmə xətası</string>
     <string name="hide_shorts_from_search">Shortları axtarış nəticəsindən gizlədin</string>
     <string name="hide_shorts_from_history">Shortları Tarixçədən gizlədin</string>
-    <string name="hide_shorts_from_trending">Shortları Trenddən gizlədin</string>
     <string name="disable_screensaver">Ekran qoruyucusunu gizlədin</string>
     <string name="description_not_found">Təsvir tapılmadı</string>
     <string name="proxy_port_hint">Proxy portu</string>
@@ -586,7 +584,6 @@
     <string name="play_video_incognito">Gizli oxudun</string>
     <string name="header_kids_home">Uşaqlar</string>
     <string name="player_section_playlist">Cari bölmə məzmununu pleylist kimi istifadə edin</string>
-    <string name="header_trending">Trend</string>
     <string name="screensaver">Ekran qoruyucusu</string>
     <string name="player_screen_off_timeout">Ekranın söndürülməsi</string>
     <string name="old_update_notifications">Yeniləmə bildirişlərinin köhnə görünüşü</string>

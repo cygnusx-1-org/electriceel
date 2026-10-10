@@ -316,7 +316,6 @@
   <string name="finish_on_disconnect">फोन डिस्कनेक्ट होने पर एप बंद करे</string>
   <string name="hide_shorts_from_home">होम से शॉर्ट्स छुपाए</string>
   <string name="player_seek_regular">निरंतर</string>
-  <string name="trending_row_name">ट्रेंडिंग</string>
   <string name="subtitle_white_transparent">पारदर्शी पृष्ठभूमि पर सफ़ेद</string>
   <string name="pin_unpin_playlist">साइडबार से प्लेलिस्ट पिन/अनपिन करें</string>
   <string name="pin_unpin_channel">साइडबार से चैनल पिन/अनपिन करें</string>
@@ -557,7 +556,6 @@
   <string name="mark_as_watched">देखे गए के रूप में चिह्नित करें</string>
   <string name="old_update_notifications">अद्यतन सूचनाओं का पुराना स्वरूप</string>
   <string name="player_screen_off_timeout">स्क्रीन बंद का समय</string>
-  <string name="header_trending">ट्रेंडिंग</string>
   <string name="player_section_playlist">प्लेलिस्ट के रूप में वर्तमान अनुभाग का उपयोग करें</string>
   <string name="volume_boost_warning">सीमा से अधिक की कोई भी सेटिंग संभावित रूप से स्पीकर को नुकसान पहुंचा सकती है</string>
   <string name="update_found">अद्यतन</string>

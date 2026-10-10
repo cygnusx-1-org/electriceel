@@ -339,7 +339,6 @@
   <string name="hide_upcoming_channel">Fshih të ardhshmet nga Kanali</string>
   <string name="hide_upcoming_home">Fshih të ardhshmet nga Kryefaqja</string>
   <string name="search_background_playback">Luajtja në sfond gjatë kërkimit/shfletimit të një kanali</string>
-  <string name="trending_row_name">Më të shikuarat</string>
   <string name="player_seek_type">Lloji i kërkimit</string>
   <string name="player_seek_regular">E zakonshme</string>
   <string name="player_seek_confirmation_pause">Me pranim (pezullo gjatë kërkimit)</string>
@@ -348,7 +347,6 @@
   <string name="finish_on_disconnect">Mbyll aplikacionin pasi të kesh shkëputur telefonin tënd</string>
   <string name="update_error">Gabim përditësimi</string>
   <string name="hide_shorts_from_history">Fshih videot e shkurtra nga Historiku</string>
-  <string name="hide_shorts_from_trending">Fshih videot e shkurtra nga Më të shikuarat</string>
   <string name="disable_screensaver">Çaktivizo mbrojtësin e ekranit</string>
   <string name="description_not_found">Përshkrimi nuk u gjet</string>
   <string name="proxy_port_hint">Porta e ndërmjetësit</string>
@@ -576,7 +574,6 @@
   <string name="play_video_incognito">Luaj në mënyrë të fshehtë</string>
   <string name="header_kids_home">Fëmijë</string>
   <string name="player_section_playlist">Përdor përmbajtjen e seksionit aktual si një listë lujatjeje</string>
-  <string name="header_trending">Më të shikuarat</string>
   <string name="screensaver">Mbrojtësi i ekranit</string>
   <string name="player_screen_off_timeout">Koha për fikjen e ekranit</string>
   <string name="old_update_notifications">Pamja e vjetër e njoftimeve të përditësimit</string>
