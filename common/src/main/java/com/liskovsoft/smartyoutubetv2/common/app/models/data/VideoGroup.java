@@ -634,7 +634,7 @@ public class VideoGroup {
             return false;
         }
 
-        return manager.isVideoHidden(video.videoId);
+        return manager.isVideoHidden(video.videoId, getType());
     }
 
     /**

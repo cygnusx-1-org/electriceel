@@ -48,13 +48,13 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
         options.add(createMenuItem(R.string.hide_old_videos, () -> OldVideosSettingsPresenter.instance(getContext()).show()));
         options.add(createMenuItem(R.string.keyword_filtering, () -> KeywordFilterSettingsPresenter.instance(getContext()).show()));
 
-        OptionItem homeCategories = createMenuItem(R.string.hide_content_home_categories, this::showHomeCategoriesMenu);
-        options.add(homeCategories);
+        OptionItem categories = createMenuItem(R.string.hide_content_categories, this::showCategoriesMenu);
+        options.add(categories);
 
         // Last in the list: the note is added below it, and the rows above stay where they are
         if (!VideoCategoryManager.isAvailable()) {
-            homeCategories.setEnabled(false);
-            OptionItem note = UiOptionItem.from(getContext().getString(R.string.hide_content_home_categories_needs_key));
+            categories.setEnabled(false);
+            OptionItem note = UiOptionItem.from(getContext().getString(R.string.hide_content_categories_needs_key));
             note.setNote(true);
             options.add(note);
         }
@@ -145,9 +145,10 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
     }
 
     /**
-     * The music, gaming, sports, news and tech videos of Home. Only with the user's own Data API key (see VideoCategoryManager).
+     * The music, gaming, sports, news and tech videos of Home, the non-gaming videos of Gaming.
+     * Only with the user's own Data API key (see VideoCategoryManager).
      */
-    private void showHomeCategoriesMenu() {
+    private void showCategoriesMenu() {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(createContentItem(R.string.hide_music_from_home, MediaServiceData.CONTENT_MUSIC_HOME));
@@ -155,8 +156,9 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
         options.add(createContentItem(R.string.hide_sports_from_home, MediaServiceData.CONTENT_SPORTS_HOME));
         options.add(createContentItem(R.string.hide_news_from_home, MediaServiceData.CONTENT_NEWS_HOME));
         options.add(createContentItem(R.string.hide_tech_from_home, MediaServiceData.CONTENT_TECH_HOME));
+        options.add(createContentItem(R.string.hide_non_gaming_from_gaming, MediaServiceData.CONTENT_NON_GAMING_GAMING));
 
-        showSubmenu(R.string.hide_content_home_categories, options);
+        showSubmenu(R.string.hide_content_categories, options);
     }
 
     private void showSubmenu(int titleResId, List<OptionItem> options) {

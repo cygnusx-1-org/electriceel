@@ -314,6 +314,32 @@ public class PlayerUIController extends BasePlayerController {
     }
 
     @Override
+    public void onPlay() {
+        updateEndingTimeOnStateChange();
+    }
+
+    @Override
+    public void onPause() {
+        updateEndingTimeOnStateChange();
+    }
+
+    @Override
+    public void onBuffering() {
+        updateEndingTimeOnStateChange();
+    }
+
+    /**
+     * Paused or buffering, the ending time moves with the clock, while playing it stands still
+     */
+    private void updateEndingTimeOnStateChange() {
+        if (getPlayer() == null) {
+            return;
+        }
+
+        getPlayer().updateEndingTime();
+    }
+
+    @Override
     public void onViewResumed() {
         if (getPlayer() == null) {
             return;

@@ -3,7 +3,6 @@ package com.liskovsoft.smartyoutubetv2.tv.ui.widgets.time;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
@@ -21,6 +20,7 @@ import com.liskovsoft.smartyoutubetv2.tv.R;
 
 @SuppressLint("AppCompatCustomView")
 public class EndingTimeView extends TextView implements TickleListener, OnDataChange {
+    private final Runnable mUpdateHandler = this::update;
     private TickleManager mTickleManager;
     private PlayerData mPlayerData;
     private boolean mIconIsSet;
@@ -62,6 +62,7 @@ public class EndingTimeView extends TextView implements TickleListener, OnDataCh
         } else {
             mTickleManager.removeListener(this);
             mPlayerData.removeOnChange(this);
+            removeCallbacks(mUpdateHandler);
         }
     }
 
@@ -83,10 +84,19 @@ public class EndingTimeView extends TextView implements TickleListener, OnDataCh
     }
 
     public void update() {
-        if (getVisibility() == View.VISIBLE) {
-            String endingTime = getEndingTime();
+        removeCallbacks(mUpdateHandler);
 
-            setText(!TextUtils.isEmpty(endingTime) ? String.format("%s %s", Helpers.HOURGLASS, endingTime) : null);
+        if (getVisibility() == View.VISIBLE) {
+            PlaybackView playbackView = PlaybackPresenter.instance(getContext()).getView();
+            long endingTimeMs = getEndingTimeMs(playbackView);
+
+            setText(endingTimeMs != 0 ? String.format("%s %s", Helpers.HOURGLASS, DateHelper.toShortTime(endingTimeMs)) : null);
+
+            // Paused or buffering, the ending time moves with the clock. Re-render it when its minute changes.
+            // While playing it stands still, and the minute tick and the player events keep it current.
+            if (endingTimeMs != 0 && playbackView != null && !playbackView.isPlaying()) {
+                postDelayed(mUpdateHandler, 60_000 - endingTimeMs % 60_000);
+            }
 
             //if (endingTime != null) {
             //    // https://stackoverflow.com/questions/5437674/what-unicode-characters-represent-time/9454080
@@ -110,11 +120,10 @@ public class EndingTimeView extends TextView implements TickleListener, OnDataCh
 
         // Player has been closed
         mTickleManager.removeListener(this);
+        removeCallbacks(mUpdateHandler);
     }
 
-    private String getEndingTime() {
-        PlaybackView playbackView = PlaybackPresenter.instance(getContext()).getView();
-
+    private long getEndingTimeMs(PlaybackView playbackView) {
         long remainingTimeMs = 0;
 
         if (playbackView != null && playbackView.getVideo() != null && !playbackView.getVideo().isLive) {
@@ -123,10 +132,10 @@ public class EndingTimeView extends TextView implements TickleListener, OnDataCh
         }
 
         if (remainingTimeMs == 0) {
-            return null;
+            return 0;
         }
 
-        return DateHelper.toShortTime(System.currentTimeMillis() + remainingTimeMs);
+        return System.currentTimeMillis() + remainingTimeMs;
     }
 
     private long applySpeedCorrection(long timeMs) {

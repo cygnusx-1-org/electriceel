@@ -105,6 +105,8 @@ public class PlaybackTransportRowPresenter extends PlaybackRowPresenter {
         long mTotalTimeInMs = Long.MIN_VALUE;
         long mCurrentTimeInMs = Long.MIN_VALUE;
         long mRemainingTimeInMs = Long.MIN_VALUE;
+        final Runnable mEndingTimeUpdater = () -> onSetEndingTimeLabel(mRemainingTimeInMs);
+        boolean mIsPlayerPlaying = true;
         long mSecondaryProgressInMs;
         final StringBuilder mTempBuilder = new StringBuilder();
         ControlBarPresenter.ViewHolder mControlsVh;
@@ -767,14 +769,21 @@ public class PlaybackTransportRowPresenter extends PlaybackRowPresenter {
             remainingTimeMs = applySpeedCorrection(remainingTimeMs);
 
             if (mEndingTime != null) {
+                mEndingTime.removeCallbacks(mEndingTimeUpdater);
+
                 if (mPlayerData.isRemainingTimeEnabled()) {
                     formatTime(remainingTimeMs, mTempBuilder);
                     mEndingTime.setText(String.format(mRemainingTimeFormat, mTempBuilder.toString()));
                     mEndingTime.setVisibility(View.VISIBLE);
                 } else if (mPlayerData.isEndingTimeEnabled()) {
-                    mEndingTime.setText(String.format(mEndingTimeFormat,
-                            DateHelper.toShortTime(System.currentTimeMillis() + remainingTimeMs)));
+                    long endingTimeMs = System.currentTimeMillis() + remainingTimeMs;
+                    mEndingTime.setText(String.format(mEndingTimeFormat, DateHelper.toShortTime(endingTimeMs)));
                     mEndingTime.setVisibility(View.VISIBLE);
+                    // Paused, the remaining time stands still while the ending time moves with the clock.
+                    // Re-render it when its minute changes.
+                    if (!mIsPlayerPlaying) {
+                        mEndingTime.postDelayed(mEndingTimeUpdater, 60_000 - endingTimeMs % 60_000);
+                    }
                 } else {
                     mEndingTime.setVisibility(View.GONE);
                 }
@@ -815,6 +824,17 @@ public class PlaybackTransportRowPresenter extends PlaybackRowPresenter {
 
         void setPlay(boolean play) {
             mIsPlaying = play;
+        }
+
+        /**
+         * The ending time label stands still while playing and moves with the clock while paused
+         */
+        void setPlayerPlaying(boolean playing) {
+            mIsPlayerPlaying = playing;
+
+            if (mRemainingTimeInMs != Long.MIN_VALUE) {
+                onSetEndingTimeLabel(mRemainingTimeInMs);
+            }
         }
 
         void setTopEdgeFocusListener(TopEdgeFocusListener listener) {
@@ -1123,6 +1143,9 @@ public class PlaybackTransportRowPresenter extends PlaybackRowPresenter {
         mSecondaryControlsPresenter.onUnbindViewHolder(vh.mSecondaryControlsVh);
         if (row != null) {
             row.setOnPlaybackProgressChangedListener(null);
+        }
+        if (vh.mEndingTime != null) {
+            vh.mEndingTime.removeCallbacks(vh.mEndingTimeUpdater);
         }
 
         super.onUnbindRowViewHolder(holder);

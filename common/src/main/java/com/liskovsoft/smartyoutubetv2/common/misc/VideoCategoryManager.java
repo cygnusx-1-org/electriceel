@@ -34,6 +34,7 @@ import io.reactivex.Observable;
  * The category is whatever the uploader picked (e.g. many music mixes are People & Blogs). The lookup also brings
  * the topics YouTube finds in the video itself (e.g. Music), and either one hides the video.<br/>
  * Whole rows go too: the ones marked with a hidden topic (e.g. music shelves) and the ones left with a single video or none.<br/>
+ * The Gaming section can drop its non-gaming videos the same way (see {@link #isNonGaming}).<br/>
  * The player uses the same lookup to tell music videos for Music autoplay (see {@link #isMusic}).
  */
 public class VideoCategoryManager {
@@ -44,9 +45,15 @@ public class VideoCategoryManager {
             MediaServiceData.CONTENT_SPORTS_HOME, MediaServiceData.CONTENT_NEWS_HOME, MediaServiceData.CONTENT_TECH_HOME};
     private static final String MUSIC_CATEGORY = "Music";
     private static final String MUSIC_TOPIC = "Music";
-    private static final String[] CATEGORIES = {MUSIC_CATEGORY, "Gaming", "Sports", "News & Politics", "Science & Technology"};
+    private static final String GAMING_CATEGORY = "Gaming";
+    private static final String[] CATEGORIES = {MUSIC_CATEGORY, GAMING_CATEGORY, "Sports", "News & Politics", "Science & Technology"};
     // The parent topics of the Data API (Wikipedia page names), every sub-genre carries them too (e.g. Electronic_music + Music)
     private static final String[] VIDEO_TOPICS = {MUSIC_TOPIC, "Video_game_culture", "Sport", "Politics", "Technology"};
+    // The sub-genres of Video_game_culture. A video about something else with game footage gets the parent alone
+    // (e.g. an AI video: Science & Technology, Video_game_culture).
+    private static final List<String> GAME_GENRE_TOPICS = Arrays.asList(
+            "Action_game", "Action-adventure_game", "Casual_game", "Music_video_game", "Puzzle_video_game",
+            "Racing_video_game", "Role-playing_video_game", "Simulation_video_game", "Sports_game", "Strategy_video_game");
     private static final int[] TOPICS = {
             MediaGroup.TOPIC_MUSIC, MediaGroup.TOPIC_GAMING, MediaGroup.TOPIC_SPORTS, MediaGroup.TOPIC_NEWS, MediaGroup.TOPIC_NONE};
     private static final String CATEGORIES_FILE = "videocategory/categories.tsv";
@@ -87,7 +94,15 @@ public class VideoCategoryManager {
      * Some category should be removed from the group
      */
     public boolean isGroupEnabled(int groupType) {
-        if (groupType != MediaGroup.TYPE_HOME || !isAvailable()) {
+        if (!isAvailable()) {
+            return false;
+        }
+
+        if (groupType == MediaGroup.TYPE_GAMING) {
+            return isContentHidden(MediaServiceData.CONTENT_NON_GAMING_GAMING);
+        }
+
+        if (groupType != MediaGroup.TYPE_HOME) {
             return false;
         }
 
@@ -101,12 +116,39 @@ public class VideoCategoryManager {
     }
 
     /**
-     * The category or one of the topics of the video found earlier is hidden from Home
+     * The video found earlier is hidden from the group: by its category or one of its topics in Home, as non-gaming in Gaming
      */
-    public boolean isVideoHidden(String videoId) {
+    public boolean isVideoHidden(String videoId, int groupType) {
         VideoCategory category = getCached(videoId);
 
-        return category != null && isHidden(category.getCategory(), category.getTopics());
+        if (category == null) {
+            return false;
+        }
+
+        if (groupType == MediaGroup.TYPE_GAMING) {
+            return isContentHidden(MediaServiceData.CONTENT_NON_GAMING_GAMING) && isNonGaming(category.getCategory(), category.getTopics());
+        }
+
+        return isHidden(category.getCategory(), category.getTopics());
+    }
+
+    /**
+     * Neither the Gaming category nor a game genre topic. Every gaming video has one or the other
+     * (e.g. a Minecraft video in People & Blogs has Action-adventure_game).
+     * Without topics (found by the player, see {@link #needsTopics}) the video stays.
+     */
+    static boolean isNonGaming(String category, List<String> topics) {
+        if (GAMING_CATEGORY.equals(category) || topics == null) {
+            return false;
+        }
+
+        for (String topic : topics) {
+            if (GAME_GENRE_TOPICS.contains(topic)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -137,10 +179,10 @@ public class VideoCategoryManager {
     }
 
     /**
-     * The row is about a hidden topic (e.g. a music shelf)
+     * The Home row is about a hidden topic (e.g. a music shelf)
      */
-    private boolean isTopicHidden(int topic) {
-        if (topic == MediaGroup.TOPIC_NONE) {
+    private boolean isTopicHidden(int groupType, int topic) {
+        if (groupType != MediaGroup.TYPE_HOME || topic == MediaGroup.TOPIC_NONE) {
             return false;
         }
 
@@ -273,7 +315,7 @@ public class VideoCategoryManager {
             for (MediaGroup mediaGroup : mediaGroups) {
                 // The videos of a hidden row don't matter
                 if (mediaGroup == null || mediaGroup.getMediaItems() == null || !isGroupEnabled(mediaGroup.getType()) ||
-                        isTopicHidden(mediaGroup.getTopic())) {
+                        isTopicHidden(mediaGroup.getType(), mediaGroup.getTopic())) {
                     continue;
                 }
 
@@ -286,7 +328,7 @@ public class VideoCategoryManager {
 
                     if (!mCategoryById.containsKey(videoId)) {
                         result.add(videoId);
-                    } else if (needsTopics(videoId)) {
+                    } else if (needsTopics(videoId, mediaGroup.getType())) {
                         topicResult.add(videoId);
                     }
                 }
@@ -317,12 +359,16 @@ public class VideoCategoryManager {
     }
 
     /**
-     * Found by the player (no topics) and not hidden by the category alone, not tried this session
+     * Found by the player (no topics), not told by the category alone (hidden from Home, gaming in Gaming), not tried this session
      */
-    private boolean needsTopics(String videoId) {
+    private boolean needsTopics(String videoId, int groupType) {
         VideoCategory category = mCategoryById.get(videoId);
 
-        if (category == null || category.getTopics() != null || isHidden(category.getCategory(), null)) {
+        if (category == null || category.getTopics() != null) {
+            return false;
+        }
+
+        if (groupType == MediaGroup.TYPE_GAMING ? GAMING_CATEGORY.equals(category.getCategory()) : isHidden(category.getCategory(), null)) {
             return false;
         }
 
@@ -376,7 +422,7 @@ public class VideoCategoryManager {
             return false;
         }
 
-        if (isTopicHidden(mediaGroup.getTopic())) {
+        if (isTopicHidden(mediaGroup.getType(), mediaGroup.getTopic())) {
             return true;
         }
 
@@ -396,7 +442,7 @@ public class VideoCategoryManager {
 
             videoCount++;
 
-            if (isVideoHidden(videoId)) {
+            if (isVideoHidden(videoId, mediaGroup.getType())) {
                 hiddenCount++;
             }
         }

@@ -219,8 +219,8 @@
     <string name="hide_content_watched">Watched videos</string>
     <string name="hide_content_streams">Streams</string>
     <string name="hide_content_upcoming">Upcoming</string>
-    <string name="hide_content_home_categories">Home categories</string>
-    <string name="hide_content_home_categories_needs_key">Enter a YouTube Data API key in System &gt; General &gt; API keys to unlock Home categories</string>
+    <string name="hide_content_categories">Categories</string>
+    <string name="hide_content_categories_needs_key">Enter a YouTube Data API key in System &gt; General &gt; API keys to unlock Categories</string>
     <string name="content_filtering_filtering">Hide or mark content</string>
     <string name="settings_video">Video</string>
     <string name="content_block_confirm_skip">Confirm on skip</string>
@@ -404,6 +404,7 @@
     <string name="hide_sports_from_home">Hide sports videos from Home</string>
     <string name="hide_news_from_home">Hide news videos from Home</string>
     <string name="hide_tech_from_home">Hide science and tech videos from Home</string>
+    <string name="hide_non_gaming_from_gaming">Hide non-gaming videos from Gaming</string>
     <string name="hide_old_videos">Hide videos older than</string>
     <string name="quick_toggle">Quick toggle on the main screen</string>
     <string name="hide_old_videos_sections">Sections</string>

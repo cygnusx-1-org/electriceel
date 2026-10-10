@@ -96,6 +96,7 @@ public abstract class MaxControlsVideoPlayerGlue<T extends PlayerAdapter>
                 viewHolder.setTopEdgeFocusListener(MaxControlsVideoPlayerGlue.this);
                 viewHolder.setQualityInfo(mQualityInfo);
                 viewHolder.setDateVisibility(isControlsVisible());
+                viewHolder.setPlayerPlaying(isPlaying());
                 // Don't uncomment
                 // Reset to defaults
                 //viewHolder.setSeekPreviewTitle(null);
@@ -164,6 +165,15 @@ public abstract class MaxControlsVideoPlayerGlue<T extends PlayerAdapter>
 
         if (getTransportViewHolder() != null) {
             getTransportViewHolder().setPlay(false);
+        }
+    }
+
+    @Override
+    protected void onPlayStateChanged() {
+        super.onPlayStateChanged();
+
+        if (getTransportViewHolder() != null) {
+            getTransportViewHolder().setPlayerPlaying(isPlaying());
         }
     }
 

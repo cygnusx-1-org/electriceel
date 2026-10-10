@@ -47,6 +47,8 @@ public class VideoCategoryManagerTest {
     private static final String GAME_VLOG_ID = "gameVlog"; // People & Blogs, YouTube's topics say gaming
     private static final String VLOG_ID = "vlog"; // People & Blogs, other topics
     private static final String PLAYER_VLOG_ID = "playerVlog"; // People & Blogs, found by the player (no topics)
+    private static final String AI_ID = "ai"; // Science & Technology with game footage: the gaming topic alone, no game genre
+    private static final String NO_TOPICS_ID = "noTopics"; // Entertainment, YouTube found no topics
 
     @Before
     public void setUp() {
@@ -57,6 +59,7 @@ public class VideoCategoryManagerTest {
         setHidden(MediaServiceData.CONTENT_SPORTS_HOME, false);
         setHidden(MediaServiceData.CONTENT_NEWS_HOME, false);
         setHidden(MediaServiceData.CONTENT_TECH_HOME, false);
+        setHidden(MediaServiceData.CONTENT_NON_GAMING_GAMING, false);
         // Home categories are hidden only with the user's own key
         MediaServiceData.instance().setDataApiKey("key");
 
@@ -73,6 +76,8 @@ public class VideoCategoryManagerTest {
         manager.setCategoryForTesting(GAME_VLOG_ID, "People & Blogs", Arrays.asList("Video_game_culture", "Action_game"));
         manager.setCategoryForTesting(VLOG_ID, "People & Blogs", Collections.singletonList("Lifestyle_(sociology)"));
         manager.setCategoryForTesting(PLAYER_VLOG_ID, "People & Blogs");
+        manager.setCategoryForTesting(AI_ID, "Science & Technology", Collections.singletonList("Video_game_culture"));
+        manager.setCategoryForTesting(NO_TOPICS_ID, "Entertainment", Collections.emptyList());
     }
 
     @After
@@ -82,6 +87,7 @@ public class VideoCategoryManagerTest {
         setHidden(MediaServiceData.CONTENT_SPORTS_HOME, false);
         setHidden(MediaServiceData.CONTENT_NEWS_HOME, false);
         setHidden(MediaServiceData.CONTENT_TECH_HOME, false);
+        setHidden(MediaServiceData.CONTENT_NON_GAMING_GAMING, false);
         MediaServiceData.instance().setDataApiKey(null);
         Utils.sHandler.removeCallbacksAndMessages(null);
     }
@@ -213,16 +219,16 @@ public class VideoCategoryManagerTest {
         manager.restoreCategoriesForTesting();
 
         setHidden(MediaServiceData.CONTENT_MUSIC_HOME, true);
-        assertTrue(manager.isVideoHidden(MUSIC_MIX_ID));
-        assertTrue(manager.isVideoHidden(MUSIC_ID));
-        assertFalse(manager.isVideoHidden(VLOG_ID));
+        assertTrue(manager.isVideoHidden(MUSIC_MIX_ID, MediaGroup.TYPE_HOME));
+        assertTrue(manager.isVideoHidden(MUSIC_ID, MediaGroup.TYPE_HOME));
+        assertFalse(manager.isVideoHidden(VLOG_ID, MediaGroup.TYPE_HOME));
         assertEquals("People & Blogs", manager.getCachedCategory(PLAYER_VLOG_ID));
 
         // Lines saved before the topics existed: video id and category only
         FileHelpers.stringToFile("old\tMusic\nbroken\n\tMusic\n", file);
         manager.restoreCategoriesForTesting();
 
-        assertTrue(manager.isVideoHidden("old"));
+        assertTrue(manager.isVideoHidden("old", MediaGroup.TYPE_HOME));
         assertNull(manager.getCachedCategory("broken"));
         assertNull(manager.getCachedCategory(MUSIC_MIX_ID));
 
@@ -391,6 +397,115 @@ public class VideoCategoryManagerTest {
         setHidden(MediaServiceData.CONTENT_MUSIC_HOME, true);
 
         assertFalse(getManager().isRowHidden(new TestMediaGroup(MediaGroup.TYPE_MUSIC, MediaGroup.TOPIC_MUSIC, MUSIC_ID)));
+    }
+
+    @Test
+    public void nonGamingVideosAreHiddenFromGaming() {
+        setHidden(MediaServiceData.CONTENT_NON_GAMING_GAMING, true);
+        VideoGroup gaming = createGroup(MediaGroup.TYPE_GAMING);
+
+        gaming.add(createVideo(AI_ID));
+        gaming.add(createVideo(NO_TOPICS_ID));
+        gaming.add(createVideo(VLOG_ID));
+        gaming.add(createVideo(GAMING_ID));
+        gaming.add(createVideo(GAME_VLOG_ID));
+        gaming.add(createVideo(PLAYER_VLOG_ID));
+        gaming.add(createVideo(TECH_ID));
+        gaming.add(createVideo(UNKNOWN_ID));
+
+        // The ones whose topics say something else. Without topics (or unknown) the video stays.
+        assertEquals(5, gaming.getSize());
+        assertFalse(contains(gaming, AI_ID));
+        assertFalse(contains(gaming, NO_TOPICS_ID));
+        assertFalse(contains(gaming, VLOG_ID));
+    }
+
+    @Test
+    public void gamingIsTheCategoryOrAGameGenre() {
+        String[] genres = {"Action_game", "Action-adventure_game", "Casual_game", "Music_video_game", "Puzzle_video_game",
+                "Racing_video_game", "Role-playing_video_game", "Simulation_video_game", "Sports_game", "Strategy_video_game"};
+
+        for (String genre : genres) {
+            assertFalse(genre, VideoCategoryManager.isNonGaming("People & Blogs", Arrays.asList("Video_game_culture", genre)));
+        }
+
+        assertFalse(VideoCategoryManager.isNonGaming("Gaming", Collections.emptyList()));
+        assertFalse(VideoCategoryManager.isNonGaming("Gaming", null));
+        // Found by the player: the topics aren't known yet
+        assertFalse(VideoCategoryManager.isNonGaming("People & Blogs", null));
+        assertTrue(VideoCategoryManager.isNonGaming("Science & Technology", Collections.singletonList("Video_game_culture")));
+        assertTrue(VideoCategoryManager.isNonGaming("Entertainment", Collections.emptyList()));
+        assertTrue(VideoCategoryManager.isNonGaming("", Collections.singletonList("Technology")));
+    }
+
+    @Test
+    public void gamingKeepsItsVideosWhileTheOptionIsOff() {
+        // The Home options don't touch Gaming
+        setHidden(MediaServiceData.CONTENT_GAMING_HOME, true);
+        setHidden(MediaServiceData.CONTENT_TECH_HOME, true);
+        VideoCategoryManager manager = getManager();
+        VideoGroup gaming = createGroup(MediaGroup.TYPE_GAMING);
+
+        gaming.add(createVideo(AI_ID));
+        gaming.add(createVideo(GAMING_ID));
+
+        assertFalse(manager.isGroupEnabled(MediaGroup.TYPE_GAMING));
+        assertEquals(2, gaming.getSize());
+        assertFalse(manager.isRowHidden(new TestMediaGroup(MediaGroup.TYPE_GAMING, MediaGroup.TOPIC_NONE, AI_ID)));
+    }
+
+    @Test
+    public void nonGamingOptionStaysInGaming() {
+        setHidden(MediaServiceData.CONTENT_NON_GAMING_GAMING, true);
+        VideoCategoryManager manager = getManager();
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME);
+
+        home.add(createVideo(AI_ID));
+        home.add(createVideo(VLOG_ID));
+
+        assertFalse(manager.isGroupEnabled(MediaGroup.TYPE_HOME));
+        assertEquals(2, home.getSize());
+        assertFalse(manager.isVideoHidden(AI_ID, MediaGroup.TYPE_HOME));
+        assertTrue(manager.isVideoHidden(AI_ID, MediaGroup.TYPE_GAMING));
+    }
+
+    @Test
+    public void gamingRowsFollowTheNonGamingOptionOnly() {
+        setHidden(MediaServiceData.CONTENT_NON_GAMING_GAMING, true);
+        // A gaming shelf of Gaming stays, whatever Home hides
+        setHidden(MediaServiceData.CONTENT_GAMING_HOME, true);
+        VideoCategoryManager manager = getManager();
+
+        assertFalse(manager.isRowHidden(new TestMediaGroup(MediaGroup.TYPE_GAMING, MediaGroup.TOPIC_GAMING, GAMING_ID, GAME_VLOG_ID)));
+        // Only the non-gaming videos go while two videos or more are left
+        assertFalse(manager.isRowHidden(new TestMediaGroup(MediaGroup.TYPE_GAMING, MediaGroup.TOPIC_NONE, AI_ID, GAMING_ID, GAME_VLOG_ID)));
+        // A game row left with a single video
+        TestMediaGroup row = new TestMediaGroup(MediaGroup.TYPE_GAMING, MediaGroup.TOPIC_NONE, AI_ID, NO_TOPICS_ID, GAMING_ID);
+        assertTrue(manager.isRowHidden(row));
+        // The top row (Recommended) keeps it
+        assertFalse(manager.isRowHidden(row, true));
+    }
+
+    @Test
+    public void gamingLooksUpTheTopicsTheCategoryDoesntTell() {
+        setHidden(MediaServiceData.CONTENT_NON_GAMING_GAMING, true);
+        VideoCategoryManager manager = getManager();
+        String playerGamingId = "playerGaming";
+        String playerVlogId = "playerVlogForGaming"; // the topic lookup of PLAYER_VLOG_ID is tried by another test
+        manager.setCategoryForTesting(playerGamingId, "Gaming");
+        manager.setCategoryForTesting(playerVlogId, "People & Blogs");
+        TestMediaGroup row = new TestMediaGroup(MediaGroup.TYPE_GAMING, MediaGroup.TOPIC_GAMING,
+                playerGamingId, playerVlogId, AI_ID, UNKNOWN_ID);
+
+        // The Gaming category keeps the video without topics, People & Blogs doesn't tell. A gaming shelf is looked up too.
+        assertEquals(Arrays.asList(UNKNOWN_ID, playerVlogId), manager.getUnknownVideoIdsForTesting(row));
+        // Not again this session (e.g. the key is out of quota)
+        assertEquals(Collections.singletonList(UNKNOWN_ID), manager.getUnknownVideoIdsForTesting(row));
+
+        // Without a key nothing is looked up or hidden
+        MediaServiceData.instance().setDataApiKey(null);
+        assertEquals(Collections.emptyList(), manager.getUnknownVideoIdsForTesting(row));
+        assertFalse(manager.isGroupEnabled(MediaGroup.TYPE_GAMING));
     }
 
     private static VideoCategoryManager getManager() {
