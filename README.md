@@ -49,6 +49,7 @@ Electric Eel is a fork of [SmartTube](https://github.com/yuliskov/SmartTube), an
 ## Test hardware
 - Nvidia Shield Pro 2019 (3gb RAM, 16gb storage, WiFi 802.11ac, Gigabit Ethernet)
 - FireTV Stick 4K MAX Gen2 (2gb RAM, 16gb storage, WiFi 6E)
+- Onn 4k Pro (3gb RAM, 32gb storage, WiFi 6)
 - Interested in your device make and model being explicitly tested? Please [donation](https://buymeacoffee.com/edgan)
 
 ## Device support
