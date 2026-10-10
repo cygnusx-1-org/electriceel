@@ -47,10 +47,10 @@ Electric Eel is a fork of [SmartTube](https://github.com/yuliskov/SmartTube), an
 - Voice search and casting performance may be inferior to official apps, depending on your device  
 
 ## Test hardware
-- Nvidia Shield Pro 2019 (3gb RAM, 16gb storage, WiFi 802.11ac, Gigabit Ethernet)
-- FireTV Stick 4K MAX Gen2 (2gb RAM, 16gb storage, WiFi 6E)
-- Onn 4k Pro (3gb RAM, 32gb storage, WiFi 6)
-- Interested in your device make and model being explicitly tested? Please [donation](https://buymeacoffee.com/edgan)
+- [Nvidia Shield Pro 2019](https://www.bestbuy.com/product/nvidia-shield-android-tv-pro-16gb-4k-hdr-streaming-device-with-google-assistant-and-geforce-now-black/J3L2TZ9S46/sku/6370425) (3gb RAM, 16gb storage, WiFi 802.11ac, Gigabit Ethernet)
+- [FireTV Stick 4K MAX Gen2](https://www.bestbuy.com/product/amazon-fire-tv-stick-2nd-gen-4k-max-streaming-device-wi-fi-6e-ambient-experience-16-gb-free-live-tv-black/J39HW6PCWK) (2gb RAM, 16gb storage, WiFi 6E)
+- [Onn 4k Pro](https://www.walmart.com/ip/4K-PRO-STREAMING/18382213962) (3gb RAM, 32gb storage, WiFi 6)
+- Interested in your device make and model being explicitly tested? Please [donate](https://buymeacoffee.com/edgan).
 
 ## Device support
 > [!IMPORTANT]  
