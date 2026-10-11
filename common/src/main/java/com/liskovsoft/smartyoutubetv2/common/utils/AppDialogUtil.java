@@ -1103,29 +1103,35 @@ public class AppDialogUtil {
         List<OptionItem> options = new ArrayList<>();
         // YouTube never marks Watch later as selected
         boolean isInWatchLater = WatchLaterManager.instance(context).isInWatchLater(video.videoId);
+        YouTubeMediaItemService itemService = YouTubeMediaItemService.instance();
 
         for (PlaylistInfo playlistInfo : playlistInfos) {
+            // An edit made in the app comes first: YouTube tells about it late, and the video keeps the playlist it's opened from
+            Boolean recentEdit = itemService.getRecentPlaylistEdit(playlistInfo.getPlaylistId(), video.videoId);
+            boolean isSelected = recentEdit != null ? recentEdit : playlistInfo.isSelected() || Helpers.equals(playlistInfo.getPlaylistId(), video.playlistId)
+                    || (isInWatchLater && WatchLaterManager.WATCH_LATER_PLAYLIST_ID.equals(playlistInfo.getPlaylistId()));
+
             options.add(UiOptionItem.from(
                     playlistInfo.getTitle(),
                     (item) -> {
-                        if (playlistInfo instanceof YouTubePlaylistInfo) {
-                            ((YouTubePlaylistInfo) playlistInfo).setSelected(item.isSelected());
-                        }
-                        addRemoveFromPlaylist(context, video, callback, playlistInfo.getPlaylistId(), item.isSelected());
+                        addRemoveFromPlaylist(context, video, callback, playlistInfo, item.isSelected());
                         GeneralData.instance(context).setLastPlaylistId(playlistInfo.getPlaylistId());
                         GeneralData.instance(context).setLastPlaylistTitle(playlistInfo.getTitle());
                     },
-                    playlistInfo.isSelected() || Helpers.equals(playlistInfo.getPlaylistId(), video.playlistId)
-                            || (isInWatchLater && WatchLaterManager.WATCH_LATER_PLAYLIST_ID.equals(playlistInfo.getPlaylistId()))));
+                    isSelected));
         }
 
         dialogPresenter.appendCheckedCategory(context.getString(R.string.dialog_add_to_playlist), options);
     }
 
-    private static void addRemoveFromPlaylist(Context context, Video video, VideoMenuCallback callback, String playlistId, boolean add) {
+    private static void addRemoveFromPlaylist(Context context, Video video, VideoMenuCallback callback, PlaylistInfo playlistInfo, boolean add) {
         if (video == null) {
             return;
         }
+
+        String playlistId = playlistInfo.getPlaylistId();
+        // The player keeps the list for the next time
+        setSelected(playlistInfo, add);
 
         Observable<Void> editObserve;
         MediaItemService itemManager = YouTubeMediaItemService.instance();
@@ -1142,8 +1148,17 @@ public class AppDialogUtil {
         }
 
         // Handle error: Maximum playlist size exceeded (> 5000 items)
-        RxHelper.execute(editObserve, error -> MessageHelpers.showLongMessage(context, error.getMessage()),
+        RxHelper.execute(editObserve, error -> {
+                    setSelected(playlistInfo, !add);
+                    MessageHelpers.showLongMessage(context, error.getMessage());
+                },
                 () -> WatchLaterManager.onPlaylistEdited(context, playlistId, video, add));
+    }
+
+    private static void setSelected(PlaylistInfo playlistInfo, boolean isSelected) {
+        if (playlistInfo instanceof YouTubePlaylistInfo) {
+            ((YouTubePlaylistInfo) playlistInfo).setSelected(isSelected);
+        }
     }
 
     public static void showPlaylistOrderDialog(Context context, Video video, Runnable onClose) {

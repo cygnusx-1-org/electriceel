@@ -5,6 +5,7 @@ import com.liskovsoft.mediaserviceinterfaces.MediaItemService;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItem;
 import com.liskovsoft.mediaserviceinterfaces.data.PlaylistInfo;
+import com.liskovsoft.mediaserviceinterfaces.oauth.Account;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.sharedutils.rx.RxHelper;
@@ -12,6 +13,8 @@ import com.liskovsoft.smartyoutubetv2.common.R;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.BrowseSection;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.SimpleMediaItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
+import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionCallback;
+import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.BrowsePresenter;
@@ -379,11 +382,7 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
             return;
         }
 
-        getDialogPresenter().appendSingleButton(
-                UiOptionItem.from(
-                        getContext().getString(R.string.create_playlist),
-                        optionItem -> showCreatePlaylistDialog(original)
-                        ));
+        getDialogPresenter().appendSingleButton(createPlaylistButton(R.string.create_playlist, optionItem -> showCreatePlaylistDialog(original)));
     }
 
     /**
@@ -437,11 +436,23 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
             return;
         }
 
-        getDialogPresenter().appendSingleButton(
-                UiOptionItem.from(
-                        getContext().getString(R.string.add_video_to_new_playlist),
-                        optionItem -> showCreatePlaylistDialog(original)
-                ));
+        getDialogPresenter().appendSingleButton(createPlaylistButton(R.string.add_video_to_new_playlist, optionItem -> showCreatePlaylistDialog(original)));
+    }
+
+    /**
+     * A button that creates a playlist on YouTube. Greyed out, saying why, when the account has no channel: YouTube refuses
+     * to create the playlist then. Signed out, the playlist is kept on this device.
+     */
+    private OptionItem createPlaylistButton(int titleResId, OptionCallback callback) {
+        Account account = getSignInService().isSigned() ? getSignInService().getSelectedAccount() : null;
+        boolean hasChannel = account == null || account.hasChannel();
+
+        OptionItem button = UiOptionItem.from(getContext().getString(titleResId),
+                hasChannel ? null : getContext().getString(R.string.create_playlist_requires_channel),
+                callback);
+        button.setEnabled(hasChannel);
+
+        return button;
     }
 
     private void showCreatePlaylistDialog(Video video) {
@@ -501,11 +512,7 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
             return;
         }
 
-        getDialogPresenter().appendSingleButton(
-                UiOptionItem.from(
-                        getContext().getString(R.string.copy_playlist_to_youtube),
-                        optionItem -> copyPlaylistToYouTube(original)
-                ));
+        getDialogPresenter().appendSingleButton(createPlaylistButton(R.string.copy_playlist_to_youtube, optionItem -> copyPlaylistToYouTube(original)));
     }
 
     private void copyPlaylistToYouTube(Video video) {

@@ -54,7 +54,6 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
     private final MediaItemService mMediaItemService;
     private final AppDialogPresenter mDialogPresenter;
     private final MediaServiceManager mServiceManager;
-    private Disposable mAddToPlaylistAction;
     private Disposable mNotInterestedAction;
     private Disposable mSubscribeAction;
     private Disposable mPlaylistsInfoAction;
@@ -969,13 +968,13 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
     }
 
     private void addRemoveFromPlaylist(String playlistId, String playlistTitle, boolean add) {
-        RxHelper.disposeActions(mAddToPlaylistAction);
+        // Not disposed: an edit of another video may still be running
         if (add) {
             Observable<Void> editObserve = mVideo.mediaItem != null ?
                     mMediaItemService.addToPlaylistObserve(playlistId, mVideo.mediaItem) : mMediaItemService.addToPlaylistObserve(playlistId, mVideo.videoId);
             Video video = mVideo;
             // Handle error: Maximum playlist size exceeded (> 5000 items)
-            mAddToPlaylistAction = RxHelper.execute(editObserve, error -> MessageHelpers.showLongMessage(getContext(), error.getMessage()),
+            RxHelper.execute(editObserve, error -> MessageHelpers.showLongMessage(getContext(), error.getMessage()),
                     () -> WatchLaterManager.onPlaylistEdited(getContext(), playlistId, video, true));
             mDialogPresenter.closeDialog();
             MessageHelpers.showMessage(getContext(),
@@ -987,8 +986,8 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
             }
             Observable<Void> editObserve = mMediaItemService.removeFromPlaylistObserve(playlistId, mVideo.videoId);
             Video video = mVideo;
-            mAddToPlaylistAction = RxHelper.execute(editObserve,
-                    error -> Log.e(TAG, "Remove from playlist error: %s", error.getMessage()),
+            RxHelper.execute(editObserve,
+                    error -> MessageHelpers.showLongMessage(getContext(), error.getMessage()),
                     () -> WatchLaterManager.onPlaylistEdited(getContext(), playlistId, video, false));
             mDialogPresenter.closeDialog();
             MessageHelpers.showMessage(getContext(),

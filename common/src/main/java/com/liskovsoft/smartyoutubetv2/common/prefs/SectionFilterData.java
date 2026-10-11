@@ -2,6 +2,7 @@ package com.liskovsoft.smartyoutubetv2.common.prefs;
 
 import android.content.Context;
 
+import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
 import com.liskovsoft.smartyoutubetv2.common.misc.OldVideoFilter;
 import com.liskovsoft.smartyoutubetv2.common.prefs.common.DataSaverBase;
 
@@ -49,7 +50,7 @@ public abstract class SectionFilterData extends DataSaverBase {
     }
 
     /**
-     * The mode applies to the section. Every section by default, except the ones never filtered (see OldVideoFilter.isSupportedSection).
+     * The mode applies to the section. Every section by default, except the ones never filtered (see isSupportedSection).
      */
     public boolean isSectionEnabled(int sectionId) {
         return isSection(sectionId) && (getSections() & (1 << sectionId)) != 0;
@@ -71,8 +72,16 @@ public abstract class SectionFilterData extends DataSaverBase {
         return sections == -1 ? DEFAULT_SECTIONS : sections;
     }
 
+    /**
+     * The sections a filter can apply to: the ones old videos are hidden from, and History, where its videos are only marked
+     * (see isHidingEnabled)
+     */
+    public static boolean isSupportedSection(int sectionId) {
+        return sectionId == MediaGroup.TYPE_HISTORY || OldVideoFilter.isSupportedSection(sectionId);
+    }
+
     private static boolean isSection(int sectionId) {
-        return sectionId >= 0 && sectionId <= MAX_SECTION_ID && OldVideoFilter.isSupportedSection(sectionId);
+        return sectionId >= 0 && sectionId <= MAX_SECTION_ID && isSupportedSection(sectionId);
     }
 
     /**
@@ -104,11 +113,14 @@ public abstract class SectionFilterData extends DataSaverBase {
         return getMode() != MODE_SHOW && isSectionEnabled(sectionId);
     }
 
+    /**
+     * Nothing is hidden from History: the videos are marked there instead
+     */
     public boolean isHidingEnabled(int sectionId) {
-        return getMode() == MODE_HIDE && isSectionEnabled(sectionId);
+        return getMode() == MODE_HIDE && sectionId != MediaGroup.TYPE_HISTORY && isSectionEnabled(sectionId);
     }
 
     public boolean isMarkingEnabled(int sectionId) {
-        return getMode() == MODE_MARK && isSectionEnabled(sectionId);
+        return isEnabled(sectionId) && !isHidingEnabled(sectionId);
     }
 }

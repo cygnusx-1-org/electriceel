@@ -210,6 +210,9 @@ public class AppPreferenceManager {
             Preference preference = new Preference(mContext);
             preference.setPersistent(false);
             preference.setTitle(item.getTitle());
+            // A second line in a smaller font, e.g. why the button is greyed out
+            preference.setSummary(item.getDescription());
+            preference.setEnabled(item.isEnabled());
             preference.setOnPreferenceClickListener(pref -> {
                 item.onSelect(true);
                 return true;

@@ -506,28 +506,63 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
     }
 
     /**
-     * Shows an edit of Watch later made in the app on the card at once, in the sections the Watch later setting applies to:
+     * Shows an edit of Watch later made in the app on the card at once, in the sections the Watch later setting applies to
+     * (the sidebar sections, search results and channel pages, see VideoGroup.isHiddenWatchLater):
      * marks it or takes the mark off, or removes it where they're hidden
      */
     private void onWatchLaterEdited(Video video, boolean isAdded) {
         VideoGroup group = video.getGroup();
-        BrowseSection section = group != null ? group.getSection() : null;
+        int sectionId = group != null ? group.getFilterSectionId() : -1;
         WatchLaterManager manager = WatchLaterManager.instance(getContext());
 
-        if (section == null || !manager.isEnabled(section.getId()) || WatchLaterManager.isWatchLaterPlaylist(group, video)) {
+        if (sectionId == -1 || !manager.isEnabled(sectionId) || WatchLaterManager.isWatchLaterPlaylist(group, video)) {
             return;
         }
 
-        if (manager.isHidden(section.getId())) {
-            if (isAdded) {
-                removeItem(video);
+        boolean isHidden = manager.isHidden(sectionId);
+
+        if (isHidden && !isAdded) {
+            return;
+        }
+
+        if (!isHidden) {
+            video.isInWatchLater = isAdded;
+        }
+
+        for (BasePresenter<?> presenter : getCardPresenters(sectionId)) {
+            if (isHidden) {
+                presenter.removeItem(video);
+            } else {
+                presenter.syncItem(video);
             }
+        }
+    }
 
-            return;
+    /**
+     * The presenters whose screen may show a card of the section
+     */
+    private List<BasePresenter<?>> getCardPresenters(int sectionId) {
+        Context context = getContext();
+
+        if (sectionId != MediaGroup.TYPE_SEARCH && sectionId != MediaGroup.TYPE_CHANNEL) {
+            return Collections.singletonList(this);
         }
 
-        video.isInWatchLater = isAdded;
-        syncItem(video);
+        if (context == null) {
+            return Collections.emptyList();
+        }
+
+        // Not the activity: it would become theirs (see setContext)
+        context = context.getApplicationContext();
+
+        if (sectionId == MediaGroup.TYPE_SEARCH) {
+            return Collections.singletonList(SearchPresenter.instance(context));
+        }
+
+        List<BasePresenter<?>> presenters = new ArrayList<>();
+        presenters.add(ChannelPresenter.instance(context));
+        presenters.add(ChannelUploadsPresenter.instance(context));
+        return presenters;
     }
 
     @Override
@@ -619,10 +654,10 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         enableSection(MediaGroup.TYPE_SPORTS, enable);
         enableSection(MediaGroup.TYPE_LIVE, enable);
         enableSection(MediaGroup.TYPE_MY_VIDEOS, enable);
+        enableSection(MediaGroup.TYPE_NOTIFICATIONS, enable);
 
         // Hidden by default (see SidebarService.initPinnedItems): only ever hidden here
         if (!enable) {
-            enableSection(MediaGroup.TYPE_NOTIFICATIONS, false);
             enableSection(MediaGroup.TYPE_BLOCKED_CHANNELS, false);
             enableSection(MediaGroup.TYPE_BLOCKED_AI_CHANNELS, false);
         }

@@ -45,7 +45,7 @@ public class WatchLaterDataTest {
         assertTrue(data.isMarkingEnabled(MediaGroup.TYPE_SUBSCRIPTIONS));
         assertTrue(data.isMarkingEnabled(MediaGroup.TYPE_GAMING));
         assertFalse(data.isHidingEnabled(MediaGroup.TYPE_HOME));
-        assertFalse(data.isEnabled(MediaGroup.TYPE_HISTORY));
+        assertTrue(data.isMarkingEnabled(MediaGroup.TYPE_HISTORY));
     }
 
     @Test

@@ -52,18 +52,38 @@ public class CollaborationsDataTest {
      * Not in the Sections menu, so they can't be turned off there
      */
     @Test
-    public void historyAndLocalListsAreNeverFiltered() {
+    public void localListsAreNeverFiltered() {
         CollaborationsData data = getData();
 
         data.setMode(CollaborationsData.MODE_HIDE);
 
-        for (int sectionId : new int[] {MediaGroup.TYPE_HISTORY, MediaGroup.TYPE_SETTINGS, MediaGroup.TYPE_PLAYBACK_QUEUE,
+        for (int sectionId : new int[] {MediaGroup.TYPE_SETTINGS, MediaGroup.TYPE_PLAYBACK_QUEUE,
                 MediaGroup.TYPE_BLOCKED_CHANNELS, MediaGroup.TYPE_BLOCKED_AI_CHANNELS}) {
             data.setSectionEnabled(sectionId, true);
 
             assertFalse(data.isSectionEnabled(sectionId));
             assertFalse(data.isEnabled(sectionId));
         }
+    }
+
+    /**
+     * Nothing is hidden from History: the videos are marked there instead, unless History is unpicked
+     */
+    @Test
+    public void historyIsMarkedNotHidden() {
+        CollaborationsData data = getData();
+
+        data.setMode(CollaborationsData.MODE_HIDE);
+
+        assertTrue(data.isEnabled(MediaGroup.TYPE_HISTORY));
+        assertFalse(data.isHidingEnabled(MediaGroup.TYPE_HISTORY));
+        assertTrue(data.isMarkingEnabled(MediaGroup.TYPE_HISTORY));
+        assertTrue(data.isHidingEnabled(MediaGroup.TYPE_HOME));
+
+        data.setSectionEnabled(MediaGroup.TYPE_HISTORY, false);
+
+        assertFalse(data.isEnabled(MediaGroup.TYPE_HISTORY));
+        assertFalse(data.isMarkingEnabled(MediaGroup.TYPE_HISTORY));
     }
 
     @Test

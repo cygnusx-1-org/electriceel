@@ -9,7 +9,6 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.SidebarService;
-import com.liskovsoft.smartyoutubetv2.common.misc.OldVideoFilter;
 import com.liskovsoft.smartyoutubetv2.common.prefs.CollaborationsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.ExploreTopicsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.SectionFilterData;
@@ -128,7 +127,7 @@ public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
         List<int[]> titledSections = new ArrayList<>();
 
         for (Entry<Integer, Integer> section : mSidebarService.getDefaultSections().entrySet()) {
-            if (OldVideoFilter.isSupportedSection(section.getValue())) {
+            if (SectionFilterData.isSupportedSection(section.getValue())) {
                 titledSections.add(new int[] {section.getKey(), section.getValue()});
             }
         }

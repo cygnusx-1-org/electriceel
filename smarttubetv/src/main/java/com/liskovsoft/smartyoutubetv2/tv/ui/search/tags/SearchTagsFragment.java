@@ -339,6 +339,13 @@ public class SearchTagsFragment extends SearchTagsFragmentBase {
                 adapter.sync(group);
             }
             return;
+        } else if (action == VideoGroup.ACTION_REMOVE) {
+            // Otherwise it's taken for the next page of the row and the video is added again
+            VideoGroupObjectAdapter adapter = mSearchGroupAdapters.get(group.getId());
+            if (adapter != null) {
+                adapter.remove(group);
+            }
+            return;
         }
 
         if (group.isEmpty()) {

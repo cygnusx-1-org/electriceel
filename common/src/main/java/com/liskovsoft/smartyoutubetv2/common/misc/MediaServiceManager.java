@@ -15,6 +15,7 @@ import com.liskovsoft.mediaserviceinterfaces.data.MediaItemFormatInfo;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItemMetadata;
 import com.liskovsoft.mediaserviceinterfaces.data.NotificationState;
 import com.liskovsoft.mediaserviceinterfaces.data.PlaylistInfo;
+import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
@@ -411,7 +412,14 @@ public class MediaServiceManager implements OnAccountChange {
         Disposable playlistsInfoAction = mItemService.getPlaylistsInfoObserve(video.videoId)
                 .subscribe(
                         videoPlaylistInfos -> {
-                            PlaylistInfo watchLater = videoPlaylistInfos.get(0);
+                            // The playlists are by title, so Watch later isn't the first one
+                            PlaylistInfo watchLater = Helpers.findFirst(videoPlaylistInfos,
+                                    info -> WatchLaterManager.WATCH_LATER_PLAYLIST_ID.equals(info.getPlaylistId()));
+
+                            if (watchLater == null) {
+                                Log.e(TAG, "Edit Watch later error: no Watch later");
+                                return;
+                            }
 
                             // BUG: YT not marked Watch later as selected
                             //if (watchLater.isSelected() == isAdd) {

@@ -68,6 +68,11 @@ final class TestAccounts {
             }
 
             @Override
+            public boolean hasChannel() {
+                return true;
+            }
+
+            @Override
             public String getSharedProfileName() {
                 return sharedProfileName;
             }

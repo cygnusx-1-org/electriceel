@@ -274,7 +274,6 @@ public class SidebarService implements ProfileChangeListener {
         for (int sectionId : mDefaultSections.values()) {
             // Hidden sections
             enableSection(sectionId, !Helpers.equalsAny(sectionId, new int[] {
-                    MediaGroup.TYPE_NOTIFICATIONS,
                     MediaGroup.TYPE_PLAYBACK_QUEUE,
                     MediaGroup.TYPE_BLOCKED_CHANNELS,
                     MediaGroup.TYPE_BLOCKED_AI_CHANNELS
