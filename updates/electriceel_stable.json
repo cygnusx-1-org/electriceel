@@ -1,13 +1,24 @@
 {
   "package": {
     "downloadUrlList_arm64-v8a": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.8/ElectricEel_stable_32.56.8_arm64-v8a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.9/ElectricEel_stable_32.56.9_arm64-v8a.apk"
     ],
     "downloadUrlList_armeabi-v7a": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.8/ElectricEel_stable_32.56.8_armeabi-v7a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.9/ElectricEel_stable_32.56.9_armeabi-v7a.apk"
     ],
     "downloadUrlList": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.8/ElectricEel_stable_32.56.8_armeabi-v7a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.9/ElectricEel_stable_32.56.9_armeabi-v7a.apk"
+    ]
+  },
+  "32.56.9": {
+    "versionCode": 2446,
+    "changelog": [
+      "Made the AI slop list filter settings per account",
+      "Made the SponsorBlock settings per account",
+      "Made Hide content and the Shorts quick toggle per account",
+      "Made the DeArrow settings per account",
+      "Made the Search settings per account",
+      "Moved the formerly global settings into each used account once on upgrade"
     ]
   },
   "32.56.8": {
