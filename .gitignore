@@ -75,4 +75,6 @@ hs_err_pid*.log
 
 backup/
 
+__pycache__/
+
 changelog_override.txt
