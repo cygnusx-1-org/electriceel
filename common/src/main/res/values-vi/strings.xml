@@ -756,4 +756,5 @@
     <string name="aislist_status">Kênh trong danh sách: %1$d trong danh sách chặn, %2$d trong danh sách cảnh báo</string>
     <string name="aislist_status_not_loaded">Đang tải xuống danh sách…</string>
     <string name="aislist_about">Giới thiệu AiSList (danh sách cộng đồng, CC BY-NC 4.0)</string>
+    <string name="report_ai_channel">Báo cáo kênh cho AiSList</string>
 </resources>

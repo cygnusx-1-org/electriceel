@@ -684,4 +684,5 @@
     <string name="aislist_status">Canale listate: %1$d pe lista de blocare, %2$d pe lista de avertizare</string>
     <string name="aislist_status_not_loaded">Se descarcă listele…</string>
     <string name="aislist_about">Despre AiSList (listă a comunității, CC BY-NC 4.0)</string>
+    <string name="report_ai_channel">Raportează canalul la AiSList</string>
 </resources>

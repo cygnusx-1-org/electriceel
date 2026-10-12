@@ -169,4 +169,5 @@
     <string name="aislist_status">Ցուցակված ալիքներ՝ %1$d արգելափակման ցուցակում, %2$d զգուշացման ցուցակում</string>
     <string name="aislist_status_not_loaded">Ցուցակները ներբեռնվում են…</string>
     <string name="aislist_about">AiSList-ի մասին (համայնքային ցուցակ, CC BY-NC 4.0)</string>
+    <string name="report_ai_channel">Հաղորդել ալիքի մասին AiSList-ին</string>
 </resources>

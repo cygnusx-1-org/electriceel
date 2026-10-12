@@ -232,6 +232,8 @@ public class AppPreferenceManager {
             Preference preference = new SwitchPreference(mContext);
             preference.setPersistent(false);
             preference.setTitle(item.getTitle());
+            // A second line in a smaller font, as on a button
+            preference.setSummary(item.getDescription());
             preference.setDefaultValue(item.isSelected());
             preference.setOnPreferenceChangeListener((pref, newValue) -> {
                 item.onSelect((boolean) newValue);

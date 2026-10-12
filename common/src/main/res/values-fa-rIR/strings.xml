@@ -713,4 +713,5 @@
     <string name="aislist_status">کانال‌های فهرست‌شده: %1$d در فهرست مسدود، %2$d در فهرست هشدار</string>
     <string name="aislist_status_not_loaded">در حال بارگیری فهرست‌ها…</string>
     <string name="aislist_about">درباره AiSList (فهرست جامعه، CC BY-NC 4.0)</string>
+    <string name="report_ai_channel">گزارش کانال به AiSList</string>
 </resources>

@@ -637,4 +637,5 @@
     <string name="aislist_status">Kanaleid loendites: %1$d blokeerimisloendis, %2$d hoiatusloendis</string>
     <string name="aislist_status_not_loaded">Loendite allalaadimine…</string>
     <string name="aislist_about">Teave AiSListi kohta (kogukonna loend, CC BY-NC 4.0)</string>
+    <string name="report_ai_channel">Teata kanalist AiSListile</string>
 </resources>

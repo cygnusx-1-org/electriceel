@@ -768,4 +768,5 @@
     <string name="aislist_status">Listázott csatornák: %1$d a tiltólistán, %2$d a figyelmeztető listán</string>
     <string name="aislist_status_not_loaded">Listák letöltése…</string>
     <string name="aislist_about">Az AiSList névjegye (közösségi lista, CC BY-NC 4.0)</string>
+    <string name="report_ai_channel">Csatorna bejelentése az AiSListnek</string>
 </resources>

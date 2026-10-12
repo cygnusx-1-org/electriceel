@@ -769,4 +769,5 @@
     <string name="aislist_status">已列出的频道：屏蔽列表 %1$d 个，警告列表 %2$d 个</string>
     <string name="aislist_status_not_loaded">正在下载列表…</string>
     <string name="aislist_about">关于 AiSList（社区列表，CC BY-NC 4.0）</string>
+    <string name="report_ai_channel">向 AiSList 举报频道</string>
 </resources>

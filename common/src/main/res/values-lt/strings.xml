@@ -433,4 +433,5 @@
     <string name="aislist_status">Kanalai sąrašuose: %1$d blokavimo sąraše, %2$d įspėjimų sąraše</string>
     <string name="aislist_status_not_loaded">Atsisiunčiami sąrašai…</string>
     <string name="aislist_about">Apie AiSList (bendruomenės sąrašas, CC BY-NC 4.0)</string>
+    <string name="report_ai_channel">Pranešti apie kanalą AiSList</string>
 </resources>

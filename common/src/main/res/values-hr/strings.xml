@@ -517,4 +517,5 @@
     <string name="aislist_status">Kanali na popisima: %1$d na popisu blokiranja, %2$d na popisu upozorenja</string>
     <string name="aislist_status_not_loaded">Preuzimanje popisa…</string>
     <string name="aislist_about">O AiSList (popis zajednice, CC BY-NC 4.0)</string>
+    <string name="report_ai_channel">Prijavi kanal AiSListu</string>
 </resources>

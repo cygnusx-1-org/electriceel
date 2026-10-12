@@ -497,6 +497,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         menuNames.put(MainUIData.MENU_ITEM_OPEN_COMMENTS, R.string.open_comments);
         menuNames.put(MainUIData.MENU_ITEM_OPEN_PLAYLIST, R.string.open_playlist);
         menuNames.put(MainUIData.MENU_ITEM_BLOCK_CHANNEL, R.string.dialog_block_channel);
+        menuNames.put(MainUIData.MENU_ITEM_REPORT_AI_CHANNEL, R.string.report_ai_channel);
         menuNames.put(MainUIData.MENU_ITEM_HIDE_KEYWORDS, R.string.keyword_filter_hide_words);
 
         for (ContextMenuProvider provider : new ContextMenuManager(getContext()).getProviders()) {

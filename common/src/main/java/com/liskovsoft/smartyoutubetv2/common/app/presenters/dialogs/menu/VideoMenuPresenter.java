@@ -26,6 +26,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.BrowsePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.ChannelPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.ChannelUploadsPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.PlaybackPresenter;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.AiSListReportPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.providers.ContextMenuManager;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.providers.ContextMenuProvider;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.KeywordFilterSettingsPresenter;
@@ -62,6 +63,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
     private boolean mIsNotInterestedButtonEnabled;
     private boolean mIsNotRecommendChannelEnabled;
     private boolean mIsBlockChannelEnabled;
+    private boolean mIsReportAiChannelEnabled;
     private boolean mIsHideKeywordsEnabled;
     private boolean mIsRemoveFromHistoryButtonEnabled;
     private boolean mIsRemoveFromSubscriptionsButtonEnabled;
@@ -518,6 +520,27 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
                     mDialogPresenter.closeDialog();
                     showHideBlockedChannelsSection(blockedChannelData);
                 }));
+    }
+
+    /**
+     * To AiSList, with the video as the evidence (see AiSListReportPresenter)
+     */
+    private void appendReportAiChannelButton() {
+        if (mVideo == null || mVideo.isChapter || !mVideo.hasVideo() || !mIsReportAiChannelEnabled) {
+            return;
+        }
+
+        Video video = mVideo;
+        VideoMenuCallback callback = mCallback;
+
+        mDialogPresenter.appendSingleButton(
+                UiOptionItem.from(getContext().getString(R.string.report_ai_channel), optionItem ->
+                        AiSListReportPresenter.instance(getContext()).report(video, () -> {
+                            // Blocked too: the video goes now, as with Block the channel
+                            if (callback != null) {
+                                callback.onItemAction(video, VideoMenuCallback.ACTION_REMOVE);
+                            }
+                        })));
     }
 
     /**
@@ -1081,6 +1104,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
         mIsNotInterestedButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_NOT_INTERESTED);
         mIsNotRecommendChannelEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_NOT_RECOMMEND_CHANNEL);
         mIsBlockChannelEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_BLOCK_CHANNEL);
+        mIsReportAiChannelEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_REPORT_AI_CHANNEL);
         mIsHideKeywordsEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_HIDE_KEYWORDS);
         mIsRemoveFromHistoryButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_REMOVE_FROM_HISTORY);
         mIsRemoveFromSubscriptionsButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_REMOVE_FROM_SUBSCRIPTIONS);
@@ -1116,6 +1140,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
         mMenuMapping.put(MainUIData.MENU_ITEM_NOT_RECOMMEND_CHANNEL, new MenuAction(this::appendNotRecommendChannelButton, true));
         mMenuMapping.put(MainUIData.MENU_ITEM_REMOVE_FROM_SUBSCRIPTIONS, new MenuAction(() -> { appendRemoveFromSubscriptionsButton(); appendRemoveFromNotificationsButton(); }, true));
         mMenuMapping.put(MainUIData.MENU_ITEM_BLOCK_CHANNEL, new MenuAction(this::appendBlockChannelButton, false));
+        mMenuMapping.put(MainUIData.MENU_ITEM_REPORT_AI_CHANNEL, new MenuAction(this::appendReportAiChannelButton, false));
         mMenuMapping.put(MainUIData.MENU_ITEM_HIDE_KEYWORDS, new MenuAction(this::appendHideKeywordsButton, false));
         mMenuMapping.put(MainUIData.MENU_ITEM_MARK_AS_WATCHED, new MenuAction(this::appendMarkAsWatchedButton, false));
         mMenuMapping.put(MainUIData.MENU_ITEM_PLAYLIST_ORDER, new MenuAction(this::appendPlaylistOrderButton, true));

@@ -591,4 +591,5 @@
     <string name="aislist_status">सूचीबद्ध चैनल: ब्लॉकलिस्ट में %1$d, चेतावनी सूची में %2$d</string>
     <string name="aislist_status_not_loaded">सूचियाँ डाउनलोड हो रही हैं…</string>
     <string name="aislist_about">AiSList के बारे में (समुदाय सूची, CC BY-NC 4.0)</string>
+    <string name="report_ai_channel">चैनल की AiSList को रिपोर्ट करें</string>
 </resources>

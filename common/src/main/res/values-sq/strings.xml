@@ -729,4 +729,5 @@
     <string name="aislist_status">Kanale të listuara: %1$d në listën e bllokimit, %2$d në listën e paralajmërimit</string>
     <string name="aislist_status_not_loaded">Po shkarkohen listat…</string>
     <string name="aislist_about">Rreth AiSList (listë e komunitetit, CC BY-NC 4.0)</string>
+    <string name="report_ai_channel">Raporto kanalin te AiSList</string>
 </resources>

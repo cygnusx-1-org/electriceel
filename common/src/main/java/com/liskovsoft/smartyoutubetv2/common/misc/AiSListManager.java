@@ -18,15 +18,19 @@ import com.liskovsoft.youtubeapi.service.YouTubeServiceManager;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.BehaviorSubject;
 
 /**
@@ -37,7 +41,8 @@ import io.reactivex.subjects.BehaviorSubject;
  * Most TV Home cards carry only the channel name. The handle of such a channel is looked up once
  * (one watch-next request for one of its videos), before the card is shown (see HiddenVideoResolver),
  * and cached on disk by the channel name. A collaboration ("X and Y") gets the handle of each of its channels.<br/>
- * A channel card is never hidden, only marked (see {@link #getChannelMarkedList}).
+ * A channel card is never hidden, only marked (see {@link #getChannelMarkedList}).<br/>
+ * The channels reported to AiSList from this device are kept on disk, so none is sent twice (see AiSListReportPresenter).
  */
 public class AiSListManager implements OnDataChange {
     private static final String TAG = AiSListManager.class.getSimpleName();
@@ -54,12 +59,17 @@ public class AiSListManager implements OnDataChange {
     private static final Map<String, String> NO_HANDLES = Collections.emptyMap(); // the lookup failed, don't repeat it this session
     private static final long SAVE_DELAY_MS = 10_000;
     private static final int MAX_PARALLEL_LOOKUPS = 4;
+    private static final String REPORTED_FILE = "aislist/reported.txt";
+    private static final int MAX_REPORTED_CHANNELS = 150; // as many as the AiBlock extension keeps
     @SuppressLint("StaticFieldLeak")
     private static AiSListManager sInstance;
     private final AiSListFilterData mFilterData;
     private final MediaItemService mItemService;
     private HandleLookup mHandleLookup;
     private final File mHandlesFile;
+    private final File mReportedFile;
+    // Lowercase handles of the channels reported from this device, the most recent last
+    private final Set<String> mReportedChannels = new LinkedHashSet<>();
     // Channel name -> the handles of its channels (one, or one per channel of a collaboration) -> their channel ids or null
     private final Map<String, Map<String, String>> mHandlesByAuthor = new ConcurrentHashMap<>();
     private final Map<String, Observable<Map<String, String>>> mRunningLookups = new ConcurrentHashMap<>(); // see resolveHandles
@@ -89,7 +99,9 @@ public class AiSListManager implements OnDataChange {
         mItemService = YouTubeServiceManager.instance().getMediaItemService();
         mHandleLookup = mItemService::getChannelHandlesObserve;
         mHandlesFile = new File(FileHelpers.getFilesDir(context), HANDLES_FILE);
+        mReportedFile = new File(FileHelpers.getFilesDir(context), REPORTED_FILE);
         RxHelper.runAsync(this::restoreHandles);
+        runInOrder(this::restoreReported);
         loadIfNeeded();
     }
 
@@ -223,6 +235,76 @@ public class AiSListManager implements OnDataChange {
 
         Collections.reverse(result);
         return result;
+    }
+
+    /**
+     * The channel is on the blocklist, whatever the sections the list applies to
+     * @param handle channel handle with the leading "@"
+     */
+    public boolean isBlocklisted(String handle) {
+        loadIfNeeded();
+
+        return handle != null && mBlocklist.contains(handle.toLowerCase(Locale.ROOT));
+    }
+
+    /**
+     * The channel was reported from this device (one of the last {@value #MAX_REPORTED_CHANNELS})
+     * @param handle channel handle with the leading "@"
+     */
+    public boolean isReported(String handle) {
+        if (handle == null) {
+            return false;
+        }
+
+        synchronized (mReportedChannels) {
+            return mReportedChannels.contains(handle.toLowerCase(Locale.ROOT));
+        }
+    }
+
+    /**
+     * Remember a channel AiSList took the report of, so it isn't sent again
+     * @param handle channel handle with the leading "@"
+     */
+    public void onReported(String handle) {
+        if (!isHandle(handle)) {
+            return;
+        }
+
+        synchronized (mReportedChannels) {
+            addReported(handle.toLowerCase(Locale.ROOT));
+        }
+
+        runInOrder(this::saveReported);
+    }
+
+    /**
+     * The handles of the video's channels (one per channel of a collaboration) -> their channel ids or null.
+     * Looked up when not known yet. Empty when none is found.
+     */
+    public Observable<Map<String, String>> getChannelHandles(Video video) {
+        String key = getLookupKey(video);
+        Map<String, String> handles = key != null ? mHandlesByAuthor.get(key) : null;
+
+        // The card of a collaboration has the handle of one of its channels at most
+        if (handles != null && !handles.isEmpty() && (handles.size() > 1 || video.channelHandle == null)) {
+            return Observable.just(handles);
+        }
+
+        Map<String, String> cardHandles = video.channelHandle != null ?
+                Collections.singletonMap(video.channelHandle, video.channelId) : NO_HANDLES;
+        // Not looked up yet, the name might be a collaboration's: only the lookup finds its other channels
+        boolean mayBeCollaboration = handles == null && CollaborationManager.isCandidate(video.getAuthor());
+
+        if ((!cardHandles.isEmpty() && !mayBeCollaboration) || video.videoId == null) {
+            return Observable.just(cardHandles);
+        }
+
+        Observable<Map<String, String>> lookup = key != null ? getHandleLookup(key, video.videoId) :
+                mHandleLookup.getChannelHandles(video.videoId) // nothing to keep it by
+                        .map(AiSListManager::copyHandles)
+                        .onErrorReturnItem(NO_HANDLES);
+
+        return lookup.map(found -> found.isEmpty() ? cardHandles : found);
     }
 
     /**
@@ -369,6 +451,72 @@ public class AiSListManager implements OnDataChange {
 
         if (parent != null && (parent.exists() || parent.mkdirs())) {
             FileHelpers.stringToFile(content.toString(), mHandlesFile);
+        }
+    }
+
+    /**
+     * The file is read before it's written: both run on one thread, in the order they're asked
+     */
+    private static void runInOrder(Runnable task) {
+        Completable.fromRunnable(task)
+                .subscribeOn(Schedulers.single())
+                .subscribe(() -> {}, error -> Log.e(TAG, "Reported channels error: %s", error.getMessage()));
+    }
+
+    /**
+     * Before the ones reported since the start
+     */
+    private void restoreReported() {
+        String content = FileHelpers.getFileContents(mReportedFile);
+
+        if (content == null) {
+            return;
+        }
+
+        synchronized (mReportedChannels) {
+            List<String> reportedSinceStart = new ArrayList<>(mReportedChannels);
+            mReportedChannels.clear();
+
+            for (String line : content.split("\n")) {
+                if (isHandle(line)) {
+                    addReported(line.toLowerCase(Locale.ROOT));
+                }
+            }
+
+            for (String handle : reportedSinceStart) {
+                addReported(handle);
+            }
+        }
+    }
+
+    private void saveReported() {
+        StringBuilder content = new StringBuilder();
+
+        synchronized (mReportedChannels) {
+            for (String handle : mReportedChannels) {
+                content.append(handle).append('\n');
+            }
+        }
+
+        File parent = mReportedFile.getParentFile();
+
+        if (parent != null && (parent.exists() || parent.mkdirs())) {
+            FileHelpers.stringToFile(content.toString(), mReportedFile);
+        }
+    }
+
+    /**
+     * As the most recent, dropping the oldest past {@value #MAX_REPORTED_CHANNELS}. Under the lock.
+     */
+    private void addReported(String key) {
+        mReportedChannels.remove(key);
+        mReportedChannels.add(key);
+
+        Iterator<String> oldest = mReportedChannels.iterator();
+
+        while (mReportedChannels.size() > MAX_REPORTED_CHANNELS && oldest.hasNext()) {
+            oldest.next();
+            oldest.remove();
         }
     }
 

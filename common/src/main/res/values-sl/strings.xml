@@ -320,4 +320,5 @@
     <string name="aislist_status">Kanali na seznamih: %1$d na seznamu blokiranih, %2$d na seznamu opozoril</string>
     <string name="aislist_status_not_loaded">Prenašanje seznamov…</string>
     <string name="aislist_about">O AiSList (seznam skupnosti, CC BY-NC 4.0)</string>
+    <string name="report_ai_channel">Prijavi kanal AiSListu</string>
 </resources>

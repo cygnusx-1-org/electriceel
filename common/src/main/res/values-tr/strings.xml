@@ -774,4 +774,5 @@
     <string name="aislist_status">Listelenen kanallar: engelleme listesinde %1$d, uyarı listesinde %2$d</string>
     <string name="aislist_status_not_loaded">Listeler indiriliyor…</string>
     <string name="aislist_about">AiSList hakkında (topluluk listesi, CC BY-NC 4.0)</string>
+    <string name="report_ai_channel">Kanalı AiSList\'e bildir</string>
 </resources>

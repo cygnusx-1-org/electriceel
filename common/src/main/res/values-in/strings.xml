@@ -768,4 +768,5 @@
     <string name="aislist_status">Channel terdaftar: %1$d di daftar blokir, %2$d di daftar peringatan</string>
     <string name="aislist_status_not_loaded">Mengunduh daftar…</string>
     <string name="aislist_about">Tentang AiSList (daftar komunitas, CC BY-NC 4.0)</string>
+    <string name="report_ai_channel">Laporkan channel ke AiSList</string>
 </resources>

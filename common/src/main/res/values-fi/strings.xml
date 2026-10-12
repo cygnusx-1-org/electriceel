@@ -766,4 +766,5 @@
     <string name="aislist_status">Listatut kanavat: %1$d estolistalla, %2$d varoituslistalla</string>
     <string name="aislist_status_not_loaded">Ladataan listoja…</string>
     <string name="aislist_about">Tietoja AiSLististä (yhteisön lista, CC BY-NC 4.0)</string>
+    <string name="report_ai_channel">Ilmoita kanava AiSListiin</string>
 </resources>

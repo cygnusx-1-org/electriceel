@@ -5,7 +5,7 @@ import android.content.Context;
 import com.liskovsoft.smartyoutubetv2.common.prefs.common.DataSaverBase;
 
 /**
- * Where to hide videos from channels listed by AiSList.<br/>
+ * Where to hide videos from channels listed by AiSList, and how channels are reported to it.<br/>
  * Each list has its own set of sections. Everything is off by default.
  */
 public class AiSListFilterData extends DataSaverBase {
@@ -30,9 +30,13 @@ public class AiSListFilterData extends DataSaverBase {
     private static final int WARNLIST_MARK_COLOR_INDEX = EVERYTHING_INDEX + 2; // the blocklist uses MARK_COLOR_INDEX
     private static final int WARNLIST_MARK_INDEX = WARNLIST_MARK_COLOR_INDEX + 1; // the blocklist uses MARK_INDEX
     private static final int MARK_MODE_INDEX = WARNLIST_MARK_INDEX + 1; // one per list, replaces the mark switches
+    private static final int REPORT_AS_INDEX = MARK_MODE_INDEX + 2;
+    private static final int BLOCK_ON_REPORT_INDEX = REPORT_AS_INDEX + 1;
     public static final int MARK_MODE_OFF = 0; // hide, mark only sections are left alone
     public static final int MARK_MODE_MARK_ONLY_SECTIONS = 1; // hide, mark in the mark only sections
     public static final int MARK_MODE_ALL = 2; // mark everywhere, never hide
+    public static final int REPORT_AS_ANONYMOUS = 0;
+    public static final int REPORT_AS_ACCOUNT_NAME = 1; // the name of the selected YouTube account
     public static final int MARK_COLOR_OFF = 0; // the marker uses the card text color
     public static final int MARK_COLOR_RED = 0xFFFF0000;
     public static final int MARK_COLOR_ORANGE = 0xFFFF9800;
@@ -113,6 +117,28 @@ public class AiSListFilterData extends DataSaverBase {
         }
 
         return getBoolean(MARK_INDEX);
+    }
+
+    /**
+     * Who a reported channel is credited to: {@link #REPORT_AS_ANONYMOUS} or {@link #REPORT_AS_ACCOUNT_NAME}
+     */
+    public int getReportAs() {
+        return getInt(REPORT_AS_INDEX, REPORT_AS_ANONYMOUS);
+    }
+
+    public void setReportAs(int reportAs) {
+        setInt(REPORT_AS_INDEX, reportAs);
+    }
+
+    /**
+     * A channel AiSList took the report of is blocked too (see BlockedChannelData)
+     */
+    public boolean isBlockOnReportEnabled() {
+        return getBoolean(BLOCK_ON_REPORT_INDEX);
+    }
+
+    public void setBlockOnReportEnabled(boolean enable) {
+        setBoolean(BLOCK_ON_REPORT_INDEX, enable);
     }
 
     /**

@@ -19,6 +19,8 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import io.reactivex.Observable;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -408,6 +410,115 @@ public class AiSListManagerTest {
         assertNull(AiSListManager.parseHandles("@handle,Channel"));
         assertNull(AiSListManager.parseHandles("@"));
         assertNull(AiSListManager.parseHandles(""));
+    }
+
+    @Test
+    public void blocklistedWhateverTheSections() {
+        AiSListManager manager = AiSListManager.instance(RuntimeEnvironment.getApplication());
+
+        // Every filter is off
+        assertTrue(manager.isBlocklisted(AI_HANDLE));
+        assertTrue(manager.isBlocklisted(AI_HANDLE.toUpperCase()));
+        assertFalse(manager.isBlocklisted(WARN_HANDLE));
+        assertFalse(manager.isBlocklisted(HUMAN_HANDLE));
+        assertFalse(manager.isBlocklisted(null));
+    }
+
+    @Test
+    public void reportedChannelIsRemembered() {
+        AiSListManager manager = AiSListManager.instance(RuntimeEnvironment.getApplication());
+
+        assertFalse(manager.isReported("@ReportedOnce"));
+
+        manager.onReported("@ReportedOnce");
+
+        assertTrue(manager.isReported("@reportedonce"));
+
+        // Not a handle
+        manager.onReported("Channel Name");
+
+        assertFalse(manager.isReported("Channel Name"));
+        assertFalse(manager.isReported(null));
+    }
+
+    @Test
+    public void onlyTheLastReportedChannelsAreRemembered() {
+        AiSListManager manager = AiSListManager.instance(RuntimeEnvironment.getApplication());
+
+        manager.onReported("@ReportedFirst");
+        manager.onReported("@ReportedSecond");
+        manager.onReported("@ReportedFirst"); // again: the most recent now
+
+        for (int i = 0; i < 149; i++) {
+            manager.onReported("@Report" + i);
+        }
+
+        assertTrue(manager.isReported("@ReportedFirst"));
+        assertFalse(manager.isReported("@ReportedSecond"));
+        assertTrue(manager.isReported("@Report0"));
+        assertTrue(manager.isReported("@Report148"));
+    }
+
+    @Test
+    public void handleOfTheCardIsUsedWithoutLookup() {
+        AiSListManager manager = AiSListManager.instance(RuntimeEnvironment.getApplication());
+        List<String> lookedUp = new ArrayList<>();
+        manager.setHandleLookupForTesting(videoId -> {
+            lookedUp.add(videoId);
+            return Observable.just(Collections.singletonMap("@Other", null));
+        });
+        Video video = createVideo("1", HUMAN_HANDLE);
+        video.channelId = "UCreal";
+
+        assertEquals(Collections.singletonMap(HUMAN_HANDLE, "UCreal"), manager.getChannelHandles(video).blockingFirst());
+        assertTrue(lookedUp.isEmpty());
+    }
+
+    @Test
+    public void everyChannelOfCollaborationIsFound() {
+        AiSListManager manager = AiSListManager.instance(RuntimeEnvironment.getApplication());
+        Map<String, String> handles = new LinkedHashMap<>();
+        handles.put("@fexl", "UCFlnKDqG512KkbDvPa2ybRw");
+        handles.put("@Frequensyt", null);
+        List<String> lookedUp = new ArrayList<>();
+        manager.setHandleLookupForTesting(videoId -> {
+            lookedUp.add(videoId);
+            return Observable.just(handles);
+        });
+        Video video = createVideo("collab", null);
+        video.author = "Fexl and Frequensi";
+
+        assertEquals(handles, manager.getChannelHandles(video).blockingFirst());
+
+        // Kept: the card that has the handle of one of them gets both, without another lookup
+        video.channelHandle = "@fexl";
+
+        assertEquals(handles, manager.getChannelHandles(video).blockingFirst());
+        assertEquals(Collections.singletonList("collab"), lookedUp);
+    }
+
+    @Test
+    public void cardWithoutChannelNameIsLookedUpByVideo() {
+        AiSListManager manager = AiSListManager.instance(RuntimeEnvironment.getApplication());
+        manager.setHandleLookupForTesting(videoId -> Observable.just(Collections.singletonMap("@" + videoId, null)));
+
+        assertEquals(Collections.singletonMap("@nameless", null), manager.getChannelHandles(createVideo("nameless", null)).blockingFirst());
+    }
+
+    @Test
+    public void noHandleWhenLookupFails() {
+        AiSListManager manager = AiSListManager.instance(RuntimeEnvironment.getApplication());
+        manager.setHandleLookupForTesting(videoId -> Observable.error(new IllegalStateException("Offline")));
+        Video video = createVideo("1", null);
+        video.author = "Someone";
+
+        assertTrue(manager.getChannelHandles(video).blockingFirst().isEmpty());
+
+        // A card without a video has nothing to look up with
+        Video channel = new Video();
+        channel.author = "Someone Else";
+
+        assertTrue(manager.getChannelHandles(channel).blockingFirst().isEmpty());
     }
 
     private void setMarkEnabled(boolean enable) {

@@ -774,4 +774,5 @@
     <string name="aislist_status">リスト掲載チャンネル: ブロックリスト %1$d件、警告リスト %2$d件</string>
     <string name="aislist_status_not_loaded">リストをダウンロードしています…</string>
     <string name="aislist_about">AiSListについて（コミュニティリスト、CC BY-NC 4.0）</string>
+    <string name="report_ai_channel">チャンネルをAiSListに報告</string>
 </resources>

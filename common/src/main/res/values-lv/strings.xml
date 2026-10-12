@@ -143,4 +143,5 @@
     <string name="aislist_status">Kanāli sarakstos: %1$d bloķēšanas sarakstā, %2$d brīdinājumu sarakstā</string>
     <string name="aislist_status_not_loaded">Lejupielādē sarakstus…</string>
     <string name="aislist_about">Par AiSList (kopienas saraksts, CC BY-NC 4.0)</string>
+    <string name="report_ai_channel">Ziņot par kanālu AiSList</string>
 </resources>

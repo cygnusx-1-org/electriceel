@@ -766,4 +766,5 @@
     <string name="aislist_status">Каналів у списках: %1$d у чорному списку, %2$d у списку попереджень</string>
     <string name="aislist_status_not_loaded">Завантаження списків…</string>
     <string name="aislist_about">Про AiSList (список спільноти, CC BY-NC 4.0)</string>
+    <string name="report_ai_channel">Поскаржитися на канал в AiSList</string>
 </resources>

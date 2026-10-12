@@ -30,6 +30,10 @@ public class AiSListSettingsPresenter extends BasePresenter<Void> {
             {R.string.aislist_mark_in_mark_only, AiSListFilterData.MARK_MODE_MARK_ONLY_SECTIONS},
             {R.string.aislist_mark_instead_of_hide, AiSListFilterData.MARK_MODE_ALL}
     };
+    private static final int[][] REPORT_AS = {
+            {R.string.aislist_report_as_anonymous, AiSListFilterData.REPORT_AS_ANONYMOUS},
+            {R.string.aislist_report_as_account_name, AiSListFilterData.REPORT_AS_ACCOUNT_NAME}
+    };
     // Also the colors of the Collaborations and Watch later labels (see SectionFilterSettingsPresenter)
     static final int[][] MARK_COLORS = {
             {R.string.aislist_mark_color_off, AiSListFilterData.MARK_COLOR_OFF},
@@ -55,6 +59,7 @@ public class AiSListSettingsPresenter extends BasePresenter<Void> {
 
         appendListMenu(settingsPresenter, AiSListFilterData.LIST_BLOCKLIST, R.string.aislist_blocklist);
         appendListMenu(settingsPresenter, AiSListFilterData.LIST_WARNLIST, R.string.aislist_warnlist);
+        appendReportsMenu(settingsPresenter);
         appendStatus(settingsPresenter);
         appendLinks(settingsPresenter);
 
@@ -147,6 +152,36 @@ public class AiSListSettingsPresenter extends BasePresenter<Void> {
         }
 
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.aislist_mark_color), options);
+    }
+
+    /**
+     * How the channels reported from the context menu are sent (see AiSListReportPresenter)
+     */
+    private void appendReportsMenu(AppDialogPresenter settingsPresenter) {
+        String title = getContext().getString(R.string.aislist_reports);
+        settingsPresenter.appendSingleButton(UiOptionItem.from(title, option -> showReportsMenu(title)));
+    }
+
+    private void showReportsMenu(String title) {
+        AppDialogPresenter dialogPresenter = AppDialogPresenter.instance(getContext());
+        List<OptionItem> options = new ArrayList<>();
+
+        for (int[] pair : REPORT_AS) {
+            String description = pair[1] == AiSListFilterData.REPORT_AS_ACCOUNT_NAME ?
+                    getContext().getString(R.string.aislist_report_as_account_name_desc) : null;
+            options.add(UiOptionItem.from(getContext().getString(pair[0]), description,
+                    optionItem -> mFilterData.setReportAs(pair[1]),
+                    mFilterData.getReportAs() == pair[1]));
+        }
+
+        dialogPresenter.appendRadioCategory(getContext().getString(R.string.aislist_report_as), options);
+
+        dialogPresenter.appendSingleSwitch(UiOptionItem.from(getContext().getString(R.string.aislist_block_on_report),
+                getContext().getString(R.string.aislist_block_on_report_desc),
+                optionItem -> mFilterData.setBlockOnReportEnabled(optionItem.isSelected()),
+                mFilterData.isBlockOnReportEnabled()));
+
+        dialogPresenter.showDialog(title);
     }
 
     private void appendStatus(AppDialogPresenter settingsPresenter) {

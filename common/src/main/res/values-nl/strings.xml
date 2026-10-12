@@ -741,4 +741,5 @@
     <string name="aislist_status">Vermelde kanalen: %1$d op de blokkeerlijst, %2$d op de waarschuwingslijst</string>
     <string name="aislist_status_not_loaded">Lijsten downloaden…</string>
     <string name="aislist_about">Over AiSList (communitylijst, CC BY-NC 4.0)</string>
+    <string name="report_ai_channel">Kanaal melden bij AiSList</string>
 </resources>
