@@ -54,7 +54,8 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
             LocaleData.LOCALE_DATA, BlockedChannelData.BLOCKED_CHANNEL_DATA, KeywordFilterData.KEYWORD_FILTER_DATA,
             CollaborationsData.class.getSimpleName(), TopChannelsData.class.getSimpleName(), ExploreTopicsData.class.getSimpleName(),
             ShowsData.class.getSimpleName(), WatchLaterData.class.getSimpleName(), MusicAutoplayData.class.getSimpleName(),
-            OldVideosData.class.getSimpleName()
+            OldVideosData.class.getSimpleName(), AiSListFilterData.class.getSimpleName(), SponsorBlockData.SPONSOR_BLOCK_DATA,
+            HideContentData.HIDE_CONTENT_DATA, DeArrowData.class.getSimpleName(), SearchData.SEARCH_DATA
     };
     private String mBootResolution;
     private final WeakHashSet<ProfileChangeListener> mListeners = new WeakHashSet<>();
@@ -79,6 +80,10 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
 
     private void initProfiles() {
         migrateSharedSettings();
+        migrateToProfileData(AiSListFilterData.class.getSimpleName());
+        migrateToProfileData(SponsorBlockData.SPONSOR_BLOCK_DATA);
+        migrateToProfileData(DeArrowData.class.getSimpleName());
+        migrateToProfileData(SearchData.SEARCH_DATA);
         initSharedSettingsProfile();
         MediaServiceManager.instance().addAccountListener(this);
         initAccountProfile();
@@ -179,6 +184,29 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
         // All of them have their own now
         putString(SHARED_SETTINGS_PROFILE_NAME, "");
         putString(MULTI_PROFILES, null);
+    }
+
+    /**
+     * The settings were for all the accounts before: each account that has been used keeps them as its own, an account added
+     * after this starts from the defaults. Until an account is selected, the shared key is the one in use (see getProfileKey).
+     */
+    void migrateToProfileData(String key) {
+        String data = getData(key);
+
+        if (TextUtils.isEmpty(data) || TextUtils.isEmpty(getProfileName())) {
+            return;
+        }
+
+        for (String profileName : getUsedProfileNames()) {
+            String profileKey = profileName + "_" + key;
+
+            if (TextUtils.isEmpty(getData(profileKey))) {
+                setData(profileKey, data);
+            }
+        }
+
+        // Once
+        setData(key, "");
     }
 
     /**

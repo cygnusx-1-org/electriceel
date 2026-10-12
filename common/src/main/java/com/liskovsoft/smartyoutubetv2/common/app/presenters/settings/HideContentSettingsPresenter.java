@@ -11,6 +11,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.BrowsePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
 import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.HideContentData;
 import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
 
 import java.util.ArrayList;
@@ -22,11 +23,13 @@ import java.util.List;
 public class HideContentSettingsPresenter extends BasePresenter<Void> {
     private final GeneralData mGeneralData;
     private final MediaServiceData mMediaServiceData;
+    private final HideContentData mHideContentData;
 
     private HideContentSettingsPresenter(Context context) {
         super(context);
         mGeneralData = GeneralData.instance(context);
         mMediaServiceData = MediaServiceData.instance();
+        mHideContentData = HideContentData.instance(context);
     }
 
     public static HideContentSettingsPresenter instance(Context context) {
@@ -74,10 +77,10 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
                 option -> {
                     if (option.isSelected()) {
                         // Starts on: the options apply as before
-                        mMediaServiceData.setShortsQuickToggleHiding(true);
+                        mHideContentData.setShortsQuickToggleHiding(true);
                     }
 
-                    mMediaServiceData.setShortsQuickToggleEnabled(option.isSelected());
+                    mHideContentData.setShortsQuickToggleEnabled(option.isSelected());
                 },
                 mMediaServiceData.isShortsQuickToggleEnabled());
         quickToggle.setToggle(true);
@@ -85,7 +88,7 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
 
         options.add(UiOptionItem.from(getContext().getString(R.string.hide_shorts_everywhere),
                 option -> {
-                    mMediaServiceData.setContentHidden(MediaServiceData.CONTENT_SHORTS_ALL, option.isSelected());
+                    mHideContentData.setContentHidden(MediaServiceData.CONTENT_SHORTS_ALL, option.isSelected());
                     BrowsePresenter.instance(getContext()).enableSection(MediaGroup.TYPE_SHORTS, !option.isSelected());
                 },
                 mMediaServiceData.isContentHiddenInSettings(MediaServiceData.CONTENT_SHORTS_ALL)));
@@ -173,7 +176,7 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
      */
     private OptionItem createContentItem(int titleResId, int content) {
         return UiOptionItem.from(getContext().getString(titleResId),
-                option -> mMediaServiceData.setContentHidden(content, option.isSelected()),
+                option -> mHideContentData.setContentHidden(content, option.isSelected()),
                 mMediaServiceData.isContentHiddenInSettings(content));
     }
 

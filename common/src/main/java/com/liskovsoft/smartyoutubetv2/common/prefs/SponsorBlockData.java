@@ -8,6 +8,7 @@ import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
 import com.liskovsoft.smartyoutubetv2.common.R;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers.SponsorBlockController.SegmentAction;
+import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs.ProfileChangeListener;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,13 +18,16 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class SponsorBlockData {
+/**
+ * Each account has its own, except the alt server: the shared modules read it from GlobalPreferences
+ */
+public class SponsorBlockData implements ProfileChangeListener {
     public static final int ACTION_UNDEFINED = -1;
     public static final int ACTION_SKIP_ONLY = 0;
     public static final int ACTION_SKIP_WITH_TOAST = 1;
     public static final int ACTION_SHOW_DIALOG = 2;
     public static final int ACTION_DO_NOTHING = 3;
-    private static final String SPONSOR_BLOCK_DATA = "content_block_data";
+    static final String SPONSOR_BLOCK_DATA = "content_block_data";
     @SuppressLint("StaticFieldLeak")
     private static SponsorBlockData sInstance;
     private final AppPrefs mAppPrefs;
@@ -44,6 +48,7 @@ public class SponsorBlockData {
         initColorMapping();
         initAllCategories();
         restoreState();
+        mAppPrefs.addListener(this);
     }
 
     public static SponsorBlockData instance(Context context) {
@@ -243,7 +248,7 @@ public class SponsorBlockData {
     }
 
     private void restoreState() {
-        String data = mAppPrefs.getData(SPONSOR_BLOCK_DATA);
+        String data = mAppPrefs.getProfileData(SPONSOR_BLOCK_DATA);
 
         String[] split = Helpers.splitData(data);
 
@@ -280,10 +285,11 @@ public class SponsorBlockData {
             mExcludedChannels.clear();
         }
 
+        // Another account's are left otherwise
+        mActions.clear();
+
         if (actions != null) {
             String[] actionsArr = Helpers.splitArray(actions);
-
-            mActions.clear();
 
             for (String action : actionsArr) {
                 mActions.add(SegmentAction.from(action));
@@ -309,10 +315,25 @@ public class SponsorBlockData {
         String actions = Helpers.mergeArray(mActions.toArray());
         String excludedChannels = Helpers.mergeArray(mExcludedChannels.toArray());
 
-        mAppPrefs.setData(SPONSOR_BLOCK_DATA, Helpers.mergeData(
+        mAppPrefs.setProfileData(SPONSOR_BLOCK_DATA, Helpers.mergeData(
                 mIsSponsorBlockEnabled, null, null, null,
                 null, null, actions, colorCategories, mIsDontSkipSegmentAgainEnabled,
                 excludedChannels, mIsPaidContentNotificationEnabled, mIgnoredDurationMs
         ));
+    }
+
+    /**
+     * The account (or the per account switch) has changed, the values are the new account's
+     */
+    @Override
+    public void onProfileChanged() {
+        restoreState();
+    }
+
+    /**
+     * The next instance reads the saved values again
+     */
+    static void resetInstanceForTesting() {
+        sInstance = null;
     }
 }

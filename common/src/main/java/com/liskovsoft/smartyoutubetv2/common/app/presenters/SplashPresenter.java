@@ -27,6 +27,7 @@ import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.StreamReminderService;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AccountsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.HideContentData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.LocaleData;
 import com.liskovsoft.smartyoutubetv2.common.proxy.ProxyManager;
 import com.liskovsoft.smartyoutubetv2.common.utils.IntentExtractor;
@@ -93,6 +94,7 @@ public class SplashPresenter extends BasePresenter<SplashView> {
             RxHelper.setupGlobalErrorHandler();
             initGlobalPrefs();
             initLocaleData();
+            initHideContentData();
             initProxy();
             initVideoStateService();
             initStreamReminderService();
@@ -183,6 +185,15 @@ public class SplashPresenter extends BasePresenter<SplashView> {
     private void initLocaleData() {
         if (getContext() != null) {
             LocaleData.instance(getContext());
+        }
+    }
+
+    /**
+     * Before an account change: it puts the account's hidden content and Shorts quick toggle in use
+     */
+    private void initHideContentData() {
+        if (getContext() != null) {
+            HideContentData.instance(getContext());
         }
     }
 

@@ -11,6 +11,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.BrowsePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
 import com.liskovsoft.smartyoutubetv2.common.misc.OldVideoFilter;
+import com.liskovsoft.smartyoutubetv2.common.prefs.HideContentData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.OldVideosData;
 import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
 
@@ -65,8 +66,7 @@ public class QuickTogglePresenter extends BasePresenter<Void> {
             MessageHelpers.showMessage(getContext(), getOldVideosState());
             refreshSection(true, false);
         } else if (isShortsEnabled) {
-            MediaServiceData data = MediaServiceData.instance();
-            data.setShortsQuickToggleHiding(!data.isShortsQuickToggleHiding());
+            HideContentData.instance(getContext()).setShortsQuickToggleHiding(!isShortsHiding());
             MessageHelpers.showMessage(getContext(), getShortsState());
             refreshSection(false, true);
         }
@@ -100,7 +100,7 @@ public class QuickTogglePresenter extends BasePresenter<Void> {
                 isOldVideosHiding));
 
         presenter.appendSingleSwitch(UiOptionItem.from(getContext().getString(R.string.enable_hide_shorts_options),
-                option -> shortsData.setShortsQuickToggleHiding(option.isSelected()),
+                option -> HideContentData.instance(getContext()).setShortsQuickToggleHiding(option.isSelected()),
                 isShortsHiding));
 
         presenter.showDialog(getContext().getString(R.string.quick_toggles), () -> refreshSection(

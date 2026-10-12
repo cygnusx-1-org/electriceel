@@ -32,6 +32,7 @@ import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager.AccountChangeListener;
 import com.liskovsoft.smartyoutubetv2.common.prefs.common.DataChangeBase.OnDataChange;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.HideContentData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.OldVideosData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
@@ -74,7 +75,7 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
     private boolean mIsLanguageViewEnabled;
     private boolean mIsGlobalClockEnabled;
     // Held here, the data keeps its listeners weakly. Doesn't reload the other buttons (e.g. the flag).
-    private final OnDataChange mOnOldVideosChange = this::updateQuickToggle;
+    private final OnDataChange mOnQuickToggleChange = this::updateQuickToggle;
 
     public NavigateTitleView(Context context) {
         super(context);
@@ -196,7 +197,8 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
         MainUIData mainUIData = MainUIData.instance(getContext());
         mainUIData.setOnChange(this);
 
-        OldVideosData.instance(getContext()).setOnChange(mOnOldVideosChange);
+        OldVideosData.instance(getContext()).setOnChange(mOnQuickToggleChange);
+        HideContentData.instance(getContext()).setOnChange(mOnQuickToggleChange);
 
         mInitDone = true;
     }

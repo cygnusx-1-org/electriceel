@@ -6,7 +6,7 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.common.DataSaverBase;
 
 /**
  * Where to hide videos from channels listed by AiSList, and how channels are reported to it.<br/>
- * Each list has its own set of sections. Everything is off by default.
+ * Each list has its own set of sections. Everything is off by default. Each account has its own.
  */
 public class AiSListFilterData extends DataSaverBase {
     public static final int LIST_BLOCKLIST = 0;
@@ -58,7 +58,8 @@ public class AiSListFilterData extends DataSaverBase {
     private static AiSListFilterData sInstance;
 
     private AiSListFilterData(Context context) {
-        super(context);
+        // Saved right away: a save still pending when the account changes is dropped
+        super(context, true, true);
     }
 
     public static AiSListFilterData instance(Context context) {
@@ -183,5 +184,12 @@ public class AiSListFilterData extends DataSaverBase {
         }
 
         return MORE_SECTIONS_INDEX + list * (SECTION_COUNT - FIRST_SECTION_COUNT) + section - FIRST_SECTION_COUNT;
+    }
+
+    /**
+     * The next instance reads the saved values again
+     */
+    static void resetInstanceForTesting() {
+        sInstance = null;
     }
 }

@@ -4,11 +4,15 @@ import android.content.Context;
 
 import com.liskovsoft.smartyoutubetv2.common.prefs.common.DataSaverBase;
 
+/**
+ * Each account has its own
+ */
 public class DeArrowData extends DataSaverBase {
     private static DeArrowData sInstance;
 
     private DeArrowData(Context context) {
-        super(context);
+        // Saved right away: a save still pending when the account changes is dropped
+        super(context, true, true);
     }
 
     public static DeArrowData instance(Context context) {
@@ -41,5 +45,12 @@ public class DeArrowData extends DataSaverBase {
 
     public void setReplaceThumbnailsEnabled(boolean replace) {
         setBoolean(2, replace);
+    }
+
+    /**
+     * The next instance reads the saved values again
+     */
+    static void resetInstanceForTesting() {
+        sInstance = null;
     }
 }

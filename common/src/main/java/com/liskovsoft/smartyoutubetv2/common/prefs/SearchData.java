@@ -3,12 +3,16 @@ package com.liskovsoft.smartyoutubetv2.common.prefs;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import com.liskovsoft.sharedutils.helpers.Helpers;
+import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs.ProfileChangeListener;
 
-public class SearchData {
+/**
+ * Each account has its own
+ */
+public class SearchData implements ProfileChangeListener {
     public static final int SPEECH_RECOGNIZER_SYSTEM = 0;
     public static final int SPEECH_RECOGNIZER_INTENT = 1;
     public static final int SPEECH_RECOGNIZER_GOTEV = 2;
-    private static final String SEARCH_DATA = "search_data";
+    static final String SEARCH_DATA = "search_data";
     @SuppressLint("StaticFieldLeak")
     private static SearchData sInstance;
     private final AppPrefs mAppPrefs;
@@ -28,6 +32,7 @@ public class SearchData {
     private SearchData(Context context) {
         mAppPrefs = AppPrefs.instance(context);
         restoreData();
+        mAppPrefs.addListener(this);
     }
 
     public static SearchData instance(Context context) {
@@ -146,6 +151,14 @@ public class SearchData {
     }
 
     /**
+     * The account (or the per account switch) has changed, the values are the new account's
+     */
+    @Override
+    public void onProfileChanged() {
+        restoreData();
+    }
+
+    /**
      * The next instance reads the saved values again
      */
     static void resetInstanceForTesting() {
@@ -153,7 +166,7 @@ public class SearchData {
     }
 
     private void restoreData() {
-        String data = mAppPrefs.getData(SEARCH_DATA);
+        String data = mAppPrefs.getProfileData(SEARCH_DATA);
 
         String[] split = Helpers.splitData(data);
 
@@ -175,7 +188,7 @@ public class SearchData {
     }
 
     private void persistData() {
-        mAppPrefs.setData(SEARCH_DATA,
+        mAppPrefs.setProfileData(SEARCH_DATA,
                 Helpers.mergeData(mIsInstantVoiceSearchEnabled, mSearchOptions, mIsFocusOnResultsEnabled,
                         mIsKeyboardAutoShowEnabled, mIsTempBackgroundModeEnabled, null, mSpeechRecognizerType,
                         mIsTrendingSearchesEnabled, mIsSearchHistoryDisabled, mIsPopularSearchesDisabled,
