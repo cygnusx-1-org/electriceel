@@ -278,6 +278,10 @@ public class AppPreferenceManager {
                     dependentPref.setNote(item.toString());
                 }
 
+                if (item.isSeparator()) {
+                    dependentPref.setSeparator(item.toString());
+                }
+
                 if (item.isMenu()) {
                     // Stays unchecked, the list tells a change by the checked state
                     dependentPref.setMenu(item.toString(), () -> item.onSelect(false));
@@ -314,8 +318,8 @@ public class AppPreferenceManager {
 
     private static boolean hasDependentItems(OptionCategory category) {
         for (OptionItem item : category.options) {
-            if (item.getDisabledBy() != null || !item.isEnabled() || item.isNote() || item.isMenu() || item.isToggle() || item.getRadio() != null
-                    || item.getSelectAll() != null) {
+            if (item.getDisabledBy() != null || !item.isEnabled() || item.isNote() || item.isSeparator() || item.isMenu() || item.isToggle()
+                    || item.getRadio() != null || item.getSelectAll() != null) {
                 return true;
             }
         }

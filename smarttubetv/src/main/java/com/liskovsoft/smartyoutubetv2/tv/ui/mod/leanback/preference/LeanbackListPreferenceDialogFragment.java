@@ -65,6 +65,7 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
     private static final int VIEW_TYPE_MENU = 2;
     private static final int VIEW_TYPE_RADIO = 3;
     private static final int VIEW_TYPE_NOTE = 4;
+    private static final int VIEW_TYPE_SEPARATOR = 5;
     private boolean mMulti;
     protected CharSequence[] mEntries;
     protected CharSequence[] mEntryValues;
@@ -303,11 +304,14 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-            // MOD: switch, menu, radio and note rows (see DependentListPreference)
+            // MOD: switch, menu, radio, note and separator rows (see DependentListPreference)
             final int layoutResId;
             switch (viewType) {
                 case VIEW_TYPE_NOTE:
                     layoutResId = R.layout.dialog_list_preference_item_note;
+                    break;
+                case VIEW_TYPE_SEPARATOR:
+                    layoutResId = R.layout.dialog_list_preference_item_separator;
                     break;
                 case VIEW_TYPE_SWITCH:
                     layoutResId = R.layout.dialog_list_preference_item_switch;
@@ -341,6 +345,10 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
                 return VIEW_TYPE_NOTE;
             }
 
+            if (((DependentListPreference) preference).isSeparator(entryValue)) {
+                return VIEW_TYPE_SEPARATOR;
+            }
+
             if (((DependentListPreference) preference).isMenu(entryValue)) {
                 return VIEW_TYPE_MENU;
             }
@@ -354,6 +362,10 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
+            // MOD: a separator is only a line, it has no checkbox or title
+            if (getItemViewType(position) == VIEW_TYPE_SEPARATOR) {
+                return;
+            }
             holder.getWidgetView().setChecked(
                     mSelections.contains(mEntryValues[position].toString()));
             holder.getTitleView().setText(mEntries[position]);
@@ -376,7 +388,8 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
         @Override
         public void onItemClick(ViewHolder viewHolder) {
             final int index = viewHolder.getAdapterPosition();
-            if (index == RecyclerView.NO_POSITION || isDisabled(index) || getItemViewType(index) == VIEW_TYPE_NOTE) {
+            if (index == RecyclerView.NO_POSITION || isDisabled(index) || getItemViewType(index) == VIEW_TYPE_NOTE
+                    || getItemViewType(index) == VIEW_TYPE_SEPARATOR) {
                 return;
             }
             final String entry = mEntryValues[index].toString();

@@ -1104,21 +1104,40 @@ public class AppDialogUtil {
         // YouTube never marks Watch later as selected
         boolean isInWatchLater = WatchLaterManager.instance(context).isInWatchLater(video.videoId);
         YouTubeMediaItemService itemService = YouTubeMediaItemService.instance();
+        OptionItem watchLater = null;
 
         for (PlaylistInfo playlistInfo : playlistInfos) {
+            boolean isWatchLater = WatchLaterManager.WATCH_LATER_PLAYLIST_ID.equals(playlistInfo.getPlaylistId());
             // An edit made in the app comes first: YouTube tells about it late, and the video keeps the playlist it's opened from
             Boolean recentEdit = itemService.getRecentPlaylistEdit(playlistInfo.getPlaylistId(), video.videoId);
             boolean isSelected = recentEdit != null ? recentEdit : playlistInfo.isSelected() || Helpers.equals(playlistInfo.getPlaylistId(), video.playlistId)
-                    || (isInWatchLater && WatchLaterManager.WATCH_LATER_PLAYLIST_ID.equals(playlistInfo.getPlaylistId()));
+                    || (isInWatchLater && isWatchLater);
 
-            options.add(UiOptionItem.from(
+            OptionItem option = UiOptionItem.from(
                     playlistInfo.getTitle(),
                     (item) -> {
                         addRemoveFromPlaylist(context, video, callback, playlistInfo, item.isSelected());
                         GeneralData.instance(context).setLastPlaylistId(playlistInfo.getPlaylistId());
                         GeneralData.instance(context).setLastPlaylistTitle(playlistInfo.getTitle());
                     },
-                    isSelected));
+                    isSelected);
+
+            if (isWatchLater && watchLater == null) {
+                watchLater = option;
+            } else {
+                options.add(option);
+            }
+        }
+
+        // Watch later on top, set apart from the playlists by title (see PlaylistOrder)
+        if (watchLater != null) {
+            if (!options.isEmpty()) {
+                OptionItem separator = UiOptionItem.from("");
+                separator.setSeparator(true);
+                options.add(0, separator);
+            }
+
+            options.add(0, watchLater);
         }
 
         dialogPresenter.appendCheckedCategory(context.getString(R.string.dialog_add_to_playlist), options);

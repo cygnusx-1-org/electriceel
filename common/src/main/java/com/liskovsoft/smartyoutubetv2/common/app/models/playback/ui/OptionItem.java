@@ -27,6 +27,11 @@ public interface OptionItem {
     void setNote(boolean isNote);
     boolean isNote();
     /**
+     * Show this item of a checked list as a line between the items above and below it: no title or checkbox, can't be focused or selected
+     */
+    void setSeparator(boolean isSeparator);
+    boolean isSeparator();
+    /**
      * Show this item of a checked list as a row that opens a menu: no checkbox, selecting it calls the callback and leaves it unchecked
      */
     void setMenu(boolean isMenu);

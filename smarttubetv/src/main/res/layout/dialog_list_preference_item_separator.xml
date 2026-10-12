@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- A checked list entry that's only a line between the entries above and below it (e.g. Watch later and the playlists).
+     As wide as the content of the leanback_list_preference_item_multi rows, in the dimmed title color.
+     Never focused: the D-pad goes past it. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:focusable="false"
+    android:importantForAccessibility="no"
+    android:paddingStart="@dimen/lb_preference_item_padding_start"
+    android:paddingEnd="@dimen/lb_preference_item_padding_end"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp" >
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/lb_preference_item_primary_text_color_disabled" />
+
+</FrameLayout>

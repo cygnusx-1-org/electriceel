@@ -12,7 +12,7 @@ import java.util.Set;
 /**
  * A checked list with special entries: ones disabled while another entry is checked (e.g. "Everything") or for good,
  * ones that open a menu instead of being checked, radio buttons that uncheck each other, "All" entries that check or uncheck
- * other entries, and notes (a line of text)
+ * other entries, notes (a line of text) and separators
  */
 public class DependentListPreference extends MultiSelectListPreference {
     private final Map<String, String> mDisabledBy = new HashMap<>(); // entry value -> entry value
@@ -22,6 +22,7 @@ public class DependentListPreference extends MultiSelectListPreference {
     private final Map<String, Set<String>> mSelectAll = new HashMap<>(); // entry value -> entry values checked and unchecked with it
     private final Set<String> mToggles = new HashSet<>(); // entry values shown as a switch
     private final Set<String> mNotes = new HashSet<>(); // entry values shown as a line of text
+    private final Set<String> mSeparators = new HashSet<>(); // entry values shown as a line between entries
 
     public DependentListPreference(Context context) {
         super(context);
@@ -44,6 +45,17 @@ public class DependentListPreference extends MultiSelectListPreference {
      */
     public boolean isNote(String entryValue) {
         return mNotes.contains(entryValue);
+    }
+
+    public void setSeparator(String entryValue) {
+        mSeparators.add(entryValue);
+    }
+
+    /**
+     * Shown as a line between the entries above and below it, never checked
+     */
+    public boolean isSeparator(String entryValue) {
+        return mSeparators.contains(entryValue);
     }
 
     public void setToggle(String entryValue) {
