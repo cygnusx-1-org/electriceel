@@ -1,13 +1,24 @@
 {
   "package": {
     "downloadUrlList_arm64-v8a": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.7/ElectricEel_stable_32.56.7_arm64-v8a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.8/ElectricEel_stable_32.56.8_arm64-v8a.apk"
     ],
     "downloadUrlList_armeabi-v7a": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.7/ElectricEel_stable_32.56.7_armeabi-v7a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.8/ElectricEel_stable_32.56.8_armeabi-v7a.apk"
     ],
     "downloadUrlList": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.7/ElectricEel_stable_32.56.7_armeabi-v7a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.8/ElectricEel_stable_32.56.8_armeabi-v7a.apk"
+    ]
+  },
+  "32.56.8": {
+    "versionCode": 2446,
+    "changelog": [
+      "Implemented Add a report an AI channel option to the context menu #14",
+      "Greyed out playlist creation for accounts without a channel",
+      "Fixed Notifications",
+      "Enabled Notifications section by default",
+      "Removed the Trending section, which YouTube no longer serves",
+      "Implemented Add options to filter sections like Gaming better #28"
     ]
   },
   "32.56.7": {
