@@ -5,10 +5,13 @@
 ![The app collage 1](./images/collage1.png)
 ![The app collage 2](./images/collage2.png)
 ![The app collage 3](./images/collage3.png)
+![The app collage 4](./images/collage4.png)
 
 Electric Eel is a fork of [SmartTube](https://github.com/yuliskov/SmartTube), and a free and open-source media client for Android TVs and TV boxes.
 
 ### Features
+- Ability to control Home rows and their order
+- Ability to add Subscriptions and individual subscribed channels as Home rows
 - Ability to create non-local YouTube playlists again, but requires you to create a YouTube channel in each YouTube account
 - Ability to move local playlists to YouTube
 - Ability to autoplay music videos without autoplaying non-music videos
