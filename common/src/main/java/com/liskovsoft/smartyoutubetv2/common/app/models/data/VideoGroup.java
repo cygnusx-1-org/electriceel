@@ -10,6 +10,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.service.VideoSt
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.service.VideoStateService.State;
 import com.liskovsoft.smartyoutubetv2.common.misc.AiSListManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.ChildModeManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.DuplicateFilter;
 import com.liskovsoft.smartyoutubetv2.common.misc.KeywordFilter;
 import com.liskovsoft.smartyoutubetv2.common.misc.CollaborationManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.NotInterestedManager;
@@ -56,6 +57,8 @@ public class VideoGroup {
     private int mAction = ACTION_APPEND;
     private int mType = -1;
     private int mHiddenVideoCount;
+    private int mDuplicateCount;
+    private DuplicateFilter mDuplicateFilter; // the videos of the rows above, also for the pages added later
     private boolean mIsChannelRow; // every item is a channel (see MediaGroup.isChannelRow), kept by the pages added later
     private boolean mIsSearchTopicRow; // every item is a topic that opens a search (see MediaGroup.isSearchTopicRow), kept by the pages added later
     public boolean isQueue;
@@ -115,6 +118,13 @@ public class VideoGroup {
     }
 
     public static VideoGroup from(MediaGroup mediaGroup, BrowseSection section, int groupPosition) {
+        return from(mediaGroup, section, groupPosition, null);
+    }
+
+    /**
+     * @param duplicateFilter the videos of the rows above, left out of the row and of its next pages, or null to keep them
+     */
+    public static VideoGroup from(MediaGroup mediaGroup, BrowseSection section, int groupPosition, DuplicateFilter duplicateFilter) {
         VideoGroup videoGroup = new VideoGroup();
         videoGroup.mSection = section;
         videoGroup.mPosition = groupPosition;
@@ -125,6 +135,7 @@ public class VideoGroup {
         // Fix duplicated rows e.g. Shorts
         //videoGroup.mId = !TextUtils.isEmpty(videoGroup.mTitle) ? videoGroup.mTitle.hashCode() : videoGroup.hashCode();
         videoGroup.mId = videoGroup.hashCode();
+        videoGroup.mDuplicateFilter = duplicateFilter;
 
         if (mediaGroup == null) {
             return videoGroup;
@@ -458,6 +469,13 @@ public class VideoGroup {
     }
 
     /**
+     * The videos left out because the rows above, or this one, have them (see DuplicateFilter). Also counted as hidden.
+     */
+    public int getDuplicateCount() {
+        return mDuplicateCount;
+    }
+
+    /**
      * Every video was hidden, here or by the service (see MediaGroup.getFilteredVideoCount), and only cards without a video are left
      * (e.g. "More music" of a music row, or of "Listen again" with Hide watched videos from Home)
      */
@@ -507,7 +525,7 @@ public class VideoGroup {
 
         if (isChannelBlocked(video) || isNotInterested(video) || isAiListed(video) || isHiddenCategory(video) || isOld(video) || isHiddenCollaboration(video)
                 || isHiddenWatchLater(video) || isHiddenShow(video) || isHiddenTopChannel(video) || isHiddenExploreTopic(video)
-                || hasHiddenKeyword(video) || isWatchedSuggestion(video) || isUnsubscribedChannel(video)) {
+                || hasHiddenKeyword(video) || isWatchedSuggestion(video) || isUnsubscribedChannel(video) || isDuplicate(video)) {
             if (video.videoId != null) {
                 mHiddenVideoCount++;
             }
@@ -875,6 +893,19 @@ public class VideoGroup {
         }
 
         return aiSListSection == AiSListManager.SECTION_CHANNEL_PAGE ? MediaGroup.TYPE_CHANNEL : -1;
+    }
+
+    /**
+     * Last of the filters: a video another one hides isn't counted as shown, so a row below may show it
+     */
+    private boolean isDuplicate(Video video) {
+        if (mDuplicateFilter == null || !mDuplicateFilter.isDuplicate(video)) {
+            return false;
+        }
+
+        mDuplicateCount++;
+
+        return true;
     }
 
     private boolean isWatchedSuggestion(Video video) {

@@ -9,13 +9,16 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.BrowsePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.SidebarService;
 import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
+import com.liskovsoft.smartyoutubetv2.common.prefs.DuplicatesData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.HideContentData;
 import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 /**
  * The Hide content card of the Content Filtering settings (was a part of General)
@@ -48,6 +51,7 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
         options.add(createMenuItem(R.string.hide_content_watched, this::showWatchedMenu));
         options.add(createMenuItem(R.string.hide_content_streams, this::showStreamsMenu));
         options.add(createMenuItem(R.string.hide_content_upcoming, this::showUpcomingMenu));
+        options.add(createMenuItem(R.string.hide_content_duplicates, this::showDuplicatesMenu));
         options.add(createMenuItem(R.string.hide_old_videos, () -> OldVideosSettingsPresenter.instance(getContext()).show()));
         options.add(createMenuItem(R.string.keyword_filtering, () -> KeywordFilterSettingsPresenter.instance(getContext()).show()));
 
@@ -144,6 +148,32 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
         options.add(createContentItem(R.string.hide_upcoming_channel, MediaServiceData.CONTENT_UPCOMING_CHANNEL));
 
         showSubmenu(R.string.hide_content_upcoming, options);
+    }
+
+    /**
+     * The sections of rows from the feeds (see DuplicatesData), in the sidebar's order
+     */
+    private void showDuplicatesMenu() {
+        DuplicatesData data = DuplicatesData.instance(getContext());
+        List<OptionItem> options = new ArrayList<>();
+
+        for (Entry<Integer, Integer> section : SidebarService.instance(getContext()).getDefaultSections().entrySet()) {
+            int sectionId = section.getValue();
+
+            if (!DuplicatesData.isSupportedSection(sectionId)) {
+                continue;
+            }
+
+            options.add(UiOptionItem.from(getContext().getString(section.getKey()),
+                    option -> data.setSectionEnabled(sectionId, option.isSelected()),
+                    data.isSectionEnabled(sectionId)));
+        }
+
+        OptionItem note = UiOptionItem.from(getContext().getString(R.string.hide_content_duplicates_desc));
+        note.setNote(true);
+        options.add(note);
+
+        showSubmenu(R.string.hide_content_duplicates, options);
     }
 
     /**

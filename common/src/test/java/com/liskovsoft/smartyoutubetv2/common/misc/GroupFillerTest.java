@@ -111,6 +111,27 @@ public class GroupFillerTest {
         }
     }
 
+    /**
+     * A row that lost its videos to the rows above (see DuplicateFilter)
+     */
+    @Test
+    public void duplicatesAreReplaced() {
+        DuplicateFilter filter = new DuplicateFilter();
+        MediaGroup page = createPage(MIN_SIZE);
+        VideoGroup first = VideoGroup.from(page, HOME, 0, filter);
+        VideoGroup second = VideoGroup.from(page, HOME, 1, filter); // the same videos
+        List<List<VideoGroup>> shown = new ArrayList<>();
+
+        assertEquals(0, second.getSize());
+
+        mFiller.fill(Arrays.asList(first, second), MIN_SIZE, group -> continueGroup(group, Observable.just(createPage(MIN_SIZE)))).subscribe(shown::add);
+
+        assertEquals(1, shown.size());
+        assertEquals(MIN_SIZE, first.getSize());
+        assertEquals(MIN_SIZE, second.getSize());
+        assertEquals(Collections.singletonList(second), mContinued);
+    }
+
     @Test
     public void fullRowIsShownAtOnce() {
         VideoGroup row = createRow(MIN_SIZE);

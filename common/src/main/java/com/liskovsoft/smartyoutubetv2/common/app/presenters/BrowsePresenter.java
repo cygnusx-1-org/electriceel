@@ -38,6 +38,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.interfaces.VideoGrou
 import com.liskovsoft.smartyoutubetv2.common.app.views.BrowseView;
 import com.liskovsoft.smartyoutubetv2.common.misc.AppDataSourceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.BrowseProcessorManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.DuplicateFilter;
 import com.liskovsoft.smartyoutubetv2.common.misc.HiddenVideoResolver;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager.AccountChangeListener;
@@ -46,6 +47,7 @@ import com.liskovsoft.smartyoutubetv2.common.misc.AiSListManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.WatchLaterManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.DuplicatesData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
@@ -63,6 +65,8 @@ import io.reactivex.disposables.Disposable;
 
 public class BrowsePresenter extends BasePresenter<BrowseView> implements SectionPresenter, VideoGroupPresenter, AccountChangeListener {
     private static final String TAG = BrowsePresenter.class.getSimpleName();
+    // A row whose next pages have only videos the rows above have (see DuplicateFilter) stops looking after these
+    private static final int MAX_DUPLICATE_PAGES = 5;
     @SuppressLint("StaticFieldLeak")
     private static BrowsePresenter sInstance;
     private final List<BrowseSection> mSections;
@@ -844,11 +848,13 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         }
 
         AtomicInteger groupIndex = new AtomicInteger(-1);
+        // The rows of this load share it: a video is kept by the first row that has it
+        DuplicateFilter duplicateFilter = DuplicatesData.instance(getContext()).isSectionEnabled(section.getId()) ? new DuplicateFilter() : null;
 
         Disposable updateAction = HiddenVideoResolver.resolveGroups(getContext(), VideoCategoryManager.instance(getContext()).resolveGroups(groups), section)
                 // The rows that lost their videos to Hide content get the next ones before they're shown
                 .concatMap(mediaGroups -> MediaServiceManager.instance().fillRowGroups(getContext(),
-                        createRowGroups(section, mediaGroups, groupIndex), this::continueGroupObserve))
+                        createRowGroups(section, mediaGroups, groupIndex, duplicateFilter), this::continueGroupObserve))
                 .subscribe(
                         videoGroups -> {
                             // E.g. the app is closing while the rows are filled
@@ -874,7 +880,11 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         mActions.add(updateAction);
     }
 
-    private List<VideoGroup> createRowGroups(BrowseSection section, List<MediaGroup> mediaGroups, AtomicInteger groupIndex) {
+    /**
+     * @param duplicateFilter the videos of the rows created before, or null to keep them
+     */
+    private List<VideoGroup> createRowGroups(BrowseSection section, List<MediaGroup> mediaGroups, AtomicInteger groupIndex,
+                                             DuplicateFilter duplicateFilter) {
         List<VideoGroup> result = new ArrayList<>();
 
         filterHomeIfNeeded(mediaGroups);
@@ -885,7 +895,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
                 continue;
             }
 
-            VideoGroup videoGroup = VideoGroup.from(mediaGroup, section, groupIndex.get() + 1);
+            VideoGroup videoGroup = VideoGroup.from(mediaGroup, section, groupIndex.get() + 1, duplicateFilter);
 
             // A card alone says nothing, e.g. "More music" of a row that lost its videos to Hide content.
             // A hidden row of channels or topics isn't continued in search of cards to show (see GroupFiller).
@@ -960,6 +970,13 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
     }
 
     private void continueGroup(VideoGroup group, boolean showLoading) {
+        continueGroup(group, showLoading, 0);
+    }
+
+    /**
+     * @param duplicatePages the pages just before this one that had only videos the rows already have (see DuplicateFilter)
+     */
+    private void continueGroup(VideoGroup group, boolean showLoading, int duplicatePages) {
         if (getView() == null) {
             Log.e(TAG, "Can't continue group. The view is null.");
             return;
@@ -982,6 +999,9 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
             getView().showProgressBar(true);
         }
 
+        int size = group.getSize();
+        int duplicateCount = group.getDuplicateCount();
+
         Disposable continueAction = continueGroupObserve(group)
                 .subscribe(
                         continueGroup -> {
@@ -995,6 +1015,13 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
                             VideoGroup videoGroup = VideoGroup.from(group, continueGroup);
                             getView().updateSection(videoGroup);
                             mBrowseProcessor.process(videoGroup);
+
+                            // Nothing new to show: the row would stop at the card that asked for the page
+                            if (videoGroup.getSize() == size && videoGroup.getDuplicateCount() > duplicateCount
+                                    && videoGroup.getNextPageKey() != null && duplicatePages + 1 < MAX_DUPLICATE_PAGES) {
+                                continueGroup(videoGroup, showLoading, duplicatePages + 1);
+                                return;
+                            }
 
                             continueGroupIfNeeded(videoGroup, showLoading);
                         },
