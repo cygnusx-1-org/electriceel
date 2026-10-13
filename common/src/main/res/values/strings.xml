@@ -371,6 +371,7 @@
     <string name="ui_hide_timeout_sec">%s sec</string>
     <string name="screen_dimming_timeout_min">%s min</string>
     <string name="mark_all_channels_watched">Mark all channels as watched</string>
+    <string name="remove_watched_videos">Remove watched videos</string>
     <string name="move_section_up">Move section up</string>
     <string name="move_section_down">Move section down</string>
     <string name="player_buttons">Setup player buttons</string>
@@ -805,7 +806,6 @@
     <string name="hide_watched_from_notifications">Hide watched videos from Notifications</string>
     <string name="hide_unwanted_content">Hide content</string>
     <string name="hide_watched_from_home">Hide watched videos from Home</string>
-    <string name="hide_watched_from_watch_later">Remove watched videos from Watch later playlist</string>
     <string name="remote_control_permission">Background Remote control requires Overlay permission</string>
     <string name="login_from_browser">Login from browser</string>
     <string name="disable_remote_history">Disable history when using remote control</string>

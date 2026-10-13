@@ -639,7 +639,6 @@
     <string name="hide_watched_from_notifications">Skryť videné videá v Notifikáciách</string>
     <string name="hide_unwanted_content">Skryť videá</string>
     <string name="hide_watched_from_home">Skryť videné videá v Domov</string>
-    <string name="hide_watched_from_watch_later">Skryť videné videá zo zoznamu Pozrieť neskôr</string>
     <string name="remote_control_permission">Diaľkové ovládanie na pozadí vyžaduje povolenie na prekrytie cez okná</string>
     <string name="login_from_browser">Prihlásenie z prehliadača</string>
     <string name="disable_remote_history">Zakázanť históriu pri používaní diaľkového ovládania</string>

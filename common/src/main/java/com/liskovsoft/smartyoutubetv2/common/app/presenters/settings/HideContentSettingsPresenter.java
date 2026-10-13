@@ -122,7 +122,6 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
     private void showWatchedMenu() {
         List<OptionItem> options = new ArrayList<>();
 
-        options.add(createContentItem(R.string.hide_watched_from_watch_later, MediaServiceData.CONTENT_WATCHED_WATCH_LATER));
         options.add(createContentItem(R.string.hide_watched_from_home, MediaServiceData.CONTENT_WATCHED_HOME));
         options.add(createContentItem(R.string.hide_watched_from_subscriptions, MediaServiceData.CONTENT_WATCHED_SUBSCRIPTIONS));
         options.add(UiOptionItem.from(getContext().getString(R.string.hide_watched_from_notifications),

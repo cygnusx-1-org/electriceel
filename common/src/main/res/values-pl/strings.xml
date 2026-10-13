@@ -620,7 +620,6 @@
   <string name="hide_watched_from_notifications">Ukryj obejrzane wideo w sekcji Powiadomienia</string>
   <string name="hide_unwanted_content">Ukryj niechciane treści</string>
   <string name="hide_watched_from_home">Ukryj obejrzane wideo w sekcji Główna</string>
-  <string name="hide_watched_from_watch_later">Ukryj obejrzane wideo na liście Do obejrzenia</string>
   <string name="remote_control_permission">Zdalne sterowanie w tle wymaga uprawnienia Wyświetlanie nad innymi aplikacjami</string>
   <string name="login_from_browser">Zaloguj przy użyciu przeglądarki</string>
   <string name="disable_remote_history">Wyłącz historię w trakcie korzystania ze zdalnego sterowania</string>

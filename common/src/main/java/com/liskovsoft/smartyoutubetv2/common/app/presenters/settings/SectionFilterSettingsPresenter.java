@@ -127,7 +127,7 @@ public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
         List<int[]> titledSections = new ArrayList<>();
 
         for (Entry<Integer, Integer> section : mSidebarService.getDefaultSections().entrySet()) {
-            if (SectionFilterData.isSupportedSection(section.getValue())) {
+            if (mData.isFilteredSection(section.getValue())) {
                 titledSections.add(new int[] {section.getKey(), section.getValue()});
             }
         }

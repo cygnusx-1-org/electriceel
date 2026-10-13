@@ -400,8 +400,18 @@ public class MediaServiceManager implements OnAccountChange {
         addRemoveFromWatchLaterPlaylist(video, true);
     }
 
-    public void removeFromWatchLaterPlaylist(Video video) {
-        addRemoveFromWatchLaterPlaylist(video, false);
+    /**
+     * YouTube removes the watched videos from Watch later, the ones it picks: every one with any of it watched
+     */
+    public void removeWatchedFromWatchLater(Context context, Runnable onSuccess, OnError onError) {
+        RxHelper.execute(mItemService.removeWatchedFromWatchLaterObserve(), error -> {
+            // YouTube might have removed them all the same, e.g. from a long list after the request timed out
+            WatchLaterManager.instance(context).reload();
+            onError.onError(error);
+        }, () -> {
+            WatchLaterManager.instance(context).reload();
+            onSuccess.run();
+        });
     }
 
     public void addRemoveFromWatchLaterPlaylist(Video video, boolean isAdd) {

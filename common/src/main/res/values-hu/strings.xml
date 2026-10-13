@@ -647,7 +647,6 @@
   <string name="remember_position_pinned">Emlékezzen az utoljára megtekintett pozícióra a rögzített lejátszási listákon</string>
   <string name="unknown_source_error">Ismeretlen forrás hiba</string>
   <string name="unknown_renderer_error">Ismeretlen renderelő hiba</string>
-  <string name="hide_watched_from_watch_later">A megtekintett videók elrejtése a Megnézendő videók lejátszási listáról</string>
   <string name="player_quick_skip_videos">A normál videók kihagyása a bal/jobb gombokkal</string>
   <string name="fullscreen_mode">Teljes képernyős mód (rendszersávok nélkül)</string>
   <string name="player_only_mode">Csak a lejátszó megjelenítése, ha a videót az alkalmazáson kívül nyitották meg</string>

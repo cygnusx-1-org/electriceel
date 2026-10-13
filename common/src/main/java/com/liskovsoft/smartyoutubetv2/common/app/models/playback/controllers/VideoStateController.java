@@ -16,7 +16,6 @@ import com.liskovsoft.smartyoutubetv2.common.misc.ScreensaverManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.utils.AppDialogUtil;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
-import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
 
 import javax.annotation.Nullable;
 
@@ -495,7 +494,7 @@ public class VideoStateController extends BasePlayerController {
 
         if (!isBeginEmbed()) {
             updateHistory();
-            syncWithPlaylists();
+            syncWithNotifications();
         }
     }
 
@@ -744,15 +743,11 @@ public class VideoStateController extends BasePlayerController {
         return (posPercents2 != 0 && Math.abs(posPercents1 - posPercents2) > 3) && state.timestamp < item.timestamp;
     }
 
-    private void syncWithPlaylists() {
+    private void syncWithNotifications() {
         Video video = getVideo();
 
         if (video == null) {
             return;
-        }
-
-        if (getMediaServiceData().isContentHidden(MediaServiceData.CONTENT_WATCHED_WATCH_LATER) && video.percentWatched > 95) { // remove fully watched
-            MediaServiceManager.instance().removeFromWatchLaterPlaylist(video);
         }
 
         if (getGeneralData().isHideWatchedFromNotificationsEnabled()) { // remove any watched length

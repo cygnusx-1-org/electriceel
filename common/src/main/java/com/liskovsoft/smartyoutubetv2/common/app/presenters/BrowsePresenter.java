@@ -218,6 +218,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         mSectionsMapping.put(MediaGroup.TYPE_CHANNEL_UPLOADS, new BrowseSection(MediaGroup.TYPE_CHANNEL_UPLOADS, getContext().getString(R.string.header_channels), uploadsType, R.drawable.icon_channels, false));
         mSectionsMapping.put(MediaGroup.TYPE_SUBSCRIPTIONS, new BrowseSection(MediaGroup.TYPE_SUBSCRIPTIONS, getContext().getString(R.string.header_subscriptions), BrowseSection.TYPE_GRID, R.drawable.icon_subscriptions, false));
         mSectionsMapping.put(MediaGroup.TYPE_HISTORY, new BrowseSection(MediaGroup.TYPE_HISTORY, getContext().getString(R.string.header_history), BrowseSection.TYPE_GRID, R.drawable.icon_history, true));
+        mSectionsMapping.put(MediaGroup.TYPE_WATCH_LATER, new BrowseSection(MediaGroup.TYPE_WATCH_LATER, getContext().getString(R.string.watch_later), BrowseSection.TYPE_GRID, R.drawable.icon_watch_later, true));
         mSectionsMapping.put(MediaGroup.TYPE_BLOCKED_CHANNELS,
                 new BrowseSection(MediaGroup.TYPE_BLOCKED_CHANNELS, getContext().getString(R.string.header_blocked_channels), BrowseSection.TYPE_GRID, R.drawable.icon_blocked_channels, false));
         BrowseSection blockedAiChannels =
@@ -248,6 +249,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         mGridMapping.put(MediaGroup.TYPE_SHORTS, getContentService().getShortsObserve());
         mGridMapping.put(MediaGroup.TYPE_SUBSCRIPTIONS, getContentService().getSubscriptionsObserve());
         mGridMapping.put(MediaGroup.TYPE_HISTORY, getContentService().getHistoryObserve());
+        mGridMapping.put(MediaGroup.TYPE_WATCH_LATER, getContentService().getWatchLaterObserve());
         mGridMapping.put(MediaGroup.TYPE_CHANNEL_UPLOADS, getContentService().getSubscribedChannelsByNewContentObserve());
         mGridMapping.put(MediaGroup.TYPE_NOTIFICATIONS, getNotificationsService().getNotificationItemsObserve());
     }
@@ -686,6 +688,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
 
     public void enableAllSections(boolean enable) {
         enableSection(MediaGroup.TYPE_HISTORY, enable);
+        enableSection(MediaGroup.TYPE_WATCH_LATER, enable);
         enableSection(MediaGroup.TYPE_USER_PLAYLISTS, enable);
         enableSection(MediaGroup.TYPE_SUBSCRIPTIONS, enable);
         enableSection(MediaGroup.TYPE_CHANNEL_UPLOADS, enable);
@@ -1365,6 +1368,10 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
 
     public boolean isHistorySection() {
         return isSection(MediaGroup.TYPE_HISTORY);
+    }
+
+    public boolean isWatchLaterSection() {
+        return isSection(MediaGroup.TYPE_WATCH_LATER);
     }
 
     public boolean isSubscriptionsSection() {

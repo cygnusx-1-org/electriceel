@@ -669,6 +669,8 @@ public class AiSListManager implements OnDataChange {
                 return AiSListFilterData.SECTION_HISTORY;
             case MediaGroup.TYPE_USER_PLAYLISTS:
                 return AiSListFilterData.SECTION_PLAYLISTS;
+            case MediaGroup.TYPE_WATCH_LATER:
+                return AiSListFilterData.SECTION_WATCH_LATER;
             default:
                 return -1;
         }

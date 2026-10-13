@@ -50,7 +50,7 @@ public abstract class SectionFilterData extends DataSaverBase {
     }
 
     /**
-     * The mode applies to the section. Every section by default, except the ones never filtered (see isSupportedSection).
+     * The mode applies to the section. Every section by default, except the ones never filtered (see isFilteredSection).
      */
     public boolean isSectionEnabled(int sectionId) {
         return isSection(sectionId) && (getSections() & (1 << sectionId)) != 0;
@@ -80,8 +80,15 @@ public abstract class SectionFilterData extends DataSaverBase {
         return sectionId == MediaGroup.TYPE_HISTORY || OldVideoFilter.isSupportedSection(sectionId);
     }
 
-    private static boolean isSection(int sectionId) {
-        return sectionId >= 0 && sectionId <= MAX_SECTION_ID && isSupportedSection(sectionId);
+    /**
+     * The sections this filter can apply to, the ones its settings list: the supported ones, unless it never applies there
+     */
+    public boolean isFilteredSection(int sectionId) {
+        return isSupportedSection(sectionId);
+    }
+
+    private boolean isSection(int sectionId) {
+        return sectionId >= 0 && sectionId <= MAX_SECTION_ID && isFilteredSection(sectionId);
     }
 
     /**

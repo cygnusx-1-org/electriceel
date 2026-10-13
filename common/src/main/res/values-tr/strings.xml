@@ -643,7 +643,6 @@
     <string name="hide_watched_from_notifications">İzlenen videoları Bildirimler\'de gizle</string>
     <string name="hide_unwanted_content">İstenmeyen içerik gizleme</string>
     <string name="hide_watched_from_home">İzlenen videoları Ana Sayfa\'da gizle</string>
-    <string name="hide_watched_from_watch_later">İzlenen videoları Daha sonra izle oynatma listesinde gizle</string>
     <string name="remote_control_permission">Arka plan Uzaktan kontrol, Yer Paylaşımı izni gerektirir</string>
     <string name="login_from_browser">Tarayıcıdan giriş yap</string>
     <string name="disable_remote_history">Uzaktan kontrol kullanırken geçmişi devre dışı bırak</string>

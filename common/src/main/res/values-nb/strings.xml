@@ -635,7 +635,6 @@
     <string name="hide_watched_from_notifications">Skjul sette videoer fra Varsler</string>
     <string name="hide_unwanted_content">Skjul videoer</string>
     <string name="hide_watched_from_home">Skjul sette videoer fra Hjem</string>
-    <string name="hide_watched_from_watch_later">Skjul sette videoer fra Se senere-spillelisten</string>
     <string name="remote_control_permission">Fjernkontroll i bakgrunnen krever tillatelse til å vises over andre apper</string>
     <string name="login_from_browser">Logg inn fra nettleser</string>
     <string name="disable_remote_history">Deaktiver historikk ved bruk av fjernkontroll</string>

@@ -644,7 +644,6 @@ So, make a copy of values-he and name it values-iw. Keep both in your structure.
     <string name="hide_watched_from_notifications">הסתרת סרטונים שנצפו מההתראות</string>
     <string name="hide_unwanted_content">הסתרת תוכן</string>
     <string name="hide_watched_from_home">הסתרת סרטונים שנצפו מהבית</string>
-    <string name="hide_watched_from_watch_later">הסתרת סרטונים שנצפו מהפלייליסט \'לצפייה בהמשך\'</string>
     <string name="remote_control_permission">שליטה מרחוק ברקע דורשת הרשאת שכבת-על</string>
     <string name="login_from_browser">כניסה מדפדפן</string>
     <string name="disable_remote_history">השבתת היסטוריה בעת שימוש בשליטה מרחוק</string>

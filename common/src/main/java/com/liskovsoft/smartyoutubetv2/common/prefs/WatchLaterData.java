@@ -2,6 +2,8 @@ package com.liskovsoft.smartyoutubetv2.common.prefs;
 
 import android.content.Context;
 
+import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
+
 /**
  * Marks or hides the videos of the account's Watch later in the chosen sections (see WatchLaterManager)
  */
@@ -23,6 +25,14 @@ public class WatchLaterData extends SectionFilterData {
     @Override
     protected int getDefaultMarkColor() {
         return AiSListFilterData.MARK_COLOR_BLUE;
+    }
+
+    /**
+     * Not its own section, where every video is in Watch later
+     */
+    @Override
+    public boolean isFilteredSection(int sectionId) {
+        return sectionId != MediaGroup.TYPE_WATCH_LATER && super.isFilteredSection(sectionId);
     }
 
     /**

@@ -643,7 +643,6 @@
   <string name="hide_watched_from_notifications">Dölj sedda videor i Aviseringar</string>
   <string name="hide_unwanted_content">Dölj innehåll</string>
   <string name="hide_watched_from_home">Dölj sedda videor i Hem</string>
-  <string name="hide_watched_from_watch_later">Ta bort sedda videor från spellistan Titta senare</string>
   <string name="remote_control_permission">Fjärrstyrning i bakgrunden kräver behörighet för överlägg</string>
   <string name="login_from_browser">Logga in från webbläsare</string>
   <string name="disable_remote_history">Inaktivera historik när du använder fjärrstyrning</string>

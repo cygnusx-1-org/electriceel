@@ -135,6 +135,8 @@ public class AiSListManagerTest {
     public void historyPlaylistsAndWatchLaterAreMarkOnly() {
         assertEquals(AiSListFilterData.SECTION_HISTORY, AiSListManager.getSection(MediaGroup.TYPE_HISTORY, true));
         assertEquals(AiSListFilterData.SECTION_PLAYLISTS, AiSListManager.getSection(MediaGroup.TYPE_USER_PLAYLISTS, true));
+        // The sidebar section, as the playlist opened as a channel
+        assertEquals(AiSListFilterData.SECTION_WATCH_LATER, AiSListManager.getSection(MediaGroup.TYPE_WATCH_LATER, true));
         // A playlist page is opened like a channel page
         assertEquals(AiSListFilterData.SECTION_PLAYLISTS, AiSListManager.getSection(MediaGroup.TYPE_CHANNEL_UPLOADS, false, "VLPLxxxx"));
         assertEquals(AiSListFilterData.SECTION_WATCH_LATER, AiSListManager.getSection(MediaGroup.TYPE_CHANNEL_UPLOADS, false, "VLWL"));

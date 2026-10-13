@@ -643,7 +643,6 @@
     <string name="hide_watched_from_notifications">Skrýt zhlédnutá videa v Oznámení</string>
     <string name="hide_unwanted_content">Skrýt obsah</string>
     <string name="hide_watched_from_home">Skrýt zhlédnutá videa ze sekce Domů</string>
-    <string name="hide_watched_from_watch_later">Odstranit zhlédnutá videa ze seznamu Přehrát později</string>
     <string name="remote_control_permission">Dálkové ovládání na pozadí vyžaduje oprávnění pro překrytí přes okna</string>
     <string name="login_from_browser">Přihlášení přes prohlížeč</string>
     <string name="disable_remote_history">Zazázat historii při používání dálkového ovládání</string>

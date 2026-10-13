@@ -655,7 +655,6 @@
   <string name="fullscreen_mode">全螢幕模式（無系統列）</string>
   <string name="header_sports">體育</string>
   <string name="hide_mixes">隱藏合輯</string>
-  <string name="hide_watched_from_watch_later">從「稍後再看」播放清單隱藏已觀看的影片</string>
   <string name="import_subscriptions_group">匯入</string>
   <string name="keep_finished_activities">保留已完成的畫面</string>
   <string name="lb_playback_controls_closed_captioning_disable">停用隱藏式字幕</string>

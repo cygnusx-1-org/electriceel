@@ -614,7 +614,6 @@
   <string name="hide_watched_from_notifications">Sembunyikan video yang ditonton dari Notifikasi</string>
   <string name="hide_unwanted_content">Sembunyikan konten yang tidak diinginkan</string>
   <string name="hide_watched_from_home">Sembunyikan video yang ditonton dari Beranda</string>
-  <string name="hide_watched_from_watch_later">Sembunyikan video yang ditonton dari playlist Tonton nanti</string>
   <string name="remote_control_permission">Remot kontrol latar belakang memerlukan izin muncul di atas aplikasi</string>
   <string name="login_from_browser">Masuk dari browser</string>
   <string name="disable_remote_history">Nonaktifkan histori saat menggunakan remot kontrol</string>

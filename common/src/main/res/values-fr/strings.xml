@@ -637,7 +637,6 @@
   <string name="dearrow_not_submitted_thumbs">Où récupérer les vignettes non soumises</string>
   <string name="pitch_effect">Effet de hauteur</string>
   <string name="action_sound_off">Son désactivé</string>
-  <string name="hide_watched_from_watch_later">Masquer les vidéos regardées de la playlist À regarder plus tard</string>
   <string name="fullscreen_mode">Mode plein écran (sans barres système)</string>
   <string name="player_only_mode">Afficher uniquement le lecteur si la vidéo est ouverte en dehors de l’application</string>
   <string name="pinned_channel_rows">Afficher la chaîne épinglé sous forme de lignes</string>

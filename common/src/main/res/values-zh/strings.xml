@@ -661,7 +661,6 @@
   <string name="original_lang">初始</string>
   <string name="speech_engine">语音搜索引擎</string>
   <string name="remember_position_pinned">记住上次在置顶播放列表中浏览的位置</string>
-  <string name="hide_watched_from_watch_later">隐藏稍后观看列表中已观看的视频</string>
   <string name="player_quick_skip_videos">使用左/右键跳过常规视频</string>
   <string name="video_flip">翻转（镜像）</string>
   <string name="player_extra_long_speed_list">超长播放速度列表</string>

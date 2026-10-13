@@ -634,7 +634,6 @@
   <string name="unknown_source_error">Tuntematon lähdevirhe</string>
   <string name="unknown_renderer_error">Tuntematon renderointivirhe</string>
   <string name="hide_watched_from_notifications">Piilota katsotut videot ilmoituksista</string>
-  <string name="hide_watched_from_watch_later">Piilota katsotut videot Katsele myöhemmin -soittolistalta</string>
   <string name="player_quick_skip_videos">Ohita tavallisia videoita vasen/oikea-painikkeilla</string>
   <string name="header_sports">Urheilu</string>
   <string name="keep_finished_activities">Säilytä valmiit toiminnot</string>

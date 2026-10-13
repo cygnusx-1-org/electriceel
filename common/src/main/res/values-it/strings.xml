@@ -643,7 +643,6 @@
     <string name="hide_watched_from_notifications">Nascondi i video già visti dalle Notifiche</string>
     <string name="hide_unwanted_content">Nascondi il contenuto</string>
     <string name="hide_watched_from_home">Nascondi i video già visti dalla Home</string>
-    <string name="hide_watched_from_watch_later">Nascondi i video già visti dalla playlist Guarda più tardi</string>
     <string name="remote_control_permission">Il controllo remoto in background richiede l\'autorizzazione alla sovrapposizione</string>
     <string name="login_from_browser">Accedi dal browser</string>
     <string name="disable_remote_history">Disabilita la Cronologia quando si usa il controllo remoto</string>

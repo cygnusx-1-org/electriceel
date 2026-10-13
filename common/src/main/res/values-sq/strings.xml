@@ -620,7 +620,6 @@
   <string name="hide_watched_from_notifications">Fshih videot e shikuara nga Njoftimet</string>
   <string name="hide_unwanted_content">Fshih përmbajtjen e padëshiruar</string>
   <string name="hide_watched_from_home">Fshih videot e shikuara nga Kryefaqja</string>
-  <string name="hide_watched_from_watch_later">Fshih videot e shikuara nga lista e luajtjes \"Shiko më vonë\".</string>
   <string name="remote_control_permission">Kontrolli në Largësi në sfond kërkon leje për Mbivendosjeje</string>
   <string name="login_from_browser">Hyr nga shfletuesi</string>
   <string name="disable_remote_history">Çaktivizo Historikun kur përdor telekomandën</string>

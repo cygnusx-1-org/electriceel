@@ -637,7 +637,6 @@
     <string name="hide_watched_from_notifications">Сакриј одгледане видее са Обавештења</string>
     <string name="hide_unwanted_content">Сакриј видее</string>
     <string name="hide_watched_from_home">Сакриј одгледане видее са Почетне</string>
-    <string name="hide_watched_from_watch_later">Сакриј одгледане видее са листе Гледај касније</string>
     <string name="remote_control_permission">Даљинско управљање у позадини захтева дозволу за преклапање</string>
     <string name="login_from_browser">Пријави се преко прегледача</string>
     <string name="disable_remote_history">Искључи историју при коришћењу даљинског управљача</string>

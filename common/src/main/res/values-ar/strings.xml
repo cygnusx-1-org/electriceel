@@ -630,7 +630,6 @@
   <string name="hide_watched_from_notifications">إخفاء الفيديوهات التي تمت مشاهدتها من الإشعارات</string>
   <string name="hide_unwanted_content">إخفاء المحتوى غير المرغوب فيه</string>
   <string name="hide_watched_from_home">إخفاء الفيديوهات التي تمت مشاهدتها من الصفحة الرئيسية</string>
-  <string name="hide_watched_from_watch_later">إخفاء الفيديوهات التي تمت مشاهدتها من قائمة التشغيل \"مشاهدة لاحقًا\"</string>
   <string name="remote_control_permission">يتطلب التحكم عن بعد في الخلفية إذن السماح بعرض التراكب على التطبيقات الأخرى</string>
   <string name="login_from_browser">تسجيل الدخول من المتصفح</string>
   <string name="disable_remote_history">تعطيل السجلّ عند استخدام التحكم بالهاتف</string>

@@ -227,6 +227,76 @@ public class WatchLaterManagerTest {
         assertTrue(mManager.contains("later2"));
     }
 
+    /**
+     * YouTube removed the watched videos: the list is read again at once, though it's fresh
+     */
+    @Test
+    public void reloadReadsTheListAgain() {
+        mData.setMode(WatchLaterData.MODE_MARK);
+        assertTrue(resolve());
+        mWatchLater.put(ACCOUNT, Collections.singletonList("later2"));
+
+        mManager.reload();
+
+        assertEquals(2, mLoads.size());
+        assertFalse(mManager.contains("later1"));
+        assertTrue(mManager.contains("later2"));
+    }
+
+    /**
+     * The load running then might have read the list as it was: what it read is dropped, and it's read again after it
+     */
+    @Test
+    public void reloadDuringALoadReadsItAgainAfter() {
+        mData.setMode(WatchLaterData.MODE_MARK);
+        PublishSubject<List<String>> load = PublishSubject.create();
+        mPendingLoad = load;
+        mManager.resolve().subscribe();
+        mPendingLoad = null;
+        mWatchLater.put(ACCOUNT, Collections.singletonList("later2"));
+
+        mManager.reload();
+
+        assertEquals(1, mLoads.size());
+
+        load.onNext(Arrays.asList("later1", "later2"));
+        load.onComplete();
+
+        assertEquals(2, mLoads.size());
+        assertFalse(mManager.contains("later1"));
+        assertTrue(mManager.contains("later2"));
+    }
+
+    /**
+     * Nothing needs the list while the setting shows them: it's read again at its next use
+     */
+    @Test
+    public void reloadInShowModeWaitsForTheNextUse() {
+        assertTrue(resolve());
+        mWatchLater.put(ACCOUNT, Collections.singletonList("later2"));
+
+        mManager.reload();
+
+        assertEquals(1, mLoads.size());
+
+        // The old list is used while it's read again
+        assertTrue(resolve());
+
+        assertEquals(2, mLoads.size());
+        assertFalse(mManager.contains("later1"));
+        assertTrue(mManager.contains("later2"));
+    }
+
+    @Test
+    public void signedOutReloadReadsNothing() {
+        mData.setMode(WatchLaterData.MODE_MARK);
+        mAccount = null;
+
+        mManager.reload();
+
+        assertTrue(mLoads.isEmpty());
+    }
+
     @Test
     public void menusKnowItOnlyWhileTheSettingIsOn() {
         assertTrue(resolve());
@@ -299,6 +369,24 @@ public class WatchLaterManagerTest {
         Video inOtherPlaylist = createVideo("later1");
         inOtherPlaylist.playlistId = "PLother";
         assertFalse(WatchLaterManager.isWatchLaterPlaylist(home, inOtherPlaylist));
+    }
+
+    /**
+     * Its sidebar section, where every video is in it, isn't one of the setting's sections
+     */
+    @Test
+    public void watchLaterSectionIsLeftAlone() {
+        assertTrue(resolve());
+        mData.setMode(WatchLaterData.MODE_HIDE);
+        mData.setSectionEnabled(MediaGroup.TYPE_WATCH_LATER, true);
+
+        VideoGroup watchLater = createGroup(MediaGroup.TYPE_WATCH_LATER);
+        watchLater.add(createVideo("later1"));
+
+        assertEquals(1, watchLater.getSize());
+        assertFalse(watchLater.get(0).isInWatchLater);
+        assertFalse(mData.isFilteredSection(MediaGroup.TYPE_WATCH_LATER));
+        assertTrue(mData.isFilteredSection(MediaGroup.TYPE_USER_PLAYLISTS));
     }
 
     /**

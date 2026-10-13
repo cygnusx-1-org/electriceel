@@ -34,7 +34,8 @@ import io.reactivex.subjects.BehaviorSubject;
  * The whole playlist is read (15 videos a request) before the first cards that need it are shown (see HiddenVideoResolver),
  * for {@link #MAX_HOLD_MS} at most.
  * It's kept on disk, so a start doesn't wait for it, and read again in the background once it's {@link #REFRESH_PERIOD_MS} old.<br/>
- * Videos added or removed in the app count right away (see {@link #onPlaylistEdited}).
+ * Videos added or removed in the app count right away (see {@link #onPlaylistEdited}), and it's read again at once
+ * when YouTube changed it (see {@link #reload}).
  */
 public class WatchLaterManager {
     private static final String TAG = WatchLaterManager.class.getSimpleName();
@@ -57,6 +58,8 @@ public class WatchLaterManager {
     private final Map<String, Long> mLoadStartTimes = new ConcurrentHashMap<>(); // by account
     // Added (true) or removed while a load runs: the list it reads might be older
     private final Map<String, Boolean> mPendingEdits = new ConcurrentHashMap<>();
+    // The accounts whose running load might read the list as it was before YouTube changed it (see reload)
+    private final Set<String> mStaleLoads = ConcurrentHashMap.newKeySet();
     private String mFailedAccount;
     private long mFailedTimeMs;
     // The list saved on disk is known
@@ -223,11 +226,16 @@ public class WatchLaterManager {
     private Observable<Boolean> load(String account) {
         return mRunningLoads.computeIfAbsent(account, key -> {
             mPendingEdits.clear();
+            mStaleLoads.remove(account);
             mLoadStartTimes.put(account, System.currentTimeMillis());
 
             return mLoader.getVideoIds()
                     .map(videoIds -> {
-                        apply(account, videoIds);
+                        // Read again once it ends (see doFinally)
+                        if (!mStaleLoads.contains(account)) {
+                            apply(account, videoIds);
+                        }
+
                         return true;
                     })
                     .onErrorReturn(error -> {
@@ -239,9 +247,42 @@ public class WatchLaterManager {
                     .doFinally(() -> {
                         mRunningLoads.remove(account);
                         mLoadStartTimes.remove(account);
+
+                        // Not for an account left meanwhile: the list read would be the one picked now's (see apply)
+                        if (mStaleLoads.contains(account) && account.equals(mAccountSource.getAccount())) {
+                            RxHelper.execute(load(account));
+                        }
                     })
                     .cache();
         });
+    }
+
+    /**
+     * YouTube changed Watch later in a way the app can't follow video by video (e.g. it removed the watched videos):
+     * it's read again now, or at its next use while the setting shows them.
+     * A load already running might read it as it was, so what that one reads is dropped and it's read again after.
+     */
+    public void reload() {
+        String account = mAccountSource.getAccount();
+
+        if (account == null) {
+            return;
+        }
+
+        // Nothing needs it while the setting shows them: it's read again at its next use (see resolveNow)
+        if (getData().getMode() == WatchLaterData.MODE_SHOW) {
+            Snapshot snapshot = mSnapshot;
+
+            if (snapshot != null) {
+                mSnapshot = new Snapshot(snapshot.account, snapshot.videoIds, 0);
+                Utils.postDelayed(mSaveIds, SAVE_DELAY_MS);
+            }
+
+            return;
+        }
+
+        mStaleLoads.add(account);
+        RxHelper.execute(load(account));
     }
 
     private void apply(String account, List<String> videoIds) {
@@ -334,6 +375,7 @@ public class WatchLaterManager {
         mRunningLoads.clear();
         mLoadStartTimes.clear();
         mPendingEdits.clear();
+        mStaleLoads.clear();
         mFailedAccount = null;
         mRestored.onNext(true);
     }

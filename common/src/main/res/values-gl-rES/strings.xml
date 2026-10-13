@@ -623,7 +623,6 @@
   <string name="hide_watched_from_notifications">Ocultar os vídeos vistos das notificacións</string>
   <string name="hide_unwanted_content">Ocultar contido non desexado</string>
   <string name="hide_watched_from_home">Ocultar os vídeos vistos de Inicio</string>
-  <string name="hide_watched_from_watch_later">Ocultar os vídeos vistos da lista de reprodución Ver máis tarde</string>
   <string name="remote_control_permission">O control remoto en segundo plano require permiso de superposición</string>
   <string name="login_from_browser">Comezar sesión desde o navegador</string>
   <string name="disable_remote_history">Desactivar o historial ao usar o control remoto</string>

@@ -93,13 +93,7 @@ public class SidebarService implements ProfileChangeListener {
             Video item = new Video();
             item.sectionId = sectionId;
 
-            int index = getDefaultSectionIndex(sectionId);
-
-            if (index == -1 || index > mPinnedItems.size()) {
-                mPinnedItems.add(item);
-            } else {
-                mPinnedItems.add(index, item);
-            }
+            mPinnedItems.add(getInsertIndex(sectionId), item);
         } else {
             Helpers.removeIf(mPinnedItems, item -> item == null || item.sectionId == sectionId);
         }
@@ -109,6 +103,29 @@ public class SidebarService implements ProfileChangeListener {
 
     public Map<Integer, Integer> getDefaultSections() {
         return mDefaultSections;
+    }
+
+    /**
+     * Right after the closest section before it in the default order (see initSections) that's in the sidebar, at the top
+     * when there's none. Not its index in the default order: the sidebar may lack sections before it (e.g. Notifications)
+     * or be reordered.
+     */
+    private int getInsertIndex(int sectionId) {
+        int index = 0;
+
+        for (int defaultId : mDefaultSections.values()) {
+            if (defaultId == sectionId) {
+                break;
+            }
+
+            int found = Helpers.indexOfFirst(mPinnedItems, item -> item != null && item.sectionId == defaultId);
+
+            if (found != -1) {
+                index = found + 1;
+            }
+        }
+
+        return index;
     }
 
     private int getDefaultSectionIndex(int sectionId) {
@@ -262,6 +279,7 @@ public class SidebarService implements ProfileChangeListener {
         mDefaultSections.put(R.string.header_channels, MediaGroup.TYPE_CHANNEL_UPLOADS);
         mDefaultSections.put(R.string.header_subscriptions, MediaGroup.TYPE_SUBSCRIPTIONS);
         mDefaultSections.put(R.string.header_history, MediaGroup.TYPE_HISTORY);
+        mDefaultSections.put(R.string.watch_later, MediaGroup.TYPE_WATCH_LATER);
         mDefaultSections.put(R.string.header_blocked_channels, MediaGroup.TYPE_BLOCKED_CHANNELS);
         mDefaultSections.put(R.string.header_blocked_ai_channels, MediaGroup.TYPE_BLOCKED_AI_CHANNELS);
         mDefaultSections.put(R.string.header_playlists, MediaGroup.TYPE_USER_PLAYLISTS);

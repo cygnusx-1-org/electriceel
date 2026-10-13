@@ -21,6 +21,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.provide
 import com.liskovsoft.smartyoutubetv2.common.app.views.SplashView;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
+import com.liskovsoft.smartyoutubetv2.common.utils.AppDialogUtil;
 import com.liskovsoft.smartyoutubetv2.common.utils.SimpleEditDialog;
 
 import java.util.HashMap;
@@ -99,6 +100,7 @@ public class SectionMenuPresenter extends BaseMenuPresenter {
         appendToggleSectionHomeRowButton();
         appendUnpinSectionFromSidebarButton();
         appendMarkAllChannelsWatchedButton();
+        appendRemoveWatchedButton();
         appendAccountSelectionButton();
         appendMoveSectionButton();
         appendRenameSectionButton();
@@ -253,6 +255,39 @@ public class SectionMenuPresenter extends BaseMenuPresenter {
                         processNextChannel(serviceManager, iterator);
                     });
                 }));
+    }
+
+    /**
+     * Only in the Watch later section. YouTube picks the videos: every one with any of it watched.
+     */
+    private void appendRemoveWatchedButton() {
+        if (mSection == null || mSection.getId() != MediaGroup.TYPE_WATCH_LATER) {
+            return;
+        }
+
+        mDialogPresenter.appendSingleButton(
+                UiOptionItem.from(getContext().getString(R.string.remove_watched_videos),
+                        optionItem -> AppDialogUtil.showConfirmationDialog(getContext(), getContext().getString(R.string.remove_watched_videos), () -> {
+                            mDialogPresenter.closeDialog();
+                            MessageHelpers.showMessage(getContext(), R.string.wait_data_loading);
+
+                            MediaServiceManager.instance().removeWatchedFromWatchLater(getContext(), () -> {
+                                refreshWatchLaterSection();
+                                MessageHelpers.showMessage(getContext(), R.string.msg_done);
+                            }, error -> {
+                                // YouTube might have removed them all the same (see removeWatchedFromWatchLater)
+                                refreshWatchLaterSection();
+                                MessageHelpers.showLongMessage(getContext(), error.getMessage());
+                            });
+                        })));
+    }
+
+    private void refreshWatchLaterSection() {
+        BrowsePresenter presenter = BrowsePresenter.instance(getContext());
+
+        if (presenter.isWatchLaterSection()) {
+            presenter.refresh();
+        }
     }
 
     private void processNextChannel(MediaServiceManager serviceManager, Iterator<MediaItem> iterator) {
