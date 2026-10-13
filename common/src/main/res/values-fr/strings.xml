@@ -769,4 +769,5 @@
     <string name="aislist_status_not_loaded">Téléchargement des listes…</string>
     <string name="aislist_about">À propos d\'AiSList (liste communautaire, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Signaler la chaîne à AiSList</string>
+    <string name="add_remove_from_home_rows">Ajouter/Retirer de l\'Accueil</string>
 </resources>

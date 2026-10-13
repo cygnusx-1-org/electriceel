@@ -380,7 +380,7 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
 
     /**
      * Replaces the settings of the current account with the ones the given account has in use (see getProfileData).
-     * The history, channel groups, sidebar and home screen channels stay the current account's.
+     * The history, channel groups, sidebar, Home rows and home screen channels stay the current account's.
      */
     public void copyProfileData(Account from) {
         String fromName = getProfileName(from);

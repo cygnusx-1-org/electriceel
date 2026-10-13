@@ -616,4 +616,5 @@
     <string name="aislist_status_not_loaded">Изтегляне на списъците…</string>
     <string name="aislist_about">За AiSList (списък на общността, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Докладване на канала в AiSList</string>
+    <string name="add_remove_from_home_rows">Добавяне/премахване от Начало</string>
 </resources>

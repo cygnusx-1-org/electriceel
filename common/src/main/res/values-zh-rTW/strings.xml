@@ -769,4 +769,5 @@
     <string name="aislist_status_not_loaded">正在下載清單…</string>
     <string name="aislist_about">關於 AiSList（社群清單，CC BY-NC 4.0）</string>
     <string name="report_ai_channel">向 AiSList 檢舉頻道</string>
+    <string name="add_remove_from_home_rows">新增至首頁或從中移除</string>
 </resources>

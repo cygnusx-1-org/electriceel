@@ -6,6 +6,7 @@ import com.liskovsoft.smartyoutubetv2.common.R;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.SettingsCardsPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
+import com.liskovsoft.smartyoutubetv2.common.prefs.HomeScreenPlaylistsData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,12 @@ public class MainUISectionSettingsPresenter extends BasePresenter<Void> implemen
                 () -> LanguageSettingsPresenter.instance(context).showCountry(), R.drawable.settings_language));
         items.add(new SettingsItem(context.getString(R.string.dearrow_provider),
                 () -> DeArrowSettingsPresenter.instance(context).show(), R.drawable.settings_dearrow));
+        items.add(new SettingsItem(context.getString(R.string.header_home),
+                () -> MainUISettingsPresenter.instance(context).showHome(), R.drawable.settings_home_rows));
+        if (HomeScreenPlaylistsData.isSupported(context)) {
+            items.add(new SettingsItem(context.getString(R.string.home_screen_channels),
+                    () -> MainUISettingsPresenter.instance(context).showHomeScreenChannels(), R.drawable.settings_home_screen_channels));
+        }
 
         return items;
     }

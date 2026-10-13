@@ -18,6 +18,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.data.BrowseSection;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Playlist;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsGroup;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsItem;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SimpleMediaItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.VideoGroup;
 import com.liskovsoft.smartyoutubetv2.common.app.models.errors.CategoryEmptyError;
@@ -40,6 +41,7 @@ import com.liskovsoft.smartyoutubetv2.common.misc.AppDataSourceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.BrowseProcessorManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.DuplicateFilter;
 import com.liskovsoft.smartyoutubetv2.common.misc.HiddenVideoResolver;
+import com.liskovsoft.smartyoutubetv2.common.misc.HomeRowOrderer;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager.AccountChangeListener;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AccountsData;
@@ -48,6 +50,8 @@ import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.WatchLaterManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.DuplicatesData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.HomeRowsData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.HomeRowsData.Row;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
@@ -55,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -79,6 +84,10 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
     private final AppDataSourceManager mDataSourcePresenter;
     private final BrowseProcessorManager mBrowseProcessor;
     private final List<Disposable> mActions;
+    // The rows added to Home in its last load: they're not YouTube's (see HomeRowsData, cleared as Home loads)
+    private final Map<MediaGroup, Row> mAddedHomeRows = Collections.synchronizedMap(new IdentityHashMap<>());
+    // The rows of channels of the last load of Home, with the channel: their cards don't name it (see findAddedHomeRowChannelId)
+    private final Map<VideoGroup, String> mAddedHomeRowChannelIds = Collections.synchronizedMap(new IdentityHashMap<>());
     private final Runnable mRefreshSection = this::refresh;
     private BrowseSection mCurrentSection;
     private Video mCurrentVideo;
@@ -226,7 +235,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
     }
 
     private void initRowAndGridMapping() {
-        mRowMapping.put(MediaGroup.TYPE_HOME, getContentService().getHomeObserve());
+        mRowMapping.put(MediaGroup.TYPE_HOME, createHomeObserve());
         mRowMapping.put(MediaGroup.TYPE_KIDS_HOME, getContentService().getKidsHomeObserve());
         mRowMapping.put(MediaGroup.TYPE_SPORTS, getContentService().getSportsObserve());
         mRowMapping.put(MediaGroup.TYPE_LIVE, getContentService().getLiveObserve());
@@ -241,6 +250,37 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         mGridMapping.put(MediaGroup.TYPE_HISTORY, getContentService().getHistoryObserve());
         mGridMapping.put(MediaGroup.TYPE_CHANNEL_UPLOADS, getContentService().getSubscribedChannelsByNewContentObserve());
         mGridMapping.put(MediaGroup.TYPE_NOTIFICATIONS, getNotificationsService().getNotificationItemsObserve());
+    }
+
+    /**
+     * YouTube's rows of Home and the rows added to it, in the order of HomeRowsData. Read at each load.
+     * As YouTube sends them while that's YouTube's order and nothing is added.
+     */
+    private Observable<List<MediaGroup>> createHomeObserve() {
+        Observable<List<MediaGroup>> youTubeRows = getContentService().getHomeObserve();
+        HomeRowsData homeRowsData = HomeRowsData.instance(getContext());
+
+        return Observable.defer(() -> {
+            if (homeRowsData.isDefault()) {
+                return youTubeRows;
+            }
+
+            return HomeRowOrderer.order(homeRowsData.getHiddenKinds(), homeRowsData.getRows(), youTubeRows,
+                    row -> createAddedHomeRowObserve(row).doOnNext(group -> mAddedHomeRows.put(group, row)));
+        });
+    }
+
+    private Observable<MediaGroup> createAddedHomeRowObserve(Row row) {
+        if (row.type == Row.TYPE_SUBSCRIPTIONS) {
+            return getContentService().getSubscriptionsObserve();
+        }
+
+        // Its uploads, as the grid of the channel
+        Video channel = new Video();
+        channel.channelId = row.channelId;
+        channel.title = row.title;
+
+        return getContentService().getGroupObserve(SimpleMediaItem.from(channel));
     }
 
     private void initPinnedSections() {
@@ -740,6 +780,25 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         refresh(true);
     }
 
+    /**
+     * The channel of a card of the row of a channel added to Home, which the card doesn't name (see HomeRowsData)
+     */
+    @Nullable
+    public String findAddedHomeRowChannelId(Video video) {
+        VideoGroup group = video != null ? video.getGroup() : null;
+
+        return group != null ? mAddedHomeRowChannelIds.get(group) : null;
+    }
+
+    /**
+     * Home is loaded again, with its rows in their new order (see HomeRowsData). From another section, it gets them when it's next shown.
+     */
+    public void updateHomeRows() {
+        if (isHomeSection()) {
+            refresh(false);
+        }
+    }
+
     public void refresh(boolean focusOnContent) {
         updateCurrentSection();
         if (focusOnContent && getView() != null) {
@@ -847,6 +906,12 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
             return;
         }
 
+        // Not where Home is loaded: a load of its content elsewhere (e.g. the preview of KeywordFilterSettingsPresenter) runs alongside
+        if (section.getId() == MediaGroup.TYPE_HOME) {
+            mAddedHomeRows.clear();
+            mAddedHomeRowChannelIds.clear();
+        }
+
         AtomicInteger groupIndex = new AtomicInteger(-1);
         // The rows of this load share it: a video is kept by the first row that has it
         DuplicateFilter duplicateFilter = DuplicatesData.instance(getContext()).isSectionEnabled(section.getId()) ? new DuplicateFilter() : null;
@@ -896,6 +961,20 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
             }
 
             VideoGroup videoGroup = VideoGroup.from(mediaGroup, section, groupIndex.get() + 1, duplicateFilter);
+
+            // Named after the channel, or Subscriptions
+            Row addedRow = mAddedHomeRows.get(mediaGroup);
+            if (addedRow != null) {
+                String title = addedRow.type == Row.TYPE_SUBSCRIPTIONS ? getContext().getString(R.string.header_subscriptions) : addedRow.title;
+
+                if (title != null) {
+                    videoGroup.setTitle(title);
+                }
+
+                if (addedRow.type == Row.TYPE_CHANNEL) {
+                    mAddedHomeRowChannelIds.put(videoGroup, addedRow.channelId);
+                }
+            }
 
             // A card alone says nothing, e.g. "More music" of a row that lost its videos to Hide content.
             // A hidden row of channels or topics isn't continued in search of cards to show (see GroupFiller).
@@ -1235,7 +1314,8 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
             return;
         }
 
-        Helpers.removeIf(mediaGroups, value -> Helpers.containsAny(
+        // Not a row added to Home, e.g. a channel with News in its name
+        Helpers.removeIf(mediaGroups, value -> !mAddedHomeRows.containsKey(value) && (Helpers.containsAny(
                 value.getTitle(),
                 "Primetime", // Free movies and shows row
                 "News", // Top news
@@ -1249,7 +1329,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
                 //getContext().getString(R.string.news_row_name),
                 getContext().getString(R.string.breaking_news_row_name),
                 getContext().getString(R.string.covid_news_row_name)
-        ));
+        )));
     }
 
     private Observable<MediaGroup> createPinnedGridAction(Video item) {

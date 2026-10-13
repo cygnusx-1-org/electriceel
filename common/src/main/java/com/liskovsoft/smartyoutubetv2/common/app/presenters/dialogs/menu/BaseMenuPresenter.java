@@ -24,6 +24,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.AppUpdatePre
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.VideoMenuPresenter.VideoMenuCallback;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.HomeRowsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.HomeScreenPlaylistsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.utils.AppDialogUtil;
@@ -50,6 +51,7 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
     private boolean mIsRenamePlaylistEnabled;
     private boolean mIsCopyPlaylistToYouTubeEnabled;
     private boolean mIsAddToHomeScreenEnabled;
+    private boolean mIsAddToHomeRowsEnabled;
 
     protected BaseMenuPresenter(Context context) {
         super(context);
@@ -142,6 +144,116 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
         section.title = video.createChannelTitle();
 
         return section;
+    }
+
+    /**
+     * The channel of the card (a channel, or a video of it) as a row of Home of its uploads, for the current account
+     * (see HomeRowsData). Not a playlist: its channel is the playlist ("VL" + its id).
+     */
+    protected void appendToggleHomeRowButton() {
+        if (!mIsAddToHomeRowsEnabled) {
+            return;
+        }
+
+        Video original = getVideo();
+
+        if (original == null || original.isChapter || original.isPlaylistAsChannel() || original.channelGroupId != null
+                || (!original.hasVideo() && !original.isChannel())) {
+            return;
+        }
+
+        HomeRowsData data = HomeRowsData.instance(getContext());
+        // A card of the row of its channel in Home
+        String rowChannelId = original.hasChannel() ? null : BrowsePresenter.instance(getContext()).findAddedHomeRowChannelId(original);
+        // It does what it says: a card that doesn't name its channel adds it, the channel is known once it's pressed
+        boolean isAdded = data.isChannelAdded(rowChannelId != null ? rowChannelId : original.channelId);
+
+        getDialogPresenter().appendSingleButton(
+                UiOptionItem.from(
+                        getContext().getString(isAdded ? R.string.remove_channel_from_home : R.string.add_channel_to_home),
+                        optionItem -> {
+                            String title = original.isChannel() ? original.getTitle() : original.getAuthor();
+
+                            if (rowChannelId != null) {
+                                setHomeRow(rowChannelId, title, !isAdded);
+                                return;
+                            }
+
+                            // A video whose card doesn't name its channel gets it from its metadata
+                            if (original.hasChannel() && (title != null || !original.hasVideo())) {
+                                setHomeRow(original.channelId, title, !isAdded);
+                                return;
+                            }
+
+                            MessageHelpers.showMessage(getContext(), R.string.wait_data_loading);
+
+                            mServiceManager.loadMetadata(
+                                    original,
+                                    metadata -> {
+                                        Video video = Video.from(original);
+                                        video.sync(metadata);
+                                        setHomeRow(video.channelId, video.getAuthor(), !isAdded);
+                                    }
+                            );
+                        }));
+    }
+
+    /**
+     * Subscriptions, or a channel added to the sidebar, as a row of Home (see HomeRowsData)
+     */
+    protected void appendToggleSectionHomeRowButton() {
+        if (!mIsAddToHomeRowsEnabled) {
+            return;
+        }
+
+        BrowseSection section = getSection();
+        Video channel = getVideo();
+        HomeRowsData data = HomeRowsData.instance(getContext());
+        boolean isAdded;
+
+        if (section == null) {
+            return;
+        } else if (section.getId() == MediaGroup.TYPE_SUBSCRIPTIONS && channel == null) {
+            isAdded = data.isSubscriptionsAdded();
+        } else if (channel != null && channel.isChannel() && !channel.isPlaylistAsChannel() && channel.channelGroupId == null) {
+            isAdded = data.isChannelAdded(channel.channelId);
+        } else {
+            return;
+        }
+
+        getDialogPresenter().appendSingleButton(
+                UiOptionItem.from(
+                        getContext().getString(isAdded ? R.string.remove_from_home_rows : R.string.add_to_home_rows),
+                        optionItem -> {
+                            if (channel == null) {
+                                data.setSubscriptionsAdded(!isAdded);
+                                onHomeRowToggled(!isAdded);
+                            } else {
+                                setHomeRow(channel.channelId, channel.getTitle(), !isAdded);
+                            }
+                        }));
+    }
+
+    private void setHomeRow(String channelId, String title, boolean add) {
+        if (channelId == null) {
+            return;
+        }
+
+        HomeRowsData data = HomeRowsData.instance(getContext());
+
+        if (add) {
+            data.addChannel(channelId, title);
+        } else {
+            data.removeChannel(channelId);
+        }
+
+        onHomeRowToggled(add);
+    }
+
+    private void onHomeRowToggled(boolean isAdded) {
+        closeDialog();
+        MessageHelpers.showMessage(getContext(), isAdded ? R.string.added_to_home_rows : R.string.removed_from_home_rows);
+        BrowsePresenter.instance(getContext()).updateHomeRows();
     }
 
     /**
@@ -686,6 +798,7 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
         mIsRenamePlaylistEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_RENAME_PLAYLIST);
         mIsCopyPlaylistToYouTubeEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_COPY_PLAYLIST_TO_YOUTUBE);
         mIsAddToHomeScreenEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_ADD_TO_HOME_SCREEN);
+        mIsAddToHomeRowsEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_ADD_TO_HOME_ROWS);
         // Another account would leave Child mode (it's kept per account)
         mIsAccountSelectionEnabled = !GeneralData.instance(getContext()).isChildModeEnabled() && mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_SELECT_ACCOUNT);
         mIsAddToNewPlaylistEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_ADD_TO_NEW_PLAYLIST);

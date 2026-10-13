@@ -239,4 +239,5 @@
     <string name="aislist_status_not_loaded">జాబితాలు డౌన్‌లోడ్ అవుతున్నాయి…</string>
     <string name="aislist_about">AiSList గురించి (కమ్యూనిటీ జాబితా, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">ఛానెల్‌ను AiSListకు నివేదించండి</string>
+    <string name="add_remove_from_home_rows">హోమ్‌కు జోడించు/తీసివేయి</string>
 </resources>

@@ -730,4 +730,5 @@
     <string name="aislist_status_not_loaded">Po shkarkohen listat…</string>
     <string name="aislist_about">Rreth AiSList (listë e komunitetit, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Raporto kanalin te AiSList</string>
+    <string name="add_remove_from_home_rows">Shto/Hiq nga Kryefaqja</string>
 </resources>

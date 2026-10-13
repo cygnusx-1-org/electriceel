@@ -96,6 +96,7 @@ public class SectionMenuPresenter extends BaseMenuPresenter {
         appendRefreshButton();
         appendUnpinVideoFromSidebarButton();
         appendToggleHomeScreenPlaylistButton();
+        appendToggleSectionHomeRowButton();
         appendUnpinSectionFromSidebarButton();
         appendMarkAllChannelsWatchedButton();
         appendAccountSelectionButton();
@@ -129,6 +130,7 @@ public class SectionMenuPresenter extends BaseMenuPresenter {
         appendRefreshButton();
         appendUnpinVideoFromSidebarButton();
         appendToggleHomeScreenPlaylistButton();
+        appendToggleSectionHomeRowButton();
         appendUnpinSectionFromSidebarButton();
         appendAccountSelectionButton();
         appendMoveSectionButton();

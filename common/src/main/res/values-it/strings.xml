@@ -777,4 +777,5 @@
     <string name="aislist_status_not_loaded">Download delle liste in corso…</string>
     <string name="aislist_about">Informazioni su AiSList (lista della community, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Segnala il canale ad AiSList</string>
+    <string name="add_remove_from_home_rows">Aggiungi/Rimuovi dalla Home</string>
 </resources>

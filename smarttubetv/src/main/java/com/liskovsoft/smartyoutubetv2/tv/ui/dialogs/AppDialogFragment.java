@@ -30,6 +30,8 @@ import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.ChatPreferenceDialogFr
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.CommentsPreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.CommentsPreferenceDialogFragment;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.RadioListPreferenceDialogFragment;
+import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.ReorderListPreference;
+import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.ReorderListPreferenceDialogFragment;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.StringListPreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.StringListPreferenceDialogFragment;
 import com.liskovsoft.smartyoutubetv2.tv.ui.mod.leanback.preference.LeanbackListPreferenceDialogFragment;
@@ -200,7 +202,16 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
             ((DialogPreference) pref).setDialogTitle(createTitle(baseTitle));
         }
 
-        if (pref instanceof StringListPreference) {
+        if (pref instanceof ReorderListPreference) {
+            ReorderListPreferenceDialogFragment f = ReorderListPreferenceDialogFragment.newInstance(pref.getKey());
+            f.enableTransparent(mIsTransparent);
+            f.setTargetFragment(caller, 0);
+            f.setPreference(pref);
+            startPreferenceFragment(f);
+            mBaseTitles.add(baseTitle);
+
+            return true;
+        } else if (pref instanceof StringListPreference) {
             StringListPreference listPreference = (StringListPreference) pref;
             StringListPreferenceDialogFragment f = StringListPreferenceDialogFragment.newInstanceStringList(listPreference.getKey());
             f.enableTransparent(mIsTransparent);

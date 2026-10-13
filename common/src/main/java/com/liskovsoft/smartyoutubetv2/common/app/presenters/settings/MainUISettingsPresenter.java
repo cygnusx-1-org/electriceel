@@ -21,6 +21,12 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.provide
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.SidebarService;
 import com.liskovsoft.smartyoutubetv2.common.prefs.DeArrowData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.WatchLaterData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.TopChannelsData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.ShowsData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.ExploreTopicsData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.HomeRowsData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.HomeRowsData.Row;
 import com.liskovsoft.smartyoutubetv2.common.prefs.HomeScreenPlaylistsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData.ColorScheme;
@@ -28,13 +34,17 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
 import com.liskovsoft.smartyoutubetv2.common.utils.ClickbaitRemover;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
+import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 public class MainUISettingsPresenter extends BasePresenter<Void> {
     private final MainUIData mMainUIData;
@@ -203,6 +213,214 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
     }
 
     /**
+     * The Home card of the User interface settings: the rows of Home and their order (see HomeRowsData).
+     * Home is loaded again once it's closed.
+     */
+    public void showHome() {
+        HomeRowsData data = HomeRowsData.instance(getContext());
+        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+
+        settingsPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.home_rows), option -> showHomeRows()));
+
+        settingsPresenter.appendSingleSwitch(UiOptionItem.from(getContext().getString(R.string.home_rows_order_youtube),
+                getContext().getString(R.string.home_rows_order_youtube_desc),
+                option -> {
+                    if (option.isSelected()) {
+                        data.orderYouTubeRows();
+                    } else {
+                        data.resetYouTubeOrder();
+                    }
+                },
+                data.isYouTubeOrdered()));
+
+        settingsPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.home_rows_order), option -> showHomeRowsOrder()));
+
+        settingsPresenter.showDialog(getContext().getString(R.string.header_home), () -> BrowsePresenter.instance(getContext()).updateHomeRows());
+    }
+
+    private void showHomeRows() {
+        MessageHelpers.showMessage(getContext(), R.string.wait_data_loading);
+
+        RxHelper.execute(
+                getContentService().getSubscribedChannelsWithIdsObserve(),
+                this::showHomeRows,
+                error -> showHomeRows(null) // the added ones still can be removed
+        );
+    }
+
+    /**
+     * YouTube's rows that are on every load and the rest of them, but the ones Hide content takes out of Home anyway. Then
+     * Subscriptions and the subscribed channels by name. The channels added that aren't subscribed (e.g. from a video of
+     * Recommended) come after them.
+     */
+    private void showHomeRows(MediaGroup subscribedChannels) {
+        HomeRowsData data = HomeRowsData.instance(getContext());
+        List<OptionItem> options = new ArrayList<>();
+        Set<String> listedIds = new HashSet<>();
+        List<MediaItem> channels = subscribedChannels != null ? subscribedChannels.getMediaItems() : null;
+        List<Integer> kinds = new ArrayList<>(HomeRowsData.getYouTubeKinds());
+        kinds.add(MediaGroup.ROW_KIND_NONE); // the rest of them
+
+        for (int kind : kinds) {
+            if (!isHiddenByHideContent(kind)) {
+                options.add(UiOptionItem.from(getContext().getString(getHomeRowKindTitle(kind)),
+                        option -> data.setYouTubeRowShown(kind, option.isSelected()), data.isYouTubeRowShown(kind)));
+            }
+        }
+
+        options.add(UiOptionItem.from(getContext().getString(R.string.header_subscriptions),
+                option -> data.setSubscriptionsAdded(option.isSelected()), data.isSubscriptionsAdded()));
+
+        if (channels != null) {
+            for (MediaItem channel : channels) {
+                String channelId = channel != null ? channel.getChannelId() : null;
+
+                if (channelId != null && listedIds.add(channelId)) {
+                    options.add(createHomeRowChannelOption(data, channelId, channel.getTitle() != null ? channel.getTitle() : channelId));
+                }
+            }
+        }
+
+        for (Row row : data.getRows()) {
+            if (row.type == Row.TYPE_CHANNEL && listedIds.add(row.channelId)) {
+                options.add(createHomeRowChannelOption(data, row.channelId, getHomeRowTitle(row, data)));
+            }
+        }
+
+        MessageHelpers.cancelToasts();
+
+        AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
+        dialog.appendCheckedCategory(getContext().getString(R.string.home_rows), options);
+        dialog.showDialog();
+    }
+
+    /**
+     * Hide content takes the rows of the kind out of Home: their videos, or the whole row
+     */
+    private boolean isHiddenByHideContent(int kind) {
+        switch (kind) {
+            case MediaGroup.ROW_KIND_SHORTS:
+                return MediaServiceData.instance().isContentHidden(MediaServiceData.CONTENT_SHORTS_HOME);
+            case MediaGroup.ROW_KIND_SHOWS:
+                return ShowsData.instance(getContext()).isHidingEnabled(MediaGroup.TYPE_HOME);
+            case MediaGroup.ROW_KIND_TOP_CHANNELS:
+                return TopChannelsData.instance(getContext()).isHidingEnabled(MediaGroup.TYPE_HOME);
+            case MediaGroup.ROW_KIND_SEARCH_TOPICS:
+                return ExploreTopicsData.instance(getContext()).isHidingEnabled(MediaGroup.TYPE_HOME);
+            case MediaGroup.ROW_KIND_WATCH_LATER:
+                return WatchLaterData.instance(getContext()).isHidingEnabled(MediaGroup.TYPE_HOME);
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * In Home: an added row, or YouTube's not taken out by Home rows or Hide content. YouTube's rows as one (in YouTube's order)
+     * are there while one of them is.
+     */
+    private boolean isHomeRowShown(Row row, HomeRowsData data) {
+        if (row.type == Row.TYPE_KIND) {
+            return data.isShown(row) && !isHiddenByHideContent(row.kind);
+        }
+
+        if (row.type != Row.TYPE_YOUTUBE) {
+            return true;
+        }
+
+        if (data.isShown(row)) {
+            return true;
+        }
+
+        if (data.isYouTubeOrdered()) {
+            return false;
+        }
+
+        for (int kind : HomeRowsData.getYouTubeKinds()) {
+            if (data.isYouTubeRowShown(kind) && !isHiddenByHideContent(kind)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checked, it's added at the top
+     */
+    private OptionItem createHomeRowChannelOption(HomeRowsData data, String channelId, String title) {
+        return UiOptionItem.from(title, option -> {
+            if (option.isSelected()) {
+                data.addChannel(channelId, title);
+            } else {
+                data.removeChannel(channelId);
+            }
+        }, data.isChannelAdded(channelId));
+    }
+
+    /**
+     * The rows put in order with the remote (see OptionCategory.reorderList). Read again each time it's opened.
+     */
+    private void showHomeRowsOrder() {
+        HomeRowsData data = HomeRowsData.instance(getContext());
+        List<OptionItem> options = new ArrayList<>();
+
+        // The rest come after them (see HomeRowsData.setRows)
+        for (Row row : data.getRows()) {
+            if (isHomeRowShown(row, data)) {
+                options.add(UiOptionItem.from(getHomeRowTitle(row, data), null, false, row));
+            }
+        }
+
+        AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
+        dialog.appendReorderCategory(getContext().getString(R.string.home_rows_order), options, items -> {
+            List<Row> rows = new ArrayList<>();
+
+            for (OptionItem item : items) {
+                rows.add((Row) item.getData());
+            }
+
+            data.setRows(rows);
+        });
+        dialog.showDialog();
+    }
+
+    private String getHomeRowTitle(Row row, HomeRowsData data) {
+        switch (row.type) {
+            case Row.TYPE_YOUTUBE:
+                return getContext().getString(data.isYouTubeOrdered() ? R.string.home_rows_other : R.string.home_rows_youtube);
+            case Row.TYPE_SUBSCRIPTIONS:
+                return getContext().getString(R.string.header_subscriptions);
+            case Row.TYPE_CHANNEL:
+                return row.title != null ? row.title : row.channelId;
+            default:
+                return getContext().getString(getHomeRowKindTitle(row.kind));
+        }
+    }
+
+    private static int getHomeRowKindTitle(int kind) {
+        switch (kind) {
+            case MediaGroup.ROW_KIND_RECOMMENDED:
+                return R.string.recommended;
+            case MediaGroup.ROW_KIND_RECENTLY_UPLOADED:
+                return R.string.recently_uploaded;
+            case MediaGroup.ROW_KIND_CONTINUE_WATCHING:
+                return R.string.continue_watching;
+            case MediaGroup.ROW_KIND_WATCH_LATER:
+                return R.string.watch_later;
+            case MediaGroup.ROW_KIND_SHOWS:
+                return R.string.shows;
+            case MediaGroup.ROW_KIND_TOP_CHANNELS:
+                return R.string.top_channels;
+            case MediaGroup.ROW_KIND_SEARCH_TOPICS:
+                return R.string.explore_topics;
+            case MediaGroup.ROW_KIND_SHORTS:
+                return R.string.header_shorts;
+            default:
+                return R.string.home_rows_other;
+        }
+    }
+
+    /**
      * The Context menu card of the User interface settings, in General (was in the General panel)
      */
     public void showContextMenuItems() {
@@ -210,7 +428,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
     }
 
     /**
-     * The Home screen channels card of the User interface settings, in General: the app's own channels (History, My videos...),
+     * The Android channels card of the User interface settings: the app's own channels (History, My videos...),
      * then the playlists of the Playlists section, shown as channels of the launcher's home screen. The ones added that aren't
      * there (deleted since) come after them.
      */
@@ -228,8 +446,8 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
     private void showHomeScreenChannels(MediaGroup myPlaylists) {
         HomeScreenPlaylistsData data = HomeScreenPlaylistsData.instance(getContext());
         Map<String, String> added = data.getPlaylists();
-        Map<String, String> playlists = new LinkedHashMap<>();
         boolean[] isChanged = {false};
+        Map<String, String> playlists = new LinkedHashMap<>();
         List<MediaItem> mediaItems = myPlaylists != null ? myPlaylists.getMediaItems() : null;
 
         if (mediaItems != null) {
@@ -266,6 +484,12 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         appendHomeScreenChannel(options, data, R.string.recommended, ClipService.RECOMMENDED_PROVIDER_ID, isChanged);
         appendHomeScreenChannel(options, data, R.string.header_subscriptions, ClipService.SUBSCRIPTIONS_PROVIDER_ID, isChanged);
 
+        if (!playlists.isEmpty()) {
+            OptionItem header = UiOptionItem.from(getContext().getString(R.string.header_playlists));
+            header.setNote(true);
+            options.add(header);
+        }
+
         for (Entry<String, String> playlist : playlists.entrySet()) {
             options.add(UiOptionItem.from(playlist.getValue(), optionItem -> {
                 if (optionItem.isSelected()) {
@@ -283,10 +507,10 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         String title = getContext().getString(R.string.home_screen_channels);
         String accountName = data.getAccountName();
 
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
-        // Whose channels these are, named as in the launcher: it shows every account's. The title of the list (its only one).
-        settingsPresenter.appendCheckedCategory(accountName != null ? String.format("%s - %s", title, accountName) : title, options);
-        settingsPresenter.showDialog(title, () -> {
+        AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
+        // Whose channels these are, named as in the launcher: it shows every account's
+        dialog.appendCheckedCategory(accountName != null ? String.format("%s - %s", title, accountName) : title, options);
+        dialog.showDialog(title, () -> {
             // Once for all the changes
             if (isChanged[0]) {
                 Utils.updateChannels(getContext());
@@ -485,6 +709,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         menuNames.put(MainUIData.MENU_ITEM_REMOVE_FROM_HISTORY, R.string.remove_from_history);
         menuNames.put(MainUIData.MENU_ITEM_REMOVE_FROM_SUBSCRIPTIONS, R.string.remove_from_subscriptions);
         menuNames.put(MainUIData.MENU_ITEM_PIN_TO_SIDEBAR, R.string.pin_unpin_from_sidebar);
+        menuNames.put(MainUIData.MENU_ITEM_ADD_TO_HOME_ROWS, R.string.add_remove_from_home_rows);
         menuNames.put(MainUIData.MENU_ITEM_ADD_TO_HOME_SCREEN, R.string.add_remove_from_home_screen);
         menuNames.put(MainUIData.MENU_ITEM_SHARE_LINK, R.string.share_link);
         menuNames.put(MainUIData.MENU_ITEM_SHARE_EMBED_LINK, R.string.share_embed_link);

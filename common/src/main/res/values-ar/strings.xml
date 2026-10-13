@@ -769,4 +769,5 @@
     <string name="aislist_status_not_loaded">جارٍ تنزيل القوائم…</string>
     <string name="aislist_about">حول AiSList (قائمة مجتمعية، CC BY-NC 4.0)</string>
     <string name="report_ai_channel">الإبلاغ عن القناة إلى AiSList</string>
+    <string name="add_remove_from_home_rows">إضافة/إزالة من الصفحة الرئيسية</string>
 </resources>

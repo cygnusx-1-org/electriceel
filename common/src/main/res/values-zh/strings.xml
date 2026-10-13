@@ -770,4 +770,5 @@
     <string name="aislist_status_not_loaded">正在下载列表…</string>
     <string name="aislist_about">关于 AiSList（社区列表，CC BY-NC 4.0）</string>
     <string name="report_ai_channel">向 AiSList 举报频道</string>
+    <string name="add_remove_from_home_rows">添加至首页或从中移除</string>
 </resources>

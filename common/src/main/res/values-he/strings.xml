@@ -770,4 +770,5 @@ So, make a copy of values-he and name it values-iw. Keep both in your structure.
     <string name="aislist_status_not_loaded">מוריד את הרשימות…</string>
     <string name="aislist_about">אודות AiSList (רשימה קהילתית, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">דיווח על הערוץ ל-AiSList</string>
+    <string name="add_remove_from_home_rows">הוספה/הסרה מדף הבית</string>
 </resources>

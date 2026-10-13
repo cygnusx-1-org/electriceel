@@ -767,4 +767,5 @@
     <string name="aislist_status_not_loaded">Λήψη των λιστών…</string>
     <string name="aislist_about">Σχετικά με το AiSList (λίστα κοινότητας, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Αναφορά του καναλιού στο AiSList</string>
+    <string name="add_remove_from_home_rows">Προσθήκη/Αφαίρεση από την Αρχική</string>
 </resources>

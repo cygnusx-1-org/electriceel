@@ -638,4 +638,5 @@
     <string name="aislist_status_not_loaded">Loendite allalaadimine…</string>
     <string name="aislist_about">Teave AiSListi kohta (kogukonna loend, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Teata kanalist AiSListile</string>
+    <string name="add_remove_from_home_rows">Lisa/Eemalda Avalehelt</string>
 </resources>

@@ -742,4 +742,5 @@
     <string name="aislist_status_not_loaded">Lijsten downloaden…</string>
     <string name="aislist_about">Over AiSList (communitylijst, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Kanaal melden bij AiSList</string>
+    <string name="add_remove_from_home_rows">Toevoegen aan/verwijderen uit Home</string>
 </resources>

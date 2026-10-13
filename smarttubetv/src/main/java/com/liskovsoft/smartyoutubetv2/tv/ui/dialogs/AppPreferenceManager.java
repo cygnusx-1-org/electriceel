@@ -16,6 +16,7 @@ import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.ChatPreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.CommentsPreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.DependentListPreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.ImagePreference;
+import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.ReorderListPreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.StringListPreference;
 
 import java.util.ArrayList;
@@ -136,6 +137,8 @@ public class AppPreferenceManager {
                 return createRadioListPreference(category);
             case OptionCategory.TYPE_STRING_LIST:
                 return createStringListPreference(category);
+            case OptionCategory.TYPE_REORDER_LIST:
+                return createReorderListPreference(category);
             case OptionCategory.TYPE_SINGLE_SWITCH:
                 return createSwitchPreference(category);
             case OptionCategory.TYPE_SINGLE_BUTTON:
@@ -151,6 +154,43 @@ public class AppPreferenceManager {
         }
 
         throw  new IllegalStateException("Can't find matched preference for type: " + category.type);
+    }
+
+    /**
+     * The values are the places of the items: the listener gets them in the new order (see ReorderListPreferenceDialogFragment)
+     */
+    private Preference createReorderListPreference(OptionCategory category) {
+        ReorderListPreference pref = new ReorderListPreference(mContext);
+
+        initDialogPreference(category, pref);
+
+        int size = category.options.size();
+        CharSequence[] titles = new CharSequence[size];
+        CharSequence[] values = new CharSequence[size];
+
+        for (int i = 0; i < size; i++) {
+            titles[i] = category.options.get(i).getTitle();
+            values[i] = String.valueOf(i);
+        }
+
+        pref.setEntries(titles);
+        pref.setEntryValues(values);
+
+        pref.setOnPreferenceChangeListener((preference, newValue) -> {
+            if (category.onReorder != null && newValue instanceof List) {
+                List<OptionItem> items = new ArrayList<>();
+
+                for (Object value : (List<?>) newValue) {
+                    items.add(category.options.get(Integer.parseInt(value.toString())));
+                }
+
+                category.onReorder.onReorder(items);
+            }
+
+            return true;
+        });
+
+        return pref;
     }
 
     private Preference createStringListPreference(OptionCategory category) {

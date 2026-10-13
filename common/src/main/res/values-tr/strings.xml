@@ -775,4 +775,5 @@
     <string name="aislist_status_not_loaded">Listeler indiriliyor…</string>
     <string name="aislist_about">AiSList hakkında (topluluk listesi, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Kanalı AiSList\'e bildir</string>
+    <string name="add_remove_from_home_rows">Ana Sayfaya Ekle/Kaldır</string>
 </resources>

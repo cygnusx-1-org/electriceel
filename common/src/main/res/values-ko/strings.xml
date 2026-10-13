@@ -734,4 +734,5 @@
     <string name="aislist_status_not_loaded">목록을 다운로드하는 중…</string>
     <string name="aislist_about">AiSList 정보 (커뮤니티 목록, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">AiSList에 채널 신고</string>
+    <string name="add_remove_from_home_rows">홈에 추가/제거</string>
 </resources>

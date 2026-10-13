@@ -749,4 +749,5 @@
     <string name="aislist_status_not_loaded">Sťahovanie zoznamov…</string>
     <string name="aislist_about">O AiSList (komunitný zoznam, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Nahlásiť kanál do AiSList</string>
+    <string name="add_remove_from_home_rows">Pridať/Odstrániť z Domova</string>
 </resources>

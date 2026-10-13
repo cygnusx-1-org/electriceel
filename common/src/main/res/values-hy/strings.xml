@@ -170,4 +170,5 @@
     <string name="aislist_status_not_loaded">Ցուցակները ներբեռնվում են…</string>
     <string name="aislist_about">AiSList-ի մասին (համայնքային ցուցակ, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Հաղորդել ալիքի մասին AiSList-ին</string>
+    <string name="add_remove_from_home_rows">Ավելացնել/Հեռացնել Գլխավոր էջից</string>
 </resources>

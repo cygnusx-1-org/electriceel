@@ -729,4 +729,5 @@
     <string name="aislist_status_not_loaded">Downloader listerne…</string>
     <string name="aislist_about">Om AiSList (fællesskabsliste, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Rapportér kanalen til AiSList</string>
+    <string name="add_remove_from_home_rows">Tilføj/fjern fra Hjem</string>
 </resources>

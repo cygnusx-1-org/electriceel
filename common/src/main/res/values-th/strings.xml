@@ -347,4 +347,5 @@
     <string name="aislist_status_not_loaded">กำลังดาวน์โหลดรายการ…</string>
     <string name="aislist_about">เกี่ยวกับ AiSList (รายการจากชุมชน, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">รายงานช่องไปยัง AiSList</string>
+    <string name="add_remove_from_home_rows">เพิ่ม/ลบจากหน้าแรก</string>
 </resources>

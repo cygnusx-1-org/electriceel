@@ -5,6 +5,16 @@ import java.util.Collections;
 import java.util.List;
 
 public class OptionCategory {
+    /**
+     * The items of a list that's put in order (see {@link #reorderList})
+     */
+    public interface OnReorder {
+        /**
+         * @param items all of them, in their new order
+         */
+        void onReorder(List<OptionItem> items);
+    }
+
     public static OptionCategory radioList(CharSequence title, List<OptionItem> items) {
         return new OptionCategory(title, items, TYPE_RADIO_LIST);
     }
@@ -15,6 +25,13 @@ public class OptionCategory {
 
     public static OptionCategory stringList(CharSequence title, List<OptionItem> items) {
         return new OptionCategory(title, items, TYPE_STRING_LIST);
+    }
+
+    /**
+     * Its items are moved up and down: one is picked up and moved to its place. Told of the new order at each move.
+     */
+    public static OptionCategory reorderList(CharSequence title, List<OptionItem> items, OnReorder onReorder) {
+        return new OptionCategory(title, items, TYPE_REORDER_LIST, -1, 0, onReorder);
     }
 
     public static OptionCategory longText(CharSequence title, OptionItem item) {
@@ -67,11 +84,16 @@ public class OptionCategory {
     }
 
     private OptionCategory(CharSequence title, List<OptionItem> options, int type, int id, int imageResId) {
+        this(title, options, type, id, imageResId, null);
+    }
+
+    private OptionCategory(CharSequence title, List<OptionItem> options, int type, int id, int imageResId, OnReorder onReorder) {
         this.id = id;
         this.type = type;
         this.title = title;
         this.options = options;
         this.imageResId = imageResId;
+        this.onReorder = onReorder;
     }
 
     public static final int TYPE_RADIO_LIST = 0;
@@ -83,9 +105,14 @@ public class OptionCategory {
     public static final int TYPE_CHAT = 6;
     public static final int TYPE_COMMENTS = 7;
     public static final int TYPE_IMAGE = 8;
+    public static final int TYPE_REORDER_LIST = 9;
     public final int id;
     public final int type;
     public final CharSequence title;
     public final List<OptionItem> options;
     public final int imageResId;
+    /**
+     * Of {@link #TYPE_REORDER_LIST}, null for the others
+     */
+    public final OnReorder onReorder;
 }

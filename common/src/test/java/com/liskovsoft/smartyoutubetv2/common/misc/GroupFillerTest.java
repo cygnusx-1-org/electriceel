@@ -391,6 +391,11 @@ public class GroupFillerTest {
         }
 
         @Override
+        public int getRowKind() {
+            return ROW_KIND_NONE;
+        }
+
+        @Override
         public int getFilteredVideoCount() {
             return 0;
         }

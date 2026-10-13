@@ -774,4 +774,5 @@
     <string name="aislist_status_not_loaded">Listen werden heruntergeladen…</string>
     <string name="aislist_about">Über AiSList (Community-Liste, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Kanal an AiSList melden</string>
+    <string name="add_remove_from_home_rows">Hinzufügen/Entfernen aus Start</string>
 </resources>

@@ -777,6 +777,7 @@
     <string name="aislist_status_not_loaded">Stahování seznamů…</string>
     <string name="aislist_about">O AiSList (komunitní seznam, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Nahlásit kanál do AiSList</string>
+    <string name="add_remove_from_home_rows">Přidat/Odebrat ze sekce Domů</string>
 </resources>
 
 

@@ -526,4 +526,5 @@
     <string name="aislist_status_not_loaded">S\'estan baixant les llistes…</string>
     <string name="aislist_about">Quant a AiSList (llista comunitària, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Informa del canal a AiSList</string>
+    <string name="add_remove_from_home_rows">Afegeix/Treu d\'Inici</string>
 </resources>

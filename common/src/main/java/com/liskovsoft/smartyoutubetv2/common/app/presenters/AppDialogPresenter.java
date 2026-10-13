@@ -215,6 +215,13 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
         mCategories.add(OptionCategory.checkedList(categoryTitle, items));
     }
 
+    /**
+     * Its items are moved up and down, see {@link OptionCategory#reorderList}
+     */
+    public void appendReorderCategory(CharSequence categoryTitle, List<OptionItem> items, OptionCategory.OnReorder onReorder) {
+        mCategories.add(OptionCategory.reorderList(categoryTitle, items, onReorder));
+    }
+
     public void appendStringsCategory(CharSequence categoryTitle, List<OptionItem> items) {
         mCategories.add(OptionCategory.stringList(categoryTitle, items));
     }
