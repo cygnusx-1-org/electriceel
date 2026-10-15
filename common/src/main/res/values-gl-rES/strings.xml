@@ -591,7 +591,6 @@
   <string name="amazon_frame_drop_fix">Corrección de caída de fotogramas #2</string>
   <string name="amazon_frame_drop_fix_desc">Destinado a dispositivos Amazon Stick. Tamén pode funcionar noutros dispositivos.</string>
   <string name="default_stack_desc">Motor de rede incorporado. Este motor pode ter unha mellor estabilidade en determinadas situacións.</string>
-  <string name="item_postion">Posición de</string>
   <string name="player_screen_off_dimming">Cantidade de escurecemento da pantalla</string>
   <string name="screensaver_timout">Tempo de espera do salvapantallas</string>
   <string name="screensaver_dimming">Cantidade de atenuación do protector de pantalla</string>
@@ -679,7 +678,6 @@
   <string name="screen_dimming_timeout">Tempo de espera para a atenuación da pantalla</string>
   <string name="playlists_rows">Amosar a sección de listas de reprodución como filas</string>
   <string name="not_supported_by_device">O dispositivo non soporta esta función</string>
-  <string name="context_menu_sorting">Ordenación do menú contextual</string>
   <string name="hide_shorts_from_search">Ocultar vídeos curtos nos resultados de busca</string>
   <string name="suggestions">Suxestións</string>
   <string name="import_subscriptions_group">Importar</string>

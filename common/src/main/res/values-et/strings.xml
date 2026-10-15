@@ -580,7 +580,6 @@
   <string name="amazon_frame_drop_fix">Kaadrikao parandus #2</string>
   <string name="amazon_frame_drop_fix_desc">Mõeldud Amazon Sticki seadmetele. Võib töötada ka teistes seadmetes.</string>
   <string name="default_stack_desc">Sisseehitatud võrgutarkvara.</string>
-  <string name="item_postion">positsioon</string>
   <string name="player_screen_off_dimming">Ekraani väljalülitamise hämardamise määr</string>
   <string name="screensaver_timout">Ekraanisäästja sisselülitamise aeg</string>
   <string name="screensaver_dimming">Ekraanisäästja hämardamise määr</string>

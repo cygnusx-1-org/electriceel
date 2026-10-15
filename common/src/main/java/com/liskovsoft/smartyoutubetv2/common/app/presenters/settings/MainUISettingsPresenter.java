@@ -421,10 +421,52 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
     }
 
     /**
-     * The Context menu card of the User interface settings, in General (was in the General panel)
+     * The Context menu card of the User interface settings, in General (was in the General panel): the items of the menu and
+     * their order
      */
     public void showContextMenuItems() {
-        showCategory(R.string.context_menu, this::appendContextMenuItemsCategory);
+        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+
+        settingsPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.context_menu_items), option -> showContextMenuItemsList()));
+        settingsPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.context_menu_order), option -> showContextMenuOrder()));
+
+        settingsPresenter.showDialog(getContext().getString(R.string.context_menu));
+    }
+
+    private void showContextMenuItemsList() {
+        AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
+        appendContextMenuItemsCategory(dialog);
+        dialog.showDialog();
+    }
+
+    /**
+     * The enabled items put in order with the remote (see OptionCategory.reorderList). Read again each time it's opened.
+     */
+    private void showContextMenuOrder() {
+        List<OptionItem> options = new ArrayList<>();
+
+        Map<Long, Integer> menuNames = getMenuNames();
+
+        // The disabled ones come after them (see MainUIData.setMenuItemsOrder)
+        for (Long menuItem : mMainUIData.getMenuItemsOrdered()) {
+            Integer nameResId = menuNames.get(menuItem);
+
+            if (nameResId != null && mMainUIData.isMenuItemEnabled(menuItem)) {
+                options.add(UiOptionItem.from(getContext().getString(nameResId), null, false, menuItem));
+            }
+        }
+
+        AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
+        dialog.appendReorderCategory(getContext().getString(R.string.context_menu_order), options, items -> {
+            List<Long> menuItems = new ArrayList<>();
+
+            for (OptionItem item : items) {
+                menuItems.add((Long) item.getData());
+            }
+
+            mMainUIData.setMenuItemsOrder(menuItems);
+        });
+        dialog.showDialog();
     }
 
     /**
@@ -574,75 +616,13 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
             options.add(UiOptionItem.from(getContext().getString(nameResId), optionItem -> {
                 if (optionItem.isSelected()) {
                     mMainUIData.setMenuItemEnabled(menuItem);
-                    showMenuItemOrderDialog(menuItem);
                 } else {
                     mMainUIData.setMenuItemDisabled(menuItem);
                 }
             }, mMainUIData.isMenuItemEnabled(menuItem)));
         }
 
-        settingsPresenter.appendCheckedCategory(getContext().getString(R.string.context_menu), options);
-    }
-
-    private void appendContextMenuSortingCategory(AppDialogPresenter settingsPresenter) {
-        List<OptionItem> options = new ArrayList<>();
-
-        Map<Long, Integer> menuNames = getMenuNames();
-
-        for (Long menuItem : mMainUIData.getMenuItemsOrdered()) {
-            Integer nameResId = menuNames.get(menuItem);
-
-            if (nameResId == null || !mMainUIData.isMenuItemEnabled(menuItem)) {
-                continue;
-            }
-
-            options.add(UiOptionItem.from(getContext().getString(nameResId), optionItem ->
-                    showMenuItemOrderDialog(menuItem), false));
-        }
-
-        settingsPresenter.appendRadioCategory(getContext().getString(R.string.context_menu_sorting), options);
-    }
-
-    private void showMenuItemOrderDialog(Long menuItem) {
-        AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
-
-        List<OptionItem> options = new ArrayList<>();
-
-        Map<Long, Integer> menuNames = getMenuNames();
-
-        Integer currentNameResId = menuNames.get(menuItem);
-
-        if (currentNameResId == null) {
-            return;
-        }
-
-        List<Long> menuItemsOrdered = mMainUIData.getMenuItemsOrdered();
-        int size = menuItemsOrdered.size();
-        int currentIndex = mMainUIData.getMenuItemIndex(menuItem);
-        int counter = 0;
-
-        for (int i = 0; i < size; i++) {
-            Long item = menuItemsOrdered.get(i);
-            Integer nameResId = menuNames.get(item);
-
-            if (nameResId == null || !mMainUIData.isMenuItemEnabled(item)) {
-                continue;
-            }
-
-            final int index = i;
-            options.add(UiOptionItem.from((counter + 1) + " " + getContext().getString(nameResId), optionItem -> {
-                if (optionItem.isSelected()) {
-                    mMainUIData.setMenuItemIndex(index, menuItem);
-                    dialog.goBack();
-                }
-            }, currentIndex == i));
-            counter++;
-        }
-
-        String itemName = getContext().getString(currentNameResId);
-        dialog.appendRadioCategory(getContext().getString(R.string.item_postion) + " " + itemName, options);
-
-        dialog.showDialog();
+        settingsPresenter.appendCheckedCategory(getContext().getString(R.string.context_menu_items), options);
     }
 
     private void appendBootToSection(AppDialogPresenter settingsPresenter) {

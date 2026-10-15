@@ -590,7 +590,6 @@
   <string name="amazon_frame_drop_fix">Rregullo uljen e frekuencës #2</string>
   <string name="amazon_frame_drop_fix_desc">I menduar për pajisjet Amazon Stick. Mund të punoi edhe në pajisje të tjera.</string>
   <string name="default_stack_desc">Motor i integruar i rrjetit. Ky motor mund të ketë qëndrueshmëri më të mirë në ca situata.</string>
-  <string name="item_postion">Vendndodhja e</string>
   <string name="player_screen_off_dimming">Niveli i zbehjes së ekranit të fikur</string>
   <string name="screensaver_timout">Koha për nisjen e mbrojtësit të ekranit</string>
   <string name="screensaver_dimming">Niveli i zbehjes i mbrojtësit të ekranit</string>
@@ -684,7 +683,6 @@
   <string name="import_subscriptions_group">Importo</string>
   <string name="lb_playback_controls_closed_captioning_disable">Çaktivizo Titrat</string>
   <string name="lb_playback_controls_closed_captioning_enable">Aktivizo Titrat</string>
-  <string name="context_menu_sorting">Renditja e menysë së kontekstit</string>
   <string name="my_videos">Videot e mia</string>
   <string name="paid_content_notification">Njoftim për përmbajtje me pagesë</string>
   <string name="player_audio_focus">Përqendrimi i zërit (pezullo nëse zbulohen luajtës të tjerë)</string>

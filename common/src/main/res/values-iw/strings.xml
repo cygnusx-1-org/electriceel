@@ -304,7 +304,6 @@ So, make a copy of values-he and name it values-iw. Keep both in your structure.
     <string name="upload_date_last_hour">בשעה האחרונה</string>
     <string name="focus_on_search_results">התמקדות אוטומטית בתוצאות חיפוש</string>
     <string name="context_menu">תפריט הקשר</string>
-    <string name="context_menu_sorting">מיון תפריט הקשר</string>
     <string name="add_remove_from_recent_playlist">הוספה/הסרה מפלייליסט אחרון</string>
     <string name="hide_settings_section">הסתרת מדור ההגדרות (מסוכן!)</string>
     <string name="volume">נפח %s%%</string>
@@ -612,7 +611,6 @@ So, make a copy of values-he and name it values-iw. Keep both in your structure.
     <string name="amazon_frame_drop_fix">תיקון נפילת פריימים #2</string>
     <string name="amazon_frame_drop_fix_desc">מיועד למכשירי Amazon Stick. עשוי לעבוד גם על מכשירים אחרים.</string>
     <string name="default_stack_desc">מנוע רשת מובנה. מנוע זה עשוי להיות בעל יציבות טובה יותר במצבים מסוימים.</string>
-    <string name="item_postion">מיקום של</string>
     <string name="player_screen_off_dimming">כמות עמעום של כיבוי מסך</string>
     <string name="screensaver_timout">זמן קצוב לשומר מסך</string>
     <string name="screensaver_dimming">כמות עמעום של שומר מסך</string>

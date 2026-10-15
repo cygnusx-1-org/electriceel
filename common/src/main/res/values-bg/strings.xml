@@ -575,7 +575,6 @@
   <string name="amazon_frame_drop_fix">Поправка за падане на рамката #2</string>
   <string name="amazon_frame_drop_fix_desc">Предназначено за устройства Amazon Stick. Може да работи и на други устройства.</string>
   <string name="default_stack_desc">Вграден мрежов стек. Този стек може да има по-добра стабилност в определени ситуации.</string>
-  <string name="item_postion">Позиция на</string>
   <string name="player_screen_off_dimming">Размер на затъмнението при изключен екран</string>
   <string name="screensaver_timout">Време за прекъсване на скрийнсейвъра</string>
   <string name="screensaver_dimming">Степен на затъмняване на екрана</string>

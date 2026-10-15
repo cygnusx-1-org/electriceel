@@ -555,7 +555,6 @@
   <string name="amazon_frame_drop_fix">Επιδιόρθωση απώλειας καρέ #2</string>
   <string name="amazon_frame_drop_fix_desc">Προορίζεται για συσκευές Amazon Stick. Ίσως δουλεύει και σε άλλες.</string>
   <string name="default_stack_desc">Ενσωματωμένη στοίβα δικτύου. Αυτή η στοίβα ίσως είναι πιο σταθερή σε κάποιες περιπτώσεις. </string>
-  <string name="item_postion">Θέση του</string>
   <string name="player_screen_off_dimming">Ποσότητα συσκότισης οθόνης</string>
   <string name="screensaver_timout">Λήξη χρονικού ορίου προφύλαξης οθόνης </string>
   <string name="screensaver_dimming">Ποσότητα σκοτεινιάσματος προφύλαξης οθόνης</string>
@@ -675,7 +674,6 @@
   <string name="player_toggle_speed">Εναλλαγή ταχύτητας ναι/όχι</string>
   <string name="search_exit_shortcut">Έξοδος από αναζήτηση</string>
   <string name="unpin_group_from_sidebar">Αφαίρεση ομάδας συνδρομών</string>
-  <string name="context_menu_sorting">Ταξινόμηση μενού περιεχομένων</string>
   <string name="hide_shorts_from_search">Απόκρυψη shorts από το αποτέλεσμα αναζήτησης</string>
   <string name="remove_playlist_fmt">Αφαίρεση %s μόνιμα;</string>
   <string name="create_playlist_note">δε θα φαίνεται στην εφαρμογή YouTube</string>

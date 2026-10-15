@@ -669,7 +669,6 @@
   <string name="sony_frame_drop_fix_desc">Sửa lỗi giật lag ở các TV của Sony và một số thiết bị khác. Lưu ý: có thể sẽ có vấn đề với việc đồng bộ hoá âm thanh.</string>
   <string name="amazon_frame_drop_fix">Sửa lỗi giảm khung hình #2</string>
   <string name="amazon_frame_drop_fix_desc">Dành cho các thiết bị Amazon Stick. Cũng có thể hoạt động ở một số thiết bị khác.</string>
-  <string name="item_postion">Vị trí của</string>
   <string name="header_shorts">Shorts</string>
   <string name="remote_control_permission">Điều khiển trong nền yêu cầu quyền Vẽ trên ứng dụng khác</string>
   <string name="keyboard_fix">Ngăn việc nút OK vô tình mở bàn phím (G20s và các thiết bị khác)</string>
@@ -686,7 +685,6 @@
   <string name="import_subscriptions_group">Nhập</string>
   <string name="my_videos">Video của bạn</string>
   <string name="paid_content_notification">Thông báo nội dung trả tiền</string>
-  <string name="context_menu_sorting">Sắp xếp danh mục</string>
   <string name="you_liked">đã thích</string>
   <string name="player_audio_focus">Lấy nét âm thanh (tạm dừng nếu trình phát khác đã phát hiện)</string>
   <string name="oculus_quest_fix">Sửa Oculus Quest</string>

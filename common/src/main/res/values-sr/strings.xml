@@ -259,7 +259,6 @@
     <string name="upload_date_this_year">ове године</string>
     <string name="upload_date_last_hour">у последњем сату</string>
     <string name="context_menu">Контекстни мени</string>
-    <string name="context_menu_sorting">Сотрирање контекстног менија</string>
     <string name="volume">Јачина %s%%</string>
     <string name="auto_frame_rate_sec">%s сек.</string>
     <string name="audio_shift_sec">%s сек.</string>
@@ -605,7 +604,6 @@
     <string name="amazon_frame_drop_fix">Сређује пад кадрова #2</string>
     <string name="amazon_frame_drop_fix_desc">Намењено за Амазон Стик уређаје. Можда може радити и на другим уређајима.</string>
     <string name="default_stack_desc">Уграђени мрежни мотор. Овај мотор може имати бољу стабилност у одређеним ситуацијама.</string>
-    <string name="item_postion">Позиција</string>
     <string name="player_screen_off_dimming">Степен затамњења при искључењу екрана</string>
     <string name="screensaver_timout">Време до укључења чувара екрана</string>
     <string name="screensaver_dimming">Степен затамњења чувара екрана</string>

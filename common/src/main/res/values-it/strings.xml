@@ -301,7 +301,6 @@
     <string name="upload_date_last_hour">Ultima ora</string>
     <string name="focus_on_search_results">Messa a fuoco automatica sui risultati della ricerca</string>
     <string name="context_menu">Menu contestuale</string>
-    <string name="context_menu_sorting">Ordinamento del menu contestuale</string>
     <string name="add_remove_from_recent_playlist">Aggiungi/Rimuovi dalla playlist recente</string>
     <string name="hide_settings_section">Nascondi la sezione Impostazioni (pericoloso!)</string>
     <string name="volume">Volume %s%%</string>
@@ -610,7 +609,6 @@
     <string name="amazon_frame_drop_fix">Correggi salto fotogrammi #2</string>
     <string name="amazon_frame_drop_fix_desc">Destinato ai dispositivi Amazon Stick. Può funzionare anche su altri dispositivi.</string>
     <string name="default_stack_desc">Motore di rete integrato. Questo motore può avere una migliore stabilità in determinate situazioni.</string>
-    <string name="item_postion">Posizione di</string>
     <string name="player_screen_off_dimming">Livello di oscuramento a schermo spento</string>
     <string name="screensaver_timout">Timeout screensaver</string>
     <string name="screensaver_dimming">Livello di oscuramento dello screensaver</string>

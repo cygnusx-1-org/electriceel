@@ -590,7 +590,6 @@
   <string name="amazon_frame_drop_fix">Poprawka dla gubienia klatek #2</string>
   <string name="amazon_frame_drop_fix_desc">Dla urządzeń Amazon Stick. Może zadziałać też na innych urządzeniach</string>
   <string name="default_stack_desc">Używaj wbudowanej biblioteki sieciowej. W określonych okolicznościach może zapewniać lepszą stabilność działania</string>
-  <string name="item_postion">Pozycja</string>
   <string name="player_screen_off_dimming">Wartość przyciemnienia ekranu</string>
   <string name="screensaver_timout">Limit czasu wygaszacza ekranu</string>
   <string name="screensaver_dimming">Stopień przyciemnienia wygaszacza ekranu</string>
@@ -661,7 +660,6 @@
   <string name="video_buffer_size_lowest">Najmniejszy</string>
   <string name="video_buffer_size_highest">Największy</string>
   <string name="unpin_group_from_sidebar">Usuń grupę Subskrypcji</string>
-  <string name="context_menu_sorting">Sortowanie menu kontekstowego</string>
   <string name="hide_shorts_from_search">Ukryj Szorty w wynikach wyszukiwania</string>
   <string name="suggestions">Sugestie</string>
   <string name="place_comments_left">Umieść komentarze po lewej stronie</string>

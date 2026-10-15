@@ -300,7 +300,6 @@
     <string name="upload_date_last_hour">Última hora</string>
     <string name="focus_on_search_results">Foco automático nos resultados da pesquisa</string>
     <string name="context_menu">Menu de contexto</string>
-    <string name="context_menu_sorting">Ordem no menu de contexto</string>
     <string name="add_remove_from_recent_playlist">Adicionar/remover das listas de reprodução recentes</string>
     <string name="hide_settings_section">Ocultar definições (PERIGOSO)</string>
     <string name="volume">Volume %s%%</string>
@@ -607,7 +606,6 @@
     <string name="amazon_frame_drop_fix">Correção de fotogramas #2</string>
     <string name="amazon_frame_drop_fix_desc">Opção criada para dispositivos Amazon Stick. Também pode funcionar noutros dispositivos.</string>
     <string name="default_stack_desc">Mecanismo de rede nativo. Pode apresentar mais estabilidade em situações específicas.</string>
-    <string name="item_postion">Posição de</string>
     <string name="player_screen_off_dimming">Valor de escurecimento ao desligar o ecrã</string>
     <string name="screensaver_timout">Tempo limite para ativar a proteção de ecrã</string>
     <string name="screensaver_dimming">Valor de escurecimento ao ativar a proteção de ecrã</string>

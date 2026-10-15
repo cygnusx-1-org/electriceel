@@ -301,7 +301,6 @@
     <string name="upload_date_last_hour">Za poslední hodinu</string>
     <string name="focus_on_search_results">Automatické zaměření na výsledek vyhledávání</string>
     <string name="context_menu">Kontextová nabídka</string>
-    <string name="context_menu_sorting">Řazení kontextové nabídky</string>
     <string name="add_remove_from_recent_playlist">Přidat/odebrat z nedávného playlistu</string>
     <string name="hide_settings_section">Skrýt sekci Nastavení (nebezpečné!)</string>
     <string name="volume">Hlasitost %s%%</string>
@@ -610,7 +609,6 @@
     <string name="amazon_frame_drop_fix">Oprava poklesu snímků #2</string>
     <string name="amazon_frame_drop_fix_desc">Určeno pro zařízení Amazon Stick. Může fungovat i na jiných zařízeních.</string>
     <string name="default_stack_desc">Vestavěný síťový vyhledávač. Tento vyhledávač může mít v určitých situacích lepší stabilitu.</string>
-    <string name="item_postion">Pozice</string>
     <string name="player_screen_off_dimming">Míra ztmavení obrazovky</string>
     <string name="screensaver_timout">Časový limit spořiče</string>
     <string name="screensaver_dimming">Míra ztmavení spořiče</string>

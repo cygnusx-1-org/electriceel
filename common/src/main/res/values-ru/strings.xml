@@ -301,7 +301,6 @@
     <string name="upload_date_last_hour">Последний час</string>
     <string name="focus_on_search_results">Автофокусировка на результатах поиска</string>
     <string name="context_menu">Контекстное меню</string>
-    <string name="context_menu_sorting">Сортировка контекстного меню</string>
     <string name="add_remove_from_recent_playlist">Добавить/Удалить из недавнего плейлиста</string>
     <string name="hide_settings_section">Прятать раздел Настройки (опасно!)</string>
     <string name="volume">Громкость %s%%</string>
@@ -605,7 +604,6 @@
     <string name="amazon_frame_drop_fix">Исправление выпадения кадров #2</string>
     <string name="amazon_frame_drop_fix_desc">Исправляет лаги на Amazon Stick и некоторых других устройствах.</string>
     <string name="default_stack_desc">Встроенный сетевой движок. Этот движок может иметь лучшую стабильность в определенных ситуациях.</string>
-    <string name="item_postion">Позиция</string>
     <string name="player_screen_off_dimming">Величина затемнения экрана</string>
     <string name="screensaver_timout">Тайм-аут включения заставки</string>
     <string name="screensaver_dimming">Величина затемнения заставки</string>

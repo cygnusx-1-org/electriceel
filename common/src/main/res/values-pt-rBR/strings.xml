@@ -300,7 +300,6 @@
   <string name="upload_date_last_hour">Última hora</string>
   <string name="focus_on_search_results">Foco automático nos resultados de pesquisa</string>
   <string name="context_menu">Menu de contexto</string>
-  <string name="context_menu_sorting">Ordenação do menu de contexto</string>
   <string name="add_remove_from_recent_playlist">Adicionar/Remover da lista de reprodução (playlist) recente</string>
   <string name="hide_settings_section">Ocultar a seção \"Configurações\" (perigoso!)</string>
   <string name="volume">Volume %s%%</string>
@@ -607,7 +606,6 @@
   <string name="amazon_frame_drop_fix">Correção de queda de quadros #2</string>
   <string name="amazon_frame_drop_fix_desc">Recomendado para aparelhos Amazon Stick. Pode funcionar em outros dispositivos.</string>
   <string name="default_stack_desc">Fluxo de rede integrado. Este fluxo pode ter melhor estabilidade em determinadas situações.</string>
-  <string name="item_postion">Posição de</string>
   <string name="player_screen_off_dimming">Porcentagem de escurecimento para tela desligada/desativada</string>
   <string name="screensaver_timout">Tempo limite para ativar o protetor de tela</string>
   <string name="screensaver_dimming">Porcentagem de escurecimento do protetor de tela</string>

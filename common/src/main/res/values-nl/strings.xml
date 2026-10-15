@@ -595,7 +595,6 @@
   <string name="amazon_frame_drop_fix">Amazon frame drop-oplossing #2</string>
   <string name="amazon_frame_drop_fix_desc">Bedoeld voor Amazon Stick-apparaten. Werkt mogelijk ook op andere apparaten.</string>
   <string name="default_stack_desc">Ingebouwde netwerkengine. Deze engine kan in bepaalde situaties een betere stabiliteit hebben.</string>
-  <string name="item_postion">Positie van</string>
   <string name="player_screen_off_dimming">Scherm uit dimmen hoeveelheid</string>
   <string name="screensaver_timout">Time-out van schermbeveiliging</string>
   <string name="screensaver_dimming">Hoeveelheid schermbeveiliging dimmen</string>

@@ -301,7 +301,6 @@
     <string name="upload_date_last_hour">1 時間以内</string>
     <string name="focus_on_search_results">検索結果に自動でカーソルを合わせる</string>
     <string name="context_menu">コンテキストメニュー</string>
-    <string name="context_menu_sorting">コンテキストメニューの並べ替え</string>
     <string name="add_remove_from_recent_playlist">直近の再生リストに追加または削除</string>
     <string name="hide_settings_section">設定セクションを非表示にする (危険です！)</string>
     <string name="volume">音量 %s%%</string>
@@ -610,7 +609,6 @@
     <string name="amazon_frame_drop_fix">フレームドロップの修正 #2</string>
     <string name="amazon_frame_drop_fix_desc">Amazon Fire TV 向け。他のデバイスでも効果がある場合があります。</string>
     <string name="default_stack_desc">内蔵のネットワークエンジンです。特定の状況下では優れた安定性があります。</string>
-    <string name="item_postion">位置の設定:</string>
     <string name="player_screen_off_dimming">画面 OFF 時の減光量</string>
     <string name="screensaver_timout">一定時間後にスクリーンセーバーを起動する</string>
     <string name="screensaver_dimming">スクリーンセーバーの減光量</string>

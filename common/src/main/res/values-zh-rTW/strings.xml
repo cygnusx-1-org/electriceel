@@ -548,7 +548,6 @@
   <string name="amazon_frame_drop_fix">掉幀問題修復 #2</string>
   <string name="amazon_frame_drop_fix_desc">專為 Amazon Stick 裝置設計，也可能適用於其他裝置。</string>
   <string name="default_stack_desc">內建的網路引擎。這個引擎在某些情況下可能較穩定。</string>
-  <string name="item_postion">位置</string>
   <string name="player_screen_off_dimming">螢幕關閉暗化程度</string>
   <string name="screensaver_timout">螢幕保護程式逾時</string>
   <string name="screensaver_dimming">螢幕保護程式暗化程度</string>
@@ -643,7 +642,6 @@
   <string name="card_unlocalized_titles">未本地化的影片標題</string>
   <string name="channel_search_bar">頻道頁面內的搜尋列</string>
   <string name="channels_filter">在「頻道」區段中顯示「篩選頻道」欄位</string>
-  <string name="context_menu_sorting">內容選單排序</string>
   <string name="crowdsourced_thumbnails">社群貢獻縮圖</string>
   <string name="crowdsoursed_titles">社群貢獻標題</string>
   <string name="dearrow_not_submitted_thumbs">縮圖來源（如果沒有 DeArrow 的縮圖）</string>

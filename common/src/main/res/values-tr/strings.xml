@@ -301,7 +301,6 @@
     <string name="upload_date_last_hour">Son bir saat</string>
     <string name="focus_on_search_results">Arama sonuçlarına otomatik odaklan</string>
     <string name="context_menu">İçerik menüsü</string>
-    <string name="context_menu_sorting">İçerik menüsü sıralama</string>
     <string name="add_remove_from_recent_playlist">Son oynatma listesine Ekle/Kaldır</string>
     <string name="hide_settings_section">Ayarlar bölümünü gizle (tehlikeli!)</string>
     <string name="volume">Ses %s%%</string>
@@ -610,7 +609,6 @@
     <string name="amazon_frame_drop_fix">Kare bırakma düzeltmesi #2</string>
     <string name="amazon_frame_drop_fix_desc">Amazon Stick cihazları için tasarlanmıştır. Diğer cihazlarda da çalışabilir.</string>
     <string name="default_stack_desc">Dahili ağ motoru. Bu motoru belirli durumlarda daha iyi kararlılığa sahip olabilir.</string>
-    <string name="item_postion">Konum:</string>
     <string name="player_screen_off_dimming">Ekran kapatma karartma miktarı</string>
     <string name="screensaver_timout">Ekran koruyucu zaman aşımı</string>
     <string name="screensaver_dimming">Ekran koruyucu karartma miktarı</string>

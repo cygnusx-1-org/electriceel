@@ -590,7 +590,6 @@
   <string name="amazon_frame_drop_fix">프레임 드랍 수정 #2</string>
   <string name="amazon_frame_drop_fix_desc">아마존 스틱 장치용입니다. 다른 장치에서도 작동할 수 있습니다.</string>
   <string name="default_stack_desc">내장 네트워크 스택입니다. 이 스택은 특정 상황에서 더 나은 안정성을 제공할 수 있습니다.</string>
-  <string name="item_postion">위치</string>
   <string name="player_screen_off_dimming">화면 꺼짐 어둡기 농도</string>
   <string name="screensaver_timout">화면 보호기 작동 시작 시간</string>
   <string name="screensaver_dimming">화면 보호기 어둡기 농도</string>
@@ -680,7 +679,6 @@
   <string name="playlists_rows">재생목록 섹션을 행으로 표시</string>
   <string name="not_supported_by_device">해당 장치는 이 기능을 지원하지 않음</string>
   <string name="suggestions">제안</string>
-  <string name="context_menu_sorting">상황에 맞는 메뉴 정렬</string>
   <string name="hide_shorts_from_search">검색 결과에서 쇼츠 숨기기</string>
   <string name="import_subscriptions_group">가져오기</string>
   <string name="lb_playback_controls_closed_captioning_disable">폐쇄 자막 넣기 비활성화</string>

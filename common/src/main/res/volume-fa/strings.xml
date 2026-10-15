@@ -574,7 +574,6 @@
   <string name="player_network_stack">موتور شبکه</string>
   <string name="dialog_notification">اعلان بروزرسانی‌ها از طریق کادر بازشو</string>
   <string name="default_stack_desc">موتور شبکه داخلی. این موتور ممکن است در برخی شرایط ثبات بهتری داشته باشد.</string>
-  <string name="item_postion">موقعیت</string>
   <string name="screensaver_timout">زمان محافظ صفحه</string>
   <string name="screensaver_dimming">مقدار تاریکی محافظ صفحه</string>
   <string name="player_screen_off_dimming">مقدار تاریکی خاموش شدن صفحه</string>
@@ -686,5 +685,4 @@
   <string name="my_videos">ویدیوهای من</string>
   <string name="hide_mixes">پنهان کردن میکس‌ها</string>
   <string name="hide_shorts_from_search">پنهان کردن کوته ویدیوها از نتایج جستجو</string>
-  <string name="context_menu_sorting">مرتب‌سازی منوی زمینه</string>
 </resources>

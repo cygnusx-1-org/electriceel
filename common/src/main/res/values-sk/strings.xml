@@ -300,7 +300,6 @@
     <string name="upload_date_last_hour">Za poslednú hodinu</string>
     <string name="focus_on_search_results">Automatické zameranie na výsledky vyhľadávania</string>
     <string name="context_menu">Kontextové menu</string>
-    <string name="context_menu_sorting">Radenie kontextového menu</string>
     <string name="add_remove_from_recent_playlist">Pridať/Odobrať z nedávneho zoznamu</string>
     <string name="hide_settings_section">Skryť sekciu Nastavenia (nebezpečné!)</string>
     <string name="volume">Hlasitosť %s%%</string>
@@ -607,7 +606,6 @@
     <string name="amazon_frame_drop_fix">Oprava výpadkov prehrávania #2</string>
     <string name="amazon_frame_drop_fix_desc">Určené pre zariadenia Amazon Stick. Môže fungovať aj na iných zariadeniach.</string>
     <string name="default_stack_desc">Predvolený sieťový mechanizmus. Tento mechanizmus môže mať v určitých situáciách lepšiu stabilitu.</string>
-    <string name="item_postion">Pozícia</string>
     <string name="player_screen_off_dimming">Intenzita stmievania obrazovky</string>
     <string name="screensaver_timout">Časový limit šetriča obrazovky</string>
     <string name="screensaver_dimming">Intenzita stmievania šetriča obrazovky</string>

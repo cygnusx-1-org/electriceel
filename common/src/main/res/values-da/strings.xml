@@ -338,7 +338,6 @@
   <string name="screensaver_dimming">Dæmpningsniveau ved pauseskærm</string>
   <string name="screensaver_timout">Timeout for pauseskærm</string>
   <string name="player_screen_off_dimming">Skærmdæmpningsniveau</string>
-  <string name="item_postion">Placering af</string>
   <string name="default_stack_desc">Indbygget netværksstak. Kan være mere stabil i visse situationer.</string>
   <string name="amazon_frame_drop_fix_desc">Beregnet til Amazon Stick-enheder. Virker muligvis også på andre enheder.</string>
   <string name="amazon_frame_drop_fix">Rettelse #2 til tab af frames</string>
@@ -602,7 +601,6 @@
   <string name="unpin_group_from_sidebar">Fjern abonnementsgruppen</string>
   <string name="hide_shorts_channel">Skjul shorts fra en kanal</string>
   <string name="news_row_name">Nyheder</string>
-  <string name="context_menu_sorting">Sortering af kontekstmenu</string>
   <string name="action_sound_off">Lyd fra</string>
   <string name="hide_upcoming_channel">Skjul kommende fra Kanaler</string>
   <string name="hide_upcoming_home">Skjul kommende fra Hjem</string>

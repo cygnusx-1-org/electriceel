@@ -600,7 +600,6 @@
     <string name="amazon_frame_drop_fix">Kadr düşməsini düzəldin #2</string>
     <string name="amazon_frame_drop_fix_desc">Amazon Stick cihazları üçün nəzərdə tutulub. Digər cihazlarda da işləyə bilər.</string>
     <string name="default_stack_desc">Daxili şəbəkə yığını. Bu yığın müəyyən vəziyyətlərdə daha yaxşı sabitliyə malik ola bilər.</string>
-    <string name="item_postion">Mövqeyi</string>
     <string name="player_screen_off_dimming">Ekranın söndürülməsinin miqdarı</string>
     <string name="screensaver_timout">Ekran qoruyucu vaxt bitməsi</string>
     <string name="screensaver_dimming">Ekran qoruyucusu qaralma miqdarı</string>

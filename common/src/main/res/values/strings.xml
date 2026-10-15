@@ -362,7 +362,8 @@
     <string name="upload_date_last_hour">Last hour</string>
     <string name="focus_on_search_results">Autofocus on search results</string>
     <string name="context_menu">Context menu</string>
-    <string name="context_menu_sorting">Context menu sorting</string>
+    <string name="context_menu_items">Context menu items</string>
+    <string name="context_menu_order">Order of the context menu</string>
     <string name="add_remove_from_recent_playlist">Add/Remove from recent playlist</string>
     <string name="hide_settings_section">Hide Settings section (dangerous!)</string>
     <string name="volume">Volume %s%%</string>
@@ -771,7 +772,6 @@
     <string name="amazon_frame_drop_fix">Frame drop fix #2</string>
     <string name="amazon_frame_drop_fix_desc">Intended for Amazon Stick devices. May work on other devices too.</string>
     <string name="default_stack_desc">Built-in network engine. This engine may have better stability in certain situations.</string>
-    <string name="item_postion">Position of</string>
     <string name="player_screen_off_dimming">Screen off dimming amount</string>
     <string name="screensaver_timout">Screensaver timeout</string>
     <string name="screensaver_dimming">Screensaver dimming amount</string>

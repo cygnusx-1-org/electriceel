@@ -295,7 +295,6 @@
   <string name="upload_date_last_hour">Jam terakhir</string>
   <string name="focus_on_search_results">Fokus otomatis pada hasil penelusuran</string>
   <string name="context_menu">Menu konteks</string>
-  <string name="context_menu_sorting">Pengurutan menu konteks</string>
   <string name="add_remove_from_recent_playlist">Tambah/Hapus dari playlist akhir-akhir ini</string>
   <string name="hide_settings_section">Sembunyikan Setelan (bahaya!)</string>
   <string name="auto_frame_rate_sec">%s detik</string>
@@ -582,7 +581,6 @@
   <string name="amazon_frame_drop_fix">Perbaikan Frame drop #2</string>
   <string name="amazon_frame_drop_fix_desc">Diperuntukkan untuk perangkat Amazon Stick. Dapat berfungsi pada perangkat lain juga.</string>
   <string name="default_stack_desc">Mesin jaringan bawaan. Mesin ini mungkin memiliki stabilitas yang lebih baik dalam situasi tertentu.</string>
-  <string name="item_postion">Posisi</string>
   <string name="player_screen_off_dimming">Atur peredupan layar</string>
   <string name="screensaver_timout">Batas waktu screensaver</string>
   <string name="screensaver_dimming">Atur peredupan screensaver</string>

@@ -589,7 +589,6 @@
   <string name="amazon_frame_drop_fix">丢帧修复 #2</string>
   <string name="amazon_frame_drop_fix_desc">专为Amazon电视棒设计。也可能适用于其他设备。</string>
   <string name="default_stack_desc">内置网络引擎。在某些情况下稳定性更好。</string>
-  <string name="item_postion">位于</string>
   <string name="player_screen_off_dimming">息屏调暗值</string>
   <string name="screensaver_timout">屏保调暗值</string>
   <string name="screensaver_dimming">屏保调光量</string>
@@ -706,7 +705,6 @@
   <string name="msg_no_blocked_channels">未屏蔽频道</string>
   <string name="player_toggle_speed">切换播放速度开/关</string>
   <string name="unpin_group_from_sidebar">移除订阅群组</string>
-  <string name="context_menu_sorting">快捷菜单排序</string>
   <string name="hide_shorts_from_search">隐藏搜索结果的短视频</string>
   <string name="remove_playlist_fmt">永久移除 %s ？</string>
   <string name="create_playlist_note">注意：此项不会显示在 YouTube 应用中</string>

@@ -318,7 +318,6 @@
     <string name="double_refresh_rate">Dobbel oppdateringsfrekvens</string>
     <string name="upload_date_last_hour">Siste time</string>
     <string name="focus_on_search_results">Autofokus på søkeresultater</string>
-    <string name="context_menu_sorting">Sortering i kontekstmeny</string>
     <string name="hide_settings_section">Skjul Innstillinger-seksjonen (farlig!)</string>
     <string name="volume">Volum %s%%</string>
     <string name="auto_frame_rate_sec">%s sek</string>
@@ -603,7 +602,6 @@
     <string name="amazon_frame_drop_fix">Fiks for tapte bilder #2</string>
     <string name="amazon_frame_drop_fix_desc">Beregnet for Amazon Stick-enheter. Kan også fungere på andre enheter.</string>
     <string name="default_stack_desc">Innebygd nettverksmotor. Denne motoren kan ha bedre stabilitet i visse situasjoner.</string>
-    <string name="item_postion">Posisjon til</string>
     <string name="player_screen_off_dimming">Dempingsgrad for skjerm av</string>
     <string name="screensaver_timout">Tidsavbrudd for skjermsparer</string>
     <string name="screensaver_dimming">Dempingsgrad for skjermsparer</string>

@@ -591,7 +591,6 @@
   <string name="amazon_frame_drop_fix">Rezolvați căderea cadrului #2</string>
   <string name="amazon_frame_drop_fix_desc">Destinat dispozitivelor Amazon Stick. Poate funcționa și pe alte dispozitive.</string>
   <string name="default_stack_desc">Motor de rețea încorporat. Acest motor poate avea o stabilitate mai bună în anumite situații.</string>
-  <string name="item_postion">Poziția lui</string>
   <string name="player_screen_off_dimming">Cantitate de diminuare a ecranului dezactivat</string>
   <string name="screensaver_timout">Expirare economizor de ecran</string>
   <string name="screensaver_dimming">Cantitate de diminuare a economizorului de ecran</string>

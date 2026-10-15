@@ -301,7 +301,6 @@
   <string name="upload_date_last_hour">Senaste timmen</string>
   <string name="focus_on_search_results">Fokusera automatiskt på sökresultaten</string>
   <string name="context_menu">Snabbmeny</string>
-  <string name="context_menu_sorting">Sortera snabbmenyn</string>
   <string name="add_remove_from_recent_playlist">Lägg till/ta bort från nylig spellista</string>
   <string name="hide_settings_section">Dölj avsnittet Inställnigar (farligt!)</string>
   <string name="volume">Volym %s %%</string>
@@ -610,7 +609,6 @@
   <string name="amazon_frame_drop_fix">Korrigering för tappade bildrutor 2</string>
   <string name="amazon_frame_drop_fix_desc">Avsedd för Amazon Stick-enheter. Kan fungera även på andra enheter.</string>
   <string name="default_stack_desc">Inbyggd nätverksmotor. Den här motorn kan ha bättre stabilitet i vissa sammanhang.</string>
-  <string name="item_postion">Plats för</string>
   <string name="player_screen_off_dimming">Nedtoningsgrad för avstängd skärm</string>
   <string name="screensaver_timout">Tidsgräns för skärmsläckare</string>
   <string name="screensaver_dimming">Nedtoningsgrad för skärmsläckare</string>

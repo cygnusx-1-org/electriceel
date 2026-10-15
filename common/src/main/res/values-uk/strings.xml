@@ -301,7 +301,6 @@
     <string name="upload_date_last_hour">Остання година</string>
     <string name="focus_on_search_results">Автофокусування на результатах пошуку</string>
     <string name="context_menu">Контекстне меню</string>
-    <string name="context_menu_sorting">Сортування контекстного меню</string>
     <string name="add_remove_from_recent_playlist">Додати/Видалити з недавнього плейлиста</string>
     <string name="hide_settings_section">Приховувати розділ Налаштування (небезпечно!)</string>
     <string name="volume">Гучність %s%%</string>
@@ -605,7 +604,6 @@
     <string name="amazon_frame_drop_fix">Виправлення випадіння кадрів #2</string>
     <string name="amazon_frame_drop_fix_desc">Виправляє лагання на Amazon Stick та деяких інших пристроях.</string>
     <string name="default_stack_desc">Вбудований мережевий рушій. Цей рушій може мати кращу стабільність у певних ситуаціях.</string>
-    <string name="item_postion">Позиція</string>
     <string name="player_screen_off_dimming">Величина затемнення екрану</string>
     <string name="screensaver_timout">Тайм-аут увімкнення заставки</string>
     <string name="screensaver_dimming">Величина затемнення заставки</string>

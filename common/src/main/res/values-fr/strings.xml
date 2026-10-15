@@ -572,7 +572,6 @@
   <string name="amazon_frame_drop_fix">Correction de pertes d\'images n°2</string>
   <string name="amazon_frame_drop_fix_desc">Corrige les ralentissements sur les appareils Amazon Fire TV Stick et certains autres appareils.</string>
   <string name="default_stack_desc">Pile réseau intégrée. Cette pile peut apporter une meilleure stabilité dans certaines situations.</string>
-  <string name="item_postion">Position de : </string>
   <string name="player_screen_off_dimming">Réduction de la luminosité de l\'écran</string>
   <string name="screensaver_timout">Délai d\'activation de l\'économiseur d\'écran</string>
   <string name="screensaver_dimming">Réduction de la luminosité de l\'économiseur d\'écran</string>
@@ -684,7 +683,6 @@
   <string name="import_subscriptions_group">Importer</string>
   <string name="lb_playback_controls_closed_captioning_disable">Désactiver le sous-titrage codé</string>
   <string name="lb_playback_controls_closed_captioning_enable">Activer le sous-titrage codé</string>
-  <string name="context_menu_sorting">Tri du menu contextuel</string>
   <string name="video_flip">Retournement (miroir)</string>
   <string name="my_videos">Mes vidéos</string>
   <string name="player_audio_focus">Focus audio (pause si d\'autres lecteurs sont détectés)</string>

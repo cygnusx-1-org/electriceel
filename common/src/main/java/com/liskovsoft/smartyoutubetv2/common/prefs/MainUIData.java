@@ -15,6 +15,7 @@ import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 public class MainUIData extends DataChangeBase implements ProfileChangeListener {
@@ -327,17 +328,29 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
         return mMenuItemsOrdered.indexOf(menuItem);
     }
 
-    public void setMenuItemIndex(int index, Long menuItem) {
-        //int currentIndex = getMenuItemIndex(menuItem);
-        //index = currentIndex < index ? index - 1 : index;
-
-        mMenuItemsOrdered.remove(menuItem);
-
-        if (index <= mMenuItemsOrdered.size()) {
-            mMenuItemsOrdered.add(index, menuItem);
-        } else {
-            mMenuItemsOrdered.add(menuItem);
+    /**
+     * Items in a new order, e.g. the enabled ones. The others come after them, in their order.
+     * Left as they are when one isn't an item or one is there twice.
+     */
+    public void setMenuItemsOrder(List<Long> menuItems) {
+        if (menuItems == null || !mMenuItemsOrdered.containsAll(menuItems) || new HashSet<>(menuItems).size() != menuItems.size()) {
+            return;
         }
+
+        List<Long> result = new ArrayList<>(menuItems);
+
+        for (Long menuItem : mMenuItemsOrdered) {
+            if (!result.contains(menuItem)) {
+                result.add(menuItem);
+            }
+        }
+
+        if (result.equals(mMenuItemsOrdered)) {
+            return;
+        }
+
+        mMenuItemsOrdered.clear();
+        mMenuItemsOrdered.addAll(result);
 
         persistState();
     }

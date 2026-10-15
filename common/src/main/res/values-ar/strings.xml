@@ -574,7 +574,6 @@
   <string name="player_network_stack">محرك الشبكة</string>
   <string name="dialog_notification">عرض إشعار بالتحديثات من خلال نافذة منبثقة</string>
   <string name="default_stack_desc">محرك الشبكة المدمج. قد يكون لهذا المحرك استقرار أفضل في بعض الحالات.</string>
-  <string name="item_postion">موضع</string>
   <string name="screensaver_timout">مهلة شاشة التوقف</string>
   <string name="screensaver_dimming">مستوى تعتيم شاشة التوقف</string>
   <string name="player_screen_off_dimming">مستوى تعتيم إيقاف الشاشة</string>
@@ -682,7 +681,6 @@
   <string name="playlists_rows">عرض قسم قوائم التشغيل كصفوف</string>
   <string name="original_lang">الأصلية</string>
   <string name="search_exit_shortcut">الخروج من البحث</string>
-  <string name="context_menu_sorting">فرز القائمة المنبثقة</string>
   <string name="hide_shorts_from_search">إخفاء فيديوهات Shorts من نتائج البحث</string>
   <string name="remove_playlist_fmt">هل تريد إزالة %s بشكل دائم؟</string>
   <string name="video_flip">انعكاس (مرآة)</string>

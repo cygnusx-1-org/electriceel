@@ -14,6 +14,10 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLooper;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -248,6 +252,54 @@ public class MainUIDataTest {
         MainUIData.resetInstanceForTesting();
 
         assertTrue(getData().isMenuItemEnabled(MainUIData.MENU_ITEM_LIKE));
+    }
+
+    /**
+     * The enabled ones put in order: the others come after them, in their order
+     */
+    @Test
+    public void menuItemsOrderPutsTheOthersAfterThem() {
+        MainUIData data = getData();
+        List<Long> rest = new ArrayList<>(data.getMenuItemsOrdered());
+        List<Long> order = Arrays.asList(MainUIData.MENU_ITEM_SHARE_QR_LINK, MainUIData.MENU_ITEM_PIN_TO_SIDEBAR);
+        rest.removeAll(order);
+
+        data.setMenuItemsOrder(order);
+
+        List<Long> result = data.getMenuItemsOrdered();
+        assertEquals(order, result.subList(0, order.size()));
+        assertEquals(rest, result.subList(order.size(), result.size()));
+    }
+
+    @Test
+    public void menuItemsOrderStaysAfterReload() {
+        List<Long> order = Arrays.asList(MainUIData.MENU_ITEM_SHARE_QR_LINK, MainUIData.MENU_ITEM_PIN_TO_SIDEBAR);
+
+        getData().setMenuItemsOrder(order);
+        ShadowLooper.shadowMainLooper().idle();
+        MainUIData.resetInstanceForTesting();
+
+        assertEquals(order, getData().getMenuItemsOrdered().subList(0, order.size()));
+    }
+
+    @Test
+    public void menuItemsOrderWithAnUnknownItemIsIgnored() {
+        MainUIData data = getData();
+        List<Long> before = new ArrayList<>(data.getMenuItemsOrdered());
+
+        data.setMenuItemsOrder(Arrays.asList(MainUIData.MENU_ITEM_SHARE_QR_LINK, 0L)); // no item has it
+
+        assertEquals(before, data.getMenuItemsOrdered());
+    }
+
+    @Test
+    public void menuItemsOrderWithAnItemTwiceIsIgnored() {
+        MainUIData data = getData();
+        List<Long> before = new ArrayList<>(data.getMenuItemsOrdered());
+
+        data.setMenuItemsOrder(Arrays.asList(MainUIData.MENU_ITEM_SHARE_QR_LINK, MainUIData.MENU_ITEM_SHARE_QR_LINK));
+
+        assertEquals(before, data.getMenuItemsOrdered());
     }
 
     /**
