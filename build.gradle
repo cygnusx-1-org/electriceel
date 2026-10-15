@@ -53,9 +53,9 @@ allprojects {
         // resolutionStrategy.force 'androidx.lifecycle:lifecycle-livedata-core:' + liveDataVersion
         // resolutionStrategy.force 'androidx.lifecycle:lifecycle-livedata:' + liveDataVersion
         // resolutionStrategy.force 'androidx.lifecycle:lifecycle-runtime:' + liveDataVersion
-        // Force Android 4 compatible okHttp version
+        // One okHttp version for every module (exoplayer, retrofit and cronet-okhttp ask for 3.x)
         resolutionStrategy.force 'com.squareup.okhttp3:okhttp:' + okhttpVersion
-        // Downgrade kotlin version for WorkManager
+        // Keep the Kotlin runtime at the compiler's version
         resolutionStrategy.force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:' + kotlinVersion
         resolutionStrategy.force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:' + kotlinVersion
         resolutionStrategy.force 'org.jetbrains.kotlin:kotlin-stdlib:' + kotlinVersion
@@ -63,7 +63,7 @@ allprojects {
         resolutionStrategy.force 'androidx.core:core-ktx:' + kotlinCoreXVersion
         resolutionStrategy.force 'androidx.core:core:' + coreXVersion
         resolutionStrategy.force 'androidx.annotation:annotation:' + annotationXVersion
-        // Downgrade Cronet version for cronet-okhttp
+        // Match cronet-embedded (cronet-okhttp asks for an older cronet-api)
         resolutionStrategy.force 'org.chromium.net:cronet-api:' + cronetApiVersion
         resolutionStrategy.force 'androidx.multidex:multidex:' + multiDexVersion
 
