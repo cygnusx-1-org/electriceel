@@ -1,0 +1,177 @@
+package com.liskovsoft.smartyoutubetv2.common.app.models.data;
+
+import android.content.Context;
+
+import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
+import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
+import com.liskovsoft.smartyoutubetv2.common.prefs.StreamedData;
+import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
+
+import java.util.ArrayList;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+/**
+ * The Streamed setting in the groups of the sections (see StreamedData)
+ */
+@RunWith(RobolectricTestRunner.class)
+@Config(sdk = 28)
+public class VideoGroupStreamedTest {
+    private StreamedData mData;
+
+    @Before
+    public void setUp() {
+        Context context = RuntimeEnvironment.getApplication();
+        GlobalPreferences.instance(context);
+        mData = StreamedData.instance(context);
+        mData.setSectionEnabled(MediaGroup.TYPE_HOME, true);
+        mData.setSectionEnabled(MediaGroup.TYPE_GAMING, false);
+    }
+
+    @After
+    public void tearDown() {
+        // The defaults
+        mData.setMode(StreamedData.MODE_MARK);
+        mData.setSectionEnabled(MediaGroup.TYPE_GAMING, true);
+        Utils.sHandler.removeCallbacksAndMessages(null);
+    }
+
+    @Test
+    public void streamedIsMarkedByDefault() {
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME);
+        home.add(createStreamed("Craft Computing • 3.8K views • Streamed 5 hours ago"));
+        home.add(createVideo());
+
+        assertEquals(2, home.getSize());
+        assertTrue(home.get(0).isStreamedMarked);
+        assertFalse(home.get(1).isStreamedMarked);
+    }
+
+    @Test
+    public void streamedIsHiddenOnlyInPickedSections() {
+        mData.setMode(StreamedData.MODE_HIDE);
+
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME);
+        home.add(createStreamed("Channel • 11K views • Streamed live on Oct 6, 2026"));
+        home.add(createVideo());
+
+        VideoGroup gaming = createGroup(MediaGroup.TYPE_GAMING);
+        gaming.add(createStreamed("Channel • 11K views • Streamed 7 days ago"));
+
+        assertEquals(1, home.getSize());
+        assertEquals("video1", home.get(0).videoId);
+        assertEquals(1, gaming.getSize());
+        assertFalse(gaming.get(0).isStreamedMarked);
+    }
+
+    /**
+     * Nothing is hidden from History: it's marked there instead
+     */
+    @Test
+    public void streamedIsMarkedInHistoryInHideMode() {
+        mData.setMode(StreamedData.MODE_HIDE);
+
+        VideoGroup history = createGroup(MediaGroup.TYPE_HISTORY);
+        history.add(createStreamed("Channel • 11K views • Streamed 7 days ago"));
+
+        assertEquals(1, history.getSize());
+        assertTrue(history.get(0).isStreamedMarked);
+    }
+
+    /**
+     * Search and channel pages have no sidebar section: they're picked in the setting as their own sections
+     */
+    @Test
+    public void streamedIsMarkedInSearchAndOnChannelPages() {
+        VideoGroup search = VideoGroup.from(new ArrayList<>());
+        search.setType(MediaGroup.TYPE_SEARCH);
+        search.add(createStreamed("Channel • Streamed 2 weeks ago"));
+        VideoGroup channel = VideoGroup.from(new ArrayList<>());
+        channel.setType(MediaGroup.TYPE_CHANNEL);
+        channel.add(createStreamed("Channel • Streamed 2 weeks ago"));
+        // The player's suggestions aren't a section of the setting
+        VideoGroup suggestions = VideoGroup.from(new ArrayList<>());
+        suggestions.setType(MediaGroup.TYPE_SUGGESTIONS);
+        suggestions.add(createStreamed("Channel • Streamed 2 weeks ago"));
+
+        assertTrue(search.get(0).isStreamedMarked);
+        assertTrue(channel.get(0).isStreamedMarked);
+        assertFalse(suggestions.get(0).isStreamedMarked);
+    }
+
+    @Test
+    public void showModeLeavesThemAlone() {
+        mData.setMode(StreamedData.MODE_SHOW);
+
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME);
+        home.add(createStreamed("Channel • Streamed 2 weeks ago"));
+
+        assertEquals(1, home.getSize());
+        assertFalse(home.get(0).isStreamedMarked);
+    }
+
+    /**
+     * Only a stream that ended: one that's live or to come isn't marked or hidden, whatever its line says
+     */
+    @Test
+    public void liveAndUpcomingAreLeftAlone() {
+        mData.setMode(StreamedData.MODE_HIDE);
+
+        Video live = createStreamed("Channel • Streamed 2 hours ago");
+        live.isLive = true;
+        Video upcoming = createStreamed("Channel • Streamed 2 hours ago");
+        upcoming.isUpcoming = true;
+
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME);
+        home.add(live);
+        home.add(upcoming);
+
+        assertEquals(2, home.getSize());
+        assertFalse(home.get(0).isStreamedMarked);
+        assertFalse(home.get(1).isStreamedMarked);
+    }
+
+    @Test
+    public void markIsKeptByTheCopy() {
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME);
+        home.add(createStreamed("Channel • Streamed 2 weeks ago"));
+
+        assertTrue(Video.from(home.get(0)).isStreamedMarked);
+    }
+
+    private static VideoGroup createGroup(int type) {
+        return VideoGroup.from(new BrowseSection(type, "Section", BrowseSection.TYPE_GRID, 0));
+    }
+
+    private static int sStreamedCount;
+
+    private static Video createStreamed(String secondTitle) {
+        sStreamedCount++;
+        Video video = new Video();
+        video.videoId = "streamed" + sStreamedCount;
+        video.title = "Stream " + sStreamedCount;
+        video.author = "Channel";
+        video.badge = "2:15:39";
+        video.secondTitle = secondTitle;
+        return video;
+    }
+
+    private static Video createVideo() {
+        Video video = new Video();
+        video.videoId = "video1";
+        video.title = "Video";
+        video.author = "Channel";
+        video.secondTitle = "Channel • 5K views • 3 weeks ago";
+        return video;
+    }
+}

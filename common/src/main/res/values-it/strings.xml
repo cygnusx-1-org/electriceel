@@ -768,6 +768,7 @@
     <string name="aislist_color_yellow">Giallo</string>
     <string name="aislist_color_green">Verde</string>
     <string name="aislist_color_blue">Blu</string>
+    <string name="aislist_color_purple">Viola</string>
     <string name="aislist_blocklist">Lista di blocco (affidabilità alta)</string>
     <string name="aislist_warnlist">Lista di avviso (affidabilità moderata)</string>
     <string name="aislist_status">Canali elencati: %1$d nella lista di blocco, %2$d nella lista di avviso</string>

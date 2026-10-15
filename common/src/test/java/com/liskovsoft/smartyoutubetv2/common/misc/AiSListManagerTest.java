@@ -225,7 +225,7 @@ public class AiSListManagerTest {
         assertEquals(0xFFCE2029, AiSListFilterData.getMarkShade(AiSListFilterData.MARK_COLOR_RED, true));
 
         int[] colors = {AiSListFilterData.MARK_COLOR_ORANGE, AiSListFilterData.MARK_COLOR_YELLOW,
-                AiSListFilterData.MARK_COLOR_GREEN, AiSListFilterData.MARK_COLOR_BLUE};
+                AiSListFilterData.MARK_COLOR_GREEN, AiSListFilterData.MARK_COLOR_BLUE, AiSListFilterData.MARK_COLOR_PURPLE};
 
         for (int color : colors) {
             int normal = AiSListFilterData.getMarkShade(color, false);

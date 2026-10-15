@@ -722,6 +722,7 @@
     <string name="aislist_color_yellow">Жута</string>
     <string name="aislist_color_green">Зелена</string>
     <string name="aislist_color_blue">Плава</string>
+    <string name="aislist_color_purple">Љубичаста</string>
     <string name="aislist_blocklist">Листа блокирања (висока поузданост)</string>
     <string name="aislist_warnlist">Листа упозорења (умерена поузданост)</string>
     <string name="aislist_status">Канали на листама: %1$d на листи блокирања, %2$d на листи упозорења</string>

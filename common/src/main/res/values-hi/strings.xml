@@ -586,6 +586,7 @@
     <string name="aislist_color_yellow">पीला</string>
     <string name="aislist_color_green">हरा</string>
     <string name="aislist_color_blue">नीला</string>
+    <string name="aislist_color_purple">बैंगनी</string>
     <string name="aislist_blocklist">ब्लॉकलिस्ट (उच्च विश्वास)</string>
     <string name="aislist_warnlist">चेतावनी सूची (मध्यम विश्वास)</string>
     <string name="aislist_status">सूचीबद्ध चैनल: ब्लॉकलिस्ट में %1$d, चेतावनी सूची में %2$d</string>

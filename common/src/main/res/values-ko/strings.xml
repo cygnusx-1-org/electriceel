@@ -725,6 +725,7 @@
     <string name="aislist_color_yellow">노란색</string>
     <string name="aislist_color_green">초록색</string>
     <string name="aislist_color_blue">파란색</string>
+    <string name="aislist_color_purple">보라색</string>
     <string name="aislist_blocklist">차단 목록 (높은 신뢰도)</string>
     <string name="aislist_warnlist">경고 목록 (보통 신뢰도)</string>
     <string name="aislist_status">목록에 있는 채널: 차단 목록 %1$d개, 경고 목록 %2$d개</string>

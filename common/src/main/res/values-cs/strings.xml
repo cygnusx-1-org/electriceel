@@ -768,6 +768,7 @@
     <string name="aislist_color_yellow">Žlutá</string>
     <string name="aislist_color_green">Zelená</string>
     <string name="aislist_color_blue">Modrá</string>
+    <string name="aislist_color_purple">Fialová</string>
     <string name="aislist_blocklist">Seznam blokovaných (vysoká spolehlivost)</string>
     <string name="aislist_warnlist">Seznam varování (střední spolehlivost)</string>
     <string name="aislist_status">Kanály na seznamech: %1$d na seznamu blokovaných, %2$d na seznamu varování</string>

@@ -765,6 +765,7 @@
     <string name="aislist_color_yellow">Gelb</string>
     <string name="aislist_color_green">Grün</string>
     <string name="aislist_color_blue">Blau</string>
+    <string name="aislist_color_purple">Lila</string>
     <string name="aislist_blocklist">Sperrliste (hohe Sicherheit)</string>
     <string name="aislist_warnlist">Warnliste (mittlere Sicherheit)</string>
     <string name="aislist_status">Gelistete Kanäle: %1$d auf der Sperrliste, %2$d auf der Warnliste</string>

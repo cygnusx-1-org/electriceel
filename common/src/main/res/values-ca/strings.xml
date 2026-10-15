@@ -520,6 +520,7 @@
     <string name="aislist_color_yellow">Groc</string>
     <string name="aislist_color_green">Verd</string>
     <string name="aislist_color_blue">Blau</string>
+    <string name="aislist_color_purple">Porpra</string>
     <string name="aislist_blocklist">Llista de bloqueig (confiança alta)</string>
     <string name="aislist_warnlist">Llista d\'avís (confiança moderada)</string>
     <string name="aislist_status">Canals llistats: %1$d a la llista de bloqueig, %2$d a la llista d\'avís</string>

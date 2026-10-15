@@ -760,6 +760,7 @@
     <string name="aislist_color_yellow">أصفر</string>
     <string name="aislist_color_green">أخضر</string>
     <string name="aislist_color_blue">أزرق</string>
+    <string name="aislist_color_purple">بنفسجي</string>
     <string name="aislist_blocklist">قائمة الحظر (ثقة عالية)</string>
     <string name="aislist_warnlist">قائمة التحذير (ثقة متوسطة)</string>
     <string name="aislist_status">القنوات المدرجة: %1$d في قائمة الحظر، %2$d في قائمة التحذير</string>

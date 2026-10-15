@@ -760,6 +760,7 @@
     <string name="aislist_color_yellow">Жёлтый</string>
     <string name="aislist_color_green">Зелёный</string>
     <string name="aislist_color_blue">Синий</string>
+    <string name="aislist_color_purple">Фиолетовый</string>
     <string name="aislist_blocklist">Чёрный список (высокая уверенность)</string>
     <string name="aislist_warnlist">Список предупреждений (умеренная уверенность)</string>
     <string name="aislist_status">Каналов в списках: %1$d в чёрном списке, %2$d в списке предупреждений</string>

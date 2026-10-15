@@ -24,7 +24,9 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.ExploreTopicsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.KeywordFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.SectionFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.ShowsData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.StreamedData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.TopChannelsData;
+import com.liskovsoft.smartyoutubetv2.common.utils.CompactInfo;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -524,7 +526,7 @@ public class VideoGroup {
         addShortsDate(video);
 
         if (isChannelBlocked(video) || isNotInterested(video) || isAiListed(video) || isHiddenCategory(video) || isOld(video) || isHiddenCollaboration(video)
-                || isHiddenWatchLater(video) || isHiddenShow(video) || isHiddenTopChannel(video) || isHiddenExploreTopic(video)
+                || isHiddenWatchLater(video) || isHiddenShow(video) || isHiddenStreamed(video) || isHiddenTopChannel(video) || isHiddenExploreTopic(video)
                 || hasHiddenKeyword(video) || isWatchedSuggestion(video) || isUnsubscribedChannel(video) || isDuplicate(video)) {
             if (video.videoId != null) {
                 mHiddenVideoCount++;
@@ -781,6 +783,33 @@ public class VideoGroup {
         }
 
         video.isShowMarked = true;
+
+        return false;
+    }
+
+    /**
+     * A live stream that ended ("Streamed 5 hours ago"), only in the sections picked in the Streamed setting.
+     * Also marks the video when the setting marks instead of hiding. Only the English date is known (see CompactInfo.isStreamed).
+     */
+    private boolean isHiddenStreamed(Video video) {
+        int sectionId = getFilterSectionId();
+
+        // No context before the app is initialized (GlobalPreferences)
+        if (video.isChapter || video.videoId == null || video.isLive || video.isUpcoming || sectionId == -1 || GlobalPreferences.context() == null) {
+            return false;
+        }
+
+        StreamedData data = StreamedData.instance(GlobalPreferences.context());
+
+        if (!data.isEnabled(sectionId) || !CompactInfo.isStreamed(video.getSecondTitle())) {
+            return false;
+        }
+
+        if (data.isHidingEnabled(sectionId)) {
+            return true;
+        }
+
+        video.isStreamedMarked = true;
 
         return false;
     }

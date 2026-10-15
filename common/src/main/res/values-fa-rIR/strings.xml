@@ -705,6 +705,7 @@
     <string name="aislist_color_yellow">زرد</string>
     <string name="aislist_color_green">سبز</string>
     <string name="aislist_color_blue">آبی</string>
+    <string name="aislist_color_purple">بنفش</string>
     <string name="aislist_blocklist">فهرست مسدود (اطمینان بالا)</string>
     <string name="aislist_warnlist">فهرست هشدار (اطمینان متوسط)</string>
     <string name="aislist_status">کانال‌های فهرست‌شده: %1$d در فهرست مسدود، %2$d در فهرست هشدار</string>

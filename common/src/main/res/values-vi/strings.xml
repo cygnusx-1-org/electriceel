@@ -748,6 +748,7 @@
     <string name="aislist_color_yellow">Vàng</string>
     <string name="aislist_color_green">Xanh lá</string>
     <string name="aislist_color_blue">Xanh biển</string>
+    <string name="aislist_color_purple">Tím</string>
     <string name="aislist_blocklist">Danh sách chặn (độ tin cậy cao)</string>
     <string name="aislist_warnlist">Danh sách cảnh báo (độ tin cậy trung bình)</string>
     <string name="aislist_status">Kênh trong danh sách: %1$d trong danh sách chặn, %2$d trong danh sách cảnh báo</string>

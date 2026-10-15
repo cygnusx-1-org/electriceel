@@ -761,6 +761,7 @@ So, make a copy of values-he and name it values-iw. Keep both in your structure.
     <string name="aislist_color_yellow">צהוב</string>
     <string name="aislist_color_green">ירוק</string>
     <string name="aislist_color_blue">כחול</string>
+    <string name="aislist_color_purple">סגול</string>
     <string name="aislist_blocklist">רשימת חסימה (ודאות גבוהה)</string>
     <string name="aislist_warnlist">רשימת אזהרה (ודאות בינונית)</string>
     <string name="aislist_status">ערוצים ברשימות: %1$d ברשימת החסימה, %2$d ברשימת האזהרה</string>

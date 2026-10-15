@@ -58,6 +58,7 @@ public final class Video {
     public boolean isCollaboration; // marked as a collaboration (see CollaborationManager)
     public boolean isInWatchLater; // marked as in Watch later (see WatchLaterManager)
     public boolean isShowMarked; // marked as a show (see ShowsData)
+    public boolean isStreamedMarked; // marked as a live stream that ended (see StreamedData)
     public boolean isTopChannelMarked; // marked as a channel of a row of channels (see TopChannelsData)
     public boolean isExploreTopicMarked; // marked as a topic of a row of topics (see ExploreTopicsData)
     public boolean isDateAdded; // the date of a short is in the second title (see ShortsDateManager)
@@ -194,6 +195,7 @@ public final class Video {
         video.isCollaboration = item.isCollaboration;
         video.isInWatchLater = item.isInWatchLater;
         video.isShowMarked = item.isShowMarked;
+        video.isStreamedMarked = item.isStreamedMarked;
         video.isTopChannelMarked = item.isTopChannelMarked;
         video.isExploreTopicMarked = item.isExploreTopicMarked;
         video.isDateAdded = item.isDateAdded;

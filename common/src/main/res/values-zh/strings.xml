@@ -761,6 +761,7 @@
     <string name="aislist_color_yellow">黄色</string>
     <string name="aislist_color_green">绿色</string>
     <string name="aislist_color_blue">蓝色</string>
+    <string name="aislist_color_purple">紫色</string>
     <string name="aislist_blocklist">屏蔽列表（高可信度）</string>
     <string name="aislist_warnlist">警告列表（中等可信度）</string>
     <string name="aislist_status">已列出的频道：屏蔽列表 %1$d 个，警告列表 %2$d 个</string>

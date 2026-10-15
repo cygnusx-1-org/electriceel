@@ -41,7 +41,8 @@ public class AiSListSettingsPresenter extends BasePresenter<Void> {
             {R.string.aislist_color_orange, AiSListFilterData.MARK_COLOR_ORANGE},
             {R.string.aislist_color_yellow, AiSListFilterData.MARK_COLOR_YELLOW},
             {R.string.aislist_color_green, AiSListFilterData.MARK_COLOR_GREEN},
-            {R.string.aislist_color_blue, AiSListFilterData.MARK_COLOR_BLUE}
+            {R.string.aislist_color_blue, AiSListFilterData.MARK_COLOR_BLUE},
+            {R.string.aislist_color_purple, AiSListFilterData.MARK_COLOR_PURPLE}
     };
     private final AiSListFilterData mFilterData;
 

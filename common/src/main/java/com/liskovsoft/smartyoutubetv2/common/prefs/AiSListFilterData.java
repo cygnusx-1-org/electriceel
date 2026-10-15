@@ -43,6 +43,7 @@ public class AiSListFilterData extends DataSaverBase {
     public static final int MARK_COLOR_YELLOW = 0xFFFFEB3B;
     public static final int MARK_COLOR_GREEN = 0xFF4CAF50;
     public static final int MARK_COLOR_BLUE = 0xFF2196F3;
+    public static final int MARK_COLOR_PURPLE = 0xFF9C27B0;
     /**
      * Saved color (the key, don't change) -> shade on an unselected (dark) card, shade on the selected (light) card.<br/>
      * Each shade has at least 4.5:1 contrast on its card in the default theme (teal #004B53 / white #FFFFFF),
@@ -53,7 +54,8 @@ public class AiSListFilterData extends DataSaverBase {
             {MARK_COLOR_ORANGE, 0xFFFFA000, 0xFFB85C00},
             {MARK_COLOR_YELLOW, 0xFFD1AE00, 0xFF8A7300},
             {MARK_COLOR_GREEN, 0xFF2BCA30, 0xFF1D8720},
-            {MARK_COLOR_BLUE, 0xFF69B7F7, 0xFF0B78D0}
+            {MARK_COLOR_BLUE, 0xFF69B7F7, 0xFF0B78D0},
+            {MARK_COLOR_PURPLE, 0xFFD69CF6, 0xFFA742D6}
     };
     private static AiSListFilterData sInstance;
 

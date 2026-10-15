@@ -758,6 +758,7 @@
     <string name="aislist_color_yellow">Жовтий</string>
     <string name="aislist_color_green">Зелений</string>
     <string name="aislist_color_blue">Синій</string>
+    <string name="aislist_color_purple">Фіолетовий</string>
     <string name="aislist_blocklist">Чорний список (висока впевненість)</string>
     <string name="aislist_warnlist">Список попереджень (помірна впевненість)</string>
     <string name="aislist_status">Каналів у списках: %1$d у чорному списку, %2$d у списку попереджень</string>

@@ -138,6 +138,7 @@
     <string name="aislist_color_yellow">Dzeltena</string>
     <string name="aislist_color_green">Zaļa</string>
     <string name="aislist_color_blue">Zila</string>
+    <string name="aislist_color_purple">Violeta</string>
     <string name="aislist_blocklist">Bloķēšanas saraksts (augsta ticamība)</string>
     <string name="aislist_warnlist">Brīdinājumu saraksts (mērena ticamība)</string>
     <string name="aislist_status">Kanāli sarakstos: %1$d bloķēšanas sarakstā, %2$d brīdinājumu sarakstā</string>

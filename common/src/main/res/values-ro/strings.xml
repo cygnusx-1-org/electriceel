@@ -677,6 +677,7 @@
     <string name="aislist_color_yellow">Galben</string>
     <string name="aislist_color_green">Verde</string>
     <string name="aislist_color_blue">Albastru</string>
+    <string name="aislist_color_purple">Mov</string>
     <string name="aislist_blocklist">Listă de blocare (încredere ridicată)</string>
     <string name="aislist_warnlist">Listă de avertizare (încredere moderată)</string>
     <string name="aislist_status">Canale listate: %1$d pe lista de blocare, %2$d pe lista de avertizare</string>

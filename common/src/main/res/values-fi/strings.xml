@@ -758,6 +758,7 @@
     <string name="aislist_color_yellow">Keltainen</string>
     <string name="aislist_color_green">Vihreä</string>
     <string name="aislist_color_blue">Sininen</string>
+    <string name="aislist_color_purple">Violetti</string>
     <string name="aislist_blocklist">Estolista (korkea varmuus)</string>
     <string name="aislist_warnlist">Varoituslista (kohtalainen varmuus)</string>
     <string name="aislist_status">Listatut kanavat: %1$d estolistalla, %2$d varoituslistalla</string>

@@ -631,6 +631,7 @@
     <string name="aislist_color_yellow">Kollane</string>
     <string name="aislist_color_green">Roheline</string>
     <string name="aislist_color_blue">Sinine</string>
+    <string name="aislist_color_purple">Lilla</string>
     <string name="aislist_blocklist">Blokeerimisloend (kõrge kindlus)</string>
     <string name="aislist_warnlist">Hoiatusloend (mõõdukas kindlus)</string>
     <string name="aislist_status">Kanaleid loendites: %1$d blokeerimisloendis, %2$d hoiatusloendis</string>

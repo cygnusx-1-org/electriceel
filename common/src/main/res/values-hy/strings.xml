@@ -164,6 +164,7 @@
     <string name="aislist_color_yellow">Դեղին</string>
     <string name="aislist_color_green">Կանաչ</string>
     <string name="aislist_color_blue">Կապույտ</string>
+    <string name="aislist_color_purple">Մանուշակագույն</string>
     <string name="aislist_blocklist">Արգելափակման ցուցակ (բարձր վստահություն)</string>
     <string name="aislist_warnlist">Զգուշացման ցուցակ (չափավոր վստահություն)</string>
     <string name="aislist_status">Ցուցակված ալիքներ՝ %1$d արգելափակման ցուցակում, %2$d զգուշացման ցուցակում</string>

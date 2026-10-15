@@ -760,6 +760,7 @@
     <string name="aislist_color_yellow">Sárga</string>
     <string name="aislist_color_green">Zöld</string>
     <string name="aislist_color_blue">Kék</string>
+    <string name="aislist_color_purple">Lila</string>
     <string name="aislist_blocklist">Tiltólista (magas megbízhatóság)</string>
     <string name="aislist_warnlist">Figyelmeztető lista (mérsékelt megbízhatóság)</string>
     <string name="aislist_status">Listázott csatornák: %1$d a tiltólistán, %2$d a figyelmeztető listán</string>

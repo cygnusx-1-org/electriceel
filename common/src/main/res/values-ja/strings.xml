@@ -766,6 +766,7 @@
     <string name="aislist_color_yellow">イエロー</string>
     <string name="aislist_color_green">グリーン</string>
     <string name="aislist_color_blue">ブルー</string>
+    <string name="aislist_color_purple">パープル</string>
     <string name="aislist_blocklist">ブロックリスト（信頼度：高）</string>
     <string name="aislist_warnlist">警告リスト（信頼度：中）</string>
     <string name="aislist_status">リスト掲載チャンネル: ブロックリスト %1$d件、警告リスト %2$d件</string>

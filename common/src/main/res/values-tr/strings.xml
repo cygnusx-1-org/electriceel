@@ -766,6 +766,7 @@
     <string name="aislist_color_yellow">Sarı</string>
     <string name="aislist_color_green">Yeşil</string>
     <string name="aislist_color_blue">Mavi</string>
+    <string name="aislist_color_purple">Mor</string>
     <string name="aislist_blocklist">Engelleme listesi (yüksek güven)</string>
     <string name="aislist_warnlist">Uyarı listesi (orta güven)</string>
     <string name="aislist_status">Listelenen kanallar: engelleme listesinde %1$d, uyarı listesinde %2$d</string>

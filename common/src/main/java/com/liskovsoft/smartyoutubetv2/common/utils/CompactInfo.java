@@ -36,6 +36,8 @@ public class CompactInfo {
     // "9 hours ago", "Streamed 2 days ago"
     private static final Pattern AGO = Pattern.compile("(?i)(?:(" + PREFIXES + ")[\\s\\u00A0]+)?(\\d{1,4})[\\s\\u00A0]+(second|minute|hour|day|week|month|year)s?[\\s\\u00A0]+ago");
     private static final Pattern DATE_PREFIX = Pattern.compile("(?i)" + PREFIXES);
+    // The prefix of the date of a live stream that ended ("Streamed 2 days ago", "Streamed live on Oct 6, 2026"), with the space after it
+    private static final Pattern STREAMED_PREFIX = Pattern.compile("(?i)^streamed(?:[\\s\\u00A0]+live)?(?:[\\s\\u00A0]+on)?[\\s\\u00A0]+");
     // Every date has its year: a part without one isn't parsed (most aren't dates, e.g. the channel)
     private static final Pattern YEAR = Pattern.compile("\\d{4}");
     // The dates of YouTube ("Published on Oct 7, 2026", "Scheduled for Sep 24, 2020, 9:00 PM")
@@ -66,14 +68,78 @@ public class CompactInfo {
         String text = info.toString();
 
         for (int[] part : getParts(text)) {
-            String value = BIDI_MARKS.matcher(text.substring(part[0], part[1])).replaceAll("").trim();
-
-            if (AGO.matcher(value).matches() || compactDate(value, System.currentTimeMillis()) != null) {
+            if (isAge(getValue(text, part))) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * A part of the line is the date of a live stream that ended (e.g. "Streamed 2 days ago", "Streamed live on Oct 6, 2026").
+     * A name that starts with the word isn't one (e.g. a channel).
+     */
+    public static boolean isStreamed(CharSequence info) {
+        return getStreamedPart(info) != null;
+    }
+
+    /**
+     * The line without the words that make the date a stream's ("Streamed 2 days ago" becomes "2 days ago"), for the "Streamed" marker
+     * that says it instead (see VideoCardPresenter). The other parts keep their styles.
+     */
+    public static CharSequence removeStreamed(CharSequence info) {
+        int[] part = getStreamedPart(info);
+
+        if (part == null) {
+            return info;
+        }
+
+        String text = info.toString();
+        // The marks before it stay: a mark that starts the RTL text has its end in another part
+        int start = part[0] + getMarks(text.substring(part[0], part[1]), true).length();
+        Matcher prefix = STREAMED_PREFIX.matcher(text.substring(start, part[1]));
+
+        if (!prefix.find()) {
+            return info;
+        }
+
+        return new SpannableStringBuilder(info).delete(start, start + prefix.end());
+    }
+
+    /**
+     * @return the start and the end of the first part that's the date of a live stream that ended, or null
+     */
+    private static int[] getStreamedPart(CharSequence info) {
+        if (TextUtils.isEmpty(info)) {
+            return null;
+        }
+
+        String text = info.toString();
+
+        for (int[] part : getParts(text)) {
+            String value = getValue(text, part);
+
+            if (STREAMED_PREFIX.matcher(value).find() && isAge(value)) {
+                return part;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * The part without the marks around it
+     */
+    private static String getValue(String text, int[] part) {
+        return BIDI_MARKS.matcher(text.substring(part[0], part[1])).replaceAll("").trim();
+    }
+
+    /**
+     * An age or a date (e.g. "9 hours ago", "Published on Oct 7, 2026")
+     */
+    private static boolean isAge(String value) {
+        return AGO.matcher(value).matches() || compactDate(value, System.currentTimeMillis()) != null;
     }
 
     /**

@@ -721,6 +721,7 @@
     <string name="aislist_color_yellow">E verdhë</string>
     <string name="aislist_color_green">E gjelbër</string>
     <string name="aislist_color_blue">Blu</string>
+    <string name="aislist_color_purple">Vjollcë</string>
     <string name="aislist_blocklist">Lista e bllokimit (besueshmëri e lartë)</string>
     <string name="aislist_warnlist">Lista e paralajmërimit (besueshmëri mesatare)</string>
     <string name="aislist_status">Kanale të listuara: %1$d në listën e bllokimit, %2$d në listën e paralajmërimit</string>

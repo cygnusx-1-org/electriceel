@@ -760,6 +760,7 @@
     <string name="aislist_color_yellow">Amarelo</string>
     <string name="aislist_color_green">Verde</string>
     <string name="aislist_color_blue">Azul</string>
+    <string name="aislist_color_purple">Morado</string>
     <string name="aislist_blocklist">Lista de bloqueo (confianza alta)</string>
     <string name="aislist_warnlist">Lista de aviso (confianza moderada)</string>
     <string name="aislist_status">Canles listadas: %1$d na lista de bloqueo, %2$d na lista de aviso</string>

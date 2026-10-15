@@ -428,6 +428,7 @@
     <string name="aislist_color_yellow">Geltona</string>
     <string name="aislist_color_green">Žalia</string>
     <string name="aislist_color_blue">Mėlyna</string>
+    <string name="aislist_color_purple">Violetinė</string>
     <string name="aislist_blocklist">Blokavimo sąrašas (didelis patikimumas)</string>
     <string name="aislist_warnlist">Įspėjimų sąrašas (vidutinis patikimumas)</string>
     <string name="aislist_status">Kanalai sąrašuose: %1$d blokavimo sąraše, %2$d įspėjimų sąraše</string>

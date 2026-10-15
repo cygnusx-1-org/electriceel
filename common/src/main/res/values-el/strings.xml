@@ -758,6 +758,7 @@
     <string name="aislist_color_yellow">Κίτρινο</string>
     <string name="aislist_color_green">Πράσινο</string>
     <string name="aislist_color_blue">Μπλε</string>
+    <string name="aislist_color_purple">Μωβ</string>
     <string name="aislist_blocklist">Λίστα αποκλεισμού (υψηλή βεβαιότητα)</string>
     <string name="aislist_warnlist">Λίστα προειδοποίησης (μέτρια βεβαιότητα)</string>
     <string name="aislist_status">Κανάλια στις λίστες: %1$d στη λίστα αποκλεισμού, %2$d στη λίστα προειδοποίησης</string>

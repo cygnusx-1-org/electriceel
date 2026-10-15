@@ -760,6 +760,7 @@
     <string name="aislist_color_yellow">Jaune</string>
     <string name="aislist_color_green">Vert</string>
     <string name="aislist_color_blue">Bleu</string>
+    <string name="aislist_color_purple">Violet</string>
     <string name="aislist_blocklist">Liste noire (confiance élevée)</string>
     <string name="aislist_warnlist">Liste d\'avertissement (confiance modérée)</string>
     <string name="aislist_status">Chaînes listées : %1$d sur la liste noire, %2$d sur la liste d\'avertissement</string>

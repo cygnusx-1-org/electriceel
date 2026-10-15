@@ -760,6 +760,7 @@
     <string name="aislist_color_yellow">Kuning</string>
     <string name="aislist_color_green">Hijau</string>
     <string name="aislist_color_blue">Biru</string>
+    <string name="aislist_color_purple">Ungu</string>
     <string name="aislist_blocklist">Daftar blokir (keyakinan tinggi)</string>
     <string name="aislist_warnlist">Daftar peringatan (keyakinan sedang)</string>
     <string name="aislist_status">Channel terdaftar: %1$d di daftar blokir, %2$d di daftar peringatan</string>

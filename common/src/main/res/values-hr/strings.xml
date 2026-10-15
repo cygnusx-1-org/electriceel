@@ -512,6 +512,7 @@
     <string name="aislist_color_yellow">Žuta</string>
     <string name="aislist_color_green">Zelena</string>
     <string name="aislist_color_blue">Plava</string>
+    <string name="aislist_color_purple">Ljubičasta</string>
     <string name="aislist_blocklist">Popis blokiranja (visoka pouzdanost)</string>
     <string name="aislist_warnlist">Popis upozorenja (umjerena pouzdanost)</string>
     <string name="aislist_status">Kanali na popisima: %1$d na popisu blokiranja, %2$d na popisu upozorenja</string>

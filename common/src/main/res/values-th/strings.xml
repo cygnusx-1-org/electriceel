@@ -341,6 +341,7 @@
     <string name="aislist_color_yellow">เหลือง</string>
     <string name="aislist_color_green">เขียว</string>
     <string name="aislist_color_blue">น้ำเงิน</string>
+    <string name="aislist_color_purple">ม่วง</string>
     <string name="aislist_blocklist">รายการบล็อก (ความมั่นใจสูง)</string>
     <string name="aislist_warnlist">รายการเตือน (ความมั่นใจปานกลาง)</string>
     <string name="aislist_status">ช่องในรายการ: %1$d ในรายการบล็อก, %2$d ในรายการเตือน</string>

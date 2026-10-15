@@ -315,6 +315,7 @@
     <string name="aislist_color_yellow">Rumena</string>
     <string name="aislist_color_green">Zelena</string>
     <string name="aislist_color_blue">Modra</string>
+    <string name="aislist_color_purple">Vijolična</string>
     <string name="aislist_blocklist">Seznam blokiranih (visoka zanesljivost)</string>
     <string name="aislist_warnlist">Seznam opozoril (zmerna zanesljivost)</string>
     <string name="aislist_status">Kanali na seznamih: %1$d na seznamu blokiranih, %2$d na seznamu opozoril</string>

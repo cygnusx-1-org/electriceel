@@ -720,6 +720,7 @@
     <string name="aislist_color_yellow">Gul</string>
     <string name="aislist_color_green">Grøn</string>
     <string name="aislist_color_blue">Blå</string>
+    <string name="aislist_color_purple">Lilla</string>
     <string name="aislist_blocklist">Blokeringsliste (høj sikkerhed)</string>
     <string name="aislist_warnlist">Advarselsliste (moderat sikkerhed)</string>
     <string name="aislist_status">Listede kanaler: %1$d på blokeringslisten, %2$d på advarselslisten</string>

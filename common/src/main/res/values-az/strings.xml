@@ -733,6 +733,7 @@
     <string name="aislist_color_yellow">Sarı</string>
     <string name="aislist_color_green">Yaşıl</string>
     <string name="aislist_color_blue">Göy</string>
+    <string name="aislist_color_purple">Bənövşəyi</string>
     <string name="aislist_blocklist">Bloklama siyahısı (yüksək etibarlılıq)</string>
     <string name="aislist_warnlist">Xəbərdarlıq siyahısı (orta etibarlılıq)</string>
     <string name="aislist_status">Siyahıdakı kanallar: bloklama siyahısında %1$d, xəbərdarlıq siyahısında %2$d</string>

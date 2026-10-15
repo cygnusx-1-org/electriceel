@@ -609,6 +609,7 @@
     <string name="aislist_color_yellow">Жълт</string>
     <string name="aislist_color_green">Зелен</string>
     <string name="aislist_color_blue">Син</string>
+    <string name="aislist_color_purple">Лилав</string>
     <string name="aislist_blocklist">Черен списък (висока сигурност)</string>
     <string name="aislist_warnlist">Списък с предупреждения (умерена сигурност)</string>
     <string name="aislist_status">Канали в списъците: %1$d в черния списък, %2$d в списъка с предупреждения</string>

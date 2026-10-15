@@ -32,6 +32,7 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.CollaborationsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.ExploreTopicsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.ShowsData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.StreamedData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.TopChannelsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.WatchLaterData;
 import com.liskovsoft.smartyoutubetv2.common.utils.ClickbaitRemover;
@@ -202,10 +203,16 @@ public class VideoCardPresenter extends LongClickPresenter {
     }
 
     /**
-     * The second title, shortened for a short (see CompactInfo), after the "AI", "Collab", "Watch later", "Show", "Top channel" and "Topic" markers the video has
+     * The second title, shortened for a short (see CompactInfo), after the "AI", "Collab", "Watch later", "Show", "Top channel", "Topic"
+     * and "Streamed" markers the video has. The "Streamed" marker takes the word off the date ("Streamed • 5 hours ago").
      */
     private static CharSequence getContentText(Context context, Video video, boolean selected) {
-        CharSequence text = video.isShorts ? CompactInfo.compact(video.getSecondTitle()) : video.getSecondTitle();
+        CharSequence secondTitle = video.isStreamedMarked ? CompactInfo.removeStreamed(video.getSecondTitle()) : video.getSecondTitle();
+        CharSequence text = video.isShorts ? CompactInfo.compact(secondTitle) : secondTitle;
+
+        if (video.isStreamedMarked) {
+            text = addMark(context, text, R.string.streamed_label, StreamedData.instance(context).getMarkColor(), selected);
+        }
 
         if (video.isExploreTopicMarked) {
             text = addMark(context, text, R.string.explore_topic_label, ExploreTopicsData.instance(context).getMarkColor(), selected);
@@ -287,7 +294,7 @@ public class VideoCardPresenter extends LongClickPresenter {
     }
 
     /**
-     * Colors a marker ("AI", "Collab", "Watch later", "Show", "Top channel") with the shade of the saved color that suits the card background
+     * Colors a marker ("AI", "Collab", "Watch later", "Show", "Top channel", "Streamed") with the shade of the saved color that suits the card background
      */
     private static class MarkSpan extends ForegroundColorSpan {
         private final int mColor;

@@ -120,6 +120,65 @@ public class CompactInfoTest {
     }
 
     @Test
+    public void streamedIsFoundInTheLine() {
+        assertTrue(CompactInfo.isStreamed("Craft Computing • 3.8K views • Streamed 5 hours ago"));
+        assertTrue(CompactInfo.isStreamed("Some Channel • Streamed live 15 hours ago"));
+        assertTrue(CompactInfo.isStreamed("Some Channel • Streamed live on Oct 6, 2026"));
+        assertTrue(CompactInfo.isStreamed("Streamed 2 days ago"));
+        assertTrue(CompactInfo.isStreamed("⁨Some Channel⁩ • ⁨Streamed 2 days ago⁩"));
+    }
+
+    /**
+     * A name that starts with the word, the other dates, a live stream and another language aren't one
+     */
+    @Test
+    public void streamedNeedsItsDate() {
+        assertFalse(CompactInfo.isStreamed("Streamed Gaming • 1.2K views • 3 days ago"));
+        assertFalse(CompactInfo.isStreamed("Some Channel • Premiered 3 days ago"));
+        assertFalse(CompactInfo.isStreamed("Some Channel • Started streaming 2 hours ago"));
+        assertFalse(CompactInfo.isStreamed("Some Channel • 1.2K watching"));
+        assertFalse(CompactInfo.isStreamed("Some Channel • Streamed"));
+        assertFalse(CompactInfo.isStreamed("Канал • Трансляция закончилась 3 дня назад"));
+        assertFalse(CompactInfo.isStreamed(null));
+    }
+
+    @Test
+    public void streamedComesOffTheDate() {
+        assertEquals("Craft Computing • 3.8K views • 5 hours ago",
+                CompactInfo.removeStreamed("Craft Computing • 3.8K views • Streamed 5 hours ago").toString());
+        assertEquals("Some Channel • 15 hours ago", CompactInfo.removeStreamed("Some Channel • Streamed live 15 hours ago").toString());
+        assertEquals("Some Channel • Oct 6, 2026", CompactInfo.removeStreamed("Some Channel • Streamed live on Oct 6, 2026").toString());
+        assertEquals("2 days ago", CompactInfo.removeStreamed("Streamed 2 days ago").toString());
+        // The marks around the part stay
+        assertEquals("⁨Some Channel⁩ • ⁨2 days ago⁩",
+                CompactInfo.removeStreamed("⁨Some Channel⁩ • ⁨Streamed 2 days ago⁩").toString());
+        // The date without the word still compacts for a short
+        assertEquals("Some Channel • 1d", compact(CompactInfo.removeStreamed("Some Channel • Streamed live on Oct 6, 2026").toString()));
+    }
+
+    @Test
+    public void lineWithoutStreamedIsLeftAsItIs() {
+        String name = "Streamed Gaming • 1.2K views • 3 days ago";
+
+        assertSame(name, CompactInfo.removeStreamed(name));
+        assertEquals(null, CompactInfo.removeStreamed(null));
+    }
+
+    @Test
+    public void streamedComesOffWithTheOtherPartsStyled() {
+        SpannableString info = new SpannableString("LIVE • Streamed 2 days ago");
+        ForegroundColorSpan red = new ForegroundColorSpan(0xFFFF0000);
+        info.setSpan(red, 0, 4, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        CharSequence result = CompactInfo.removeStreamed(info);
+        Spanned spanned = (Spanned) result;
+
+        assertEquals("LIVE • 2 days ago", result.toString());
+        assertEquals(0, spanned.getSpanStart(red));
+        assertEquals(4, spanned.getSpanEnd(red));
+    }
+
+    @Test
     public void datesToComeTellTheTimeLeft() {
         assertEquals("Scheduled in 11m", compact("Scheduled for Sep 24, 2027"));
         assertEquals("Premieres in 2w", compact("Premieres Oct 21, 2026"));
