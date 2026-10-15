@@ -229,6 +229,27 @@ public class MainUIDataTest {
         assertFalse(getData().isMenuItemEnabled(MainUIData.MENU_ITEM_SHARE_QR_LINK));
     }
 
+    @Test
+    public void likeIsNotInTheMenuByDefault() {
+        assertFalse(getData().isMenuItemEnabled(MainUIData.MENU_ITEM_LIKE));
+    }
+
+    @Test
+    public void likeComesAfterWatchLater() {
+        MainUIData data = getData();
+
+        assertEquals(data.getMenuItemIndex(MainUIData.MENU_ITEM_ADD_TO_WATCH_LATER) + 1, data.getMenuItemIndex(MainUIData.MENU_ITEM_LIKE));
+    }
+
+    @Test
+    public void likeTurnedOnStaysOn() {
+        getData().setMenuItemEnabled(MainUIData.MENU_ITEM_LIKE);
+        ShadowLooper.shadowMainLooper().idle();
+        MainUIData.resetInstanceForTesting();
+
+        assertTrue(getData().isMenuItemEnabled(MainUIData.MENU_ITEM_LIKE));
+    }
+
     /**
      * Saved like MainUIData does, the values after the color scheme left out: the defaults
      */

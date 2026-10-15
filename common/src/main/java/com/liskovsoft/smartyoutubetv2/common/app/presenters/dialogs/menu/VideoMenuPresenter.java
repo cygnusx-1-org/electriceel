@@ -7,6 +7,7 @@ import com.liskovsoft.mediaserviceinterfaces.data.FeedbackEndpoint;
 import com.liskovsoft.mediaserviceinterfaces.data.FeedbackReasons.FeedbackItem;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItem;
+import com.liskovsoft.mediaserviceinterfaces.data.MediaItemMetadata;
 import com.liskovsoft.mediaserviceinterfaces.data.PlaylistInfo;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
@@ -57,6 +58,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
     private final MediaServiceManager mServiceManager;
     private Disposable mNotInterestedAction;
     private Disposable mSubscribeAction;
+    private Disposable mLikeAction;
     private Disposable mPlaylistsInfoAction;
     private Video mVideo;
     public static WeakReference<Video> sVideoHolder = new WeakReference<>(null);
@@ -74,6 +76,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
     private boolean mIsShareQRLinkButtonEnabled;
     private boolean mIsShareEmbedLinkButtonEnabled;
     private boolean mIsAddToWatchLaterButtonEnabled;
+    private boolean mIsLikeButtonEnabled;
     private boolean mIsAddToPlaylistButtonEnabled;
     private boolean mIsAddToRecentPlaylistButtonEnabled;
     private boolean mIsReturnToBackgroundVideoEnabled;
@@ -245,6 +248,35 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
                             mDialogPresenter.closeDialog();
                         }
                 ));
+    }
+
+    private void appendLikeButton() {
+        if (!mIsLikeButtonEnabled || mVideo == null || !mVideo.hasVideo()) {
+            return;
+        }
+
+        mDialogPresenter.appendSingleButton(
+                UiOptionItem.from(
+                        getContext().getString(R.string.like_remove_like),
+                        optionItem -> {
+                            mDialogPresenter.closeDialog();
+                            // The card doesn't know whether the video is liked: only its metadata does
+                            MessageHelpers.showMessage(getContext(), R.string.wait_data_loading);
+                            mServiceManager.loadMetadata(mVideo, this::toggleLike,
+                                    error -> MessageHelpers.showLongMessage(getContext(), error.getMessage()), null);
+                        }
+                ));
+    }
+
+    private void toggleLike(MediaItemMetadata metadata) {
+        boolean isLiked = metadata.getLikeStatus() == MediaItemMetadata.LIKE_STATUS_LIKE;
+        MediaItem item = mVideo.mediaItem != null ? mVideo.mediaItem : mVideo.toMediaItem();
+
+        RxHelper.disposeActions(mLikeAction);
+
+        mLikeAction = RxHelper.execute(isLiked ? mMediaItemService.removeLikeObserve(item) : mMediaItemService.setLikeObserve(item),
+                error -> MessageHelpers.showLongMessage(getContext(), error.getMessage()),
+                () -> MessageHelpers.showMessage(getContext(), isLiked ? R.string.action_like_unset : R.string.action_like));
     }
 
     private void appendAddToPlaylistButton() {
@@ -1097,6 +1129,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
         mIsAddToPlaybackQueueButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_ADD_TO_QUEUE);
         mIsPlayNextButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_PLAY_NEXT);
         mIsAddToWatchLaterButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_ADD_TO_WATCH_LATER);
+        mIsLikeButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_LIKE);
         mIsAddToPlaylistButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_ADD_TO_PLAYLIST);
         mIsShareLinkButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_SHARE_LINK);
         mIsShareQRLinkButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_SHARE_QR_LINK);
@@ -1130,6 +1163,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
         mMenuMapping.put(MainUIData.MENU_ITEM_STREAM_REMINDER, new MenuAction(this::appendStreamReminderButton, false));
         mMenuMapping.put(MainUIData.MENU_ITEM_RECENT_PLAYLIST, new MenuAction(this::appendAddToRecentPlaylistButton, false));
         mMenuMapping.put(MainUIData.MENU_ITEM_ADD_TO_WATCH_LATER, new MenuAction(this::appendAddToWatchLaterButton, true));
+        mMenuMapping.put(MainUIData.MENU_ITEM_LIKE, new MenuAction(this::appendLikeButton, true));
         mMenuMapping.put(MainUIData.MENU_ITEM_ADD_TO_PLAYLIST, new MenuAction(this::appendAddToPlaylistButton, false));
         mMenuMapping.put(MainUIData.MENU_ITEM_CREATE_PLAYLIST, new MenuAction(this::appendCreatePlaylistButton, false));
         mMenuMapping.put(MainUIData.MENU_ITEM_CREATE_LOCAL_PLAYLIST, new MenuAction(this::appendCreateLocalPlaylistButton, true));
