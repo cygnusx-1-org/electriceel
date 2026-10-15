@@ -71,6 +71,7 @@ public class BackupSettingsPresenter extends BasePresenter<Void> {
         appendLocalBackupCategory(settingsPresenter);
         appendGDriveBackupCategory(settingsPresenter);
         appendSubscriptionsBackupButton(settingsPresenter);
+        appendPlaylistsBackupButtons(settingsPresenter);
         settingsPresenter.showDialog(getContext().getString(R.string.app_backup_restore), BackupSettingsPresenter::unhold);
     }
 
@@ -212,6 +213,15 @@ public class BackupSettingsPresenter extends BasePresenter<Void> {
 
     private void appendSubscriptionsBackupButton(AppDialogPresenter settingsPresenter) {
         settingsPresenter.appendSingleButton(AppDialogUtil.createSubscriptionsBackupButton(getContext()));
+    }
+
+    private void appendPlaylistsBackupButtons(AppDialogPresenter settingsPresenter) {
+        // Where the files are written to, as for the backup
+        settingsPresenter.appendSingleButton(UiOptionItem.from(String.format("%s:\n%s", getContext().getString(R.string.export_playlists),
+                        PlaylistsBackupPresenter.getBackupDir().getAbsolutePath()),
+                optionItem -> PlaylistsBackupPresenter.instance(getContext()).exportPlaylists()));
+        settingsPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.import_playlists),
+                optionItem -> PlaylistsBackupPresenter.instance(getContext()).importPlaylists()));
     }
 
     private void showLocalRestoreDialog(BackupAndRestoreManager backupManager, List<String> backups) {

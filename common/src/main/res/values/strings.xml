@@ -595,6 +595,14 @@
     <string name="rename_playlist">Rename playlist</string>
     <string name="copy_playlist_to_youtube">Copy to YouTube</string>
     <string name="copied_to_youtube">Copied to YouTube</string>
+    <string name="export_playlists">Export playlists</string>
+    <string name="import_playlists">Import playlists</string>
+    <string name="import_to_device">Import to this device</string>
+    <string name="import_to_youtube">Import to YouTube</string>
+    <string name="no_playlists_picked">No playlists picked</string>
+    <string name="playlists_exported">Exported %s</string>
+    <string name="playlist_exists">A playlist named \"%s\" exists</string>
+    <string name="playlist_exists_rename">A playlist named \"%s\" exists. Rename it, or cancel to skip it</string>
     <string name="cant_rename_empty_playlist">Can\'t rename empty playlist</string>
     <string name="cant_rename_foreign_playlist">Can\'t rename foreign playlist</string>
     <string name="cant_save_playlist">This playlist cannot be added</string>
@@ -971,6 +979,10 @@
         <item quantity="other">%s years</item>
     </plurals>
     <string name="card_shorts_date">Dates on shorts</string>
+    <plurals name="playlist_videos">
+        <item quantity="one">%d video</item>
+        <item quantity="other">%d videos</item>
+    </plurals>
     <plurals name="seconds_ago">
         <item quantity="one">%s second ago</item>
         <item quantity="other">%s seconds ago</item>
