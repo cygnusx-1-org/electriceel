@@ -15,6 +15,8 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLooper;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 28)
@@ -208,6 +210,23 @@ public class MainUIDataTest {
         prefs.copyProfileData(FIRST_ACCOUNT);
 
         assertEquals(defaultId, data.getColorScheme().id);
+    }
+
+    @Test
+    public void shareQrLinkIsInTheMenuByDefault() {
+        assertTrue(getData().isMenuItemEnabled(MainUIData.MENU_ITEM_SHARE_QR_LINK));
+    }
+
+    /**
+     * It was in the menu settings before it was on by default: one turned off stays off
+     */
+    @Test
+    public void shareQrLinkTurnedOffStaysOff() {
+        getData().setMenuItemDisabled(MainUIData.MENU_ITEM_SHARE_QR_LINK);
+        ShadowLooper.shadowMainLooper().idle();
+        MainUIData.resetInstanceForTesting();
+
+        assertFalse(getData().isMenuItemEnabled(MainUIData.MENU_ITEM_SHARE_QR_LINK));
     }
 
     /**

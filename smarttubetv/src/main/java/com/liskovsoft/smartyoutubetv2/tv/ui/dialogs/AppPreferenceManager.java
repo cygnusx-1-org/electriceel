@@ -15,7 +15,7 @@ import com.liskovsoft.smartyoutubetv2.tv.R;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.ChatPreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.CommentsPreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.DependentListPreference;
-import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.ImagePreference;
+import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.QrCodePreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.ReorderListPreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.StringListPreference;
 
@@ -149,8 +149,8 @@ public class AppPreferenceManager {
                 return createChatPreference(category);
             case OptionCategory.TYPE_COMMENTS:
                 return createCommentsPreference(category);
-            case OptionCategory.TYPE_IMAGE:
-                return createImagePreference(category);
+            case OptionCategory.TYPE_QR_CODE:
+                return createQrCodePreference(category);
         }
 
         throw  new IllegalStateException("Can't find matched preference for type: " + category.type);
@@ -233,11 +233,11 @@ public class AppPreferenceManager {
         return pref;
     }
 
-    private Preference createImagePreference(OptionCategory category) {
-        ImagePreference pref = new ImagePreference(mContext);
+    private Preference createQrCodePreference(OptionCategory category) {
+        QrCodePreference pref = new QrCodePreference(mContext);
         pref.setPersistent(false);
         pref.setTitle(category.title);
-        pref.setImageResource(category.imageResId);
+        pref.setQrCodeText(category.qrCodeText);
 
         return pref;
     }

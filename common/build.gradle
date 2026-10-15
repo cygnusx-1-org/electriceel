@@ -93,6 +93,8 @@ dependencies {
 
     implementation 'androidx.browser:browser:' + browserXVersion
 
+    implementation 'com.google.zxing:core:3.5.4' // the QR codes (e.g. About, Share link (QR code)), made on the device (see QrCodeEncoder)
+
     implementation 'androidx.core:core-ktx:' + kotlinCoreXVersion
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:' + kotlinVersion
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:' + kotlinxVersion

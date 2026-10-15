@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The QR code in the middle of the screen, the address under it (see QrCodeFragment) -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- A fixed size, so it's in the same place whatever the address. The picture is made this size: centered, not scaled. -->
+    <ImageView
+        android:id="@+id/qr_code_image"
+        android:layout_width="@dimen/qr_code_size"
+        android:layout_height="@dimen/qr_code_size"
+        android:layout_centerInParent="true"
+        android:scaleType="center"
+        android:importantForAccessibility="no" />
+
+    <TextView
+        android:id="@+id/qr_code_url"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/qr_code_image"
+        android:layout_marginTop="@dimen/qr_code_url_margin_top"
+        android:paddingStart="@dimen/qr_code_url_padding_horizontal"
+        android:paddingEnd="@dimen/qr_code_url_padding_horizontal"
+        android:gravity="center_horizontal"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:textColor="@color/white"
+        android:textSize="@dimen/qr_code_url_text_size" />
+
+</RelativeLayout>

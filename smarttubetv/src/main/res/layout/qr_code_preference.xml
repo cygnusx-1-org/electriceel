@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- A picture with its title above it, e.g. a QR code (see ImagePreference).
+<!-- A QR code with its title above it (see QrCodePreference).
      The title is placed like the title of the other rows (see leanback_preference of leanback-preference). -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -25,12 +25,12 @@
         android:layout_width="0dp"
         android:layout_height="@dimen/lb_preference_item_text_space_bottom" />
 
-    <!-- A fixed size, the size of the picture (e.g. qr_code_git_repository) -->
+    <!-- A fixed size. The code is made this size: centered, not scaled. -->
     <ImageView
-        android:id="@+id/image_preference_image"
-        android:layout_width="@dimen/image_preference_image_size"
-        android:layout_height="@dimen/image_preference_image_size"
-        android:scaleType="fitCenter"
+        android:id="@+id/qr_code_preference_image"
+        android:layout_width="@dimen/qr_code_preference_size"
+        android:layout_height="@dimen/qr_code_preference_size"
+        android:scaleType="center"
         android:importantForAccessibility="no" />
 
     <Space

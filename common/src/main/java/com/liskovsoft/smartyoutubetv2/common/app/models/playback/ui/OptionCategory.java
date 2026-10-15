@@ -31,7 +31,7 @@ public class OptionCategory {
      * Its items are moved up and down: one is picked up and moved to its place. Told of the new order at each move.
      */
     public static OptionCategory reorderList(CharSequence title, List<OptionItem> items, OnReorder onReorder) {
-        return new OptionCategory(title, items, TYPE_REORDER_LIST, -1, 0, onReorder);
+        return new OptionCategory(title, items, TYPE_REORDER_LIST, -1, null, onReorder);
     }
 
     public static OptionCategory longText(CharSequence title, OptionItem item) {
@@ -47,12 +47,12 @@ public class OptionCategory {
     }
 
     /**
-     * A picture with its title above it, e.g. a QR code. Nothing to press.
+     * A QR code with its title above it. Nothing to press.
      *
-     * @param imageResId a drawable, shown at once
+     * @param text e.g. an address, made into the code on the device (see QrCodeEncoder): shown at once, offline too
      */
-    public static OptionCategory image(CharSequence title, int imageResId) {
-        return new OptionCategory(title, Collections.<OptionItem>emptyList(), TYPE_IMAGE, -1, imageResId);
+    public static OptionCategory qrCode(CharSequence title, String text) {
+        return new OptionCategory(title, Collections.<OptionItem>emptyList(), TYPE_QR_CODE, -1, text);
     }
 
     public static OptionCategory singleSwitch(OptionItem item) {
@@ -80,19 +80,19 @@ public class OptionCategory {
     }
 
     private OptionCategory(CharSequence title, List<OptionItem> options, int type, int id) {
-        this(title, options, type, id, 0);
+        this(title, options, type, id, null);
     }
 
-    private OptionCategory(CharSequence title, List<OptionItem> options, int type, int id, int imageResId) {
-        this(title, options, type, id, imageResId, null);
+    private OptionCategory(CharSequence title, List<OptionItem> options, int type, int id, String qrCodeText) {
+        this(title, options, type, id, qrCodeText, null);
     }
 
-    private OptionCategory(CharSequence title, List<OptionItem> options, int type, int id, int imageResId, OnReorder onReorder) {
+    private OptionCategory(CharSequence title, List<OptionItem> options, int type, int id, String qrCodeText, OnReorder onReorder) {
         this.id = id;
         this.type = type;
         this.title = title;
         this.options = options;
-        this.imageResId = imageResId;
+        this.qrCodeText = qrCodeText;
         this.onReorder = onReorder;
     }
 
@@ -104,13 +104,16 @@ public class OptionCategory {
     public static final int TYPE_LONG_TEXT = 5;
     public static final int TYPE_CHAT = 6;
     public static final int TYPE_COMMENTS = 7;
-    public static final int TYPE_IMAGE = 8;
+    public static final int TYPE_QR_CODE = 8;
     public static final int TYPE_REORDER_LIST = 9;
     public final int id;
     public final int type;
     public final CharSequence title;
     public final List<OptionItem> options;
-    public final int imageResId;
+    /**
+     * Of {@link #TYPE_QR_CODE}, null for the others
+     */
+    public final String qrCodeText;
     /**
      * Of {@link #TYPE_REORDER_LIST}, null for the others
      */

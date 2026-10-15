@@ -205,6 +205,12 @@
             android:screenOrientation="unspecified"/>
 
         <activity
+            android:name="com.liskovsoft.smartyoutubetv2.tv.ui.qrcode.QrCodeActivity"
+            android:launchMode="singleInstance"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|layoutDirection"
+            android:screenOrientation="unspecified"/>
+
+        <activity
             android:name="com.liskovsoft.smartyoutubetv2.tv.ui.settingscards.SettingsCardsActivity"
             android:launchMode="singleInstance"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|layoutDirection"

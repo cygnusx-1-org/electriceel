@@ -8,6 +8,11 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
 
 public class AboutSimpleSettingsPresenter extends BasePresenter<Void> {
+    private static final String DONATION_URL = "https://buymeacoffee.com/edgan";
+    private static final String FEEDBACK_URL = "https://github.com/cygnusx-1-org/electriceel/issues";
+    private static final String RELEASES_URL = "https://github.com/cygnusx-1-org/electriceel/releases";
+    private static final String GIT_REPOSITORY_URL = "https://github.com/cygnusx-1-org/electriceel";
+
     public AboutSimpleSettingsPresenter(Context context) {
         super(context);
     }
@@ -27,10 +32,10 @@ public class AboutSimpleSettingsPresenter extends BasePresenter<Void> {
         AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
 
         // In the order of the full About
-        appendQrCode(settingsPresenter, R.string.donation, R.drawable.qr_code_donation);
-        appendQrCode(settingsPresenter, R.string.feedback, R.drawable.qr_code_feedback);
-        appendQrCode(settingsPresenter, R.string.releases, R.drawable.qr_code_releases);
-        appendQrCode(settingsPresenter, R.string.git_repository, R.drawable.qr_code_git_repository);
+        appendQrCode(settingsPresenter, R.string.donation, DONATION_URL);
+        appendQrCode(settingsPresenter, R.string.feedback, FEEDBACK_URL);
+        appendQrCode(settingsPresenter, R.string.releases, RELEASES_URL);
+        appendQrCode(settingsPresenter, R.string.git_repository, GIT_REPOSITORY_URL);
 
         settingsPresenter.showDialog(mainTitle);
     }
@@ -38,19 +43,19 @@ public class AboutSimpleSettingsPresenter extends BasePresenter<Void> {
     /**
      * A row that opens a panel with a QR code of the address
      */
-    private void appendQrCode(AppDialogPresenter settingsPresenter, int titleResId, int qrCodeResId) {
+    private void appendQrCode(AppDialogPresenter settingsPresenter, int titleResId, String url) {
         String title = getContext().getString(titleResId);
 
-        settingsPresenter.appendSingleButton(UiOptionItem.from(title, option -> showQrCode(title, qrCodeResId)));
+        settingsPresenter.appendSingleButton(UiOptionItem.from(title, option -> showQrCode(title, url)));
     }
 
     /**
-     * The code has the address, so it isn't written out. Pre-rendered: it's there when the panel opens.
+     * The code has the address, so it isn't written out. Made on the device: it's there when the panel opens.
      */
-    private void showQrCode(String title, int qrCodeResId) {
+    private void showQrCode(String title, String url) {
         AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
 
-        settingsPresenter.appendImage(title, qrCodeResId);
+        settingsPresenter.appendQrCode(title, url);
 
         // A single item would be opened right away instead of showing the panel with the picture
         settingsPresenter.enableExpandable(false);

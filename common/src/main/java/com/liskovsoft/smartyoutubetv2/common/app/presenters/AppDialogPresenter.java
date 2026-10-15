@@ -247,10 +247,10 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
     }
 
     /**
-     * A picture with its title above it, e.g. a QR code
+     * A QR code of the text (e.g. an address) with its title above it
      */
-    public void appendImage(CharSequence title, int imageResId) {
-        mCategories.add(OptionCategory.image(title, imageResId));
+    public void appendQrCode(CharSequence title, String text) {
+        mCategories.add(OptionCategory.qrCode(title, text));
     }
 
     public void showDialogMessage(String dialogTitle, Runnable onClose, int timeoutMs) {

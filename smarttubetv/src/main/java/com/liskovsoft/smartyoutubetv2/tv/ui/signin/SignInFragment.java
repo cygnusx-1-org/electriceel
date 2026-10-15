@@ -1,5 +1,7 @@
 package com.liskovsoft.smartyoutubetv2.tv.ui.signin;
 
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -9,22 +11,16 @@ import androidx.core.content.ContextCompat;
 import androidx.leanback.app.GuidedStepSupportFragment;
 import androidx.leanback.widget.GuidanceStylist;
 import androidx.leanback.widget.GuidedAction;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
-import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.SignInPresenter;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.YTSignInPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.SignInView;
+import com.liskovsoft.smartyoutubetv2.common.utils.QrCodeEncoder;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.smartyoutubetv2.tv.R;
-import com.liskovsoft.smartyoutubetv2.tv.util.ViewUtil;
 
 import java.util.List;
 
 public class SignInFragment extends GuidedStepSupportFragment implements SignInView {
-    private static final String TAG = SignInFragment.class.getSimpleName();
     private static final int CONTINUE = 2;
     private static final int OPEN_BROWSER = 3;
     private SignInPresenter mSignInPresenter;
@@ -68,15 +64,18 @@ public class SignInFragment extends GuidedStepSupportFragment implements SignInV
 
         getGuidanceStylist().getTitleView().setText(userCode);
 
+        if (signInUrl == null) { // e.g. Google's response without the address
+            signInUrl = "";
+        }
+
         mFullSignInUrl = fullSignInUrl != null ? fullSignInUrl : signInUrl;
 
-        Glide.with(getContext())
-                .load(Utils.toQrCodeLink(mFullSignInUrl))
-                .placeholder(R.drawable.activate_account_qrcode)
-                .apply(ViewUtil.glideOptions())
-                .error(R.drawable.activate_account_qrcode)
-                .listener(mErrorListener)
-                .into(getGuidanceStylist().getIconView());
+        // An error has no address: the code of the sign-in page stays
+        Drawable qrCode = createQrCode(mFullSignInUrl);
+
+        if (qrCode != null) {
+            getGuidanceStylist().getIconView().setImageDrawable(qrCode);
+        }
 
         String description = getString(R.string.signin_view_description, signInUrl);
         int start = description.indexOf(signInUrl);
@@ -98,7 +97,18 @@ public class SignInFragment extends GuidedStepSupportFragment implements SignInV
     public GuidanceStylist.Guidance onCreateGuidance(@NonNull Bundle savedInstanceState) {
         String title = getString(R.string.signin_view_title);
         String description = getString(R.string.signin_view_description, "");
-        return new GuidanceStylist.Guidance(title, description, "", ContextCompat.getDrawable(getContext(), R.drawable.activate_account_qrcode));
+        // The sign-in page until the code arrives
+        return new GuidanceStylist.Guidance(title, description, "", createQrCode(YTSignInPresenter.SIGN_IN_URL));
+    }
+
+    /**
+     * Made on the device: there at once, offline too. The same size before and after the code arrives, so it doesn't move.
+     */
+    @Nullable
+    private Drawable createQrCode(@Nullable String url) {
+        Bitmap qrCode = QrCodeEncoder.toBitmap(url, getResources().getDimensionPixelSize(R.dimen.sign_in_qr_code_size));
+
+        return qrCode != null ? new BitmapDrawable(getResources(), qrCode) : null;
     }
 
     @Override
@@ -125,17 +135,4 @@ public class SignInFragment extends GuidedStepSupportFragment implements SignInV
             }
         }
     }
-
-    private final RequestListener<Drawable> mErrorListener = new RequestListener<Drawable>() {
-        @Override
-        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-            Log.e(TAG, "Glide load failed: " + e);
-            return false;
-        }
-
-        @Override
-        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-            return false;
-        }
-    };
 }

@@ -15,6 +15,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.views.ChannelUploadsView;
 import com.liskovsoft.smartyoutubetv2.common.app.views.ChannelView;
 import com.liskovsoft.smartyoutubetv2.common.app.views.KeywordWordsView;
 import com.liskovsoft.smartyoutubetv2.common.app.views.PlaybackView;
+import com.liskovsoft.smartyoutubetv2.common.app.views.QrCodeView;
 import com.liskovsoft.smartyoutubetv2.common.app.views.SearchView;
 import com.liskovsoft.smartyoutubetv2.common.app.views.SettingsCardsView;
 import com.liskovsoft.smartyoutubetv2.common.app.views.SignInView;
@@ -33,6 +34,7 @@ import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.AppDialogActivity;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.AppDialogActivityOpaque;
 import com.liskovsoft.smartyoutubetv2.tv.ui.keywords.KeywordWordsActivity;
 import com.liskovsoft.smartyoutubetv2.tv.ui.playback.PlaybackActivity;
+import com.liskovsoft.smartyoutubetv2.tv.ui.qrcode.QrCodeActivity;
 import com.liskovsoft.smartyoutubetv2.tv.ui.search.tags.SearchTagsActivity;
 import com.liskovsoft.smartyoutubetv2.tv.ui.settingscards.SettingsCardsActivity;
 import com.liskovsoft.smartyoutubetv2.tv.ui.signin.SignInActivity;
@@ -109,6 +111,7 @@ public class MainApplication extends MultiDexApplication { // fix: Didn't find c
         viewManager.register(ChannelView.class, ChannelActivity.class, BrowseActivity.class);
         viewManager.register(ChannelUploadsView.class, ChannelUploadsActivity.class, BrowseActivity.class);
         viewManager.register(WebBrowserView.class, WebBrowserActivity.class, BrowseActivity.class);
+        viewManager.register(QrCodeView.class, QrCodeActivity.class, BrowseActivity.class);
         viewManager.register(KeywordWordsView.class, KeywordWordsActivity.class, BrowseActivity.class);
         viewManager.register(SettingsCardsView.class, SettingsCardsActivity.class, BrowseActivity.class);
     }
