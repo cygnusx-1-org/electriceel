@@ -234,6 +234,23 @@ public class MainUIDataTest {
     }
 
     @Test
+    public void markAsWatchedIsInTheMenuByDefault() {
+        assertTrue(getData().isMenuItemEnabled(MainUIData.MENU_ITEM_MARK_AS_WATCHED));
+    }
+
+    /**
+     * It was in the menu settings before it was on by default: one turned off stays off
+     */
+    @Test
+    public void markAsWatchedTurnedOffStaysOff() {
+        getData().setMenuItemDisabled(MainUIData.MENU_ITEM_MARK_AS_WATCHED);
+        ShadowLooper.shadowMainLooper().idle();
+        MainUIData.resetInstanceForTesting();
+
+        assertFalse(getData().isMenuItemEnabled(MainUIData.MENU_ITEM_MARK_AS_WATCHED));
+    }
+
+    @Test
     public void likeIsNotInTheMenuByDefault() {
         assertFalse(getData().isMenuItemEnabled(MainUIData.MENU_ITEM_LIKE));
     }
