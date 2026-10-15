@@ -1,13 +1,23 @@
 {
   "package": {
     "downloadUrlList_arm64-v8a": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.9.1/ElectricEel_stable_32.56.9.1_arm64-v8a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.9.2/ElectricEel_stable_32.56.9.2_arm64-v8a.apk"
     ],
     "downloadUrlList_armeabi-v7a": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.9.1/ElectricEel_stable_32.56.9.1_armeabi-v7a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.9.2/ElectricEel_stable_32.56.9.2_armeabi-v7a.apk"
     ],
     "downloadUrlList": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.9.1/ElectricEel_stable_32.56.9.1_armeabi-v7a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.9.2/ElectricEel_stable_32.56.9.2_armeabi-v7a.apk"
+    ]
+  },
+  "32.56.9.2": {
+    "versionCode": 2446,
+    "changelog": [
+      "Implemented Add options to import and export playlists #23",
+      "Implemented Break \"Settings | User interface | Context menu\" into two pieces #38",
+      "Implemented Add Like Video to context menu",
+      "Implemented Make the Share link (QR code) screen show the URL and enable Share link (QR code) by default #40",
+      "Implemented Add an option to Watch later to clear it of Watched videos #16"
     ]
   },
   "32.56.9.1": {
