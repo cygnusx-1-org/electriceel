@@ -26,6 +26,7 @@ public class TrackSelectorUtil {
     private static final HashMap<Integer, Integer> mResolutionMap = new HashMap<>();
     // Unicode chars: https://symbl.cc/en/search/?q=mark
     public static final String HIGH_BITRATE_MARK = "\uD83D\uDC8E"; // diamond
+    private static String sVoiceBoostMark = "";
 
     // Try to amplify resolution of aspect ratios that differ from 16:9
     static {
@@ -51,15 +52,15 @@ public class TrackSelectorUtil {
     public static CharSequence buildTrackNameShort(Format format) {
         String trackName;
         if (MimeTypes.isVideo(format.sampleMimeType)) {
-            trackName = joinWithSeparator(joinWithSeparator(joinWithSeparator(joinWithSeparator(joinWithSeparator(buildResolutionShortString(format),
-                    buildFPSString(format)), buildBitrateString(format)), extractCodec(format)), buildHDRString(format)), buildHighBitrateMark(format));
+            trackName = joinWithSeparator(buildResolutionShortString(format), buildFPSString(format), buildBitrateString(format),
+                    extractCodec(format), buildHDRString(format), buildHighBitrateMark(format));
         } else if (MimeTypes.isAudio(format.sampleMimeType)) {
-            trackName = joinWithSeparator(joinWithSeparator(joinWithSeparator(joinWithSeparator(joinWithSeparator(buildLanguageString(format),
-                    buildAudioPropertyString(format)), buildBitrateString(format)), extractCodec(format)), buildChannels(format)), buildDrcMark(format));
+            trackName = joinWithSeparator(buildLanguageString(format), buildAudioPropertyString(format), buildBitrateString(format),
+                    extractCodec(format), buildChannels(format), buildDrcMark(format), buildVbMark(format));
         } else if (MimeTypes.isText(format.sampleMimeType)) {
             trackName = buildLanguageString(format);
         } else {
-            trackName = joinWithSeparator(joinWithSeparator(buildLanguageString(format), buildBitrateString(format)), extractCodec(format));
+            trackName = joinWithSeparator(buildLanguageString(format), buildBitrateString(format), extractCodec(format));
         }
         return trackName.length() == 0 ? "unknown" : trackName;
     }
@@ -114,8 +115,22 @@ public class TrackSelectorUtil {
         return format.bitrate == Format.NO_VALUE || bitrateMB == 0 ? "" : String.format("%sMbps", Helpers.formatFloat(bitrateMB));
     }
 
-    private static String joinWithSeparator(String first, String second) {
-        return first.length() == 0 ? second : (second.length() == 0 ? first : first + SEPARATOR + second);
+    private static String joinWithSeparator(String... items) {
+        StringBuilder result = new StringBuilder();
+
+        for (String item : items) {
+            if (item == null || item.isEmpty()) {
+                continue;
+            }
+
+            if (result.length() > 0) {
+                result.append(SEPARATOR);
+            }
+
+            result.append(item);
+        }
+
+        return result.toString();
     }
 
     /**
@@ -214,6 +229,43 @@ public class TrackSelectorUtil {
 
     public static boolean isDrc(Format format) {
         return format != null && (Helpers.endsWithAny(format.id, "drc") || format.isDrc);
+    }
+
+    /**
+     * The voice boost mark is a word, not an acronym, so it comes from the string resources.
+     */
+    public static void setVoiceBoostMark(String mark) {
+        sVoiceBoostMark = mark != null ? mark : "";
+    }
+
+    public static String buildVbMark(Format format) {
+        return isVb(format) ? sVoiceBoostMark : "";
+    }
+
+    /**
+     * Voice boost audio variant: speech enhanced, music and ambience lowered.<br/>
+     * The parsers set {@link Format#isVb}. A manifest built by the MPD builder marks it with "-vb" in the id.
+     */
+    public static boolean isVb(Format format) {
+        return format != null && (format.isVb || (format.id != null && format.id.contains("-vb")));
+    }
+
+    /**
+     * Voice boost is opt-in. It's only wanted when the origin is voice boost too.
+     */
+    public static boolean isUnwantedVb(Format origin, Format format) {
+        return isVb(format) && !isVb(origin);
+    }
+
+    /**
+     * Same audio variant: original, DRC or voice boost.
+     */
+    public static boolean isSameVariant(Format format1, Format format2) {
+        if (format1 == null || format2 == null) {
+            return false;
+        }
+
+        return isDrc(format1) == isDrc(format2) && isVb(format1) == isVb(format2);
     }
 
     public static boolean is51Audio(Format format) {

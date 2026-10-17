@@ -580,6 +580,7 @@
   <string name="sony_frame_drop_fix">Correção de queda de quadros #1</string>
   <string name="sony_frame_drop_fix_desc">Corrige travamentos em TVs Sony e alguns outros dispositivos. Observação: possíveis problemas com a sincronização de áudio.</string>
   <string name="audio_language">Linguagem do áudio</string>
+    <string name="audio_voice_boost">Realce de voz</string>
   <string name="old_home_look">Voltar para a aparência antiga da seção \"Início\"</string>
   <string name="old_channel_look">Voltar para a aparência antiga da seção \"Canal\"</string>
   <string name="hide_shorts_everywhere">Ocultar os shorts (vídeos curtos) em todos os lugares</string>

@@ -582,6 +582,7 @@
     <string name="sony_frame_drop_fix">Correggi salto fotogrammi #1</string>
     <string name="sony_frame_drop_fix_desc">Correggi ritardi sulle TV Sony e su alcuni altri dispositivi. Nota: possibili problemi con la sincronizzazione audio.</string>
     <string name="audio_language">Lingua audio</string>
+    <string name="audio_voice_boost">Potenziamento voce</string>
     <string name="old_home_look">Il vecchio aspetto della sezione Home</string>
     <string name="old_channel_look">Il vecchio aspetto della pagina del canale</string>
     <string name="hide_shorts_everywhere">Nascondi i video brevi ovunque</string>

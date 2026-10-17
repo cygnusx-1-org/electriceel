@@ -578,6 +578,7 @@
     <string name="sony_frame_drop_fix">Fiks for tapte bilder #1</string>
     <string name="sony_frame_drop_fix_desc">Fikser hakking på Sony TV og noen andre enheter. Merk: mulige problemer med lydsynkronisering.</string>
     <string name="audio_language">Lydspråk</string>
+    <string name="audio_voice_boost">Stemmeforsterkning</string>
     <string name="old_home_look">Gammelt utseende for Hjem-seksjonen</string>
     <string name="old_channel_look">Gammelt utseende for Kanalsiden</string>
     <string name="hide_shorts_everywhere">Skjul Shorts overalt</string>

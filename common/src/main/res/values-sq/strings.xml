@@ -566,6 +566,7 @@
   <string name="sony_frame_drop_fix">Rregullo uljen e frekuencës #1</string>
   <string name="sony_frame_drop_fix_desc">Rregullo ngadalësimet në televizorët Sony dhe disa pajisje të tjera. Shënim: mund të ketë probleme me sinkronizimin e tingullit.</string>
   <string name="audio_language">Gjuha e tingullit</string>
+    <string name="audio_voice_boost">Përforcim i zërit</string>
   <string name="old_home_look">Pamja e vjetër e seksionit Kryefaqe</string>
   <string name="old_channel_look">Pamja e vjetër e faqes Kanali</string>
   <string name="hide_shorts_everywhere">Fshih video të shkurtra kudo</string>

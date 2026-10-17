@@ -580,6 +580,7 @@
     <string name="sony_frame_drop_fix">Oprava výpadkov prehrávania #1</string>
     <string name="sony_frame_drop_fix_desc">Opravuje sekanie na Sony TV a iných zariadeniach. Poznámka: môžu nastať problémy so synchronizáciou audia.</string>
     <string name="audio_language">Jazyk zvuku</string>
+    <string name="audio_voice_boost">Zosilnenie hlasu</string>
     <string name="old_home_look">Starý vzhľad sekcie Domov</string>
     <string name="old_channel_look">Starý vzhľad sekcie Kanály</string>
     <string name="hide_shorts_everywhere">Skryť Shorts všade</string>

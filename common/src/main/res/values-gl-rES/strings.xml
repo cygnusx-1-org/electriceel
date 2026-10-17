@@ -567,6 +567,7 @@
   <string name="sony_frame_drop_fix">Corrección de caída de fotogramas #1</string>
   <string name="sony_frame_drop_fix_desc">Corrixir atrasos na TV Sony e nalgúns outros dispositivos. Nota: posibles problemas coa sincronización de son.</string>
   <string name="audio_language">Linguaxe do son</string>
+    <string name="audio_voice_boost">Realce da voz</string>
   <string name="old_home_look">Aspecto antigo da sección Inicio</string>
   <string name="old_channel_look">Aspecto antigo da páxina da Canle</string>
   <string name="hide_shorts_everywhere">Oculta pantalóns curtos en todas partes</string>

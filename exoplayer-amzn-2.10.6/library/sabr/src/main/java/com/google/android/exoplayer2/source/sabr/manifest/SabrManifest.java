@@ -271,6 +271,11 @@ public class SabrManifest implements FilterableManifest<SabrManifest> {
                     .setLastManualSelectedResolution(height);
         }
 
+        // Voice boost is opt-in. Tell the server when the user has picked it.
+        if (selectedAudioFormat != null && selectedAudioFormat.isVb) {
+            clientAbrStateBuilder.setEnableVoiceBoost(true);
+        }
+
         if (trackType == C.TRACK_TYPE_AUDIO
                 && selectedAudioFormat != null
                 && selectedAudioFormat.metadata != null) {

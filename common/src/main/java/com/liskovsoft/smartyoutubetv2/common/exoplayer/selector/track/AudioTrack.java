@@ -1,6 +1,5 @@
 package com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.track;
 
-import com.google.android.exoplayer2.Format;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.TrackSelectorUtil;
 
@@ -31,6 +30,11 @@ public class AudioTrack extends MediaTrack {
             return 1;
         }
 
+        // Voice boost is opt-in. Don't select it unless the user chose it.
+        if (TrackSelectorUtil.isUnwantedVb(format, track2.format)) {
+            return -1;
+        }
+
         int result = -1;
 
         String id1 = format.id;
@@ -43,7 +47,8 @@ public class AudioTrack extends MediaTrack {
         String language2 = track2.format.language;
         boolean sameLanguage = sameLanguage(language1, language2);
 
-        if (Helpers.equals(id1, id2)) {
+        // Copies of the same itag (original, DRC, voice boost) share the id
+        if (Helpers.equals(id1, id2) && TrackSelectorUtil.isSameVariant(format, track2.format)) {
             result = 0;
         } else if (bitrate1 != -1 && bitrateLessOrEquals(bitrate2, bitrate1)) {
             result = 1;
@@ -68,9 +73,9 @@ public class AudioTrack extends MediaTrack {
 
         if (format.id == null && format.language == null && format.bitrate == -1 && codecEquals(this, track2)) {
             result = 0;
-        } else if (Helpers.equals(format.id, track2.format.id) && drcEquals(format, track2.format)) {
+        } else if (Helpers.equals(format.id, track2.format.id) && TrackSelectorUtil.isSameVariant(format, track2.format)) {
             result = 1;
-        } else if (!codecEquals(this, track2) || !drcEquals(format, track2.format) || bitrateLessOrEquals(track2.format.bitrate, format.bitrate)) {
+        } else if (!codecEquals(this, track2) || !TrackSelectorUtil.isSameVariant(format, track2.format) || bitrateLessOrEquals(track2.format.bitrate, format.bitrate)) {
             result = 0;
         }
 
@@ -79,13 +84,5 @@ public class AudioTrack extends MediaTrack {
 
     private boolean sameLanguage(String language1, String language2) {
         return Helpers.equals(language1, language2) || (language1 == null || language2 == null);
-    }
-
-    private static boolean drcEquals(Format format1, Format format2) {
-        if (format1 == null || format2 == null) {
-            return false;
-        }
-
-        return TrackSelectorUtil.isDrc(format1) == TrackSelectorUtil.isDrc(format2);
     }
 }

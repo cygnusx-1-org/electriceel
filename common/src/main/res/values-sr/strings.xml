@@ -578,6 +578,7 @@
     <string name="sony_frame_drop_fix">Сређује пад кадрова #1</string>
     <string name="sony_frame_drop_fix_desc">Сређује сецкање на Сони телевизорима и неким другим уређајима. Напомена: могући проблеми са синхронизацијом звука.</string>
     <string name="audio_language">Језик звука</string>
+    <string name="audio_voice_boost">Појачање гласа</string>
     <string name="old_home_look">Стари излед одељка Почетна</string>
     <string name="old_channel_look">Стари изглед странице Канал</string>
     <string name="hide_shorts_everywhere">Сакриј кратке свугде</string>

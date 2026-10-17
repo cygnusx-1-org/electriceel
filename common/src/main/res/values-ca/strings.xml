@@ -528,4 +528,5 @@
     <string name="aislist_about">Quant a AiSList (llista comunitària, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Informa del canal a AiSList</string>
     <string name="add_remove_from_home_rows">Afegeix/Treu d\'Inici</string>
+    <string name="audio_voice_boost">Realç de la veu</string>
 </resources>

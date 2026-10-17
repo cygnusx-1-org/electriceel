@@ -541,6 +541,7 @@
   <string name="play_video_incognito">Phát ở chế độ ẩn danh</string>
   <string name="dialog_notification">Thông báo về bản cập nhật với hộp thoại</string>
   <string name="audio_language">Ngôn ngữ âm thanh</string>
+    <string name="audio_voice_boost">Tăng cường giọng nói</string>
   <string name="player_ui_animations">Bật hoạt ảnh của bảng điều khiển</string>
   <string name="trending_searches">Tìm kiếm nổi bật</string>
   <string name="video_feature_any">Bất kì</string>

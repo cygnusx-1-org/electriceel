@@ -562,6 +562,7 @@
   <string name="hide_shorts_everywhere">शॉर्ट्स को हर जगह छुपाएं</string>
   <string name="old_home_look">होम अनुभाग का पुराना स्वरुप</string>
   <string name="audio_language">ऑडियो भाषा</string>
+    <string name="audio_voice_boost">आवाज़ बूस्ट</string>
   <string name="content_block_exclude_channel">इस चैनल को SponsorBlock से बाहर करें</string>
   <string name="content_block_stop_excluding_channel">इस चैनल को SponsorBlock में जोड़े</string>
   <string name="header_shorts">शॉर्ट्स</string>

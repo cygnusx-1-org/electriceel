@@ -538,6 +538,7 @@
   <string name="sony_frame_drop_fix">رفع افت فریم شماره ۱</string>
   <string name="sony_frame_drop_fix_desc">رفع مشکل تاخیر در تلویزیون‌های سونی و برخی دستگاه‌های دیگر. توجه: ممکن است مشکلات همگام‌سازی صدا وجود داشته باشد.</string>
   <string name="audio_language">زبان صدا</string>
+    <string name="audio_voice_boost">تقویت گفتار</string>
   <string name="old_home_look">ظاهر قدیمی بخش صفحه اصلی</string>
   <string name="hide_shorts_everywhere">پنهان کردن کوته ویدیوها در همه جا</string>
   <string name="update_found">بروزرسانی</string>

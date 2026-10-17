@@ -536,6 +536,7 @@
   <string name="sony_frame_drop_fix">Képkocka eldobása #1</string>
   <string name="sony_frame_drop_fix_desc">Javítja a késleltetést / késést a Sony TV-n és néhány más eszközön.</string>
   <string name="audio_language">Hang nyelve</string>
+    <string name="audio_voice_boost">Beszédkiemelés</string>
   <string name="old_home_look">A Kezdőlap régi megjelenése</string>
   <string name="hide_shorts_everywhere">Rövid klipek elrejtése mindenhol</string>
   <string name="update_found">Frissítés</string>

@@ -526,6 +526,7 @@
   <string name="sony_frame_drop_fix">掉幀問題修復 #2</string>
   <string name="sony_frame_drop_fix_desc">修復 Sony 電視和其他一些設備上的延遲問題。注意：可能會出現音訊同步問題。</string>
   <string name="audio_language">音訊語言</string>
+    <string name="audio_voice_boost">人聲增強</string>
   <string name="old_home_look">舊版首頁區塊外觀</string>
   <string name="hide_shorts_everywhere">在所有地方隱藏 Shorts</string>
   <string name="update_found">有更新</string>

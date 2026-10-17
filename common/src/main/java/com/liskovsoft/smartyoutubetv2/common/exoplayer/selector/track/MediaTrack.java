@@ -153,16 +153,24 @@ public abstract class MediaTrack {
         return getCodecWeight(prevTrack) - getCodecWeight(nextTrack) > 0;
     }
 
-    public static boolean preferByDrc(MediaTrack origin, MediaTrack prevTrack, MediaTrack nextTrack) {
+    /**
+     * Audio variants: original, DRC, voice boost
+     */
+    public static boolean preferByVariant(MediaTrack origin, MediaTrack prevTrack, MediaTrack nextTrack) {
         if (!(origin instanceof AudioTrack)) {
             return true;
         }
 
-        boolean isDrcOrigin = TrackSelectorUtil.isDrc(origin.format);
-        boolean isDrcPrev = TrackSelectorUtil.isDrc(prevTrack.format);
-        boolean isDrcNext = TrackSelectorUtil.isDrc(nextTrack.format);
-        boolean preferByDrc = (isDrcOrigin == isDrcNext) || (isDrcPrev == isDrcNext);
-        return preferByDrc;
+        boolean preferByDrc = preferByFlag(TrackSelectorUtil.isDrc(origin.format),
+                TrackSelectorUtil.isDrc(prevTrack.format), TrackSelectorUtil.isDrc(nextTrack.format));
+        boolean preferByVb = preferByFlag(TrackSelectorUtil.isVb(origin.format),
+                TrackSelectorUtil.isVb(prevTrack.format), TrackSelectorUtil.isVb(nextTrack.format));
+
+        return preferByDrc && preferByVb;
+    }
+
+    private static boolean preferByFlag(boolean isOrigin, boolean isPrev, boolean isNext) {
+        return (isOrigin == isNext) || (isPrev == isNext);
     }
 
     public boolean isVP9Codec() {

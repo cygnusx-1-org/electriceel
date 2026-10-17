@@ -241,4 +241,5 @@
     <string name="aislist_about">AiSList గురించి (కమ్యూనిటీ జాబితా, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">ఛానెల్‌ను AiSListకు నివేదించండి</string>
     <string name="add_remove_from_home_rows">హోమ్‌కు జోడించు/తీసివేయి</string>
+    <string name="audio_voice_boost">వాయిస్ బూస్ట్</string>
 </resources>

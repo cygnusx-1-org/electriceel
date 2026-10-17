@@ -165,6 +165,8 @@ public final class Format implements Parcelable {
 
   // MOD: Sabr specific
   public final boolean isDrc;
+  /** Voice boost audio variant: speech enhanced, music and ambience lowered. Same itag as the original. */
+  public final boolean isVb;
   public final long lastModified;
 
   // Lazily initialized hashcode.
@@ -280,6 +282,7 @@ public final class Format implements Parcelable {
         /* language= */ null,
         /* accessibilityChannel= */ NO_VALUE,
         /* isDrc */ false,
+        /* isVb */ false,
         lastModified);
   }
 
@@ -450,6 +453,7 @@ public final class Format implements Parcelable {
         roleFlags,
         language,
         /* isDrc */ false,
+        /* isVb */ false,
         /* lastModified */ NO_VALUE);
   }
 
@@ -468,6 +472,7 @@ public final class Format implements Parcelable {
       @C.RoleFlags int roleFlags,
       @Nullable String language,
       boolean isDrc,
+      boolean isVb,
       long lastModified) {
     return new Format(
         id,
@@ -499,6 +504,7 @@ public final class Format implements Parcelable {
         language,
         /* accessibilityChannel= */ NO_VALUE,
         isDrc,
+        isVb,
         lastModified);
   }
 
@@ -541,7 +547,8 @@ public final class Format implements Parcelable {
           @Nullable DrmInitData drmInitData,
           @C.SelectionFlags int selectionFlags,
           @Nullable String language,
-          boolean isDrc) {
+          boolean isDrc,
+          boolean isVb) {
     return createAudioSampleFormat(
             id,
             sampleMimeType,
@@ -558,7 +565,8 @@ public final class Format implements Parcelable {
             selectionFlags,
             language,
             /* metadata= */ null,
-            isDrc);
+            isDrc,
+            isVb);
   }
 
   public static Format createAudioSampleFormat(
@@ -624,7 +632,8 @@ public final class Format implements Parcelable {
             selectionFlags,
             language,
             metadata,
-            false);
+            /* isDrc= */ false,
+            /* isVb= */ false);
   }
 
   public static Format createAudioSampleFormat(
@@ -643,7 +652,8 @@ public final class Format implements Parcelable {
       @C.SelectionFlags int selectionFlags,
       @Nullable String language,
       @Nullable Metadata metadata,
-      boolean isDrc) {
+      boolean isDrc,
+      boolean isVb) {
     return new Format(
         id,
         /* label= */ null,
@@ -674,6 +684,7 @@ public final class Format implements Parcelable {
         language,
         /* accessibilityChannel= */ NO_VALUE,
         isDrc,
+        isVb,
         NO_VALUE);
   }
 
@@ -1097,6 +1108,7 @@ public final class Format implements Parcelable {
       language,
       accessibilityChannel,
       /* isDrc */ false,
+      /* isVb */ false,
       /* lastModified */ NO_VALUE);
   }
 
@@ -1135,6 +1147,7 @@ public final class Format implements Parcelable {
       @Nullable String language,
       int accessibilityChannel,
       boolean isDrc,
+      boolean isVb,
       long lastModified) {
     this.id = id;
     this.label = label;
@@ -1173,6 +1186,7 @@ public final class Format implements Parcelable {
     this.accessibilityChannel = accessibilityChannel;
     // MOD: Sabr specific
     this.isDrc = isDrc;
+    this.isVb = isVb;
     this.lastModified = lastModified;
   }
 
@@ -1218,6 +1232,7 @@ public final class Format implements Parcelable {
     accessibilityChannel = in.readInt();
     // Sabr specific
     this.isDrc = false;
+    this.isVb = Util.readBoolean(in);
     this.lastModified = in.readLong();
   }
 
@@ -1252,6 +1267,7 @@ public final class Format implements Parcelable {
         language,
         accessibilityChannel,
         isDrc,
+        isVb,
         lastModified);
   }
 
@@ -1286,6 +1302,7 @@ public final class Format implements Parcelable {
         language,
         accessibilityChannel,
         isDrc,
+        isVb,
         lastModified);
   }
 
@@ -1320,6 +1337,7 @@ public final class Format implements Parcelable {
         language,
         accessibilityChannel,
         isDrc,
+        isVb,
         lastModified);
   }
 
@@ -1371,6 +1389,7 @@ public final class Format implements Parcelable {
         language,
         accessibilityChannel,
         isDrc,
+        isVb,
         lastModified);
   }
 
@@ -1452,6 +1471,7 @@ public final class Format implements Parcelable {
         language,
         accessibilityChannel,
         isDrc,
+        isVb,
         lastModified);
   }
 
@@ -1486,6 +1506,7 @@ public final class Format implements Parcelable {
         language,
         accessibilityChannel,
         isDrc,
+        isVb,
         lastModified);
   }
 
@@ -1520,6 +1541,7 @@ public final class Format implements Parcelable {
         language,
         accessibilityChannel,
         isDrc,
+        isVb,
         lastModified);
   }
 
@@ -1554,6 +1576,7 @@ public final class Format implements Parcelable {
         language,
         accessibilityChannel,
         isDrc,
+        isVb,
         lastModified);
   }
 
@@ -1588,6 +1611,7 @@ public final class Format implements Parcelable {
         language,
         accessibilityChannel,
         isDrc,
+        isVb,
         lastModified);
   }
 
@@ -1622,6 +1646,7 @@ public final class Format implements Parcelable {
         language,
         accessibilityChannel,
         isDrc,
+        isVb,
         lastModified);
   }
 
@@ -1656,6 +1681,7 @@ public final class Format implements Parcelable {
         language,
         accessibilityChannel,
         isDrc,
+        isVb,
         lastModified);
   }
 
@@ -1735,6 +1761,7 @@ public final class Format implements Parcelable {
       // Audio and text specific.
       result = 31 * result + (language == null ? 0 : language.hashCode());
       result = 31 * result + accessibilityChannel;
+      result = 31 * result + (isVb ? 1 : 0);
       hashCode = result;
     }
     return hashCode;
@@ -1768,6 +1795,7 @@ public final class Format implements Parcelable {
         && encoderDelay == other.encoderDelay
         && encoderPadding == other.encoderPadding
         && accessibilityChannel == other.accessibilityChannel
+        && isVb == other.isVb
         && Float.compare(frameRate, other.frameRate) == 0
         && Float.compare(pixelWidthHeightRatio, other.pixelWidthHeightRatio) == 0
         && Util.areEqual(id, other.id)
@@ -1889,6 +1917,7 @@ public final class Format implements Parcelable {
     dest.writeString(language);
     dest.writeInt(accessibilityChannel);
     // MOD: Sabr specific
+    Util.writeBoolean(dest, isVb);
     dest.writeLong(lastModified);
   }
 

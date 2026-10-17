@@ -584,6 +584,7 @@ So, make a copy of values-he and name it values-iw. Keep both in your structure.
     <string name="sony_frame_drop_fix">תיקון נפילת פריימים #1</string>
     <string name="sony_frame_drop_fix_desc">תיקון תקיעות בטלוויזיית Sony ובכמה מכשירים אחרים. הערה: ייתכנו בעיות עם סנכרון שמע.</string>
     <string name="audio_language">שפת שמע</string>
+    <string name="audio_voice_boost">הגברת דיבור</string>
     <string name="old_home_look">מראה ישן של מדור הבית</string>
     <string name="old_channel_look">מראה ישן של דף הערוץ</string>
     <string name="hide_shorts_everywhere">הסתרת Shorts בכל מקום</string>

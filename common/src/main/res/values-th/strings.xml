@@ -349,4 +349,5 @@
     <string name="aislist_about">เกี่ยวกับ AiSList (รายการจากชุมชน, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">รายงานช่องไปยัง AiSList</string>
     <string name="add_remove_from_home_rows">เพิ่ม/ลบจากหน้าแรก</string>
+    <string name="audio_voice_boost">เพิ่มเสียงพูด</string>
 </resources>

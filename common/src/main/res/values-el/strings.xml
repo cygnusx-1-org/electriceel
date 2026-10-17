@@ -533,6 +533,7 @@
   <string name="sony_frame_drop_fix">Διόρθωση μείωσης καρέ #1</string>
   <string name="sony_frame_drop_fix_desc">Διορθώστε καθυστερήσεις στην τηλεόραση Sony και σε ορισμένες άλλες συσκευές. Σημείωση: πιθανά προβλήματα με το συγχρονισμό ήχου.</string>
   <string name="audio_language">Γλώσσα ήχου</string>
+    <string name="audio_voice_boost">Ενίσχυση φωνής</string>
   <string name="old_home_look">Παλιά εμφάνιση της ενότητας Αρχική</string>
   <string name="hide_shorts_everywhere">Κρύψτε τα shorts από παντού</string>
   <string name="update_found">Ενημέρωση</string>

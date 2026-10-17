@@ -580,6 +580,7 @@
     <string name="sony_frame_drop_fix">Correção de fotogramas #1</string>
     <string name="sony_frame_drop_fix_desc">Corrige a lentidão em dispositivos Sony e outros. Nota: podem ocorrer problemas de sincronização de áudio.</string>
     <string name="audio_language">Idioma do áudio</string>
+    <string name="audio_voice_boost">Realce de voz</string>
     <string name="old_home_look">Reverter para anterior aspeto de Início</string>
     <string name="old_channel_look">Reverter para anterior aspeto de Canais</string>
     <string name="hide_shorts_everywhere">Ocultar \'Shorts\' globalmente</string>

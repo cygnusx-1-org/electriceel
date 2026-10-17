@@ -582,6 +582,7 @@
     <string name="sony_frame_drop_fix">フレームドロップの修正 #1</string>
     <string name="sony_frame_drop_fix_desc">Sony 製のテレビやその他デバイスの遅延を修正します。注意: 音声の同期に問題が発生する可能性があります。</string>
     <string name="audio_language">音声の言語</string>
+    <string name="audio_voice_boost">ボイスブースト</string>
     <string name="old_home_look">ホームセクションを古い外観に戻す</string>
     <string name="old_channel_look">チャンネルページを古い外観に戻す</string>
     <string name="hide_shorts_everywhere">ショートを完全に非表示</string>

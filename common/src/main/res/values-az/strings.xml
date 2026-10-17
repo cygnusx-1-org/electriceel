@@ -576,6 +576,7 @@
     <string name="sony_frame_drop_fix">Kadr düşməsini düzəldin #1</string>
     <string name="sony_frame_drop_fix_desc">Sony TV və bəzi digər cihazlarda gecikmələri düzəldin. Qeyd: audio sinxronizasiya ilə bağlı mümkün problemlər.</string>
     <string name="audio_language">Audio dili</string>
+    <string name="audio_voice_boost">Nitq gücləndirmə</string>
     <string name="old_home_look">Ev bölməsinin köhnə görünüşü</string>
     <string name="old_channel_look">Kanal səhifəsinin köhnə görünüşü</string>
     <string name="hide_shorts_everywhere">Shortları hər yerdə gizlədin</string>

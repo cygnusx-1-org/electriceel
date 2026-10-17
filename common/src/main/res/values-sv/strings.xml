@@ -582,6 +582,7 @@
   <string name="sony_frame_drop_fix">Korrigering för tappade bildrutor 1</string>
   <string name="sony_frame_drop_fix_desc">Åtgärdar hackig uppspelning på Sony-tv:ar och vissa andra enheter. OBS! Eventuella problem med ljudsynkronisering.</string>
   <string name="audio_language">Ljudspråk</string>
+    <string name="audio_voice_boost">Röstförstärkning</string>
   <string name="old_home_look">Gammalt utseende för avsnittet Hem</string>
   <string name="old_channel_look">Gammalt utseende för kanalsidan</string>
   <string name="hide_shorts_everywhere">Dölj Shorts-videor överallt</string>

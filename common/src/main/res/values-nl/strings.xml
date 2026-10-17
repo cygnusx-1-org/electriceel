@@ -571,6 +571,7 @@
   <string name="sony_frame_drop_fix">Sony frame drop-oplossing #1</string>
   <string name="sony_frame_drop_fix_desc">Verhelp vertragingen op Sony TV en enkele andere apparaten. Let op: mogelijke problemen met audiosynchronisatie.</string>
   <string name="audio_language">Audiotaal</string>
+    <string name="audio_voice_boost">Stemversterking</string>
   <string name="old_home_look">Oude look van de Home-sectie</string>
   <string name="old_channel_look">Oude look van de Kanaalpagina</string>
   <string name="hide_shorts_everywhere">Shorts overal verbergen</string>

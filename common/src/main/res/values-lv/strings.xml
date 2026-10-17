@@ -146,4 +146,5 @@
     <string name="aislist_about">Par AiSList (kopienas saraksts, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Ziņot par kanālu AiSList</string>
     <string name="add_remove_from_home_rows">Pievienot/noņemt no Sākuma</string>
+    <string name="audio_voice_boost">Balss pastiprināšana</string>
 </resources>

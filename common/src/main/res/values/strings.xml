@@ -761,6 +761,7 @@
     <string name="sony_frame_drop_fix">Frame drop fix #1</string>
     <string name="sony_frame_drop_fix_desc">Fix lags on Sony TV and some other devices. Note: possible problems with audio synchronization.</string>
     <string name="audio_language">Audio language</string>
+    <string name="audio_voice_boost">Voice boost</string>
     <string name="old_home_look">Old look of the Home section</string>
     <string name="old_channel_look">Old look of the Channel page</string>
     <string name="hide_shorts_everywhere">Hide shorts everywhere</string>

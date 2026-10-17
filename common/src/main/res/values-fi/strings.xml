@@ -533,6 +533,7 @@
   <string name="sony_frame_drop_fix">Frame drop korjaus #1</string>
   <string name="sony_frame_drop_fix_desc">Korjaa viiveet Sony TV:ssä ja joissakin muissa laitteissa. Huomautus: voi aiheuttaa ongelmia äänen synkronoinnissa</string>
   <string name="audio_language">Ääniraidan kieli</string>
+    <string name="audio_voice_boost">Puheen korostus</string>
   <string name="old_home_look">Päämenun vanha ulkoasu</string>
   <string name="hide_shorts_everywhere">Piilota Shorts-videot kaikkialta</string>
   <string name="update_found">Päivitä</string>

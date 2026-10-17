@@ -558,6 +558,7 @@
   <string name="sony_frame_drop_fix">Perbaikan frame drop #1</string>
   <string name="sony_frame_drop_fix_desc">Memperbaiki lag pada TV Sony dan beberapa perangkat lain. Catatan: kemungkinan masalah dengan sinkronisasi suara.</string>
   <string name="audio_language">Bahasa suara</string>
+    <string name="audio_voice_boost">Penguat suara</string>
   <string name="old_home_look">Tampilan lama bagian Beranda</string>
   <string name="old_channel_look">tampilan lama halaman Channel</string>
   <string name="hide_shorts_everywhere">Sembunyikan Shorts di mana saja</string>

@@ -520,4 +520,5 @@
     <string name="aislist_about">O AiSList (popis zajednice, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Prijavi kanal AiSListu</string>
     <string name="add_remove_from_home_rows">Dodaj/Ukloni s Početne</string>
+    <string name="audio_voice_boost">Pojačanje glasa</string>
 </resources>

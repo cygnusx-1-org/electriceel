@@ -557,6 +557,7 @@
   <string name="sony_frame_drop_fix">Kaadrikao parandus #1</string>
   <string name="sony_frame_drop_fix_desc">Paranda viivitused Sony teleris ja mõnes muus seadmes. Märkus: võimalikud probleemid heli sünkroonimisega.</string>
   <string name="audio_language">Heli keel</string>
+    <string name="audio_voice_boost">Hääle võimendus</string>
   <string name="old_home_look">Kodu jaotise vana välimus</string>
   <string name="hide_shorts_everywhere">Peida lühivideod kõikjalt</string>
   <string name="update_found">Uuenda</string>

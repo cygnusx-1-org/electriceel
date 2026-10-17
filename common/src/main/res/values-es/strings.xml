@@ -539,6 +539,7 @@
   <string name="sony_frame_drop_fix">Corrección de caída de fotogramas #1</string>
   <string name="sony_frame_drop_fix_desc">Soluciona los retrasos en Sony TV y algunos otros dispositivos. Nota: posibles problemas con la sincronización de audio.</string>
   <string name="audio_language">Idioma de audio</string>
+    <string name="audio_voice_boost">Realce de voz</string>
   <string name="old_home_look">Aspecto antiguo de la sección Inicio</string>
   <string name="hide_shorts_everywhere">Ocultar Shorts en todas partes</string>
   <string name="update_found">Actualizar</string>

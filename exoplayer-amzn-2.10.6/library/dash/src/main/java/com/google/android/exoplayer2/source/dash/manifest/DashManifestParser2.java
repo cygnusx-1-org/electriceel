@@ -363,6 +363,7 @@ public class DashManifestParser2 {
         String baseUrl = mediaFormat.getUrl();
         String label = mediaFormat.getQualityLabel();
         boolean isDrc = mediaFormat.isDrc();
+        boolean isVb = mediaFormat.isVb();
         long lastModified = Helpers.parseLong(mediaFormat.getLmt());
         String drmSchemeType = null;
         ArrayList<SchemeData> drmSchemeDatas = new ArrayList<>();
@@ -383,6 +384,7 @@ public class DashManifestParser2 {
                         selectionFlags,
                         codecs,
                         isDrc,
+                        isVb,
                         lastModified);
 
         SegmentBase segmentBase = null;
@@ -419,6 +421,7 @@ public class DashManifestParser2 {
         String baseUrl = sub.getBaseUrl();
         String label = null;
         boolean isDrc = false;
+        boolean isVb = false;
         long lastModified = Format.NO_VALUE;
         String drmSchemeType = null;
         ArrayList<SchemeData> drmSchemeDatas = new ArrayList<>();
@@ -441,6 +444,7 @@ public class DashManifestParser2 {
                         selectionFlags,
                         codecs,
                         isDrc,
+                        isVb,
                         lastModified);
 
         SegmentBase segmentBase = new SingleSegmentBase();
@@ -489,6 +493,7 @@ public class DashManifestParser2 {
             @C.SelectionFlags int selectionFlags,
             String codecs,
             boolean isDrc,
+            boolean isVb,
             long lastModified) {
         String sampleMimeType = getSampleMimeType(containerMimeType, codecs);
         if (sampleMimeType != null) {
@@ -524,6 +529,7 @@ public class DashManifestParser2 {
                         roleFlags,
                         language,
                         isDrc,
+                        isVb,
                         lastModified);
             } else if (mimeTypeIsRawText(sampleMimeType)) {
                 return Format.createTextContainerFormat(

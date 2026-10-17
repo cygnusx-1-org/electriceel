@@ -566,6 +566,7 @@
   <string name="sony_frame_drop_fix">Poprawka dla gubienia klatek #1</string>
   <string name="sony_frame_drop_fix_desc">Poprawka opóźnień na telewizorach Sony i niektórych innych urządzeniach. UWAGA: możliwe problemy z synchronizacją audio</string>
   <string name="audio_language">Język audio</string>
+    <string name="audio_voice_boost">Wzmocnienie głosu</string>
   <string name="old_home_look">Poprzedni wygląd sekcji Główna</string>
   <string name="old_channel_look">Poprzedni wygląd sekcji Kanały</string>
   <string name="hide_shorts_everywhere">Ukryj Shorts we wszystkich sekcjach</string>

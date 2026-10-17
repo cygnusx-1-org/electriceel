@@ -552,6 +552,7 @@
   <string name="sony_frame_drop_fix">Поправка на капка рамка #1</string>
   <string name="sony_frame_drop_fix_desc">Поправяне на забавянията при Sony TV и някои други устройства. Забележка: възможни са проблеми със синхронизацията на звука.</string>
   <string name="audio_language">Език на аудиото</string>
+    <string name="audio_voice_boost">Усилване на гласа</string>
   <string name="old_home_look">Стар вид на раздел Начало</string>
   <string name="hide_shorts_everywhere">Скрийте кратките видеа навсякъде</string>
   <string name="update_found">Актуализирай</string>

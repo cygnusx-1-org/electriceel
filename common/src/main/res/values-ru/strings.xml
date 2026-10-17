@@ -577,6 +577,7 @@
     <string name="sony_frame_drop_fix_desc">Исправляет лаги на телевизорах Сони и некоторых других устройствах. Внимание: возможны проблемы с синхронизацией аудио.
     </string>
     <string name="audio_language">Язык аудио</string>
+    <string name="audio_voice_boost">Усиление голоса</string>
     <string name="old_home_look">Старый вид Главного раздела</string>
     <string name="old_channel_look">Старый вид страницы Канала</string>
     <string name="hide_shorts_everywhere">Скрывать shorts повсюду</string>

@@ -323,4 +323,5 @@
     <string name="aislist_about">O AiSList (seznam skupnosti, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Prijavi kanal AiSListu</string>
     <string name="add_remove_from_home_rows">Dodaj/odstrani iz razdelka Domov</string>
+    <string name="audio_voice_boost">Ojačitev glasu</string>
 </resources>

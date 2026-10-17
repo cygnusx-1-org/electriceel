@@ -539,6 +539,7 @@
   <string name="sony_frame_drop_fix">إصلاح فقدان الإطارات #1</string>
   <string name="sony_frame_drop_fix_desc">إصلاح التأخير في أجهزة تلفاز Sony وبعض الأجهزة الأخرى. ملاحظة: قد تحدث مشكلات في مزامنة الصوت.</string>
   <string name="audio_language">لغة الصوت</string>
+    <string name="audio_voice_boost">تعزيز الكلام</string>
   <string name="old_home_look">المظهر القديم لقسم الصفحة الرئيسية</string>
   <string name="hide_shorts_everywhere">إخفاء فيديوهات Shorts في كل مكان</string>
   <string name="update_found">تحديث</string>

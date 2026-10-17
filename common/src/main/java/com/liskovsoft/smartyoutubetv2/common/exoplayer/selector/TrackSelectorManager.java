@@ -494,7 +494,9 @@ public class TrackSelectorManager implements TrackSelectorCallback {
                     }
 
                     // Fix muted audio on stream with higher bitrate than the target
-                    if (tmpResult == null) {
+                    // Voice boost is opt-in. Fall back to it only when nothing else is playable.
+                    if (tmpResult == null || (TrackSelectorUtil.isUnwantedVb(originTrack.format, tmpResult.format)
+                            && !TrackSelectorUtil.isUnwantedVb(originTrack.format, mediaTrack.format))) {
                         tmpResult = mediaTrack;
                     }
 
@@ -519,7 +521,7 @@ public class TrackSelectorManager implements TrackSelectorCallback {
                         //    }
                         //}
 
-                        if (compare == 0 && MediaTrack.preferByDrc(originTrack, result, mediaTrack)) {
+                        if (compare == 0 && MediaTrack.preferByVariant(originTrack, result, mediaTrack)) {
                             if (MediaTrack.codecEquals(mediaTrack, originTrack)) {
                                 result = mediaTrack;
                             } else if (!MediaTrack.codecEquals(result, originTrack) &&
@@ -824,8 +826,10 @@ public class TrackSelectorManager implements TrackSelectorCallback {
         }
 
         String hdrTag = TrackSelectorUtil.isHdrFormat(format) ? "hdr" : "";
+        // Voice boost is a copy of the original audio. Don't let one replace the other.
+        String vbTag = TrackSelectorUtil.isVb(format) ? "vb" : "";
 
-        String formatId = format.width + format.height + format.frameRate + format.sampleMimeType + hdrTag + format.language;
+        String formatId = format.width + format.height + format.frameRate + format.sampleMimeType + hdrTag + vbTag + format.language;
 
         Integer bitrate = mBlacklist.get(formatId);
 

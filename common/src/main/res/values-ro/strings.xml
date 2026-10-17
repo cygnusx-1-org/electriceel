@@ -567,6 +567,7 @@
   <string name="sony_frame_drop_fix">Rezolvați căderea cadrului #1</string>
   <string name="sony_frame_drop_fix_desc">Remediați întârzierile pe televizoarele Sony și pe alte dispozitive. Notă: posibile probleme cu sincronizarea audio.</string>
   <string name="audio_language">Limba audio</string>
+    <string name="audio_voice_boost">Amplificare voce</string>
   <string name="old_home_look">Aspectul vechi al secțiunii Acasă</string>
   <string name="old_channel_look">Aspectul vechi a paginii Canal</string>
   <string name="hide_shorts_everywhere">Ascundeți shorts peste tot</string>

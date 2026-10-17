@@ -12,6 +12,7 @@ import com.google.android.exoplayer2.util.MimeTypes;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.TrackSelectorManager;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.TrackSelectorUtil;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.track.MediaTrack;
 
 import java.io.IOException;
@@ -102,7 +103,9 @@ public class TrackErrorFixer extends DefaultMediaSourceEventListener {
                 continue;
             }
 
-            if (!currentCodec.equals(track.format.codecs) && track.format.width <= width) {
+            // Voice boost is opt-in. The new track becomes the origin for later matches.
+            if (!currentCodec.equals(track.format.codecs) && track.format.width <= width
+                    && !TrackSelectorUtil.isUnwantedVb(currentTrack.format, track.format)) {
                 nextTrack = track;
                 break;
             }

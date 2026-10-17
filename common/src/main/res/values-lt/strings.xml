@@ -436,4 +436,5 @@
     <string name="aislist_about">Apie AiSList (bendruomenės sąrašas, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Pranešti apie kanalą AiSList</string>
     <string name="add_remove_from_home_rows">Pridėti/pašalinti iš Pagrindinio</string>
+    <string name="audio_voice_boost">Balso stiprinimas</string>
 </resources>

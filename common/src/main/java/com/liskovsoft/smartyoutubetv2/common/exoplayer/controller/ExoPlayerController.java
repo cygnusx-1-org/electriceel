@@ -19,6 +19,7 @@ import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItemFormatInfo;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.smartyoutubetv2.common.BuildConfig;
+import com.liskovsoft.smartyoutubetv2.common.R;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.listener.PlayerEventListener;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.ExoMediaSourceFactory;
@@ -74,6 +75,7 @@ public class ExoPlayerController implements Player.EventListener {
         applyShield720pFix();
         VideoTrack.sIsAltPresetsEnabled = playerTweaksData.isAltPresetsEnabled();
         MediaTrack.setAvcOverVp9Preferred(playerTweaksData.isAvcOverVp9Preferred());
+        TrackSelectorUtil.setVoiceBoostMark(context.getString(R.string.audio_voice_boost));
     }
 
     private void applyShield720pFix() {
