@@ -23,7 +23,6 @@ import com.liskovsoft.smartyoutubetv2.common.app.views.ViewManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.AiSListManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.GDriveBackupWorker;
 import com.liskovsoft.smartyoutubetv2.common.misc.LocalDriveBackupWorker;
-import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.StreamReminderService;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AccountsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
@@ -122,7 +121,6 @@ public class SplashPresenter extends BasePresenter<SplashView> {
 
     private void runBackgroundTasks() {
         YouTubeServiceManager.instance().refreshCacheIfNeeded(); // warm up player engine
-        enableHistoryIfNeeded();
         Utils.updateChannels(getContext());
         GDriveBackupWorker.schedule(getContext());
         LocalDriveBackupWorker.schedule(getContext());
@@ -203,14 +201,6 @@ public class SplashPresenter extends BasePresenter<SplashView> {
             if (GeneralData.instance(getContext()).isProxyEnabled()) {
                 new ProxyManager(getContext()).configureSystemProxy();
             }
-        }
-    }
-
-    private void enableHistoryIfNeeded() {
-        // Account history might be turned off (common issue).
-        GeneralData generalData = GeneralData.instance(getContext());
-        if (generalData.getHistoryState() != GeneralData.HISTORY_AUTO) {
-            MediaServiceManager.instance().enableHistory(generalData.isHistoryEnabled());
         }
     }
 

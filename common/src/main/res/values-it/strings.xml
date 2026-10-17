@@ -527,9 +527,9 @@
     <string name="child_mode_desc">In questa modalità, l\'utente non può usare la ricerca o visualizzare alcun contenuto suggerito. La pagina delle impostazioni sarà protetta da password.</string>
     <string name="lost_setting_warning">Le impostazioni dell\'app verranno modificate. Assicurati di aver creato un backup delle impostazioni.</string>
     <string name="player_button_long_click">Premi a lungo questo pulsante per ulteriori opzioni</string>
-    <string name="pause_history">Metti in pausa la Cronologia</string>
-    <string name="resume_history">Riprendi la Cronologia</string>
     <string name="disable_history">Disabilita la Cronologia</string>
+    <string name="disable_history_local">Disabilita la Cronologia di questo account localmente</string>
+    <string name="disable_history_global">Disabilita la Cronologia dell\'account globalmente</string>
     <string name="enable_history">Abilita la Cronologia</string>
     <string name="clear_history">Cancella la Cronologia</string>
     <string name="chapters">Capitoli</string>

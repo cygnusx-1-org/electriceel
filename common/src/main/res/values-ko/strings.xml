@@ -513,9 +513,9 @@
   <string name="child_mode_desc">이 모드에서 사용자는 검색을 사용하거나 제안된 콘텐츠를 볼 수 없습니다. 설정은 비밀번호 아래에 있습니다.</string>
   <string name="lost_setting_warning">앱 설정이 변경됩니다. 설정 백업을 생성했는지 확인하세요.</string>
   <string name="player_button_long_click">버튼을 짧게 클릭하면 빠른 작업이 가능하고 길게 설정 대화상자가 표시됩니다.</string>
-  <string name="pause_history">일시정지 내역</string>
-  <string name="resume_history">기록 다시 시작</string>
   <string name="disable_history">기록 비활성화</string>
+  <string name="disable_history_local">이 계정의 기록을 로컬에서 비활성화</string>
+  <string name="disable_history_global">계정 기록을 전체적으로 비활성화</string>
   <string name="enable_history">기록 활성화</string>
   <string name="clear_history">기록 지우기</string>
   <string name="chapters">챕터</string>

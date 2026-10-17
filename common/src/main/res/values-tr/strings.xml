@@ -527,9 +527,9 @@
     <string name="child_mode_desc">Bu modda, kullanıcı aramayı kullanamaz ya da önerilen içeriği göremez. Ayarlar şifrenin altında olacaktır.</string>
     <string name="lost_setting_warning">Uygulama ayarları değiştirilecektir. Ayarların yedeğini oluşturduğunuzdan emin olun.</string>
     <string name="player_button_long_click">Hızlı işlem için düğmeye kısa tıkla, ayarlarına gitmek için uzun tıkla</string>
-    <string name="pause_history">Geçmişi duraklat</string>
-    <string name="resume_history">Geçmişi devam ettir</string>
     <string name="disable_history">Geçmişi devre dışı bırak</string>
+    <string name="disable_history_local">Bu hesabın geçmişini yerel olarak devre dışı bırak</string>
+    <string name="disable_history_global">Hesabın geçmişini genel olarak devre dışı bırak</string>
     <string name="enable_history">Geçmişi etkinleştir</string>
     <string name="clear_history">Geçmişi temizle</string>
     <string name="chapters">Bölümler</string>

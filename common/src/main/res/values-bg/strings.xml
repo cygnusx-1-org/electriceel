@@ -500,9 +500,9 @@
   <string name="child_mode_desc">В този режим потребителят не може да използва търсене или да вижда предложено съдържание. Настройките ще се намират под паролата.</string>
   <string name="lost_setting_warning">Настройките на приложението ще бъдат променени. Уверете се, че сте създали резервно копие на настройките.</string>
   <string name="player_button_long_click">Кратко щракване върху бутона за бързо действие и дълго за диалогов прозорец с настройки</string>
-  <string name="pause_history">Пауза на историята</string>
-  <string name="resume_history">Активирай история</string>
   <string name="disable_history">Деактивирай историята</string>
+  <string name="disable_history_local">Деактивирай историята за този профил локално</string>
+  <string name="disable_history_global">Деактивирай историята в профила глобално</string>
   <string name="enable_history">Активирай историята</string>
   <string name="clear_history">Изисти историята</string>
   <string name="chapters">Глави</string>

@@ -482,9 +482,7 @@
   <string name="child_mode">حالت کودک</string>
   <string name="child_mode_desc">در این حالت، کاربر نمی‌تواند از جستجو استفاده کند یا هر محتوای پیشنهادی را مشاهده کند. تنظیمات تحت رمز عبور خواهند بود.</string>
   <string name="lost_setting_warning">تنظیمات برنامه تغییر خواهد کرد. لطفا از تنظیمات نسخه پشتیبان تهیه کنید.</string>
-  <string name="pause_history">توقف تاریخچه تماشا</string>
   <string name="clear_history">پاک کردن تاریخچه تماشا</string>
-  <string name="resume_history">از سرگیری تاریخچه تماشا</string>
   <string name="chapters">فصل‌ها</string>
   <string name="auto_frame_rate_modes">حالت‌های پشتیبانی شده</string>
   <string name="loading">در حال بارگیری…</string>
@@ -570,6 +568,8 @@
   <string name="player_volume">سطح صدا</string>
   <string name="open_comments">باز کردن نظرات</string>
   <string name="disable_history">غیرفعال کردن تاریخچه</string>
+  <string name="disable_history_local">غیرفعال کردن تاریخچه این حساب به‌صورت محلی</string>
+  <string name="disable_history_global">غیرفعال کردن تاریخچه حساب به‌صورت سراسری</string>
   <string name="enable_history">فعال‌سازی تاریخچه</string>
   <string name="player_network_stack">موتور شبکه</string>
   <string name="dialog_notification">اعلان بروزرسانی‌ها از طریق کادر بازشو</string>

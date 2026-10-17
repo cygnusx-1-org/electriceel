@@ -17,7 +17,6 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.AccountSettingsPresenter;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AccountsData;
-import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.utils.GlideIconFetcher;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.service.YouTubeServiceManager;
@@ -134,12 +133,6 @@ public class AccountSelectionPresenter extends BasePresenter<Void> {
     public void selectAccount(Account account) {
         mSignInService.selectAccount(account);
         Utils.updateChannels(getContext());
-
-        // Account history might be turned off (common issue).
-        GeneralData generalData = GeneralData.instance(getContext());
-        if (generalData.getHistoryState() != GeneralData.HISTORY_AUTO) {
-            MediaServiceManager.instance().enableHistory(generalData.isHistoryEnabled());
-        }
     }
 
     private String formatAccount(Account account) {

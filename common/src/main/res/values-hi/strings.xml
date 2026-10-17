@@ -482,8 +482,6 @@
   <string name="child_mode">किड्स मोड</string>
   <string name="child_mode_desc">इस मोड में, उपयोगकर्ता खोज का उपयोग नहीं कर सकता है या कोई सुझाई गई सामग्री नहीं देख सकता है। सेटिंग्स पासवर्ड से सुरक्षित</string>
   <string name="lost_setting_warning">ऐप सेटिंग बदल दी जाएगी। सुनिश्चित करें कि आपने सेटिंग्स का बैकअप बना लिया है।</string>
-  <string name="pause_history">इतिहास रोकें</string>
-  <string name="resume_history">इतिहास शुरू करें</string>
   <string name="clear_history">इतिहास मिटाये</string>
   <string name="not_recommend_channel">चैनल का सुझाव न दे</string>
   <string name="you_wont_see_this_channel">चैनल सुझावों में दिखाई नहीं देगा</string>
@@ -499,6 +497,8 @@
   <string name="open_comments">टिप्पणी खोले</string>
   <string name="player_button_long_click">कार्रवाई के लिए बटन पर एक छोटा क्लिक और सेटिंग्स के लिए देर तक दबाये</string>
   <string name="disable_history">इतिहास बंद</string>
+  <string name="disable_history_local">इस खाते का इतिहास स्थानीय रूप से बंद करें</string>
+  <string name="disable_history_global">खाते का इतिहास वैश्विक रूप से बंद करें</string>
   <string name="enable_history">इतिहास चालू </string>
   <string name="chapters">अध्याय</string>
   <string name="card_multiline_subtitle">एकाधिक पंक्ति वाले उपशीर्षक</string>

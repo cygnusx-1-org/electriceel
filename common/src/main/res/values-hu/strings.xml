@@ -483,8 +483,6 @@
   <string name="child_mode_desc">Ebben a módban a felhasználó nem használhat keresést, és nem láthat semmilyen javasolt tartalmat. A beállítások a jelszó alatt lesznek.</string>
   <string name="lost_setting_warning">Az alkalmazás beállításai módosulnak. Győződjön meg arról, hogy biztonsági másolatot készített a beállításokról.</string>
   <string name="player_button_long_click">Rövid kattintás a gombra a gyors művelethez, hosszú a beállításokhoz.</string>
-  <string name="pause_history">Előzmények szüneteltetése</string>
-  <string name="resume_history">Előzmények folytatása</string>
   <string name="clear_history">Előzmények törlése</string>
   <string name="chapters">Fejezetek</string>
   <string name="card_multiline_subtitle">Többsoros feliratok</string>
@@ -573,6 +571,8 @@
   <string name="player_global_focus">Zökkenőmentes navigáció a lejátszó gombsorai között</string>
   <string name="dialog_notification">Értesítés a frissítésről, felugró párbeszédpanelen</string>
   <string name="disable_history">Előzmények tiltása</string>
+  <string name="disable_history_local">Előzmények tiltása ennél a fióknál helyileg</string>
+  <string name="disable_history_global">Előzmények tiltása a fiókban globálisan</string>
   <string name="enable_history">Előzmények engedélyezése</string>
   <string name="open_comments">Hozzászólások megnyitása</string>
   <string name="msg_player_error_subtitle_source">A FELIRAT URL-címe nem működik, vagy helytelen az eszközidő.\nÁltalában az alkalmazással van a probléma.</string>

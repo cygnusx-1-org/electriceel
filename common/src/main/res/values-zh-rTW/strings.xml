@@ -472,8 +472,6 @@
   <string name="child_mode_desc">在這種模式下，使用者無法使用搜尋或看到任何推薦內容。設定頁面也會受到密碼保護。</string>
   <string name="lost_setting_warning">應用程式的設定將被改變。請確保您已經建立備份。</string>
   <string name="player_button_long_click">長按此按鈕即可設定更多選項。</string>
-  <string name="pause_history">暫停觀看紀錄</string>
-  <string name="resume_history">恢復觀看紀錄</string>
   <string name="clear_history">清空觀看紀錄</string>
   <string name="chapters">章節</string>
   <string name="card_multiline_subtitle">多行字幕</string>
@@ -564,6 +562,8 @@
   <string name="player_volume">音量</string>
   <string name="open_comments">開啟評論</string>
   <string name="disable_history">停用歷史紀錄</string>
+  <string name="disable_history_local">在本機停用此帳戶的歷史紀錄</string>
+  <string name="disable_history_global">全域停用帳戶的歷史紀錄</string>
   <string name="enable_history">啟用歷史紀錄</string>
   <string name="dialog_notification">彈出對話框通知更新</string>
   <string name="header_shorts">Shorts</string>

@@ -27,6 +27,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.ChannelPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.ChannelUploadsPresenter;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AccountsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs;
+import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.utils.LoadingManager;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
@@ -349,9 +350,14 @@ public class MediaServiceManager implements OnAccountChange {
         return isGrid ? MIN_GRID_GROUP_SIZE : MIN_ROW_GROUP_SIZE;
     }
 
-    public void enableHistory(boolean enable) {
-        if (enable) { // don't disable history for other clients
-            RxHelper.runAsyncUser(() -> mContentService.enableHistory(true));
+    /**
+     * The only place the account's history is resumed or paused: when the user picks it, never on launch or an account switch
+     */
+    public void applyHistoryState(Context context, int historyState) {
+        GeneralData.instance(context).setHistoryState(historyState);
+
+        if (historyState == GeneralData.HISTORY_ENABLED || historyState == GeneralData.HISTORY_PAUSED) {
+            RxHelper.runAsyncUser(() -> mContentService.enableHistory(historyState == GeneralData.HISTORY_ENABLED));
         }
     }
 

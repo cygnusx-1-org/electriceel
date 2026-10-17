@@ -524,9 +524,9 @@
     <string name="child_mode_desc">У овом режиму, корисник не може користити претрагу нити видети препоручени садржај. Страница са поставкама ће бити заштићена лозинком.</string>
     <string name="lost_setting_warning">Поставке апликације биће промењене. Будите сигурни да сте направили резервну копију поставки.</string>
     <string name="player_button_long_click">Задржите ово дугме за додатне поставке</string>
-    <string name="pause_history">Паузирај историју</string>
-    <string name="resume_history">Настави историју</string>
     <string name="disable_history">Искључи историју</string>
+    <string name="disable_history_local">Искључи историју овог налога локално</string>
+    <string name="disable_history_global">Искључи историју налога глобално</string>
     <string name="enable_history">Укључи историју</string>
     <string name="clear_history">Обриши историју</string>
     <string name="chapters">Поглавља</string>

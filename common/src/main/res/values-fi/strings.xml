@@ -483,8 +483,6 @@
   <string name="child_mode_desc">Tässä tilassa et voi käyttää hakua tai nähdä ehdotettuja sisältöjä. Asetukset on suojattu salasanalla.</string>
   <string name="lost_setting_warning">Sovelluksen asetuksia muutetaan. Varmista, että olet luonut varmuuskopion asetuksista.</string>
   <string name="player_button_long_click">Lyhyt painallus nopeaan toimintaan ja pitkä painallus asetusten valintaikkunaan.</string>
-  <string name="pause_history">Keskeytä historiatoiminto</string>
-  <string name="resume_history">Palauta historiatoiminto</string>
   <string name="clear_history">Tyhjennä historia</string>
   <string name="chapters">Videon osat</string>
   <string name="card_multiline_subtitle">Monirivinen tekstitys</string>
@@ -587,6 +585,8 @@
   <string name="unlock_high_bitrate_audio_formats">Avaa korkean bittinopeuden mp4a-formaatit</string>
   <string name="color_scheme_blue">Sininen</string>
   <string name="disable_history">Poista historia käytöstä</string>
+  <string name="disable_history_local">Poista tämän tilin historia käytöstä paikallisesti</string>
+  <string name="disable_history_global">Poista tilin historia käytöstä kaikkialla</string>
   <string name="enable_history">Ota historia käyttöön</string>
   <string name="color_scheme_dark_blue">Tummansininen</string>
   <string name="player_speed_per_channel">Jokaiselle kanavalle</string>

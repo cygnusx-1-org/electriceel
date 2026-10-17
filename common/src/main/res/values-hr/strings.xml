@@ -485,8 +485,6 @@
     <string name="child_mode_desc">U ovom načinu rada, korisnik ne može koristiti pretragu ili vidjeti bilo kakav predloženi sadržaj. Postavke će biti zaštićene lozinkom.</string>
     <string name="lost_setting_warning">Postavke aplikacije će biti promijenjene. Stvorite sigurnosnu kopiju postavki.</string>
     <string name="player_button_long_click">Kratak pritisak na tipku za brzu radnju, a dulji pritisak za dijalog postavki</string>
-    <string name="pause_history">Pauziraj povijest</string>
-    <string name="resume_history">Pokreni povijest</string>
     <string name="clear_history">Ukloni povijest</string>
     <string name="chapters">Poglavlja</string>
     <string name="card_multiline_subtitle">Višeredni podnaslovi</string>
@@ -521,4 +519,7 @@
     <string name="report_ai_channel">Prijavi kanal AiSListu</string>
     <string name="add_remove_from_home_rows">Dodaj/Ukloni s Početne</string>
     <string name="audio_voice_boost">Pojačanje glasa</string>
+    <string name="disable_history">Onemogući povijest</string>
+    <string name="disable_history_local">Onemogući povijest ovog računa lokalno</string>
+    <string name="disable_history_global">Onemogući povijest računa globalno</string>
 </resources>

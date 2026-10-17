@@ -497,9 +497,9 @@
   <string name="child_mode_desc">Dans ce mode, la recherche ainsi que la suggestion de contenu sont désactivées. Les paramètres seront protégés par un mot de passe.</string>
   <string name="lost_setting_warning">Les paramètres de l\'application seront modifiés. Assurez-vous d\'avoir effectué une sauvegarde des paramètres.</string>
   <string name="player_button_long_click">Utiliser un appui court sur le bouton principal pour exécuter une action rapide (activer/désactiver les sous-titres par exemple) et un appui long pour ouvrir les paramètres.</string>
-  <string name="pause_history">Suspendre l\'historique</string>
-  <string name="resume_history">Reprendre l\'historique</string>
   <string name="disable_history">Désactiver l\'historique</string>
+  <string name="disable_history_local">Désactiver l\'historique de ce compte localement</string>
+  <string name="disable_history_global">Désactiver l\'historique du compte globalement</string>
   <string name="enable_history">Activer l\'historique</string>
   <string name="clear_history">Effacer l\'historique</string>
   <string name="chapters">Chapitres</string>

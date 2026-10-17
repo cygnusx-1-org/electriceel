@@ -706,9 +706,9 @@
     <string name="child_mode_channel_unavailable">This channel isn\'t available in Child mode</string>
     <string name="lost_setting_warning">The app settings will be changed. Make sure that you created a backup of the settings.</string>
     <string name="player_button_long_click">Long press this button for additional options</string>
-    <string name="pause_history">Pause history</string>
-    <string name="resume_history">Resume history</string>
     <string name="disable_history">Disable history</string>
+    <string name="disable_history_local">Disable history on this account locally</string>
+    <string name="disable_history_global">Disable history on the account globally</string>
     <string name="enable_history">Enable history</string>
     <string name="clear_history">Clear history</string>
     <string name="chapters">Chapters</string>

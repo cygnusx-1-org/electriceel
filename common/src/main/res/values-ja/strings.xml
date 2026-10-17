@@ -527,9 +527,9 @@
     <string name="child_mode_desc">このモードでは、検索とおすすめの機能は使用できません。設定はパスワードで保護されます。</string>
     <string name="lost_setting_warning">設定が変更されます。バックアップを作成しておいてください。</string>
     <string name="player_button_long_click">追加のオプションを表示するには長押し</string>
-    <string name="pause_history">履歴を一時停止する</string>
-    <string name="resume_history">履歴を再開する</string>
     <string name="disable_history">履歴を無効化する</string>
+    <string name="disable_history_local">このアカウントの履歴をローカルで無効化する</string>
+    <string name="disable_history_global">アカウントの履歴をグローバルに無効化する</string>
     <string name="enable_history">履歴を有効化する</string>
     <string name="clear_history">履歴を消去する</string>
     <string name="chapters">チャプター</string>

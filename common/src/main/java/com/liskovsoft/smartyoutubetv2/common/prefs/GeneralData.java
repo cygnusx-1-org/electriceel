@@ -22,9 +22,22 @@ public class GeneralData implements ProfileChangeListener {
     public static final int BACKGROUND_PLAYBACK_SHORTCUT_HOME = 0;
     public static final int BACKGROUND_PLAYBACK_SHORTCUT_HOME_BACK = 1;
     public static final int BACKGROUND_PLAYBACK_SHORTCUT_BACK = 2;
+    /**
+     * The account's history is left as it is. Each of the others changes it once, when picked (see MediaServiceManager.applyHistoryState)
+     */
     public static final int HISTORY_AUTO = 0;
+    /**
+     * Resumed on the account
+     */
     public static final int HISTORY_ENABLED = 1;
+    /**
+     * Disabled locally, for this account: the account's own history is untouched
+     */
     public static final int HISTORY_DISABLED = 2;
+    /**
+     * Disabled (paused) on the account globally, and locally too
+     */
+    public static final int HISTORY_PAUSED = 3;
     public static final int ACTION_UNDEFINED = -1;
     public static final int ACTION_VOLUME_UP_DOWN = 0;
     public static final int ACTION_NEXT_PREVIOUS = 1;
@@ -393,12 +406,11 @@ public class GeneralData implements ProfileChangeListener {
         persistState();
     }
 
-    public boolean isHistoryEnabled() {
-        return mHistoryState == HISTORY_ENABLED;
-    }
-
-    public void setHistoryEnabled(boolean enabled) {
-        setHistoryState(enabled ? HISTORY_ENABLED : HISTORY_AUTO);
+    /**
+     * This device sends no history, whether or not the account's was paused too
+     */
+    public boolean isHistoryPaused() {
+        return mHistoryState == HISTORY_DISABLED || mHistoryState == HISTORY_PAUSED;
     }
 
     public int getHistoryState() {
@@ -668,7 +680,7 @@ public class GeneralData implements ProfileChangeListener {
     }
 
     private void persistState() {
-        Utils.postDelayed(mPersistStateInt, 10_000);
+        Utils.post(mPersistStateInt);
     }
 
     private void persistStateInt() {

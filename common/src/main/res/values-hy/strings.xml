@@ -173,4 +173,7 @@
     <string name="report_ai_channel">Հաղորդել ալիքի մասին AiSList-ին</string>
     <string name="add_remove_from_home_rows">Ավելացնել/Հեռացնել Գլխավոր էջից</string>
     <string name="audio_voice_boost">Ձայնի ուժեղացում</string>
+    <string name="disable_history">Անջատել պատմությունը</string>
+    <string name="disable_history_local">Անջատել այս հաշվի պատմությունը տեղականորեն</string>
+    <string name="disable_history_global">Անջատել հաշվի պատմությունը գլոբալ</string>
 </resources>

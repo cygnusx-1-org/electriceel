@@ -527,9 +527,9 @@
   <string name="child_mode_desc">I det här läget kan användaren inte använda sökfunktionen eller se något föreslaget innehåll. Inställningssidan skyddas med lösenord.</string>
   <string name="lost_setting_warning">Appens inställningar kommer att ändras. Se till att du har skapat en säkerhetskopia av inställningarna.</string>
   <string name="player_button_long_click">Tryck länge på den här knappen för ytterligare alternativ</string>
-  <string name="pause_history">Pausa historik</string>
-  <string name="resume_history">Återuppta historik</string>
   <string name="disable_history">Inaktivera historik</string>
+  <string name="disable_history_local">Inaktivera historik för det här kontot lokalt</string>
+  <string name="disable_history_global">Inaktivera historik på kontot globalt</string>
   <string name="enable_history">Aktivera historik</string>
   <string name="clear_history">Rensa historik</string>
   <string name="chapters">Kapitel</string>

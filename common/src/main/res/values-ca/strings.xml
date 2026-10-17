@@ -483,8 +483,6 @@
   <string name="child_mode_desc">En aquest mode, l\'usuari no pot utilitzar la cerca ni veure cap contingut suggerit. La configuració estarà sota la contrasenya.</string>
   <string name="lost_setting_warning">La configuració de l\'aplicació es canviarà. Assegureu-vos que heu creat una còpia de seguretat de la configuració.</string>
   <string name="player_button_long_click">Un clic breu al botó per a una acció ràpida i un diàleg llarg per a la configuració</string>
-  <string name="pause_history">Posa en pausa l\'historial</string>
-  <string name="resume_history">Reprendre l\'historial</string>
   <string name="clear_history">Història clara</string>
   <string name="chapters">Capítols</string>
   <string name="card_multiline_subtitle">Subtítols multilínia</string>
@@ -500,6 +498,8 @@
   <string name="player_volume">Volum</string>
   <string name="live_stream_fix_4k">Correcció de la reproducció en directe (4K)</string>
   <string name="disable_history">Desactiva l\'historial</string>
+  <string name="disable_history_local">Desactiva l\'historial d\'aquest compte localment</string>
+  <string name="disable_history_global">Desactiva l\'historial del compte globalment</string>
   <string name="enable_history">Activeu l\'historial</string>
     <string name="header_blocked_ai_channels">Canals d\'IA bloquejats</string>
     <string name="blocked_ai_channels_message">Canals dels quals AiSList ha amagat vídeos dels teus feeds des que s\'ha iniciat l\'aplicació, no tota la llista</string>

@@ -489,9 +489,9 @@
   <string name="thumb_quality_start">Đầu video</string>
   <string name="thumb_quality_default">Mặc định</string>
   <string name="player_show_quality_info_bitrate">Thêm bitrate vào thông tin chất lượng</string>
-  <string name="pause_history">Tạm dừng lưu lịch sử</string>
-  <string name="resume_history">Tiếp tục lưu lịch sử</string>
   <string name="disable_history">Tắt lưu lịch sử</string>
+  <string name="disable_history_local">Tắt lưu lịch sử của tài khoản này cục bộ</string>
+  <string name="disable_history_global">Tắt lưu lịch sử của tài khoản trên toàn bộ</string>
   <string name="enable_history">Bật lưu lịch sử</string>
   <string name="clear_history">Xóa lịch sử</string>
   <string name="chapters">Chương</string>

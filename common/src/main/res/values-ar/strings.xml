@@ -483,9 +483,7 @@
   <string name="child_mode">وضع الأطفال</string>
   <string name="child_mode_desc">في هذا الوضع، لا يستطيع المستخدم استخدام البحث أو رؤية أي محتوى مقترح. صفحة الإعدادات محمية بكلمة مرور.</string>
   <string name="lost_setting_warning">سيتم تغيير إعدادات التطبيق. تأكد من إنشاء نسخة احتياطية من الإعدادات.</string>
-  <string name="pause_history">إيقاف السجلّ</string>
   <string name="clear_history">محو سجلّ المشاهدة</string>
-  <string name="resume_history">استئناف السجلّ</string>
   <string name="chapters">الفصول</string>
   <string name="auto_frame_rate_modes">الأوضاع المدعومة</string>
   <string name="loading">جارٍ التحميل…</string>
@@ -571,6 +569,8 @@
   <string name="player_volume">مستوى الصوت</string>
   <string name="open_comments">فتح التعليقات</string>
   <string name="disable_history">تعطيل السجلّ</string>
+  <string name="disable_history_local">تعطيل السجلّ لهذا الحساب محليًا</string>
+  <string name="disable_history_global">تعطيل السجلّ في الحساب عالميًا</string>
   <string name="enable_history">تمكين السجلّ</string>
   <string name="player_network_stack">محرك الشبكة</string>
   <string name="dialog_notification">عرض إشعار بالتحديثات من خلال نافذة منبثقة</string>

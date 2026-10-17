@@ -523,9 +523,9 @@
     <string name="child_mode_desc">Bu rejimdə istifadəçi axtarışdan istifadə edə və ya təklif olunan məzmunu görə bilməz. Parametrlər parolun altında olacaq.</string>
     <string name="lost_setting_warning">Proqram parametrləri dəyişdiriləcək. Parametrlərin ehtiyat nüsxəsini yaratdığınızdan əmin olun.</string>
     <string name="player_button_long_click">Sürətli hərəkət etmək üçün düyməyə qısa bir klik və parametrlər üçün uzun bir dialoq</string>
-    <string name="pause_history">Tarixçəni dayandırın</string>
-    <string name="resume_history">Tarixçəni bərpa edin</string>
     <string name="disable_history">Tarixçəni söndürün</string>
+    <string name="disable_history_local">Bu hesab üçün tarixçəni yerli olaraq söndürün</string>
+    <string name="disable_history_global">Hesabda tarixçəni qlobal olaraq söndürün</string>
     <string name="enable_history">Tarixçəni qoşun</string>
     <string name="clear_history">Tarixçəni təmizləyin</string>
     <string name="chapters">Fəsillər</string>

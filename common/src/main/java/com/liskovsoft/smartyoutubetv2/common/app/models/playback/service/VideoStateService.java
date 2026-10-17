@@ -32,7 +32,6 @@ public class VideoStateService implements ProfileChangeListener {
     private static VideoStateService sInstance;
     private static final int LOW_RAM_STATE_MAX_SIZE = 500;
     private static final int HIGH_RAM_STATE_MAX_SIZE = 5_000;
-    private static final long PERSIST_DELAY_MS = 10_000;
     // The app finishes a second after persistNow(). A full history took ~250 ms to write on the emulator.
     private static final long PERSIST_NOW_TIMEOUT_MS = 1_000;
     // Don't store state inside Video object.
@@ -195,8 +194,8 @@ public class VideoStateService implements ProfileChangeListener {
     }
 
     private void persistState() {
-        // Improve memory and disc usage
-        Utils.postDelayed(mPersistStateInt, PERSIST_DELAY_MS);
+        // Changes made in one pass of the main thread are written once
+        Utils.post(mPersistStateInt);
     }
 
     public static class State {

@@ -522,11 +522,11 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
         for (int[] pair : new int[][] {
                 {R.string.auto_history, GeneralData.HISTORY_AUTO},
                 {R.string.enable_history, GeneralData.HISTORY_ENABLED},
-                {R.string.disable_history, GeneralData.HISTORY_DISABLED}}) {
-            options.add(UiOptionItem.from(getContext().getString(pair[0]), optionItem -> {
-                mGeneralData.setHistoryState(pair[1]);
-                MediaServiceManager.instance().enableHistory(pair[1] == GeneralData.HISTORY_AUTO || pair[1] == GeneralData.HISTORY_ENABLED);
-            }, mGeneralData.getHistoryState() == pair[1]));
+                {R.string.disable_history_local, GeneralData.HISTORY_DISABLED},
+                {R.string.disable_history_global, GeneralData.HISTORY_PAUSED}}) {
+            options.add(UiOptionItem.from(getContext().getString(pair[0]),
+                    optionItem -> MediaServiceManager.instance().applyHistoryState(getContext(), pair[1]),
+                    mGeneralData.getHistoryState() == pair[1]));
         }
 
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.header_history), options);

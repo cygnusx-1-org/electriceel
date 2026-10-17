@@ -513,9 +513,9 @@
   <string name="child_mode_desc">此模式下用户无法使用搜索功能，也无法查看任何推荐内容。设置页面将启用密码保护。</string>
   <string name="lost_setting_warning">应用设置将会更改。请确保你已创建设置备份。</string>
   <string name="player_button_long_click">长按此按钮查看更多选项</string>
-  <string name="pause_history">暂停历史记录</string>
-  <string name="resume_history">恢复历史记录</string>
   <string name="disable_history">禁用历史记录</string>
+  <string name="disable_history_local">在本地禁用此账号的历史记录</string>
+  <string name="disable_history_global">全局禁用账号的历史记录</string>
   <string name="enable_history">启用历史记录</string>
   <string name="clear_history">清空历史记录</string>
   <string name="chapters">章节</string>

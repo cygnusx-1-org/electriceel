@@ -524,9 +524,9 @@
     <string name="child_mode_desc">I denne modusen kan ikke brukeren søke eller se noe foreslått innhold. Innstillingssiden vil være passordbeskyttet.</string>
     <string name="lost_setting_warning">Appens innstillinger vil bli endret. Sørg for at du har laget en sikkerhetskopi av innstillingene.</string>
     <string name="player_button_long_click">Hold inne denne knappen for flere alternativer</string>
-    <string name="pause_history">Pause historikken</string>
-    <string name="resume_history">Gjenoppta historikken</string>
     <string name="disable_history">Deaktiver historikk</string>
+    <string name="disable_history_local">Deaktiver historikk for denne kontoen lokalt</string>
+    <string name="disable_history_global">Deaktiver historikk på kontoen globalt</string>
     <string name="enable_history">Aktiver historikk</string>
     <string name="clear_history">Tøm historikk</string>
     <string name="chapters">Kapitler</string>

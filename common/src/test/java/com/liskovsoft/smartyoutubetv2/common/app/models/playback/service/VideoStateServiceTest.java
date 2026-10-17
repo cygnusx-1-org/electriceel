@@ -15,7 +15,6 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLooper;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -70,23 +69,22 @@ public class VideoStateServiceTest {
     }
 
     /**
-     * Written off the main thread, 10 seconds after the change
+     * Written off the main thread, right after the change: no delay to lose it in
      */
     @Test
-    public void changeWrittenAfterDelay() throws InterruptedException {
-        getService().save(createState("delayed", 1_000));
-        ShadowLooper.shadowMainLooper().idleFor(Duration.ofSeconds(9));
+    public void changeWrittenRightAway() throws InterruptedException {
+        getService().save(createState("instant", 1_000));
 
-        assertFalse(isSaved("delayed"));
+        assertFalse(isSaved("instant"));
 
-        ShadowLooper.shadowMainLooper().idleFor(Duration.ofSeconds(1));
+        ShadowLooper.shadowMainLooper().idle();
         long deadlineMs = System.currentTimeMillis() + 5_000;
 
-        while (!isSaved("delayed") && System.currentTimeMillis() < deadlineMs) {
+        while (!isSaved("instant") && System.currentTimeMillis() < deadlineMs) {
             Thread.sleep(10);
         }
 
-        assertTrue(isSaved("delayed"));
+        assertTrue(isSaved("instant"));
     }
 
     @Test

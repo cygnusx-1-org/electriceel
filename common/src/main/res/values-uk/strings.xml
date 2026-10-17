@@ -521,10 +521,10 @@
     <string name="child_mode_desc">У цьому режимі користувач не може використовувати пошук або переглядати запропонований контент. Налаштування будуть під паролем.</string>
     <string name="lost_setting_warning">Налаштування застосунку буде змінено. Переконайтеся, що ви створили резервну копію налаштувань.</string>
     <string name="player_button_long_click">Коротке натискання кнопки для швидкої дії та довге для діалогового вікна налаштувань</string>
-    <string name="pause_history">Поставити історію на паузу</string>
-    <string name="resume_history">Відновити історію</string>
     <string name="clear_history">Очистити історію</string>
     <string name="disable_history">Вимкнути історію</string>
+    <string name="disable_history_local">Вимкнути історію цього облікового запису локально</string>
+    <string name="disable_history_global">Вимкнути історію облікового запису глобально</string>
     <string name="enable_history">Увімкнути історію</string>
     <string name="chapters">Епізоди</string>
     <string name="card_multiline_subtitle">Декілька рядків у підзаголовках</string>

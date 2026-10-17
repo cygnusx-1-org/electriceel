@@ -514,9 +514,9 @@
   <string name="child_mode_desc">Neste modo, o usuario non pode usar a busca nin ver ningún contido suxerido. A páxina de configuración estará protexida por contrasinal.</string>
   <string name="lost_setting_warning">Cambiarase a configuración da aplicación. Asegúrese de crear unha copia de seguridade da configuración.</string>
   <string name="player_button_long_click">Mantén presionado este botón para obter opcións adicionais</string>
-  <string name="pause_history">Pausa o historial</string>
-  <string name="resume_history">Retomar o historial</string>
   <string name="disable_history">Desactivar o historial</string>
+  <string name="disable_history_local">Desactivar o historial desta conta localmente</string>
+  <string name="disable_history_global">Desactivar o historial da conta globalmente</string>
   <string name="enable_history">Activar o historial</string>
   <string name="clear_history">Borrar o historial</string>
   <string name="chapters">Capítulos</string>

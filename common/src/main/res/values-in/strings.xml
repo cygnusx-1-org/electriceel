@@ -510,9 +510,9 @@
   <string name="child_mode_desc">Dalam mode ini, pengguna tidak dapat menggunakan penelusuran atau melihat konten yang disarankan. Halaman setelan akan dilindungi kata sandi.</string>
   <string name="lost_setting_warning">Setelan aplikasi akan diubah. Pastikan Anda sudah membuat cadangan konfigurasi setelan.</string>
   <string name="player_button_long_click">Tekan lama tombol ini untuk opsi tambahan</string>
-  <string name="pause_history">Jeda histori</string>
-  <string name="resume_history">Lanjutkan histori</string>
   <string name="disable_history">Nonaktifkan histori</string>
+  <string name="disable_history_local">Nonaktifkan histori akun ini secara lokal</string>
+  <string name="disable_history_global">Nonaktifkan histori akun secara global</string>
   <string name="enable_history">Aktifkan histori</string>
   <string name="clear_history">Hapus histori</string>
   <string name="card_multiline_subtitle">Subtitel multiline</string>

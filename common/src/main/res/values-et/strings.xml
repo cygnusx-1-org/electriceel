@@ -505,9 +505,9 @@
   <string name="child_mode_desc">Otsing ja soovitatud sisu on keelatud. Väljumiseks on vajalik parooli sisestamine.</string>
   <string name="lost_setting_warning">Rakenduse sätteid muudetakse. Veenduge, et olete seadistustest varukoopia teinud.</string>
   <string name="player_button_long_click">Lühike klõps nupul kiirtoiminguks ja pikk klõps sätete dialoogi jaoks</string>
-  <string name="pause_history">Peata ajalugu</string>
-  <string name="resume_history">Jätka ajalugu</string>
   <string name="disable_history">Keela ajalugu</string>
+  <string name="disable_history_local">Keela selle konto ajalugu kohalikult</string>
+  <string name="disable_history_global">Keela konto ajalugu globaalselt</string>
   <string name="enable_history">Luba ajalugu</string>
   <string name="clear_history">Tühjenda ajalugu</string>
   <string name="chapters">Peatükid</string>

@@ -731,13 +731,22 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
         }
 
         GeneralData generalData = GeneralData.instance(getContext());
-        boolean enabled = generalData.isHistoryEnabled();
 
+        if (generalData.isHistoryPaused()) {
+            // Enabled where it was disabled: locally only, or on the account globally too
+            appendHistoryStateButton(R.string.enable_history,
+                    generalData.getHistoryState() == GeneralData.HISTORY_PAUSED ? GeneralData.HISTORY_ENABLED : GeneralData.HISTORY_AUTO);
+        } else {
+            appendHistoryStateButton(R.string.disable_history_local, GeneralData.HISTORY_DISABLED);
+            appendHistoryStateButton(R.string.disable_history_global, GeneralData.HISTORY_PAUSED);
+        }
+    }
+
+    private void appendHistoryStateButton(int titleResId, int historyState) {
         getDialogPresenter().appendSingleButton(
-                UiOptionItem.from(getContext().getString(enabled ? R.string.pause_history : R.string.resume_history),
+                UiOptionItem.from(getContext().getString(titleResId),
                         optionItem -> {
-                            mServiceManager.enableHistory(!enabled);
-                            generalData.setHistoryEnabled(!enabled);
+                            mServiceManager.applyHistoryState(getContext(), historyState);
                             getDialogPresenter().closeDialog();
                         }));
     }

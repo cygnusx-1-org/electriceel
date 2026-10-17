@@ -526,9 +526,9 @@
   <string name="child_mode_desc">Nesse modo, o usuário não pode utilizar a pesquisa nem ver conteúdos sugeridos. As configurações estarão protegidas por senha.</string>
   <string name="lost_setting_warning">As configurações do aplicativo serão alteradas. \nTenha certeza de que você criou um backup das configurações.</string>
   <string name="player_button_long_click">Um toque curto no botão para ação rápida e um longo para o diálogo de configurações</string>
-  <string name="pause_history">Pausar histórico</string>
-  <string name="resume_history">Retomar histórico</string>
   <string name="disable_history">Desabilitar histórico</string>
+  <string name="disable_history_local">Desabilitar histórico desta conta localmente</string>
+  <string name="disable_history_global">Desabilitar histórico da conta globalmente</string>
   <string name="enable_history">Habilitar histórico</string>
   <string name="clear_history">Limpar histórico</string>
   <string name="chapters">Capítulos</string>

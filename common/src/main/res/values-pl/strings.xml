@@ -513,9 +513,9 @@
   <string name="child_mode_desc">W tym trybie użytkownik nie może używać wyszukiwarki ani zobaczyć innej, polecanej zawartości. Ustawienia będą zabezpieczone hasłem</string>
   <string name="lost_setting_warning">Ustawienia aplikacji zostaną zmienione. Upewnij się, że utworzyłeś kopię zapasową ustawień</string>
   <string name="player_button_long_click">Krótkie naciśnięcie przycisku dla wywołania akcji, długie dla ustawień</string>
-  <string name="pause_history">Wstrzymaj historię odtwarzania</string>
-  <string name="resume_history">Wznów historię odtwarzania</string>
   <string name="disable_history">Wyłącz historię odtwarzania</string>
+  <string name="disable_history_local">Wyłącz historię odtwarzania tego konta lokalnie</string>
+  <string name="disable_history_global">Wyłącz historię odtwarzania konta globalnie</string>
   <string name="enable_history">Włącz historię odtwarzania</string>
   <string name="clear_history">Wyczyść historię odtwarzania</string>
   <string name="chapters">Rozdziały</string>

@@ -665,7 +665,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         menuNames.put(MainUIData.MENU_ITEM_OPEN_CHANNEL, R.string.open_channel);
         menuNames.put(MainUIData.MENU_ITEM_UPDATE_CHECK, R.string.check_for_updates);
         menuNames.put(MainUIData.MENU_ITEM_CLEAR_HISTORY, R.string.clear_history);
-        menuNames.put(MainUIData.MENU_ITEM_TOGGLE_HISTORY, R.string.pause_history);
+        menuNames.put(MainUIData.MENU_ITEM_TOGGLE_HISTORY, R.string.disable_history);
         menuNames.put(MainUIData.MENU_ITEM_PLAYLIST_ORDER, R.string.playlist_order);
         menuNames.put(MainUIData.MENU_ITEM_PLAY_NEXT, R.string.play_next);
         menuNames.put(MainUIData.MENU_ITEM_ADD_TO_QUEUE, R.string.add_remove_from_playback_queue);

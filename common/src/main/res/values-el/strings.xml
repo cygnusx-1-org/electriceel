@@ -482,8 +482,6 @@
   <string name="child_mode_desc">Σε αυτήν τη λειτουργία, ο χρήστης δεν μπορεί να χρησιμοποιήσει την αναζήτηση ή να δει κάποιο προτεινόμενο περιεχόμενο. Οι ρυθμίσεις θα βρίσκονται κάτω από τον κωδικό πρόσβασης.</string>
   <string name="lost_setting_warning">Οι ρυθμίσεις της εφαρμογής θα αλλάξουν. Βεβαιωθείτε ότι έχετε δημιουργήσει ένα αντίγραφο ασφαλείας των ρυθμίσεων.</string>
   <string name="player_button_long_click">Ένα σύντομο κλικ στο κουμπί για γρήγορη δράση και ένα παρατεταμένο παράθυρο διαλόγου στις ρυθμίσεις</string>
-  <string name="pause_history">Παύση ιστορικού</string>
-  <string name="resume_history">Συνέχιση ιστορικού</string>
   <string name="clear_history">Καθαρισμός ιστορικού</string>
   <string name="chapters">Κεφάλαια</string>
   <string name="card_multiline_subtitle">Υπότιτλοι πολλαπλών γραμμών</string>
@@ -596,6 +594,8 @@
   <string name="channel_search_bar">Γραμμή αναζήτησης μέσα στη σελίδα του καναλιού</string>
   <string name="dialog_notification">Ειδοποίηση για την ενημέρωση με αναδυόμενο παράθυρο διαλόγου</string>
   <string name="disable_history">Απενεργοποίηση ιστορικού</string>
+  <string name="disable_history_local">Απενεργοποίηση ιστορικού για αυτόν τον λογαριασμό τοπικά</string>
+  <string name="disable_history_global">Απενεργοποίηση ιστορικού στον λογαριασμό καθολικά</string>
   <string name="enable_history">Ενεργοποίηση ιστορικού</string>
   <string name="open_comments">Ανοίξτε τα σχόλια</string>
   <string name="save_playlist">Προσθήκη λίστας αναπαραγωγής στην ενότητα Λίστες αναπαραγωγής</string>

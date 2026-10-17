@@ -242,4 +242,7 @@
     <string name="report_ai_channel">ఛానెల్‌ను AiSListకు నివేదించండి</string>
     <string name="add_remove_from_home_rows">హోమ్‌కు జోడించు/తీసివేయి</string>
     <string name="audio_voice_boost">వాయిస్ బూస్ట్</string>
+    <string name="disable_history">చరిత్రను నిలిపివేయండి</string>
+    <string name="disable_history_local">ఈ ఖాతా చరిత్రను స్థానికంగా నిలిపివేయండి</string>
+    <string name="disable_history_global">ఖాతా చరిత్రను అంతటా నిలిపివేయండి</string>
 </resources>

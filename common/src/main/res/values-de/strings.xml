@@ -526,9 +526,9 @@
     <string name="child_mode_desc">In diesem Modus kann der Benutzer die Suche nicht verwenden und keine vorgeschlagenen Inhalte sehen. Die Einstellungsseite wird durch ein Passwort geschützt.</string>
     <string name="lost_setting_warning">Die Einstellungen der App werden geändert. Stellen Sie sicher, dass Sie eine Sicherung der Einstellungen erstellt haben.</string>
     <string name="player_button_long_click">Diese Taste lange drücken für weitere Optionen</string>
-    <string name="pause_history">Verlauf pausieren</string>
-    <string name="resume_history">Verlauf fortsetzen</string>
     <string name="disable_history">Verlauf deaktivieren</string>
+    <string name="disable_history_local">Verlauf für dieses Konto lokal deaktivieren</string>
+    <string name="disable_history_global">Verlauf im Konto global deaktivieren</string>
     <string name="enable_history">Verlauf aktivieren</string>
     <string name="clear_history">Verlauf löschen</string>
     <string name="chapters">Kapitel</string>

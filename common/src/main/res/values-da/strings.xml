@@ -546,9 +546,9 @@
   <string name="child_mode_desc">I denne tilstand kan man ikke søge eller se foreslået indhold. Indstillinger er desuden beskyttet med en adgangskode.</string>
   <string name="lost_setting_warning">Electric Eel-indstillingerne bliver ændret. Sørg for, at du har sikkerhedskopieret indstillingerne.</string>
   <string name="player_button_long_click">Langt tryk på denne knap for flere indstillinger</string>
-  <string name="pause_history">Sæt historik på pause</string>
-  <string name="resume_history">Genoptag historik</string>
   <string name="disable_history">Deaktiver historik</string>
+  <string name="disable_history_local">Deaktiver historik for denne konto lokalt</string>
+  <string name="disable_history_global">Deaktiver historik på kontoen globalt</string>
   <string name="enable_history">Aktivér historik</string>
   <string name="clear_history">Ryd historik</string>
   <string name="chapters">Kapitler</string>

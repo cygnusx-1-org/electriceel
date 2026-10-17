@@ -513,9 +513,9 @@
   <string name="child_mode_desc">Në këtë mënyrë, përdoruesi nuk mund të përdorë kërkimin ose të shikojë ndonjë përmbajtje të sugjeruar. Cilësimet do të mbrohen me fjalëkalim.</string>
   <string name="lost_setting_warning">Cilësimet e aplikacionit do të ndryshohen. Sigurohu që ke krijuar një kopje rezervë të cilësimeve tua.</string>
   <string name="player_button_long_click">Mbaj shtypur këtë buton për rregullime shtesë</string>
-  <string name="pause_history">Ndalo Historikun</string>
-  <string name="resume_history">Rifillo Historikun</string>
   <string name="disable_history">Çaktivizo Historikun</string>
+  <string name="disable_history_local">Çaktivizo Historikun e kësaj llogarie lokalisht</string>
+  <string name="disable_history_global">Çaktivizo Historikun e llogarisë globalisht</string>
   <string name="enable_history">Aktivizo Historikun</string>
   <string name="clear_history">Pastro Historikun</string>
   <string name="chapters">Kapitujt</string>

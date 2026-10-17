@@ -885,7 +885,7 @@ public class PlayerData extends DataChangeBase implements PlayerConstants, Profi
 
     private void persistState() {
         onDataChange();
-        Utils.postDelayed(mPersistStateInt, 10_000);
+        Utils.post(mPersistStateInt);
     }
 
     private void persistStateInt() {

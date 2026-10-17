@@ -514,8 +514,6 @@
   <string name="child_mode_desc">In deze modus kan de gebruiker de zoekfunctie niet gebruiken of voorgestelde inhoud bekijken.  De instellingen staan ​​onder het wachtwoord.</string>
   <string name="lost_setting_warning">De app-instellingen worden gewijzigd.  Zorg ervoor dat u een back-up van de instellingen hebt gemaakt.</string>
   <string name="player_button_long_click">Een korte klik op de knop naar snelle actie en een lange naar instellingen dialoog</string>
-  <string name="pause_history">Geschiedenis onderbreken</string>
-  <string name="resume_history">Geschiedenis hervatten</string>
   <string name="clear_history">Geschiedenis wissen</string>
   <string name="chapters">Hoofdstukken</string>
   <string name="card_multiline_subtitle">Meerregelige ondertitels</string>
@@ -554,6 +552,8 @@
   <string name="speech_engine">Stemzoekmachine</string>
   <string name="dearrow_status">Controleer de DeArrow-serverstatus</string>
   <string name="disable_history">Geschiedenis uitschakelen</string>
+  <string name="disable_history_local">Geschiedenis van dit account lokaal uitschakelen</string>
+  <string name="disable_history_global">Geschiedenis van het account globaal uitschakelen</string>
   <string name="enable_history">Geschiedenis inschakelen</string>
   <string name="remove_from_subscriptions">Verbergen</string>
   <string name="player_long_speed_list">Lange snelheidslijst</string>

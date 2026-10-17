@@ -514,9 +514,9 @@
   <string name="child_mode_desc">În acest mod, utilizatorul nu poate utiliza căutarea sau vedea niciun conținut sugerat. Pagina de setări va fi protejată prin parolă.</string>
   <string name="lost_setting_warning">Setările aplicației vor fi modificate. Asigurați-vă că ați creat o copie de rezervă a setărilor.</string>
   <string name="player_button_long_click">Apăsați lung acest buton pentru opțiuni suplimentare</string>
-  <string name="pause_history">Întrerupeți istoricul</string>
-  <string name="resume_history">Reactivați istoricul</string>
   <string name="disable_history">Dezactivați istoricul</string>
+  <string name="disable_history_local">Dezactivați istoricul acestui cont local</string>
+  <string name="disable_history_global">Dezactivați istoricul contului global</string>
   <string name="enable_history">Activați istoricul</string>
   <string name="clear_history">Ștergeți istoricul</string>
   <string name="chapters">Capitole</string>

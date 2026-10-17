@@ -489,8 +489,6 @@
   <string name="child_mode_desc">En este modo el usuario no puede buscar o ver contenido sugerido. La configuración se hallará bajo contraseña.</string>
   <string name="lost_setting_warning">La configuración de la aplicación será cambiada. Asegúrese de que ha creado una copia de seguridad de la misma.</string>
   <string name="player_button_long_click">Un clic corto en el botón para acción rápida y uno largo para el diálogo de configuración</string>
-  <string name="pause_history">Pausar historial</string>
-  <string name="resume_history">Reanudar el historial</string>
   <string name="clear_history">Borrar el historial</string>
   <string name="chapters">Capítulos</string>
   <string name="card_multiline_subtitle">Subtítulos multilínea</string>
@@ -577,6 +575,8 @@
   <string name="msg_player_error_subtitle_source">La URL de los SUBTÍTULOS no funcionan o la hora del dispositivo es incorrecta.\nPor lo general, es un problema de la aplicación.</string>
   <string name="open_comments">Abrir comentarios</string>
   <string name="disable_history">Desactivar historial</string>
+  <string name="disable_history_local">Desactivar historial de esta cuenta localmente</string>
+  <string name="disable_history_global">Desactivar historial de la cuenta globalmente</string>
   <string name="enable_history">Activar historial</string>
   <string name="player_network_stack">Pila de red</string>
   <string name="dialog_notification">Notificación de la actualización mediante un cuadro de diálogo emergente</string>

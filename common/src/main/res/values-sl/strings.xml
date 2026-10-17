@@ -324,4 +324,7 @@
     <string name="report_ai_channel">Prijavi kanal AiSListu</string>
     <string name="add_remove_from_home_rows">Dodaj/odstrani iz razdelka Domov</string>
     <string name="audio_voice_boost">Ojačitev glasu</string>
+    <string name="disable_history">Onemogoči zgodovino</string>
+    <string name="disable_history_local">Onemogoči zgodovino tega računa lokalno</string>
+    <string name="disable_history_global">Onemogoči zgodovino računa globalno</string>
 </resources>

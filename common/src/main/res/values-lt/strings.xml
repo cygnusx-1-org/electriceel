@@ -437,4 +437,7 @@
     <string name="report_ai_channel">Pranešti apie kanalą AiSList</string>
     <string name="add_remove_from_home_rows">Pridėti/pašalinti iš Pagrindinio</string>
     <string name="audio_voice_boost">Balso stiprinimas</string>
+    <string name="disable_history">Išjungti istoriją</string>
+    <string name="disable_history_local">Išjungti šios paskyros istoriją vietoje</string>
+    <string name="disable_history_global">Išjungti paskyros istoriją visur</string>
 </resources>
