@@ -89,9 +89,29 @@ public class DashManifestParser2 {
                 periods);
     }
 
+    /**
+     * The period ends at this duration and the chunk source drops every sample past it (see DefaultDashChunkSource.newMediaChunk).<br/>
+     * lengthSeconds is rounded to the second, so the end of the longest track is used when it's longer (approxDurationMs is exact)
+     */
     private static long getDurationMs(MediaItemFormatInfo formatInfo) {
         long lenSeconds = Helpers.parseLong(formatInfo.getLengthSeconds());
-        return lenSeconds > 0 ? lenSeconds * 1_000 : C.TIME_UNSET;
+
+        if (lenSeconds <= 0) {
+            return C.TIME_UNSET;
+        }
+
+        long durationMs = lenSeconds * 1_000;
+
+        if (!formatInfo.isLive() && formatInfo.getAdaptiveFormats() != null) {
+            for (MediaFormat format : formatInfo.getAdaptiveFormats()) {
+                // Rounding adds half a second at most, a longer one is bogus
+                if (format != null && format.getApproxDurationMs() <= lenSeconds * 1_000 + 1_000) {
+                    durationMs = Math.max(durationMs, format.getApproxDurationMs());
+                }
+            }
+        }
+
+        return durationMs;
     }
 
     private Pair<Period, Long> parsePeriod(MediaItemFormatInfo formatInfo) {
