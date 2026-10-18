@@ -585,6 +585,8 @@
   <string name="alt_app_icon">Alternativt appikon (kræver genstart)</string>
   <string name="network_stack">Foretræk %s netværksstak</string>
   <string name="player_network_stack">Netværksstak</string>
+  <string name="client_order">Rækkefølge af YouTube-klienter</string>
+  <string name="client_signed_in">%s (logget ind, bedst til premium)</string>
   <string name="cronet_desc">Cronet er Chromium-netværksstakken. Den kan reducere forsinkelsen og øge netværkets ydeevne, hvilket kan hjælpe med bufferproblemer.</string>
   <string name="unlock_all_formats">Lås op for alle videoformater</string>
   <string name="unlock_all_formats_desc">På nogle enheder rapporterer firmwaren forkert nogle formater som ikke-understøttede, selv hvis de er.\n(F.eks. har 1080p smart-TV\'er en tendens til at rapportere 4K som ikke-understøttet.)</string>

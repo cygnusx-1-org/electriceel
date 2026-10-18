@@ -567,6 +567,8 @@
     <string name="alt_app_icon">Alternatives App-Symbol (Neustart erforderlich)</string>
     <string name="network_stack">Netzwerk-Engine %s bevorzugen</string>
     <string name="player_network_stack">Netzwerk-Engine</string>
+    <string name="client_order">Reihenfolge der YouTube-Clients</string>
+    <string name="client_signed_in">%s (angemeldet, am besten für Premium)</string>
     <string name="cronet_desc">Cronet ist die Netzwerk-Engine von Chromium. Cronet kann die Latenz verringern und die Netzwerkleistung erhöhen, was bei Pufferproblemen helfen kann.</string>
     <string name="unlock_all_formats">Alle Video-Formate freischalten</string>
     <string name="unlock_all_formats_desc">Bei einigen Geräten meldet die Firmware fälschlicherweise, dass einige Formate nicht unterstützt werden, auch wenn sie es sind.\n(z.B. melden 1080p-Smart-TVs oft, dass 4k nicht unterstützt wird).</string>

@@ -569,6 +569,8 @@
     <string name="alt_app_icon">Alternativ tətbiq işarəsi (yenidən başlamaq tələb olunur)</string>
     <string name="network_stack">%s şəbəkə stekinə üstünlük ver</string>
     <string name="player_network_stack">Şəbəkə mühərriki</string>
+    <string name="client_order">YouTube klientlərinin sırası</string>
+    <string name="client_signed_in">%s (hesaba daxil olunub, Premium üçün ən yaxşısı)</string>
     <string name="cronet_desc">Cronet Chromium şəbəkə stekidir. Cronet gecikməni azalda və şəbəkə performansını artıra bilər ki, bu da buferləşmə problemlərinin həllinə kömək edir.</string>
     <string name="unlock_all_formats">Bütün video formatlarının kilidini aç</string>
     <string name="unlock_all_formats_desc">Bəzi cihazlarda proqram təminatı səhv olaraq bəzi formatları dəstəklənməyən kimi göstərir, hətta dəstəkləsələr belə.\n(məsələn, 1080p smart televizorlar adətən 4K-nı dəstəklənmədiyini bildirir).</string>

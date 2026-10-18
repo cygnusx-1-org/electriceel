@@ -127,4 +127,6 @@
     <string name="player_show_clock">Show clock</string>
     <string name="player_show_remaining_time">Show remaining time</string>
     <string name="open_channel_uploads">Open channel videos</string>
+    <string name="client_order">Ordinea clienților YouTube</string>
+    <string name="client_signed_in">%s (conectat, cel mai bun pentru Premium)</string>
 </resources>

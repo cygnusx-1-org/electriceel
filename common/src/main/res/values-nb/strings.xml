@@ -565,6 +565,8 @@
     <string name="alt_app_icon">Alternativt appikon (krever omstart)</string>
     <string name="network_stack">Foretrekk %s nettverksstabel</string>
     <string name="player_network_stack">Nettverksmotor</string>
+    <string name="client_order">Rekkefølge for YouTube-klienter</string>
+    <string name="client_signed_in">%s (pålogget, best for Premium)</string>
     <string name="cronet_desc">Cronet er nettverksstabelen til Chromium. Cronet kan redusere ventetiden og øke nettverksytelsen, noe som kan hjelpe med bufferproblemer.</string>
     <string name="unlock_all_formats">Lås opp alle videoformater</string>
     <string name="unlock_all_formats_desc">På noen enheter rapporterer fastvaren feilaktig at noen formater ikke støttes, selv om de er det.\n(f.eks. har 1080p smart-TVer en tendens til å rapportere 4k som ikke støttet).</string>

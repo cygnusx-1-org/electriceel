@@ -573,6 +573,8 @@
   <string name="disable_history_global">تعطيل السجلّ في الحساب عالميًا</string>
   <string name="enable_history">تمكين السجلّ</string>
   <string name="player_network_stack">محرك الشبكة</string>
+  <string name="client_order">ترتيب عملاء YouTube</string>
+  <string name="client_signed_in">%s (مسجّل الدخول، الأفضل لـ Premium)</string>
   <string name="dialog_notification">عرض إشعار بالتحديثات من خلال نافذة منبثقة</string>
   <string name="default_stack_desc">محرك الشبكة المدمج. قد يكون لهذا المحرك استقرار أفضل في بعض الحالات.</string>
   <string name="screensaver_timout">مهلة شاشة التوقف</string>

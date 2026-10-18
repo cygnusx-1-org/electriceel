@@ -559,6 +559,8 @@
   <string name="player_long_speed_list">Lange snelheidslijst</string>
   <string name="player_extra_long_speed_list">Extra lange snelheidslijst</string>
   <string name="alt_app_icon">Alternatief app-pictogram (herstart vereist)</string>
+  <string name="client_order">Volgorde van YouTube-clients</string>
+  <string name="client_signed_in">%s (ingelogd, het beste voor Premium)</string>
   <string name="cronet_desc">Cronet is de Chromium-netwerkstack. Cronet kan de latentie verminderen en de netwerkprestaties verbeteren, wat kan helpen bij bufferingsproblemen.</string>
   <string name="unlock_all_formats">Ontgrendel alle videoformaten</string>
   <string name="okhttp_desc">Deze netwerkengine is het langzaamst, maar is wel stabiel.</string>

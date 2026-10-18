@@ -553,6 +553,8 @@
   <string name="alt_app_icon">Ikona alternative e aplikacionit (kërkon rinisje)</string>
   <string name="network_stack">Prefero stivën e rrjetit %s</string>
   <string name="player_network_stack">Motori i rrjetit</string>
+  <string name="client_order">Renditja e klientëve të YouTube</string>
+  <string name="client_signed_in">%s (i identifikuar, më i miri për Premium)</string>
   <string name="cronet_desc">Cronet është stiva e rrjetit të Chromium. Cronet mund të ul vonesën dhe të rrisë performancën e rrjetit, gjë që mund të ndihmojë në problemet me buferimin.</string>
   <string name="unlock_all_formats">Zhblloko të gjitha formatet e videos</string>
   <string name="unlock_all_formats_desc">Në disa pajisje firmueri njofton gabimisht disa formate si të pambështetura, edhe pse janë.\n(për shembull, televizorët e mençur 1080p priten që të njoftojnë 4k si të pambështetur).</string>

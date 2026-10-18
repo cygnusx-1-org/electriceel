@@ -567,6 +567,8 @@
   <string name="alt_app_icon">Ícone de aplicativo alternativo (necessário reiniciar)</string>
   <string name="network_stack">Preferir Ponte de Conexão %s</string>
   <string name="player_network_stack">Rotas de conexão</string>
+  <string name="client_order">Ordem dos clientes do YouTube</string>
+  <string name="client_signed_in">%s (conectado, o melhor para Premium)</string>
   <string name="cronet_desc">Cronet é a rota de rede do Chromium. O Cronet pode reduzir a latência e aumentar a desempenho da rede, o que pode ajudar com problemas de buffering.</string>
   <string name="unlock_all_formats">Desbloquear todos os formatos de vídeo</string>
   <string name="unlock_all_formats_desc">Em alguns dispositivos o firmware apresenta incorretamente alguns formatos como não suportados, mesmo que eles sejam.\n (ex. Smart TVs 1080p costumam reportar o 4K como não suportado).</string>

@@ -572,6 +572,8 @@
   <string name="disable_history_global">غیرفعال کردن تاریخچه حساب به‌صورت سراسری</string>
   <string name="enable_history">فعال‌سازی تاریخچه</string>
   <string name="player_network_stack">موتور شبکه</string>
+  <string name="client_order">ترتیب کلاینت‌های YouTube</string>
+  <string name="client_signed_in">%s (وارد شده، بهترین برای Premium)</string>
   <string name="dialog_notification">اعلان بروزرسانی‌ها از طریق کادر بازشو</string>
   <string name="default_stack_desc">موتور شبکه داخلی. این موتور ممکن است در برخی شرایط ثبات بهتری داشته باشد.</string>
   <string name="screensaver_timout">زمان محافظ صفحه</string>

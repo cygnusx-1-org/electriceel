@@ -565,6 +565,8 @@
     <string name="alt_app_icon">Алтернативна икона апликације (потребно је поновно покретање)</string>
     <string name="network_stack">Дај предност %s мрежном стеку</string>
     <string name="player_network_stack">Мрежни мотор</string>
+    <string name="client_order">Редослед YouTube клијената</string>
+    <string name="client_signed_in">%s (пријављен, најбољи за премијум)</string>
     <string name="cronet_desc">Кронет је Хромиум мрежни стек. Кронет може смањити кашњење и побољшати перформансе мреже, што може помоћи са проблемима баферовања.</string>
     <string name="unlock_all_formats">Откључај све видео формате</string>
     <string name="unlock_all_formats_desc">На неким уређајима фирмвер нетачно пријављује да одређени формати нису подржани, иако јесу.\n(нпр. 1080п паметни телевизори често пријављују да 4к није подржан).</string>

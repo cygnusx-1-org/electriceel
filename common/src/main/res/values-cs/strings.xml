@@ -569,6 +569,8 @@
     <string name="alt_app_icon">Alternativní ikona aplikace (vyžaduje restart)</string>
     <string name="network_stack">Preferovat síťový zásobník %s</string>
     <string name="player_network_stack">Síťový vyhledávač</string>
+    <string name="client_order">Pořadí klientů YouTube</string>
+    <string name="client_signed_in">%s (přihlášený, nejlepší pro Premium)</string>
     <string name="cronet_desc">Cronet je Chromium síťový zásobník. Může snížit latenci a zvýšit výkon sítě, což může pomoci s problémy s vyrovnávací pamětí.</string>
     <string name="unlock_all_formats">Odblokovat všechny formáty videa</string>
     <string name="unlock_all_formats_desc">Na některých zařízeních firmware nesprávně hlásí určité formáty jako nepodporované i když podporované jsou.\n(např. chytré televize s rozlišením 1080p mají tendenci hlásit 4K jako nepodporované)</string>

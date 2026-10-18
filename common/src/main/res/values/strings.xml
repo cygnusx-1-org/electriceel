@@ -748,6 +748,8 @@
     <string name="alt_app_icon">Alternative app icon (needs reboot)</string>
     <string name="network_stack">Prefer %s network stack</string>
     <string name="player_network_stack">Network engine</string>
+    <string name="client_order">YouTube clients order</string>
+    <string name="client_signed_in">%s (signed in, the best for Premium)</string>
     <string name="cronet_desc">Cronet is the Chromium network stack. Cronet can reduce the latency and increase networking performance, which can help with buffering issues.</string>
     <string name="unlock_all_formats">Unlock all video formats</string>
     <string name="unlock_all_formats_desc">On some devices the firmware incorrectly reports some formats as unsupported, even if they are.\n(e.g. 1080p smart TVs tend to report 4k as not supported).</string>

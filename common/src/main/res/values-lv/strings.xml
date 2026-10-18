@@ -150,4 +150,6 @@
     <string name="disable_history">Atspējot vēsturi</string>
     <string name="disable_history_local">Atspējot šī konta vēsturi lokāli</string>
     <string name="disable_history_global">Atspējot konta vēsturi globāli</string>
+    <string name="client_order">YouTube klientu secība</string>
+    <string name="client_signed_in">%s (pierakstījies, labākais Premium lietotājiem)</string>
 </resources>

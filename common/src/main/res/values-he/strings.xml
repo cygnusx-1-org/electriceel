@@ -571,6 +571,8 @@ So, make a copy of values-he and name it values-iw. Keep both in your structure.
     <string name="alt_app_icon">סמל יישום חלופי (נדרש אתחול מחדש)</string>
     <string name="network_stack">העדפת ערימת רשת מסוג %s</string>
     <string name="player_network_stack">מנוע רשת</string>
+    <string name="client_order">סדר לקוחות YouTube</string>
+    <string name="client_signed_in">%s (מחובר, הטוב ביותר עבור פרימיום)</string>
     <string name="cronet_desc">ערימת הרשת של Chromium היא Cronet. ערימת הרשת Cronet יכולה להפחית את זמן ההמתנה ולהגביר את ביצועי הרשת, מה שיכול לעזור עם בעיות טעינה.</string>
     <string name="unlock_all_formats">ביטול הנעילה של כל פורמטי הסרטון</string>
     <string name="unlock_all_formats_desc">במכשירים מסוימים הקושחה מדווחת באופן שגוי על פורמטים מסוימים כלא נתמכים, גם אם הם כן.\n(למשל טלוויזיות 1080p חכמות נוטות לדווח על 4K כלא נתמך).</string>

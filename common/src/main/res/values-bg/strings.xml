@@ -539,6 +539,8 @@
   <string name="alt_app_icon">Алтернативна икона на приложение (необходимо е рестартиране)</string>
   <string name="network_stack">Предпочитане на мрежовия стек %s</string>
   <string name="player_network_stack">Мрежов стек</string>
+  <string name="client_order">Ред на клиентите на YouTube</string>
+  <string name="client_signed_in">%s (с вход в профила, най-добрият за Premium)</string>
   <string name="cronet_desc">Cronet е мрежовият стек на Chromium. Cronet може да намали латентността и да увеличи производителността на мрежата, което може да помогне при проблеми с буферирането.</string>
   <string name="unlock_all_formats">Отключване на всички видео формати</string>
   <string name="unlock_all_formats_desc">При някои устройства фърмуерът некоректно съобщава за някои формати като неподдържани, дори и да са такива.\n(напр. 1080p смарт телевизорите обикновено съобщават, че 4k не се поддържа).</string>
