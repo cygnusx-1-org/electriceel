@@ -767,4 +767,5 @@
     <string name="aislist_about">Tietoja AiSLististä (yhteisön lista, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Ilmoita kanava AiSListiin</string>
     <string name="add_remove_from_home_rows">Lisää/poista Kodista</string>
+  <string name="remove_video_to_watch_later">Poista ”Katso myöhemmin” listalta</string>
 </resources>

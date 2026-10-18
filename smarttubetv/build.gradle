@@ -59,8 +59,8 @@ android {
         applicationId "org.cygnusx1.electriceel"
         minSdkVersion project.properties.minSdkVersion
         targetSdkVersion project.properties.targetSdkVersion
-        versionCode 2446
-        versionName "32.56.9.2"
+        versionCode 2458
+        versionName "32.68.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
 
@@ -244,4 +244,6 @@ dependencies {
 
     // ByeByeDPI fix
     implementation 'org.conscrypt:conscrypt-android:' + conscryptVersion
+
+    implementation 'androidx.work:work-runtime:' + workVersion
 }
