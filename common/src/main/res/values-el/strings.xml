@@ -558,6 +558,8 @@
   <string name="screensaver_timout">Λήξη χρονικού ορίου προφύλαξης οθόνης </string>
   <string name="screensaver_dimming">Ποσότητα σκοτεινιάσματος προφύλαξης οθόνης</string>
   <string name="player_network_stack">Στοίβα δικτύου</string>
+  <string name="client_order">Σειρά προγραμμάτων-πελατών YouTube</string>
+  <string name="client_signed_in">%s (συνδεδεμένο, το καλύτερο για Premium)</string>
   <string name="header_shorts">Shorts</string>
   <string name="player_auto_volume">Αυτόματη ρύθμιση έντασης</string>
   <string name="player_ui_on_next">Εμφάνιση της διεπαφής χρήστη του προγράμματος αναπαραγωγής κατά τη μετάβαση στο επόμενο βίντεο</string>

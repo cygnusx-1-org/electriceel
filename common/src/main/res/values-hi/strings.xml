@@ -534,6 +534,8 @@
   <string name="alt_app_icon">वैकल्पिक ऐप आइकन</string>
   <string name="network_stack">%s नेटवर्क स्टैक को प्राथमिकता दें</string>
   <string name="player_network_stack">नेटवर्क स्टैक</string>
+  <string name="client_order">YouTube क्लाइंट का क्रम</string>
+  <string name="client_signed_in">%s (साइन इन, Premium के लिए सबसे अच्छा)</string>
   <string name="cronet_desc">क्रोनेट क्रोमियम नेटवर्क स्टैक है। क्रोनेट विलंबता को कम कर सकता है और नेटवर्किंग प्रदर्शन को बढ़ा सकता है, जो बफरिंग समस्याओं में मदद कर सकता है।</string>
   <string name="unlock_all_formats">सभी वीडियो प्रारूप अनलॉक करें</string>
   <string name="unlock_all_formats_desc">कुछ डिवाइस पर फ़र्मवेयर कुछ प्रारूपों को असमर्थित के रूप में रिपोर्ट करता है, भले ही वे समर्थित हों।\n(उदाहरण के लिए, 1080p स्मार्ट टीवी 4k को असमर्थित दर्शाता हैं)।</string>

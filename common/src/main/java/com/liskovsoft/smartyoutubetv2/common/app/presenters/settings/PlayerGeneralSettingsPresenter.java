@@ -49,6 +49,8 @@ public class PlayerGeneralSettingsPresenter extends BasePresenter<Void> implemen
                 () -> PlayerSettingsPresenter.instance(context).showMisc(), R.drawable.settings_misc));
         items.add(new SettingsItem(context.getString(R.string.player_network_stack),
                 () -> PlayerSettingsPresenter.instance(context).showNetworkEngine(), R.drawable.settings_network_engine));
+        items.add(new SettingsItem(context.getString(R.string.client_order),
+                () -> PlayerSettingsPresenter.instance(context).showClientOrder(), R.drawable.settings_client_order));
         items.add(new SettingsItem(context.getString(R.string.player_pixel_ratio),
                 () -> PlayerSettingsPresenter.instance(context).showPixelRatio(), R.drawable.settings_pixel_ratio));
         items.add(new SettingsItem(context.getString(R.string.action_repeat_mode),

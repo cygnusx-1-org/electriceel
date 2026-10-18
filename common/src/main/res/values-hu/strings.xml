@@ -557,6 +557,8 @@
   <string name="player_chapter_notification">Értesítés megjelenítése a fejezetek ugrásához</string>
   <string name="player_volume">Hangerő</string>
   <string name="player_network_stack">Hálózati verem</string>
+  <string name="client_order">YouTube-kliensek sorrendje</string>
+  <string name="client_signed_in">%s (bejelentkezve, a legjobb prémiumhoz)</string>
   <string name="subtitle_remember">Emlékezzen a felirat beállításokra a felvett csatornákon</string>
   <string name="amazon_frame_drop_fix">Képkocka eldobása #2</string>
   <string name="amazon_frame_drop_fix_desc">Amazon Stick eszközökhöz készült. Működhet más eszközökön is.</string>

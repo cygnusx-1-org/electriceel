@@ -552,6 +552,8 @@
   <string name="alt_app_icon">备用应用图标（需重启）</string>
   <string name="network_stack">首选 %s 网络协议栈</string>
   <string name="player_network_stack">网络引擎</string>
+  <string name="client_order">YouTube 客户端顺序</string>
+  <string name="client_signed_in">%s（已登录，最适合 Premium 会员）</string>
   <string name="cronet_desc">Cronet是Chromium的网络协议栈。可以降低延迟并提升网络性能，有助于解决缓冲问题。</string>
   <string name="unlock_all_formats">解锁所有视频格式</string>
   <string name="unlock_all_formats_desc">某些设备的固件会错误地将某些格式报告为不受支持，即使这些格式实际上是支持的。\n（例如，1080p智能电视往往会将4k视频报告为不受支持）。</string>

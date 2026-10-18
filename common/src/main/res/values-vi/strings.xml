@@ -582,6 +582,8 @@
   <string name="alt_app_icon">Biểu tượng ứng dụng thay thế (cần khởi động lại)</string>
   <string name="network_stack">Ưu tiên lớp giao thức mạng %s</string>
   <string name="player_network_stack">Trình xử lý mạng</string>
+  <string name="client_order">Thứ tự ứng dụng khách YouTube</string>
+  <string name="client_signed_in">%s (đã đăng nhập, tốt nhất cho Premium)</string>
   <string name="cronet_desc">Cronet là lớp giao thức mạng cho Chromium. Cronet có thể giảm độ trễ và tăng hiệu suất mạng, và có thể giúp giải quyết các vấn đề về bộ đệm.</string>
   <string name="okhttp_desc">Trình xử lý mạng này là trình xử lý chậm nhất nhưng có độ ổn định tốt.</string>
   <string name="select_channel_section">Mở phần tương ứng khi ứng dụng được khởi chạy từ kênh ATV</string>

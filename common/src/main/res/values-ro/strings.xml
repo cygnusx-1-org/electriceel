@@ -554,6 +554,8 @@
   <string name="alt_app_icon">Pictogramă alternativă a aplicației (necesită repornire)</string>
   <string name="network_stack">Preferați %s stivă de rețea</string>
   <string name="player_network_stack">Motor de rețea</string>
+  <string name="client_order">Ordinea clienților YouTube</string>
+  <string name="client_signed_in">%s (conectat, cel mai bun pentru Premium)</string>
   <string name="cronet_desc">Cronet este stiva de rețea Chromium. Cronet poate reduce latența și crește performanța rețelei, ceea ce poate ajuta la problemele de redare.</string>
   <string name="unlock_all_formats">Deblocați toate formatele video</string>
   <string name="unlock_all_formats_desc">Pe unele dispozitive, firmware-ul raportează incorect unele formate ca neacceptate, chiar dacă sunt.\n (de exemplu, televizoarele inteligente 1080p tind să raporteze 4k ca nefiind acceptate).</string>

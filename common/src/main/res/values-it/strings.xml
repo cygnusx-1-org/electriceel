@@ -569,6 +569,8 @@
     <string name="alt_app_icon">Icona alternativa dell\'app (è necessario riavviare)</string>
     <string name="network_stack">Preferisci stack di rete %s</string>
     <string name="player_network_stack">Motore di rete</string>
+    <string name="client_order">Ordine dei client YouTube</string>
+    <string name="client_signed_in">%s (con accesso, il migliore per Premium)</string>
     <string name="cronet_desc">Cronet è lo stack di rete di Chromium. Cronet può ridurre la latenza e aumentare le prestazioni di rete, il che può aiutare con problemi di buffering.</string>
     <string name="unlock_all_formats">Sblocca tutti i formati video</string>
     <string name="unlock_all_formats_desc">Su alcuni dispositivi il firmware riporta erroneamente alcuni formati come non supportati, anche se lo sono.\n(ad esempio, le smart TV 1080p tendono a segnalare 4k come non supportato).</string>

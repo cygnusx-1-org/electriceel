@@ -559,6 +559,8 @@
   <string name="alt_app_icon">ალტერნატიული აპლიკაციის ხატულა (საჭიროა გადატვირთვა)</string>
   <string name="network_stack">ქსელური სტეკის უპირატესოვა %s</string>
   <string name="player_network_stack">ქსელური ძრავა</string>
+  <string name="client_order">YouTube კლიენტების თანმიმდევრობა</string>
+  <string name="client_signed_in">%s (შესული, საუკეთესო პრემიუმისთვის)</string>
   <string name="cronet_desc">Cronet არის Chromium-ის ქსელური დასტა. Cronet-ს შეუძლია შეამციროს შეყოვნება და გაზარდოს ქსელის მუშაობა, რაც დაგეხმარებათ ბუფერიზაციის პრობლემების მოგვარებაში.</string>
   <string name="unlock_all_formats">ყველა ვიდეოფორმატის განბლოკვა</string>
   <string name="unlock_all_formats_desc">ზოგიერთ მოწყობილობაზე პროგრამული უზრუნველყოფა არასწორად აფიქსირებს ზოგიერთ ფორმატს, როგორც მხარდაუჭერელს, მაშინაც კი, თუ ისინი მხარდაუჭერელია.\n(მაგ. 1080p ჭკვიანი ტელევიზორები, როგორც წესი, 4k ფორმატს, როგორც მხარდაუჭერელს, აფიქსირებენ)</string>

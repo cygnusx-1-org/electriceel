@@ -629,6 +629,8 @@
   <string name="dearrow_status">Tarkista DeArrow-palvelimen tilanne</string>
   <string name="player_extra_long_speed_list">Extralaaja nopeuslista </string>
   <string name="player_network_stack">Verkkotekniikka</string>
+  <string name="client_order">YouTube-asiakasohjelmien järjestys</string>
+  <string name="client_signed_in">%s (kirjautunut, paras Premiumille)</string>
   <string name="old_channel_look">Kanavatilausten vanha ulkoasu</string>
   <string name="remember_position_pinned">Muista viimeksi katsottu sijainti soittolistoissa</string>
   <string name="unknown_source_error">Tuntematon lähdevirhe</string>

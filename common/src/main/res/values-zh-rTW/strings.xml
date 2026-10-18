@@ -511,6 +511,8 @@
   <string name="live_stream_fix_4k">直播串流功能修正（4K）</string>
   <string name="network_stack">偏好 %s 網路堆疊</string>
   <string name="player_network_stack">網路引擎</string>
+  <string name="client_order">YouTube 用戶端順序</string>
+  <string name="client_signed_in">%s（已登入，最適合 Premium 會員）</string>
   <string name="cronet_desc">Cronet 是 Chromium 的網路堆疊。Cronet 可以降低延遲並提升網路效能，有助於緩衝問題。</string>
   <string name="unlock_all_formats">解鎖所有影片格式</string>
   <string name="unlock_all_formats_desc">在某些裝置上，韌體就算有支援，還是會錯誤地回報不支援某些格式。（例如 1080p 解析度的智慧電視傾向於回報不支援 4K 影片）。</string>

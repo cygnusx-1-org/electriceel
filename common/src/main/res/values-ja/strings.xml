@@ -569,6 +569,8 @@
     <string name="alt_app_icon">代替のアプリアイコン (再起動が必要)</string>
     <string name="network_stack">%s のネットワークスタックを優先する</string>
     <string name="player_network_stack">ネットワークエンジン</string>
+    <string name="client_order">YouTube クライアントの順序</string>
+    <string name="client_signed_in">%s（ログイン済み、プレミアムに最適）</string>
     <string name="cronet_desc">Cronet は、Chromium のネットワークスタックです。遅延を減らし、ネットワーク性能を向上させることでバッファの問題を解決できます。</string>
     <string name="unlock_all_formats">すべての動画の形式をアンロックする</string>
     <string name="unlock_all_formats_desc">一部のデバイスにおいて、ファームウェアが対応しているフォーマットを非対応と誤認識します。\n(例: 1080p のスマートテレビは、4K に非対応と認識する傾向があります)</string>

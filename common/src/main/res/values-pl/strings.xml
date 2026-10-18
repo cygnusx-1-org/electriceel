@@ -553,6 +553,8 @@
   <string name="alt_app_icon">Alternatywna ikona aplikacji (wymaga ponownego uruchomienia aplikacji)</string>
   <string name="network_stack">Preferuj bibliotekę sieciową %s</string>
   <string name="player_network_stack">Biblioteka sieciowa</string>
+  <string name="client_order">Kolejność klientów YouTube</string>
+  <string name="client_signed_in">%s (zalogowany, najlepszy dla Premium)</string>
   <string name="cronet_desc">Cronet jest biblioteką sieciową projektu Chromium. Cronet potrafi zmniejszyć opóźnienia i zwiększyć wydajność operacji sieciowych, czym może pomóc w przypadku problemów z buforowaniem wideo</string>
   <string name="unlock_all_formats">Odblokuj wszystkie formaty wideo</string>
   <string name="unlock_all_formats_desc">W przypadku niektórych urządzeń ich oprogramowanie wewnętrzne (firmware) nieprawidłowo rozpoznaje pewne formaty jako nieobsługiwane.\nNa przykład telewizory Smart TV FHD zwykle zgłaszają format UHD jako nieobsługiwany</string>

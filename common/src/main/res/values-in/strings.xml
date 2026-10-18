@@ -545,6 +545,8 @@
   <string name="alt_app_icon">Ikon alternatif aplikasi (perlu dibuka ulang)</string>
   <string name="network_stack">Lebih suka %s tumpukan jaringan</string>
   <string name="player_network_stack">Mesin jaringan</string>
+  <string name="client_order">Urutan klien YouTube</string>
+  <string name="client_signed_in">%s (masuk, terbaik untuk premium)</string>
   <string name="cronet_desc">Cronet adalah tumpukan jaringan Chromium. Cronet dapat mengurangi latensi dan meningkatkan kinerja jaringan, yang dapat membantu mengatasi masalah buffering.</string>
   <string name="unlock_all_formats">Membuka semua format video</string>
   <string name="unlock_all_formats_desc">Pada beberapa perangkat, firmware salah melaporkan beberapa format sebagai format yang tidak didukung, meskipun sebenarnya format tersebut didukung.\n(misalnya, smart TV 1080p cenderung melaporkan 4k sebagai tidak didukung).</string>

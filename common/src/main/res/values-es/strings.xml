@@ -579,6 +579,8 @@
   <string name="disable_history_global">Desactivar historial de la cuenta globalmente</string>
   <string name="enable_history">Activar historial</string>
   <string name="player_network_stack">Pila de red</string>
+  <string name="client_order">Orden de los clientes de YouTube</string>
+  <string name="client_signed_in">%s (con sesión iniciada, el mejor para Premium)</string>
   <string name="dialog_notification">Notificación de la actualización mediante un cuadro de diálogo emergente</string>
   <string name="auto_history">Auto (usar configuración de cuenta)</string>
   <string name="remember_position_subscriptions">Recordar la última posición vista en Suscripciones</string>

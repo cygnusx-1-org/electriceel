@@ -491,6 +491,8 @@
     <string name="auto_frame_rate_modes">Podržani načini</string>
     <string name="loading">Učitavanje…</string>
     <string name="hide_streams">Sakrij strujanja iz Pretplata</string>
+    <string name="client_order">Redoslijed YouTube klijenata</string>
+    <string name="client_signed_in">%s (prijavljen, najbolji za Premium)</string>
     <string name="header_blocked_ai_channels">Blokirani UI kanali</string>
     <string name="blocked_ai_channels_message">Kanali čije je videozapise AiSList sakrio iz vaših feedova otkad je aplikacija pokrenuta, ne cijeli popis</string>
     <string name="aislist_mark_videos">Označi videozapise</string>

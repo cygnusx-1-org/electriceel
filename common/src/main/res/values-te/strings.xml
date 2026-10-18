@@ -245,4 +245,6 @@
     <string name="disable_history">చరిత్రను నిలిపివేయండి</string>
     <string name="disable_history_local">ఈ ఖాతా చరిత్రను స్థానికంగా నిలిపివేయండి</string>
     <string name="disable_history_global">ఖాతా చరిత్రను అంతటా నిలిపివేయండి</string>
+    <string name="client_order">YouTube క్లయింట్‌ల క్రమం</string>
+    <string name="client_signed_in">%s (సైన్ ఇన్ చేయబడింది, Premium కోసం ఉత్తమమైనది)</string>
 </resources>

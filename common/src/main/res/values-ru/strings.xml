@@ -563,6 +563,8 @@
     <string name="alt_app_icon">Альтернативный значок приложения (требуется перезагрузка)</string>
     <string name="network_stack">Предпочитать сетевой стек %s</string>
     <string name="player_network_stack">Сетевой движок</string>
+    <string name="client_order">Порядок клиентов YouTube</string>
+    <string name="client_signed_in">%s (с входом в аккаунт, лучший для Premium)</string>
     <string name="cronet_desc">Cronet — это сетевой стек Chromium. Обычно быстрее других. Это может помочь с проблемами буферизации.</string>
     <string name="unlock_all_formats">Разблокировать все видео форматы</string>
     <string name="unlock_all_formats_desc">Разблокировать форматы, которые, вероятно, не поддерживаются вашим устройством.</string>

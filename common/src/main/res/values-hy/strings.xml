@@ -176,4 +176,6 @@
     <string name="disable_history">Անջատել պատմությունը</string>
     <string name="disable_history_local">Անջատել այս հաշվի պատմությունը տեղականորեն</string>
     <string name="disable_history_global">Անջատել հաշվի պատմությունը գլոբալ</string>
+    <string name="client_order">YouTube կլիենտների հերթականություն</string>
+    <string name="client_signed_in">%s (մուտք գործած, լավագույնը Premium-ի համար)</string>
 </resources>

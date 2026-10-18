@@ -353,4 +353,6 @@
     <string name="disable_history">ปิดประวัติ</string>
     <string name="disable_history_local">ปิดประวัติของบัญชีนี้ในเครื่อง</string>
     <string name="disable_history_global">ปิดประวัติของบัญชีทั้งหมด</string>
+    <string name="client_order">ลำดับไคลเอ็นต์ YouTube</string>
+    <string name="client_signed_in">%s (ลงชื่อเข้าใช้แล้ว เหมาะที่สุดสำหรับ Premium)</string>
 </resources>

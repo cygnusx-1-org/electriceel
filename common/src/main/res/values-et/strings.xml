@@ -544,6 +544,8 @@
   <string name="alt_app_icon">Alternatiivse rakenduse ikoon (vajab taaskäivitamist)</string>
   <string name="network_stack">Eelista %s võrgutarkvara</string>
   <string name="player_network_stack">Võrgutarkvara</string>
+  <string name="client_order">YouTube klientide järjekord</string>
+  <string name="client_signed_in">%s (sisse logitud, parim Premiumi jaoks)</string>
   <string name="cronet_desc">Cronet on Chromiumi võrgutarkvara. Võib aidata puhverdusprobleemide korral.</string>
   <string name="unlock_all_formats">Lase kasutada kõiki videovorminguid</string>
   <string name="unlock_all_formats_desc">Mõnes seadmes teatab operatsioonisüsteem valesti, et mõni videovorming pole toetatud, kuigi tegelikkuses on.\n(näiteks 1080p nutitelerid teatavad tihti, et 4K ei toetata).</string>

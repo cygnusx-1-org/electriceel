@@ -21,6 +21,7 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.SearchData;
 import com.liskovsoft.smartyoutubetv2.common.utils.AppDialogUtil;
+import com.liskovsoft.youtubeapi.common.helpers.AppClient;
 import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
 
 import java.util.ArrayList;
@@ -74,6 +75,14 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
      */
     public void showNetworkEngine() {
         showCategory(R.string.player_network_stack, this::appendNetworkEngineCategory);
+    }
+
+    /**
+     * The YouTube clients' order card of the Player settings, in General: the clients are tried in turn to get the formats of a
+     * video, until one plays
+     */
+    public void showClientOrder() {
+        showCategory(R.string.client_order, this::appendClientOrderCategory);
     }
 
     /**
@@ -680,6 +689,29 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
     private void appendNetworkEngineCategory(AppDialogPresenter settingsPresenter) {
         OptionCategory category = AppDialogUtil.createNetworkEngineCategory(getContext());
         settingsPresenter.appendCategory(category);
+    }
+
+    /**
+     * The clients put in order with the remote (see OptionCategory.reorderList). Read again each time it's opened.
+     */
+    private void appendClientOrderCategory(AppDialogPresenter settingsPresenter) {
+        List<OptionItem> options = new ArrayList<>();
+
+        for (String client : mMediaServiceData.getClientOrder()) {
+            // The ones that are signed in (TV and TV_DOWNGRADED)
+            String title = AppClient.valueOf(client).isAuthSupported() ? getContext().getString(R.string.client_signed_in, client) : client;
+            options.add(UiOptionItem.from(title, null, false, client));
+        }
+
+        settingsPresenter.appendReorderCategory(getContext().getString(R.string.client_order), options, items -> {
+            List<String> clients = new ArrayList<>();
+
+            for (OptionItem item : items) {
+                clients.add((String) item.getData());
+            }
+
+            mMediaServiceData.setClientOrder(clients);
+        });
     }
 
     private void appendPlayerExitCategory(AppDialogPresenter settingsPresenter) {

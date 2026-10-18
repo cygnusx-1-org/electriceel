@@ -327,4 +327,6 @@
     <string name="disable_history">Onemogoči zgodovino</string>
     <string name="disable_history_local">Onemogoči zgodovino tega računa lokalno</string>
     <string name="disable_history_global">Onemogoči zgodovino računa globalno</string>
+    <string name="client_order">Vrstni red odjemalcev YouTube</string>
+    <string name="client_signed_in">%s (prijavljen, najboljši za Premium)</string>
 </resources>

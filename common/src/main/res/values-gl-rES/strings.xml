@@ -554,6 +554,8 @@
   <string name="alt_app_icon">Icona da aplicación alternativa (necesita reiniciar)</string>
   <string name="network_stack">Prefire a pila de rede %s</string>
   <string name="player_network_stack">Motor de rede</string>
+  <string name="client_order">Orde dos clientes de YouTube</string>
+  <string name="client_signed_in">%s (coa sesión iniciada, o mellor para Premium)</string>
   <string name="cronet_desc">Cronet é Conxunto de protocolos de rede de Chromium. Cronet pode reducir a latencia e aumentar o rendemento da rede, o que pode axudar cos problemas de almacenamento na memoria intermedia.</string>
   <string name="unlock_all_formats">Desbloquear todos os formatos de vídeo</string>
   <string name="unlock_all_formats_desc">Nalgúns dispositivos, o firmware indica incorrectamente que algúns formatos non son compatibles, aínda que o sexan.\n(por exemplo, os televisores intelixentes de 1080p adoitan indicar que 4k non son compatibles).</string>

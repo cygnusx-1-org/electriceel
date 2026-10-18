@@ -440,4 +440,6 @@
     <string name="disable_history">Išjungti istoriją</string>
     <string name="disable_history_local">Išjungti šios paskyros istoriją vietoje</string>
     <string name="disable_history_global">Išjungti paskyros istoriją visur</string>
+    <string name="client_order">YouTube klientų tvarka</string>
+    <string name="client_signed_in">%s (prisijungta, geriausias Premium naudotojams)</string>
 </resources>
