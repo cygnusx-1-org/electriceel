@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Build.VERSION;
 
+import androidx.annotation.Nullable;
+
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.Format;
@@ -24,7 +26,9 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.listener.PlayerEventListener;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.ExoMediaSourceFactory;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.errors.TrackErrorFixer;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.other.CensoredWords.Range;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.other.FrameStepper;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.other.RangeMuter;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.other.VolumeBooster;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.ExoFormatItem;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
@@ -50,6 +54,7 @@ public class ExoPlayerController implements Player.EventListener {
     private final TrackInfoFormatter2 mTrackFormatter;
     private final TrackErrorFixer mTrackErrorFixer;
     private final FrameStepper mFrameStepper;
+    private final RangeMuter mRangeMuter;
     private boolean mOnSourceChanged;
     private WeakReference<Video> mVideo;
     private final PlayerEventListener mEventListener;
@@ -58,6 +63,9 @@ public class ExoPlayerController implements Player.EventListener {
     private VolumeBooster mVolumeBooster;
     private boolean mIsEnded;
     private Runnable mOnVideoLoaded;
+    // The volume set, kept while the range muter has the sound off
+    private float mVolume = 1f;
+    private boolean mIsMuted;
 
     public ExoPlayerController(Context context, PlayerEventListener eventListener) {
         PlayerTweaksData playerTweaksData = PlayerTweaksData.instance(context);
@@ -68,6 +76,7 @@ public class ExoPlayerController implements Player.EventListener {
         mTrackFormatter.enableBitrate(PlayerTweaksData.instance(context).isQualityInfoBitrateEnabled());
         mTrackErrorFixer = new TrackErrorFixer(mTrackSelectorManager);
         mFrameStepper = new FrameStepper(this::onFramePositionChanged);
+        mRangeMuter = new RangeMuter(this::onMuteChanged);
 
         mMediaSourceFactory.setTrackErrorFixer(mTrackErrorFixer);
         mEventListener = eventListener;
@@ -129,6 +138,7 @@ public class ExoPlayerController implements Player.EventListener {
 
     private void openMediaSource(MediaSource mediaSource) {
         mFrameStepper.reset();
+        mRangeMuter.reset();
         resetPlayerState(); // fixes occasional video artifacts and problems with quality switching
         setQualityInfo("");
 
@@ -215,6 +225,7 @@ public class ExoPlayerController implements Player.EventListener {
     public void setPlayer(SimpleExoPlayer player) {
         mPlayer = player;
         player.addListener(this);
+        mRangeMuter.setPlayer(player);
     }
 
     /**
@@ -404,6 +415,8 @@ public class ExoPlayerController implements Player.EventListener {
             mFrameStepper.onSeek();
         }
 
+        mRangeMuter.onSeek();
+
         // Fix video loop on 480p with legacy codes enabled
         if (reason == Player.DISCONTINUITY_REASON_PERIOD_TRANSITION) {
             mPlayer.stop();
@@ -454,7 +467,8 @@ public class ExoPlayerController implements Player.EventListener {
 
     public void setVolume(float volume) {
         if (mPlayer != null && volume >= 0) {
-            mPlayer.setVolume(Math.min(volume, 1f));
+            mVolume = Math.min(volume, 1f);
+            mPlayer.setVolume(mIsMuted ? 0 : mVolume);
 
             //applyVolumeBoost(volume);
         }
@@ -462,10 +476,31 @@ public class ExoPlayerController implements Player.EventListener {
     
     public float getVolume() {
         if (mPlayer != null) {
-            return mPlayer.getVolume();
+            return mIsMuted ? mVolume : mPlayer.getVolume();
         } else {
             return 1;
         }
+    }
+
+    /**
+     * Mutes the sound during the ranges of the video that's open (see CensoredWords). Opening another video drops them.
+     */
+    public void setMuteRanges(@Nullable List<Range> ranges) {
+        mRangeMuter.setRanges(ranges);
+    }
+
+    private void onMuteChanged(boolean muted) {
+        if (mPlayer == null) {
+            mIsMuted = false;
+            return;
+        }
+
+        if (muted && !mIsMuted) {
+            mVolume = mPlayer.getVolume();
+        }
+
+        mIsMuted = muted;
+        mPlayer.setVolume(muted ? 0 : mVolume);
     }
 
     /**
@@ -529,6 +564,7 @@ public class ExoPlayerController implements Player.EventListener {
 
     private void releasePlayer() {
         mFrameStepper.setPlayer(null, null);
+        mRangeMuter.setPlayer(null);
 
         if (mPlayer == null) {
             return;

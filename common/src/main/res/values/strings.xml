@@ -972,6 +972,8 @@
     <string name="aislist_report_as_account_name_desc">Each report carries the name of the signed-in account, which AiSList can show on its public leaderboard. Anonymous while signed out.</string>
     <string name="aislist_block_on_report">Block the channel when reporting</string>
     <string name="aislist_block_on_report_desc">Once AiSList takes the report, as Block the channel does</string>
+    <string name="mute_censored_words">Mute censored words</string>
+    <string name="mute_censored_words_desc">Mutes the words YouTube\'s automatic captions show as [ __ ], with subtitles on or off. Only on videos with automatic captions.</string>
     <plurals name="seconds">
         <item quantity="one">%s second</item>
         <item quantity="other">%s seconds</item>

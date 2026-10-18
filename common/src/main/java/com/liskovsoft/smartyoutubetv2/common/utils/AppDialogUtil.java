@@ -43,6 +43,7 @@ import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MotherActivity;
 import com.liskovsoft.smartyoutubetv2.common.misc.MusicAutoplayManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.WatchLaterManager;
+import com.liskovsoft.smartyoutubetv2.common.prefs.CensoredWordsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.SponsorBlockData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
@@ -528,6 +529,15 @@ public class AppDialogUtil {
         return UiOptionItem.from(context.getString(R.string.subtitle_remember),
                 optionItem -> playerData.setSubtitlesPerChannelEnabled(optionItem.isSelected()),
                 playerData.isSubtitlesPerChannelEnabled()
+        );
+    }
+
+    public static OptionItem createMuteCensoredWordsOption(Context context) {
+        CensoredWordsData data = CensoredWordsData.instance(context);
+        return UiOptionItem.from(context.getString(R.string.mute_censored_words),
+                context.getString(R.string.mute_censored_words_desc),
+                optionItem -> data.setMuteEnabled(optionItem.isSelected()),
+                data.isMuteEnabled()
         );
     }
 

@@ -39,6 +39,7 @@ public class VideoLoaderController extends BasePlayerController {
     private Video mPendingVideo;
     private SuggestionsController mSuggestionsController;
     private ErrorFixerController mErrorFixerController;
+    private CensoredWordsController mCensoredWordsController;
     private Disposable mFormatInfoAction;
     private Disposable mMusicAutoplayAction;
     private final Runnable mReloadVideo = () -> {
@@ -74,6 +75,7 @@ public class VideoLoaderController extends BasePlayerController {
     public void onInit() {
         mSuggestionsController = getController(SuggestionsController.class);
         mErrorFixerController = getController(ErrorFixerController.class);
+        mCensoredWordsController = getController(CensoredWordsController.class);
     }
 
     @Override
@@ -281,6 +283,8 @@ public class VideoLoaderController extends BasePlayerController {
         String bgImageUrl = null;
 
         getVideo().sync(formatInfo);
+
+        mCensoredWordsController.onFormatInfo(getVideo(), formatInfo);
 
         // Fix stretched video for a couple milliseconds (before the onVideoSizeChanged gets called)
         applyAspectRatio(formatInfo);

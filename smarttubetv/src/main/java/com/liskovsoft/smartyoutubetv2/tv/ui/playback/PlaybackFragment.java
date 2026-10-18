@@ -55,6 +55,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.SeekBarSegme
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.PlaybackPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.PlaybackView;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.controller.ExoPlayerController;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.other.CensoredWords.Range;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.other.DebugInfoManager;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.other.ExoPlayerInitializer;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.other.SubtitleManager;
@@ -1141,6 +1142,11 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
     @Override
     public void setVolume(float volume) {
         mExoPlayerController.setVolume(volume);
+    }
+
+    @Override
+    public void setMuteRanges(List<Range> ranges) {
+        mExoPlayerController.setMuteRanges(ranges);
     }
 
     @Override

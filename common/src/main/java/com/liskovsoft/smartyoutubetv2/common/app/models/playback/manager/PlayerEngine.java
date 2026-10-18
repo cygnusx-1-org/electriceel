@@ -1,6 +1,7 @@
 package com.liskovsoft.smartyoutubetv2.common.app.models.playback.manager;
 
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItemFormatInfo;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.other.CensoredWords.Range;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
 
 import java.io.InputStream;
@@ -46,6 +47,10 @@ public interface PlayerEngine extends PlayerConstants {
     float getPitch();
     void setVolume(float volume);
     float getVolume();
+    /**
+     * Mutes the sound during the ranges of the video that's open. Opening another video drops them.
+     */
+    void setMuteRanges(List<Range> ranges);
     void setResizeMode(int mode);
     int getResizeMode();
     void setZoomPercents(int percents);

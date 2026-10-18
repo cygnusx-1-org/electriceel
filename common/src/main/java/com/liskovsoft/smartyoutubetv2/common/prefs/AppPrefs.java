@@ -56,7 +56,7 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
             ShowsData.class.getSimpleName(), StreamedData.class.getSimpleName(), WatchLaterData.class.getSimpleName(), MusicAutoplayData.class.getSimpleName(),
             OldVideosData.class.getSimpleName(), AiSListFilterData.class.getSimpleName(), SponsorBlockData.SPONSOR_BLOCK_DATA,
             HideContentData.HIDE_CONTENT_DATA, DeArrowData.class.getSimpleName(), SearchData.SEARCH_DATA,
-            DuplicatesData.class.getSimpleName()
+            DuplicatesData.class.getSimpleName(), CensoredWordsData.class.getSimpleName()
     };
     private String mBootResolution;
     private final WeakHashSet<ProfileChangeListener> mListeners = new WeakHashSet<>();
