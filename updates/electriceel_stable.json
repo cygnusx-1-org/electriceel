@@ -1,13 +1,26 @@
 {
   "package": {
     "downloadUrlList_arm64-v8a": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.9.2/ElectricEel_stable_32.56.9.2_arm64-v8a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.68.1/ElectricEel_stable_32.68.1_arm64-v8a.apk"
     ],
     "downloadUrlList_armeabi-v7a": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.9.2/ElectricEel_stable_32.56.9.2_armeabi-v7a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.68.1/ElectricEel_stable_32.68.1_armeabi-v7a.apk"
     ],
     "downloadUrlList": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.56.9.2/ElectricEel_stable_32.56.9.2_armeabi-v7a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.68.1/ElectricEel_stable_32.68.1_armeabi-v7a.apk"
+    ]
+  },
+  "32.68.1": {
+    "versionCode": 2458,
+    "changelog": [
+      "Updated to 32.68",
+      "Fixed [BUG]: Final second of every video missing #43",
+      "Stopped the app from turning account watch history back on at launch and account switch",
+      "Added local and global Disable history options to Settings and the History menu",
+      "Changed settings to save instantly",
+      "Kept voice boost audio opt-in and labeled it in the audio formats dialog",
+      "Enabled Mark as watched in the context menu by default",
+      "Implemented Add mark or hide options for Streamed videos #41"
     ]
   },
   "32.56.9.2": {
