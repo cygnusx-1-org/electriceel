@@ -36,7 +36,8 @@ public class SectionMenuPresenter extends BaseMenuPresenter {
     private boolean mIsReturnToBackgroundVideoEnabled;
     private boolean mIsMarkAllChannelsWatchedEnabled;
     private boolean mIsRefreshEnabled;
-    private boolean mIsMoveSectionEnabled;
+    private boolean mIsMoveSectionUpEnabled;
+    private boolean mIsMoveSectionDownEnabled;
     private boolean mIsRenameSectionEnabled;
     private final Map<Long, MenuAction> mMenuMapping = new HashMap<>();
 
@@ -54,6 +55,11 @@ public class SectionMenuPresenter extends BaseMenuPresenter {
     @Override
     protected @Nullable Video getVideo() {
         return mVideo;
+    }
+
+    @Override
+    protected int getMenu() {
+        return MainUIData.MENU_SIDEBAR;
     }
 
     @Override
@@ -93,24 +99,13 @@ public class SectionMenuPresenter extends BaseMenuPresenter {
             return;
         }
 
+        // Not in the settings: first, then the ones in their order
         appendReturnToBackgroundVideoButton();
         appendRefreshButton();
-        appendUnpinVideoFromSidebarButton();
-        appendToggleHomeScreenPlaylistButton();
-        appendToggleSectionHomeRowButton();
-        appendUnpinSectionFromSidebarButton();
         appendMarkAllChannelsWatchedButton();
         appendRemoveWatchedButton();
-        appendAccountSelectionButton();
-        appendMoveSectionButton();
-        appendRenameSectionButton();
-        appendCreatePlaylistButton();
-        appendCreateLocalPlaylistButton();
-        appendToggleHistoryButton();
-        appendClearHistoryButton();
-        appendUpdateCheckButton();
 
-        for (Long menuItem : MainUIData.instance(getContext()).getMenuItemsOrdered()) {
+        for (Long menuItem : MainUIData.instance(getContext()).getMenuItemsOrdered(MainUIData.MENU_SIDEBAR)) {
             MenuAction menuAction = mMenuMapping.get(menuItem);
             if (menuAction != null) {
                 menuAction.run();
@@ -130,16 +125,8 @@ public class SectionMenuPresenter extends BaseMenuPresenter {
 
         appendReturnToBackgroundVideoButton();
         appendRefreshButton();
-        appendUnpinVideoFromSidebarButton();
-        appendToggleHomeScreenPlaylistButton();
-        appendToggleSectionHomeRowButton();
-        appendUnpinSectionFromSidebarButton();
-        appendAccountSelectionButton();
-        appendMoveSectionButton();
-        appendRenameSectionButton();
-        appendClearHistoryButton();
 
-        for (Long menuItem : MainUIData.instance(getContext()).getMenuItemsOrdered()) {
+        for (Long menuItem : MainUIData.instance(getContext()).getMenuItemsOrdered(MainUIData.MENU_SIDEBAR)) {
             MenuAction menuAction = mMenuMapping.get(menuItem);
             if (menuAction != null && !menuAction.isAuth()) {
                 menuAction.run();
@@ -171,13 +158,8 @@ public class SectionMenuPresenter extends BaseMenuPresenter {
                 }));
     }
 
-    private void appendMoveSectionButton() {
-        if (!mIsMoveSectionEnabled) {
-            return;
-        }
-
-        // Settings is always last (see SidebarService.keepSettingsLast)
-        if (mSection == null || mSection.getId() == MediaGroup.TYPE_SETTINGS) {
+    private void appendMoveSectionUpButton() {
+        if (!mIsMoveSectionUpEnabled || !canMoveSection()) {
             return;
         }
 
@@ -186,12 +168,25 @@ public class SectionMenuPresenter extends BaseMenuPresenter {
                     //mDialogPresenter.closeDialog();
                     BrowsePresenter.instance(getContext()).moveSectionUp(mSection);
                 }));
+    }
+
+    private void appendMoveSectionDownButton() {
+        if (!mIsMoveSectionDownEnabled || !canMoveSection()) {
+            return;
+        }
 
         mDialogPresenter.appendSingleButton(
                 UiOptionItem.from(getContext().getString(R.string.move_section_down), optionItem -> {
                     //mDialogPresenter.closeDialog();
                     BrowsePresenter.instance(getContext()).moveSectionDown(mSection);
                 }));
+    }
+
+    /**
+     * Settings is always last (see SidebarService.keepSettingsLast)
+     */
+    private boolean canMoveSection() {
+        return mSection != null && mSection.getId() != MediaGroup.TYPE_SETTINGS;
     }
 
     private void appendRenameSectionButton() {
@@ -317,18 +312,34 @@ public class SectionMenuPresenter extends BaseMenuPresenter {
         mIsReturnToBackgroundVideoEnabled = true;
         mIsRefreshEnabled = true;
         mIsMarkAllChannelsWatchedEnabled = true;
-        mIsMoveSectionEnabled = true;
-        mIsRenameSectionEnabled = true;
 
         MainUIData mainUIData = MainUIData.instance(getContext());
 
-        mIsMoveSectionEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_MOVE_SECTION_UP);
-        mIsMoveSectionEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_MOVE_SECTION_DOWN);
-        mIsRenameSectionEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_RENAME_SECTION);
+        mIsMoveSectionUpEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_SIDEBAR, MainUIData.MENU_ITEM_MOVE_SECTION_UP);
+        mIsMoveSectionDownEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_SIDEBAR, MainUIData.MENU_ITEM_MOVE_SECTION_DOWN);
+        mIsRenameSectionEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_SIDEBAR, MainUIData.MENU_ITEM_RENAME_SECTION);
     }
 
+    /**
+     * The items of the menu in the settings (see MainUIData.MENU_SIDEBAR). Those for the signed in only are like before they
+     * followed an order.
+     */
     private void initMenuMapping() {
         mMenuMapping.clear();
+
+        // Only one of them at a time: the pinned channel or playlist, or the section
+        mMenuMapping.put(MainUIData.MENU_ITEM_PIN_TO_SIDEBAR, new MenuAction(() -> { appendUnpinVideoFromSidebarButton(); appendUnpinSectionFromSidebarButton(); }, false));
+        mMenuMapping.put(MainUIData.MENU_ITEM_ADD_TO_HOME_SCREEN, new MenuAction(this::appendToggleHomeScreenPlaylistButton, false));
+        mMenuMapping.put(MainUIData.MENU_ITEM_ADD_TO_HOME_ROWS, new MenuAction(this::appendToggleSectionHomeRowButton, false));
+        mMenuMapping.put(MainUIData.MENU_ITEM_SELECT_ACCOUNT, new MenuAction(this::appendAccountSelectionButton, false));
+        mMenuMapping.put(MainUIData.MENU_ITEM_MOVE_SECTION_UP, new MenuAction(this::appendMoveSectionUpButton, false));
+        mMenuMapping.put(MainUIData.MENU_ITEM_MOVE_SECTION_DOWN, new MenuAction(this::appendMoveSectionDownButton, false));
+        mMenuMapping.put(MainUIData.MENU_ITEM_RENAME_SECTION, new MenuAction(this::appendRenameSectionButton, false));
+        mMenuMapping.put(MainUIData.MENU_ITEM_CREATE_PLAYLIST, new MenuAction(this::appendCreatePlaylistButton, true));
+        mMenuMapping.put(MainUIData.MENU_ITEM_CREATE_LOCAL_PLAYLIST, new MenuAction(this::appendCreateLocalPlaylistButton, true));
+        mMenuMapping.put(MainUIData.MENU_ITEM_TOGGLE_HISTORY, new MenuAction(this::appendToggleHistoryButton, true));
+        mMenuMapping.put(MainUIData.MENU_ITEM_CLEAR_HISTORY, new MenuAction(this::appendClearHistoryButton, false));
+        mMenuMapping.put(MainUIData.MENU_ITEM_UPDATE_CHECK, new MenuAction(this::appendUpdateCheckButton, true));
 
         for (ContextMenuProvider provider : new ContextMenuManager(getContext()).getProviders()) {
             if (provider.getMenuType() != ContextMenuProvider.MENU_TYPE_SECTION) {
@@ -340,7 +351,7 @@ public class SectionMenuPresenter extends BaseMenuPresenter {
 
     private void appendContextMenuItem(ContextMenuProvider provider) {
         MainUIData mainUIData = MainUIData.instance(getContext());
-        if (mainUIData.isMenuItemEnabled(provider.getId()) && provider.isEnabled(getVideo())) {
+        if (mainUIData.isMenuItemEnabled(MainUIData.MENU_SIDEBAR, provider.getId()) && provider.isEnabled(getVideo())) {
             mDialogPresenter.appendSingleButton(
                     UiOptionItem.from(getContext().getString(provider.getTitleResId()), optionItem -> provider.onClicked(getVideo(), getCallback()))
             );

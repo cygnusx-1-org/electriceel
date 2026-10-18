@@ -421,37 +421,55 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
     }
 
     /**
-     * The Context menu card of the User interface settings, in General (was in the General panel): the items of the menu and
-     * their order
+     * The Context menu card of the User interface settings, in General (was in the General panel): the menus, each with its
+     * items and their order (see MainUIData.MENU_VIDEOS...)
      */
     public void showContextMenuItems() {
         AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
 
-        settingsPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.context_menu_items), option -> showContextMenuItemsList()));
-        settingsPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.context_menu_order), option -> showContextMenuOrder()));
+        for (int[] menu : new int[][] {
+                {MainUIData.MENU_VIDEOS, R.string.context_menu_videos, R.string.context_menu_videos_desc},
+                {MainUIData.MENU_SUBSCRIPTIONS, R.string.header_subscriptions, R.string.context_menu_subscriptions_desc},
+                {MainUIData.MENU_HISTORY, R.string.header_history, 0},
+                {MainUIData.MENU_PLAYLISTS, R.string.header_playlists, 0},
+                {MainUIData.MENU_SIDEBAR, R.string.context_menu_sidebar, 0}
+        }) {
+            String title = getContext().getString(menu[1]);
+            String description = menu[2] != 0 ? getContext().getString(menu[2]) : null;
+            settingsPresenter.appendSingleButton(UiOptionItem.from(title, description, option -> showContextMenu(menu[0], title)));
+        }
 
         settingsPresenter.showDialog(getContext().getString(R.string.context_menu));
     }
 
-    private void showContextMenuItemsList() {
+    private void showContextMenu(int menu, String title) {
         AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
-        appendContextMenuItemsCategory(dialog);
+
+        dialog.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.context_menu_items), option -> showContextMenuItemsList(menu)));
+        dialog.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.context_menu_order), option -> showContextMenuOrder(menu)));
+
+        dialog.showDialog(title);
+    }
+
+    private void showContextMenuItemsList(int menu) {
+        AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
+        appendContextMenuItemsCategory(dialog, menu);
         dialog.showDialog();
     }
 
     /**
-     * The enabled items put in order with the remote (see OptionCategory.reorderList). Read again each time it's opened.
+     * The enabled items of the menu put in order with the remote (see OptionCategory.reorderList). Read again each time it's opened.
      */
-    private void showContextMenuOrder() {
+    private void showContextMenuOrder(int menu) {
         List<OptionItem> options = new ArrayList<>();
 
         Map<Long, Integer> menuNames = getMenuNames();
 
         // The disabled ones come after them (see MainUIData.setMenuItemsOrder)
-        for (Long menuItem : mMainUIData.getMenuItemsOrdered()) {
+        for (Long menuItem : mMainUIData.getMenuItemsOrdered(menu)) {
             Integer nameResId = menuNames.get(menuItem);
 
-            if (nameResId != null && mMainUIData.isMenuItemEnabled(menuItem)) {
+            if (nameResId != null && mMainUIData.isMenuItemEnabled(menu, menuItem)) {
                 options.add(UiOptionItem.from(getContext().getString(nameResId), null, false, menuItem));
             }
         }
@@ -464,7 +482,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
                 menuItems.add((Long) item.getData());
             }
 
-            mMainUIData.setMenuItemsOrder(menuItems);
+            mMainUIData.setMenuItemsOrder(menu, menuItems);
         });
         dialog.showDialog();
     }
@@ -601,12 +619,15 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendCheckedCategory(getContext().getString(R.string.side_panel_sections), options);
     }
 
-    private void appendContextMenuItemsCategory(AppDialogPresenter settingsPresenter) {
+    /**
+     * Only the items the menu can have
+     */
+    private void appendContextMenuItemsCategory(AppDialogPresenter settingsPresenter, int menu) {
         List<OptionItem> options = new ArrayList<>();
 
         Map<Long, Integer> menuNames = getMenuNames();
 
-        for (Long menuItem : mMainUIData.getMenuItemsOrdered()) {
+        for (Long menuItem : mMainUIData.getMenuItemsOrdered(menu)) {
             Integer nameResId = menuNames.get(menuItem);
 
             if (nameResId == null) {
@@ -615,11 +636,11 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
 
             options.add(UiOptionItem.from(getContext().getString(nameResId), optionItem -> {
                 if (optionItem.isSelected()) {
-                    mMainUIData.setMenuItemEnabled(menuItem);
+                    mMainUIData.setMenuItemEnabled(menu, menuItem);
                 } else {
-                    mMainUIData.setMenuItemDisabled(menuItem);
+                    mMainUIData.setMenuItemDisabled(menu, menuItem);
                 }
-            }, mMainUIData.isMenuItemEnabled(menuItem)));
+            }, mMainUIData.isMenuItemEnabled(menu, menuItem)));
         }
 
         settingsPresenter.appendCheckedCategory(getContext().getString(R.string.context_menu_items), options);
@@ -659,7 +680,6 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
 
     private Map<Long, Integer> getMenuNames() {
         Map<Long, Integer> menuNames = new HashMap<>();
-        menuNames.put(MainUIData.MENU_ITEM_EXIT_FROM_PIP, R.string.return_to_background_video);
         menuNames.put(MainUIData.MENU_ITEM_EXCLUDE_FROM_CONTENT_BLOCK, R.string.content_block_exclude_channel);
         menuNames.put(MainUIData.MENU_ITEM_MARK_AS_WATCHED, R.string.mark_as_watched);
         menuNames.put(MainUIData.MENU_ITEM_OPEN_CHANNEL, R.string.open_channel);

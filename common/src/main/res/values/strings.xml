@@ -364,6 +364,10 @@
     <string name="context_menu">Context menu</string>
     <string name="context_menu_items">Context menu items</string>
     <string name="context_menu_order">Order of the context menu</string>
+    <string name="context_menu_videos">Videos</string>
+    <string name="context_menu_videos_desc">Home, Search, channels, the player and the other sections</string>
+    <string name="context_menu_subscriptions_desc">Subscriptions, as a section or a row of Home, and Notifications</string>
+    <string name="context_menu_sidebar">Sidebar sections</string>
     <string name="add_remove_from_recent_playlist">Add/Remove from recent playlist</string>
     <string name="hide_settings_section">Hide Settings section (dangerous!)</string>
     <string name="volume">Volume %s%%</string>

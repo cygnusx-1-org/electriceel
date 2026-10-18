@@ -14,6 +14,7 @@ import com.liskovsoft.smartyoutubetv2.common.utils.ClickbaitRemover;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -99,6 +100,28 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
             MENU_ITEM_SHARE_EMBED_LINK, MENU_ITEM_SHARE_QR_LINK, MENU_ITEM_SELECT_ACCOUNT, MENU_ITEM_TOGGLE_HISTORY, MENU_ITEM_CLEAR_HISTORY,
             MENU_ITEM_MOVE_SECTION_UP, MENU_ITEM_MOVE_SECTION_DOWN, MENU_ITEM_RENAME_SECTION, MENU_ITEM_UPDATE_CHECK
     };
+    // The context menus, each with its own items and their order. The one of a card is by where it is (see VideoMenuPresenter.getCardMenu).
+    public static final int MENU_VIDEOS = 0; // the cards of the other places: Home, Search, the channels, the player...
+    public static final int MENU_SUBSCRIPTIONS = 1; // the cards of Subscriptions, the section or its row of Home, and of Notifications
+    public static final int MENU_HISTORY = 2;
+    public static final int MENU_PLAYLISTS = 3;
+    public static final int MENU_SIDEBAR = 4; // a section of the sidebar
+    public static final int MENU_COUNT = 5;
+    // The items of the menu of any card. Not Return to background video: it's always there.
+    private static final long CARD_MENU_ITEMS = MENU_ITEM_PLAY_VIDEO | MENU_ITEM_PLAY_VIDEO_INCOGNITO | MENU_ITEM_PLAY_FROM_START
+            | MENU_ITEM_STREAM_REMINDER | MENU_ITEM_RECENT_PLAYLIST | MENU_ITEM_ADD_TO_WATCH_LATER | MENU_ITEM_LIKE | MENU_ITEM_ADD_TO_PLAYLIST
+            | MENU_ITEM_ADD_TO_NEW_PLAYLIST | MENU_ITEM_BLOCK_CHANNEL | MENU_ITEM_REPORT_AI_CHANNEL | MENU_ITEM_HIDE_KEYWORDS
+            | MENU_ITEM_MARK_AS_WATCHED | MENU_ITEM_PLAY_NEXT | MENU_ITEM_ADD_TO_QUEUE | MENU_ITEM_SHOW_QUEUE | MENU_ITEM_OPEN_CHANNEL
+            | MENU_ITEM_OPEN_PLAYLIST | MENU_ITEM_SUBSCRIBE | MENU_ITEM_EXCLUDE_FROM_CONTENT_BLOCK | MENU_ITEM_PIN_TO_SIDEBAR
+            | MENU_ITEM_ADD_TO_HOME_ROWS | MENU_ITEM_ADD_TO_HOME_SCREEN | MENU_ITEM_SAVE_REMOVE_PLAYLIST | MENU_ITEM_OPEN_DESCRIPTION
+            | MENU_ITEM_OPEN_COMMENTS | MENU_ITEM_SHARE_LINK | MENU_ITEM_SHARE_EMBED_LINK | MENU_ITEM_SHARE_QR_LINK
+            | MENU_ITEM_SELECT_ACCOUNT | MENU_ITEM_TOGGLE_HISTORY;
+    // In the order the menu of a section had before it followed one
+    private static final Long[] SIDEBAR_MENU_DEFAULT_ORDER = {
+            MENU_ITEM_PIN_TO_SIDEBAR, MENU_ITEM_ADD_TO_HOME_SCREEN, MENU_ITEM_ADD_TO_HOME_ROWS, MENU_ITEM_SELECT_ACCOUNT,
+            MENU_ITEM_MOVE_SECTION_UP, MENU_ITEM_MOVE_SECTION_DOWN, MENU_ITEM_RENAME_SECTION, MENU_ITEM_CREATE_PLAYLIST,
+            MENU_ITEM_CREATE_LOCAL_PLAYLIST, MENU_ITEM_TOGGLE_HISTORY, MENU_ITEM_CLEAR_HISTORY, MENU_ITEM_UPDATE_CHECK
+    };
     public static final long UI_TWEAK_DEFAULT = UI_TWEAK_ROUNDED_CORNERS;
     @SuppressLint("StaticFieldLeak")
     private static MainUIData sInstance;
@@ -117,10 +140,14 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
     private boolean mIsUploadsOldLookEnabled;
     private boolean mIsUploadsAutoLoadEnabled;
     private float mCardTextScrollSpeed;
+    // The items of all the menus, from before each had its own (see restoreMenus)
     private long mMenuItems;
     private int mTopButtons;
     private int mThumbQuality;
     private List<Long> mMenuItemsOrdered;
+    // By the menu (see MENU_VIDEOS...): the items on, and all of its items in their order
+    private final long[] mMenuItemsByMenu = new long[MENU_COUNT];
+    private final List<List<Long>> mMenuItemsOrderedByMenu = new ArrayList<>();
     private boolean mIsChannelsFilterEnabled;
     private boolean mIsChannelSearchBarEnabled;
     private boolean mIsPinnedChannelRowsEnabled;
@@ -306,53 +333,107 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
         persistState();
     }
 
-    public boolean isMenuItemEnabled(long menuItems) {
-        return (mMenuItems & menuItems) == menuItems;
-    }
-
-    public void setMenuItemEnabled(long menuItems) {
-        mMenuItems |= menuItems;
-        persistState();
-    }
-
-    public void setMenuItemDisabled(long menuItems) {
-        mMenuItems &= ~menuItems;
-        persistState();
-    }
-
-    public List<Long> getMenuItemsOrdered() {
-        return Collections.unmodifiableList(mMenuItemsOrdered);
-    }
-
-    public int getMenuItemIndex(long menuItem) {
-        return mMenuItemsOrdered.indexOf(menuItem);
+    /**
+     * In the menu (see MENU_VIDEOS...). One it doesn't have isn't.
+     */
+    public boolean isMenuItemEnabled(int menu, long menuItems) {
+        return (mMenuItemsByMenu[menu] & menuItems) == menuItems;
     }
 
     /**
-     * Items in a new order, e.g. the enabled ones. The others come after them, in their order.
-     * Left as they are when one isn't an item or one is there twice.
+     * In the menu, the ones it has
      */
-    public void setMenuItemsOrder(List<Long> menuItems) {
-        if (menuItems == null || !mMenuItemsOrdered.containsAll(menuItems) || new HashSet<>(menuItems).size() != menuItems.size()) {
+    public void setMenuItemEnabled(int menu, long menuItems) {
+        mMenuItemsByMenu[menu] |= menuItems & getMenuItems(menu);
+        persistState();
+    }
+
+    public void setMenuItemDisabled(int menu, long menuItems) {
+        mMenuItemsByMenu[menu] &= ~menuItems;
+        persistState();
+    }
+
+    /**
+     * In each menu that has them, e.g. for Child mode
+     */
+    public void setMenuItemsEnabled(long menuItems) {
+        for (int menu = 0; menu < MENU_COUNT; menu++) {
+            mMenuItemsByMenu[menu] |= menuItems & getMenuItems(menu);
+        }
+        persistState();
+    }
+
+    /**
+     * In each menu
+     */
+    public void setMenuItemsDisabled(long menuItems) {
+        for (int menu = 0; menu < MENU_COUNT; menu++) {
+            mMenuItemsByMenu[menu] &= ~menuItems;
+        }
+        persistState();
+    }
+
+    /**
+     * The ones each menu has on by default (see getDefaultMenuItems)
+     */
+    public void setDefaultMenuItemsEnabled() {
+        for (int menu = 0; menu < MENU_COUNT; menu++) {
+            mMenuItemsByMenu[menu] |= getDefaultMenuItems(menu) & getMenuItems(menu);
+        }
+        persistState();
+    }
+
+    /**
+     * All the items of the menu, the ones off too
+     */
+    public List<Long> getMenuItemsOrdered(int menu) {
+        return Collections.unmodifiableList(mMenuItemsOrderedByMenu.get(menu));
+    }
+
+    public int getMenuItemIndex(int menu, long menuItem) {
+        return mMenuItemsOrderedByMenu.get(menu).indexOf(menuItem);
+    }
+
+    /**
+     * Items of the menu in a new order, e.g. the enabled ones. The others come after them, in their order.
+     * Left as they are when one isn't an item of the menu or one is there twice.
+     */
+    public void setMenuItemsOrder(int menu, List<Long> menuItems) {
+        List<Long> menuItemsOrdered = mMenuItemsOrderedByMenu.get(menu);
+
+        if (menuItems == null || !menuItemsOrdered.containsAll(menuItems) || new HashSet<>(menuItems).size() != menuItems.size()) {
             return;
         }
 
         List<Long> result = new ArrayList<>(menuItems);
 
-        for (Long menuItem : mMenuItemsOrdered) {
+        for (Long menuItem : menuItemsOrdered) {
             if (!result.contains(menuItem)) {
                 result.add(menuItem);
             }
         }
 
-        if (result.equals(mMenuItemsOrdered)) {
+        if (result.equals(menuItemsOrdered)) {
             return;
         }
 
-        mMenuItemsOrdered.clear();
-        mMenuItemsOrdered.addAll(result);
+        menuItemsOrdered.clear();
+        menuItemsOrdered.addAll(result);
 
         persistState();
+    }
+
+    /**
+     * All the items of the menu, at once
+     */
+    private long getMenuItems(int menu) {
+        long result = 0;
+
+        for (Long menuItem : mMenuItemsOrderedByMenu.get(menu)) {
+            result |= menuItem;
+        }
+
+        return result;
     }
 
     public boolean isTopButtonEnabled(int button) {
@@ -535,6 +616,111 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
         }
 
         updateDefaultValues();
+
+        restoreMenus(split);
+    }
+
+    /**
+     * The items of each menu and their order. Saved before each menu had its own: the ones of all of them, as far as the menu
+     * has them, in their order. The sidebar one had a fixed order: it keeps it. Not interested is new to Subscriptions: it's off there.
+     */
+    private void restoreMenus(String[] split) {
+        List<Long> menuItems = Helpers.parseLongList(split, 25);
+        List<ContextMenuProvider> providers = new ContextMenuManager(mContext).getProviders();
+
+        mMenuItemsOrderedByMenu.clear();
+
+        for (int menu = 0; menu < MENU_COUNT; menu++) {
+            List<Long> defaultOrder = getDefaultMenuItemsOrder(menu);
+            List<Long> order;
+
+            if (menu < menuItems.size()) {
+                order = Helpers.parseLongList(split, 26 + menu);
+                mMenuItemsByMenu[menu] = menuItems.get(menu);
+            } else {
+                order = new ArrayList<>(menu == MENU_SIDEBAR ? defaultOrder : mMenuItemsOrdered);
+                mMenuItemsByMenu[menu] = menu == MENU_SUBSCRIPTIONS ? mMenuItems & ~MENU_ITEM_NOT_INTERESTED : mMenuItems;
+            }
+
+            List<Long> items = new ArrayList<>(defaultOrder);
+
+            for (ContextMenuProvider provider : providers) {
+                if (provider.getMenuType() == getProviderMenuType(menu)) {
+                    items.add(provider.getId());
+                }
+            }
+
+            order.retainAll(items);
+
+            // The ones new to the menu
+            int idx = -1;
+            for (Long menuItem : defaultOrder) {
+                idx++;
+                if (!order.contains(menuItem)) {
+                    if (idx < order.size()) {
+                        order.add(idx, menuItem);
+                    } else {
+                        order.add(menuItem);
+                    }
+
+                    mMenuItemsByMenu[menu] |= getDefaultMenuItems(menu) & menuItem;
+                }
+            }
+
+            for (Long menuItem : items) {
+                if (!order.contains(menuItem)) {
+                    order.add(menuItem);
+                }
+            }
+
+            mMenuItemsOrderedByMenu.add(order);
+            mMenuItemsByMenu[menu] &= getMenuItems(menu);
+        }
+    }
+
+    /**
+     * The items the menu can have, the ones of the providers aside (see ContextMenuManager)
+     */
+    private static List<Long> getDefaultMenuItemsOrder(int menu) {
+        if (menu == MENU_SIDEBAR) {
+            return Arrays.asList(SIDEBAR_MENU_DEFAULT_ORDER);
+        }
+
+        long menuItems = CARD_MENU_ITEMS;
+
+        switch (menu) {
+            case MENU_SUBSCRIPTIONS:
+                menuItems |= MENU_ITEM_NOT_INTERESTED | MENU_ITEM_REMOVE_FROM_SUBSCRIPTIONS;
+                break;
+            case MENU_HISTORY:
+                menuItems |= MENU_ITEM_REMOVE_FROM_HISTORY | MENU_ITEM_CLEAR_HISTORY;
+                break;
+            case MENU_PLAYLISTS:
+                menuItems |= MENU_ITEM_CREATE_PLAYLIST | MENU_ITEM_CREATE_LOCAL_PLAYLIST | MENU_ITEM_RENAME_PLAYLIST
+                        | MENU_ITEM_COPY_PLAYLIST_TO_YOUTUBE | MENU_ITEM_PLAYLIST_ORDER;
+                break;
+            default:
+                menuItems |= MENU_ITEM_NOT_INTERESTED | MENU_ITEM_NOT_RECOMMEND_CHANNEL;
+                break;
+        }
+
+        List<Long> result = new ArrayList<>();
+
+        for (Long menuItem : MENU_ITEM_DEFAULT_ORDER) {
+            if ((menuItems & menuItem) == menuItem) {
+                result.add(menuItem);
+            }
+        }
+
+        return result;
+    }
+
+    private static long getDefaultMenuItems(int menu) {
+        return menu == MENU_SUBSCRIPTIONS ? MENU_ITEM_DEFAULT & ~MENU_ITEM_NOT_INTERESTED : MENU_ITEM_DEFAULT;
+    }
+
+    private static int getProviderMenuType(int menu) {
+        return menu == MENU_SIDEBAR ? ContextMenuProvider.MENU_TYPE_SECTION : ContextMenuProvider.MENU_TYPE_VIDEO;
     }
 
     public void persistNow() {
@@ -549,13 +735,24 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
     }
 
     private void persistStateInt() {
+        List<Long> menuItems = new ArrayList<>();
+
+        for (long items : mMenuItemsByMenu) {
+            menuItems.add(items);
+        }
+
         mPrefs.setProfileData(MAIN_UI_DATA, Helpers.mergeData(null,
                 mVideoGridScale, mUIScale, mColorSchemeId, mIsCardMultilineTitleEnabled,
                 mChannelCategorySorting, mPlaylistsStyle, mCardTitleLinesNum, mIsCardTextAutoScrollEnabled,
                 mIsUploadsOldLookEnabled, mIsUploadsAutoLoadEnabled, mCardTextScrollSpeed, mMenuItems, mTopButtons,
                 null, mThumbQuality, mIsCardMultilineSubtitleEnabled, Helpers.mergeList(mMenuItemsOrdered),
                 mIsChannelsFilterEnabled, mIsChannelSearchBarEnabled, mIsPinnedChannelRowsEnabled, mCardPreviewType,
-                mIsUnlocalizedTitlesEnabled, mUiTweaks, mIsShortsDateEnabled));
+                mIsUnlocalizedTitlesEnabled, mUiTweaks, mIsShortsDateEnabled, Helpers.mergeList(menuItems),
+                Helpers.mergeList(mMenuItemsOrderedByMenu.get(MENU_VIDEOS)),
+                Helpers.mergeList(mMenuItemsOrderedByMenu.get(MENU_SUBSCRIPTIONS)),
+                Helpers.mergeList(mMenuItemsOrderedByMenu.get(MENU_HISTORY)),
+                Helpers.mergeList(mMenuItemsOrderedByMenu.get(MENU_PLAYLISTS)),
+                Helpers.mergeList(mMenuItemsOrderedByMenu.get(MENU_SIDEBAR))));
     }
 
     public static class ColorScheme {

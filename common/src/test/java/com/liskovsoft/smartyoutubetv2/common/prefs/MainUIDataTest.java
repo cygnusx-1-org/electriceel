@@ -2,6 +2,8 @@ package com.liskovsoft.smartyoutubetv2.common.prefs;
 
 import com.liskovsoft.mediaserviceinterfaces.oauth.Account;
 import com.liskovsoft.sharedutils.helpers.Helpers;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.providers.ContextMenuManager;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.providers.ContextMenuProvider;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData.ColorScheme;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
@@ -218,7 +220,7 @@ public class MainUIDataTest {
 
     @Test
     public void shareQrLinkIsInTheMenuByDefault() {
-        assertTrue(getData().isMenuItemEnabled(MainUIData.MENU_ITEM_SHARE_QR_LINK));
+        assertTrue(getData().isMenuItemEnabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_SHARE_QR_LINK));
     }
 
     /**
@@ -226,16 +228,16 @@ public class MainUIDataTest {
      */
     @Test
     public void shareQrLinkTurnedOffStaysOff() {
-        getData().setMenuItemDisabled(MainUIData.MENU_ITEM_SHARE_QR_LINK);
+        getData().setMenuItemDisabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_SHARE_QR_LINK);
         ShadowLooper.shadowMainLooper().idle();
         MainUIData.resetInstanceForTesting();
 
-        assertFalse(getData().isMenuItemEnabled(MainUIData.MENU_ITEM_SHARE_QR_LINK));
+        assertFalse(getData().isMenuItemEnabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_SHARE_QR_LINK));
     }
 
     @Test
     public void markAsWatchedIsInTheMenuByDefault() {
-        assertTrue(getData().isMenuItemEnabled(MainUIData.MENU_ITEM_MARK_AS_WATCHED));
+        assertTrue(getData().isMenuItemEnabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_MARK_AS_WATCHED));
     }
 
     /**
@@ -243,32 +245,33 @@ public class MainUIDataTest {
      */
     @Test
     public void markAsWatchedTurnedOffStaysOff() {
-        getData().setMenuItemDisabled(MainUIData.MENU_ITEM_MARK_AS_WATCHED);
+        getData().setMenuItemDisabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_MARK_AS_WATCHED);
         ShadowLooper.shadowMainLooper().idle();
         MainUIData.resetInstanceForTesting();
 
-        assertFalse(getData().isMenuItemEnabled(MainUIData.MENU_ITEM_MARK_AS_WATCHED));
+        assertFalse(getData().isMenuItemEnabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_MARK_AS_WATCHED));
     }
 
     @Test
     public void likeIsNotInTheMenuByDefault() {
-        assertFalse(getData().isMenuItemEnabled(MainUIData.MENU_ITEM_LIKE));
+        assertFalse(getData().isMenuItemEnabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_LIKE));
     }
 
     @Test
     public void likeComesAfterWatchLater() {
         MainUIData data = getData();
 
-        assertEquals(data.getMenuItemIndex(MainUIData.MENU_ITEM_ADD_TO_WATCH_LATER) + 1, data.getMenuItemIndex(MainUIData.MENU_ITEM_LIKE));
+        assertEquals(data.getMenuItemIndex(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_ADD_TO_WATCH_LATER) + 1,
+                data.getMenuItemIndex(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_LIKE));
     }
 
     @Test
     public void likeTurnedOnStaysOn() {
-        getData().setMenuItemEnabled(MainUIData.MENU_ITEM_LIKE);
+        getData().setMenuItemEnabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_LIKE);
         ShadowLooper.shadowMainLooper().idle();
         MainUIData.resetInstanceForTesting();
 
-        assertTrue(getData().isMenuItemEnabled(MainUIData.MENU_ITEM_LIKE));
+        assertTrue(getData().isMenuItemEnabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_LIKE));
     }
 
     /**
@@ -277,13 +280,13 @@ public class MainUIDataTest {
     @Test
     public void menuItemsOrderPutsTheOthersAfterThem() {
         MainUIData data = getData();
-        List<Long> rest = new ArrayList<>(data.getMenuItemsOrdered());
+        List<Long> rest = new ArrayList<>(data.getMenuItemsOrdered(MainUIData.MENU_VIDEOS));
         List<Long> order = Arrays.asList(MainUIData.MENU_ITEM_SHARE_QR_LINK, MainUIData.MENU_ITEM_PIN_TO_SIDEBAR);
         rest.removeAll(order);
 
-        data.setMenuItemsOrder(order);
+        data.setMenuItemsOrder(MainUIData.MENU_VIDEOS, order);
 
-        List<Long> result = data.getMenuItemsOrdered();
+        List<Long> result = data.getMenuItemsOrdered(MainUIData.MENU_VIDEOS);
         assertEquals(order, result.subList(0, order.size()));
         assertEquals(rest, result.subList(order.size(), result.size()));
     }
@@ -292,31 +295,219 @@ public class MainUIDataTest {
     public void menuItemsOrderStaysAfterReload() {
         List<Long> order = Arrays.asList(MainUIData.MENU_ITEM_SHARE_QR_LINK, MainUIData.MENU_ITEM_PIN_TO_SIDEBAR);
 
-        getData().setMenuItemsOrder(order);
+        getData().setMenuItemsOrder(MainUIData.MENU_VIDEOS, order);
         ShadowLooper.shadowMainLooper().idle();
         MainUIData.resetInstanceForTesting();
 
-        assertEquals(order, getData().getMenuItemsOrdered().subList(0, order.size()));
+        assertEquals(order, getData().getMenuItemsOrdered(MainUIData.MENU_VIDEOS).subList(0, order.size()));
     }
 
     @Test
     public void menuItemsOrderWithAnUnknownItemIsIgnored() {
         MainUIData data = getData();
-        List<Long> before = new ArrayList<>(data.getMenuItemsOrdered());
+        List<Long> before = new ArrayList<>(data.getMenuItemsOrdered(MainUIData.MENU_VIDEOS));
 
-        data.setMenuItemsOrder(Arrays.asList(MainUIData.MENU_ITEM_SHARE_QR_LINK, 0L)); // no item has it
+        data.setMenuItemsOrder(MainUIData.MENU_VIDEOS, Arrays.asList(MainUIData.MENU_ITEM_SHARE_QR_LINK, 0L)); // no item has it
 
-        assertEquals(before, data.getMenuItemsOrdered());
+        assertEquals(before, data.getMenuItemsOrdered(MainUIData.MENU_VIDEOS));
     }
 
     @Test
     public void menuItemsOrderWithAnItemTwiceIsIgnored() {
         MainUIData data = getData();
-        List<Long> before = new ArrayList<>(data.getMenuItemsOrdered());
+        List<Long> before = new ArrayList<>(data.getMenuItemsOrdered(MainUIData.MENU_VIDEOS));
 
-        data.setMenuItemsOrder(Arrays.asList(MainUIData.MENU_ITEM_SHARE_QR_LINK, MainUIData.MENU_ITEM_SHARE_QR_LINK));
+        data.setMenuItemsOrder(MainUIData.MENU_VIDEOS, Arrays.asList(MainUIData.MENU_ITEM_SHARE_QR_LINK, MainUIData.MENU_ITEM_SHARE_QR_LINK));
 
-        assertEquals(before, data.getMenuItemsOrdered());
+        assertEquals(before, data.getMenuItemsOrdered(MainUIData.MENU_VIDEOS));
+    }
+
+    @Test
+    public void menuItemsOrderWithAnItemOfAnotherMenuIsIgnored() {
+        MainUIData data = getData();
+        List<Long> before = new ArrayList<>(data.getMenuItemsOrdered(MainUIData.MENU_VIDEOS));
+
+        data.setMenuItemsOrder(MainUIData.MENU_VIDEOS, Arrays.asList(MainUIData.MENU_ITEM_SHARE_QR_LINK, MainUIData.MENU_ITEM_MOVE_SECTION_UP));
+
+        assertEquals(before, data.getMenuItemsOrdered(MainUIData.MENU_VIDEOS));
+    }
+
+    @Test
+    public void eachMenuHasItsOwnItemsOn() {
+        MainUIData data = getData();
+
+        data.setMenuItemDisabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_SHARE_QR_LINK);
+
+        assertFalse(data.isMenuItemEnabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_SHARE_QR_LINK));
+        assertTrue(data.isMenuItemEnabled(MainUIData.MENU_SUBSCRIPTIONS, MainUIData.MENU_ITEM_SHARE_QR_LINK));
+        assertTrue(data.isMenuItemEnabled(MainUIData.MENU_HISTORY, MainUIData.MENU_ITEM_SHARE_QR_LINK));
+        assertTrue(data.isMenuItemEnabled(MainUIData.MENU_PLAYLISTS, MainUIData.MENU_ITEM_SHARE_QR_LINK));
+    }
+
+    @Test
+    public void eachMenuHasItsOwnOrder() {
+        MainUIData data = getData();
+        List<Long> before = new ArrayList<>(data.getMenuItemsOrdered(MainUIData.MENU_HISTORY));
+        List<Long> order = Arrays.asList(MainUIData.MENU_ITEM_SHARE_QR_LINK, MainUIData.MENU_ITEM_PIN_TO_SIDEBAR);
+
+        data.setMenuItemsOrder(MainUIData.MENU_VIDEOS, order);
+
+        assertEquals(order, data.getMenuItemsOrdered(MainUIData.MENU_VIDEOS).subList(0, order.size()));
+        assertEquals(before, data.getMenuItemsOrdered(MainUIData.MENU_HISTORY));
+    }
+
+    /**
+     * It's new there: not on until it's turned on
+     */
+    @Test
+    public void notInterestedIsOffInSubscriptionsByDefault() {
+        MainUIData data = getData();
+
+        assertTrue(data.isMenuItemEnabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_NOT_INTERESTED));
+        assertTrue(data.getMenuItemsOrdered(MainUIData.MENU_SUBSCRIPTIONS).contains(MainUIData.MENU_ITEM_NOT_INTERESTED));
+        assertFalse(data.isMenuItemEnabled(MainUIData.MENU_SUBSCRIPTIONS, MainUIData.MENU_ITEM_NOT_INTERESTED));
+    }
+
+    @Test
+    public void notInterestedTurnedOnInSubscriptionsStaysOn() {
+        getData().setMenuItemEnabled(MainUIData.MENU_SUBSCRIPTIONS, MainUIData.MENU_ITEM_NOT_INTERESTED);
+        ShadowLooper.shadowMainLooper().idle();
+        MainUIData.resetInstanceForTesting();
+
+        assertTrue(getData().isMenuItemEnabled(MainUIData.MENU_SUBSCRIPTIONS, MainUIData.MENU_ITEM_NOT_INTERESTED));
+    }
+
+    /**
+     * Each menu lists only the items that can show up in it
+     */
+    @Test
+    public void menusHaveOnlyTheirItems() {
+        assertMenus(MainUIData.MENU_ITEM_NOT_INTERESTED, MainUIData.MENU_VIDEOS, MainUIData.MENU_SUBSCRIPTIONS);
+        assertMenus(MainUIData.MENU_ITEM_NOT_RECOMMEND_CHANNEL, MainUIData.MENU_VIDEOS);
+        assertMenus(MainUIData.MENU_ITEM_REMOVE_FROM_SUBSCRIPTIONS, MainUIData.MENU_SUBSCRIPTIONS);
+        assertMenus(MainUIData.MENU_ITEM_REMOVE_FROM_HISTORY, MainUIData.MENU_HISTORY);
+        assertMenus(MainUIData.MENU_ITEM_CLEAR_HISTORY, MainUIData.MENU_HISTORY, MainUIData.MENU_SIDEBAR);
+        assertMenus(MainUIData.MENU_ITEM_RENAME_PLAYLIST, MainUIData.MENU_PLAYLISTS);
+        assertMenus(MainUIData.MENU_ITEM_CREATE_PLAYLIST, MainUIData.MENU_PLAYLISTS, MainUIData.MENU_SIDEBAR);
+        assertMenus(MainUIData.MENU_ITEM_MOVE_SECTION_UP, MainUIData.MENU_SIDEBAR);
+        assertMenus(MainUIData.MENU_ITEM_UPDATE_CHECK, MainUIData.MENU_SIDEBAR);
+        assertMenus(MainUIData.MENU_ITEM_PIN_TO_SIDEBAR, MainUIData.MENU_VIDEOS, MainUIData.MENU_SUBSCRIPTIONS,
+                MainUIData.MENU_HISTORY, MainUIData.MENU_PLAYLISTS, MainUIData.MENU_SIDEBAR);
+        assertMenus(MainUIData.MENU_ITEM_SHARE_LINK, MainUIData.MENU_VIDEOS, MainUIData.MENU_SUBSCRIPTIONS,
+                MainUIData.MENU_HISTORY, MainUIData.MENU_PLAYLISTS);
+        assertMenus(MainUIData.MENU_ITEM_EXIT_FROM_PIP); // always there, not in the settings
+    }
+
+    @Test
+    public void providersAreInTheMenusOfTheirType() {
+        for (ContextMenuProvider provider : new ContextMenuManager(RuntimeEnvironment.getApplication()).getProviders()) {
+            if (provider.getMenuType() == ContextMenuProvider.MENU_TYPE_SECTION) {
+                assertMenus(provider.getId(), MainUIData.MENU_SIDEBAR);
+            } else {
+                assertMenus(provider.getId(), MainUIData.MENU_VIDEOS, MainUIData.MENU_SUBSCRIPTIONS, MainUIData.MENU_HISTORY,
+                        MainUIData.MENU_PLAYLISTS);
+            }
+        }
+    }
+
+    @Test
+    public void anItemOfAnotherMenuIsNotTurnedOn() {
+        MainUIData data = getData();
+
+        data.setMenuItemEnabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_REMOVE_FROM_SUBSCRIPTIONS);
+
+        assertFalse(data.isMenuItemEnabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_REMOVE_FROM_SUBSCRIPTIONS));
+    }
+
+    /**
+     * In the order it had before it followed one
+     */
+    @Test
+    public void sidebarMenuStartsInItsOldOrder() {
+        List<Long> order = getData().getMenuItemsOrdered(MainUIData.MENU_SIDEBAR);
+
+        assertEquals(Arrays.asList(MainUIData.MENU_ITEM_PIN_TO_SIDEBAR, MainUIData.MENU_ITEM_ADD_TO_HOME_SCREEN,
+                MainUIData.MENU_ITEM_ADD_TO_HOME_ROWS, MainUIData.MENU_ITEM_SELECT_ACCOUNT, MainUIData.MENU_ITEM_MOVE_SECTION_UP,
+                MainUIData.MENU_ITEM_MOVE_SECTION_DOWN, MainUIData.MENU_ITEM_RENAME_SECTION, MainUIData.MENU_ITEM_CREATE_PLAYLIST,
+                MainUIData.MENU_ITEM_CREATE_LOCAL_PLAYLIST, MainUIData.MENU_ITEM_TOGGLE_HISTORY, MainUIData.MENU_ITEM_CLEAR_HISTORY,
+                MainUIData.MENU_ITEM_UPDATE_CHECK), order.subList(0, 12));
+    }
+
+    /**
+     * Saved before each menu had its own: the items on and the order of all of them, as far as the menu has them.
+     * The sidebar one keeps its fixed order. Not interested is new to Subscriptions: off there.
+     */
+    @Test
+    public void menusStartFromTheSettingsOfAllOfThem() {
+        long menuItems = (MainUIData.MENU_ITEM_DEFAULT | MainUIData.MENU_ITEM_LIKE) & ~MainUIData.MENU_ITEM_SHARE_QR_LINK
+                & ~MainUIData.MENU_ITEM_MOVE_SECTION_UP;
+        // All the items, or the missing ones would be added with their default
+        List<Long> order = new ArrayList<>();
+        order.add(MainUIData.MENU_ITEM_SHARE_LINK);
+        order.add(MainUIData.MENU_ITEM_EXIT_FROM_PIP);
+        for (int menu = 0; menu < MainUIData.MENU_COUNT; menu++) {
+            for (Long menuItem : getData().getMenuItemsOrdered(menu)) {
+                if (!order.contains(menuItem)) {
+                    order.add(menuItem);
+                }
+            }
+        }
+        getPrefs().setProfileData(DATA_KEY, oldMenuSettings(menuItems, order));
+        MainUIData.resetInstanceForTesting();
+
+        MainUIData data = getData();
+
+        for (int menu : new int[] {MainUIData.MENU_VIDEOS, MainUIData.MENU_SUBSCRIPTIONS, MainUIData.MENU_HISTORY, MainUIData.MENU_PLAYLISTS}) {
+            assertTrue("menu " + menu, data.isMenuItemEnabled(menu, MainUIData.MENU_ITEM_LIKE));
+            assertFalse("menu " + menu, data.isMenuItemEnabled(menu, MainUIData.MENU_ITEM_SHARE_QR_LINK));
+            assertEquals("menu " + menu, 0, data.getMenuItemIndex(menu, MainUIData.MENU_ITEM_SHARE_LINK));
+            assertEquals("menu " + menu, -1, data.getMenuItemIndex(menu, MainUIData.MENU_ITEM_UPDATE_CHECK));
+        }
+
+        assertTrue(data.isMenuItemEnabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_NOT_INTERESTED));
+        assertFalse(data.isMenuItemEnabled(MainUIData.MENU_SUBSCRIPTIONS, MainUIData.MENU_ITEM_NOT_INTERESTED));
+        assertFalse(data.isMenuItemEnabled(MainUIData.MENU_SIDEBAR, MainUIData.MENU_ITEM_MOVE_SECTION_UP));
+        assertTrue(data.isMenuItemEnabled(MainUIData.MENU_SIDEBAR, MainUIData.MENU_ITEM_MOVE_SECTION_DOWN));
+        assertEquals(0, data.getMenuItemIndex(MainUIData.MENU_SIDEBAR, MainUIData.MENU_ITEM_PIN_TO_SIDEBAR));
+        assertEquals(-1, data.getMenuItemIndex(MainUIData.MENU_SIDEBAR, MainUIData.MENU_ITEM_SHARE_LINK));
+    }
+
+    /**
+     * Child mode: all off, then its own on in each menu that has them, and back to the defaults
+     */
+    @Test
+    public void allMenusAtOnce() {
+        MainUIData data = getData();
+
+        data.setMenuItemsDisabled(Integer.MAX_VALUE);
+        data.setMenuItemsEnabled(MainUIData.MENU_ITEM_PLAY_NEXT);
+
+        assertTrue(data.isMenuItemEnabled(MainUIData.MENU_HISTORY, MainUIData.MENU_ITEM_PLAY_NEXT));
+        assertFalse(data.isMenuItemEnabled(MainUIData.MENU_HISTORY, MainUIData.MENU_ITEM_REMOVE_FROM_HISTORY));
+        assertFalse(data.isMenuItemEnabled(MainUIData.MENU_SIDEBAR, MainUIData.MENU_ITEM_PLAY_NEXT));
+
+        data.setDefaultMenuItemsEnabled();
+
+        assertTrue(data.isMenuItemEnabled(MainUIData.MENU_HISTORY, MainUIData.MENU_ITEM_REMOVE_FROM_HISTORY));
+        assertTrue(data.isMenuItemEnabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_NOT_INTERESTED));
+        assertFalse(data.isMenuItemEnabled(MainUIData.MENU_SUBSCRIPTIONS, MainUIData.MENU_ITEM_NOT_INTERESTED));
+    }
+
+    private static void assertMenus(long menuItem, int... menus) {
+        for (int menu = 0; menu < MainUIData.MENU_COUNT; menu++) {
+            assertEquals("menu " + menu + " item " + menuItem, contains(menus, menu),
+                    getData().getMenuItemsOrdered(menu).contains(menuItem));
+        }
+    }
+
+    /**
+     * Saved like MainUIData did before each menu had its own items and order
+     */
+    private static String oldMenuSettings(long menuItems, List<Long> menuItemsOrdered) {
+        Object[] data = new Object[18];
+        data[12] = menuItems;
+        data[17] = Helpers.mergeList(menuItemsOrdered);
+        return Helpers.mergeData(data);
     }
 
     /**

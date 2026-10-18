@@ -61,6 +61,14 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
 
     protected abstract Video getVideo();
     protected BrowseSection getSection() { return null; }
+
+    /**
+     * The menu whose items are shown (see MainUIData.MENU_VIDEOS...)
+     */
+    protected int getMenu() {
+        return MainUIData.MENU_VIDEOS;
+    }
+
     protected abstract AppDialogPresenter getDialogPresenter();
     protected abstract VideoMenuCallback getCallback();
 
@@ -799,21 +807,22 @@ public abstract class BaseMenuPresenter extends BasePresenter<Void> {
 
     protected void updateEnabledMenuItems() {
         MainUIData mainUIData = MainUIData.instance(getContext());
-        
-        mIsPinToSidebarEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_PIN_TO_SIDEBAR);
-        mIsSaveRemovePlaylistEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_SAVE_REMOVE_PLAYLIST);
-        mIsCreatePlaylistEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_CREATE_PLAYLIST);
-        mIsCreateLocalPlaylistEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_CREATE_LOCAL_PLAYLIST);
-        mIsRenamePlaylistEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_RENAME_PLAYLIST);
-        mIsCopyPlaylistToYouTubeEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_COPY_PLAYLIST_TO_YOUTUBE);
-        mIsAddToHomeScreenEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_ADD_TO_HOME_SCREEN);
-        mIsAddToHomeRowsEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_ADD_TO_HOME_ROWS);
+        int menu = getMenu();
+
+        mIsPinToSidebarEnabled = mainUIData.isMenuItemEnabled(menu, MainUIData.MENU_ITEM_PIN_TO_SIDEBAR);
+        mIsSaveRemovePlaylistEnabled = mainUIData.isMenuItemEnabled(menu, MainUIData.MENU_ITEM_SAVE_REMOVE_PLAYLIST);
+        mIsCreatePlaylistEnabled = mainUIData.isMenuItemEnabled(menu, MainUIData.MENU_ITEM_CREATE_PLAYLIST);
+        mIsCreateLocalPlaylistEnabled = mainUIData.isMenuItemEnabled(menu, MainUIData.MENU_ITEM_CREATE_LOCAL_PLAYLIST);
+        mIsRenamePlaylistEnabled = mainUIData.isMenuItemEnabled(menu, MainUIData.MENU_ITEM_RENAME_PLAYLIST);
+        mIsCopyPlaylistToYouTubeEnabled = mainUIData.isMenuItemEnabled(menu, MainUIData.MENU_ITEM_COPY_PLAYLIST_TO_YOUTUBE);
+        mIsAddToHomeScreenEnabled = mainUIData.isMenuItemEnabled(menu, MainUIData.MENU_ITEM_ADD_TO_HOME_SCREEN);
+        mIsAddToHomeRowsEnabled = mainUIData.isMenuItemEnabled(menu, MainUIData.MENU_ITEM_ADD_TO_HOME_ROWS);
         // Another account would leave Child mode (it's kept per account)
-        mIsAccountSelectionEnabled = !GeneralData.instance(getContext()).isChildModeEnabled() && mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_SELECT_ACCOUNT);
-        mIsAddToNewPlaylistEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_ADD_TO_NEW_PLAYLIST);
-        mIsToggleHistoryEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_TOGGLE_HISTORY);
-        mIsClearHistoryEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_CLEAR_HISTORY);
-        mIsUpdateCheckEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_UPDATE_CHECK);
-        mIsExcludeFromContentBlockEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_EXCLUDE_FROM_CONTENT_BLOCK);
+        mIsAccountSelectionEnabled = !GeneralData.instance(getContext()).isChildModeEnabled() && mainUIData.isMenuItemEnabled(menu, MainUIData.MENU_ITEM_SELECT_ACCOUNT);
+        mIsAddToNewPlaylistEnabled = mainUIData.isMenuItemEnabled(menu, MainUIData.MENU_ITEM_ADD_TO_NEW_PLAYLIST);
+        mIsToggleHistoryEnabled = mainUIData.isMenuItemEnabled(menu, MainUIData.MENU_ITEM_TOGGLE_HISTORY);
+        mIsClearHistoryEnabled = mainUIData.isMenuItemEnabled(menu, MainUIData.MENU_ITEM_CLEAR_HISTORY);
+        mIsUpdateCheckEnabled = mainUIData.isMenuItemEnabled(menu, MainUIData.MENU_ITEM_UPDATE_CHECK);
+        mIsExcludeFromContentBlockEnabled = mainUIData.isMenuItemEnabled(menu, MainUIData.MENU_ITEM_EXCLUDE_FROM_CONTENT_BLOCK);
     }
 }

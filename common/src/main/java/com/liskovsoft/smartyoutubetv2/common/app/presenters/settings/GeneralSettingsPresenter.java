@@ -645,14 +645,14 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
         // Remove all
         mMainUIData.setTopButtonDisabled(Integer.MAX_VALUE);
         tweaksData.setPlayerButtonDisabled(Integer.MAX_VALUE);
-        mMainUIData.setMenuItemDisabled(Integer.MAX_VALUE);
+        mMainUIData.setMenuItemsDisabled(Integer.MAX_VALUE);
         BrowsePresenter.instance(getContext()).enableAllSections(false);
         searchData.setPopularSearchesDisabled(true);
 
         if (enable) {
             // apply child tweaks. No top buttons: no search and no other account (see NavigateTitleView)
             tweaksData.setPlayerButtonEnabled(playerButtons);
-            mMainUIData.setMenuItemEnabled(menuItems);
+            mMainUIData.setMenuItemsEnabled(menuItems);
             mPlayerData.setPlaybackMode(PlayerConstants.PLAYBACK_MODE_LIST);
             BrowsePresenter.instance(getContext()).enableSection(MediaGroup.TYPE_HISTORY, true);
             BrowsePresenter.instance(getContext()).enableSection(MediaGroup.TYPE_USER_PLAYLISTS, true);
@@ -662,7 +662,7 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
             // apply default tweaks
             mMainUIData.setTopButtonEnabled(MainUIData.TOP_BUTTON_DEFAULT);
             tweaksData.setPlayerButtonEnabled(PlayerTweaksData.PLAYER_BUTTON_DEFAULT);
-            mMainUIData.setMenuItemEnabled(MainUIData.MENU_ITEM_DEFAULT);
+            mMainUIData.setDefaultMenuItemsEnabled();
             BrowsePresenter.instance(getContext()).enableAllSections(true);
             // Each one is enabled again at its default index in a shorter list (see SidebarService.enableSection), so they're out of order
             BrowsePresenter.instance(getContext()).sortSectionsByDefault();

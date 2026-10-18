@@ -93,6 +93,8 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
     private boolean mIsStreamReminderButtonEnabled;
     private boolean mIsMarkAsWatchedButtonEnabled;
     private VideoMenuCallback mCallback;
+    // MainUIData.MENU_VIDEOS until the card is known: read as the parent's constructor runs (see updateEnabledMenuItems)
+    private int mMenu;
     private List<PlaylistInfo> mPlaylistInfos;
     private final Map<Long, MenuAction> mMenuMapping = new HashMap<>();
 
@@ -146,6 +148,11 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
     }
 
     @Override
+    protected int getMenu() {
+        return mMenu;
+    }
+
+    @Override
     protected AppDialogPresenter getDialogPresenter() {
         return mDialogPresenter;
     }
@@ -168,7 +175,32 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
         mVideo = video;
         sVideoHolder = new WeakReference<>(video);
 
+        BrowsePresenter presenter = BrowsePresenter.instance(getContext());
+        boolean inBrowse = presenter.inForeground();
+        mMenu = getCardMenu(video, inBrowse && presenter.isHistorySection(), inBrowse && presenter.isPlaylistsSection());
+        updateEnabledMenuItems();
+
         MediaServiceManager.instance().authCheck(this::bootstrapPrepareAndShowDialogSigned, this::prepareAndShowDialogUnsigned);
+    }
+
+    /**
+     * The menu of the card (see MainUIData.MENU_VIDEOS...), by where it is. The section of the sidebar shown counts as where
+     * when the browse view is on top: it's where the items of the History and the Playlists sections show up.
+     */
+    static int getCardMenu(Video video, boolean isHistorySection, boolean isPlaylistsSection) {
+        if (video.belongsToSubscriptions() || video.belongsToNotifications()) {
+            return MainUIData.MENU_SUBSCRIPTIONS;
+        }
+
+        if (video.belongsToHistory() || isHistorySection) {
+            return MainUIData.MENU_HISTORY;
+        }
+
+        if (isPlaylistsSection) {
+            return MainUIData.MENU_PLAYLISTS;
+        }
+
+        return MainUIData.MENU_VIDEOS;
     }
 
     private void bootstrapPrepareAndShowDialogSigned() {
@@ -195,7 +227,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
 
         appendReturnToBackgroundVideoButton();
 
-        for (Long menuItem : MainUIData.instance(getContext()).getMenuItemsOrdered()) {
+        for (Long menuItem : MainUIData.instance(getContext()).getMenuItemsOrdered(mMenu)) {
             MenuAction menuAction = mMenuMapping.get(menuItem);
             if (menuAction != null) {
                 menuAction.run();
@@ -216,7 +248,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
 
         appendReturnToBackgroundVideoButton();
 
-        for (Long menuItem : MainUIData.instance(getContext()).getMenuItemsOrdered()) {
+        for (Long menuItem : MainUIData.instance(getContext()).getMenuItemsOrdered(mMenu)) {
             MenuAction menuAction = mMenuMapping.get(menuItem);
             if (menuAction != null && !menuAction.isAuth()) {
                 menuAction.run();
@@ -384,11 +416,14 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
     private void appendNotInterestedButton() {
         FeedbackEndpoint feedbackEndpoint = getFeedbackEndpoint();
 
-        if (mVideo == null || mVideo.mediaItem == null || (mVideo.mediaItem.getFeedbackToken() == null && feedbackEndpoint == null)) {
+        // The own token of a card of Subscriptions is its removal from there (see getFeedbackEndpoint)
+        if (mVideo == null || mVideo.mediaItem == null
+                || (feedbackEndpoint == null && (mVideo.belongsToSubscriptions() || mVideo.mediaItem.getFeedbackToken() == null))) {
             return;
         }
 
-        if ((!mVideo.belongsToHomeLikeSection() && !mVideo.belongsToShorts()) || !mIsNotInterestedButtonEnabled) {
+        if ((!mVideo.belongsToHomeLikeSection() && !mVideo.belongsToShorts() && !mVideo.belongsToSubscriptions())
+                || !mIsNotInterestedButtonEnabled) {
             return;
         }
 
@@ -416,6 +451,8 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
         mNotInterestedAction = mMediaItemService.getFeedbackReasonsObserve(feedbackToken)
                 .subscribe(
                         reasons -> {
+                            removeFromSubscriptionsFeed();
+
                             if (reasons.getItems() != null) {
                                 for (FeedbackItem item : reasons.getItems()) {
                                     mDialogPresenter.appendSingleButton(
@@ -437,7 +474,19 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
     }
 
     /**
+     * Marked "Not interested" in Subscriptions: it goes from there too, as with Remove from subscriptions
+     */
+    private void removeFromSubscriptionsFeed() {
+        if (mVideo == null || !mVideo.belongsToSubscriptions() || mVideo.mediaItem == null || mVideo.mediaItem.getFeedbackToken() == null) {
+            return;
+        }
+
+        RxHelper.execute(mMediaItemService.markAsNotInterestedObserve(mVideo.mediaItem.getFeedbackToken()));
+    }
+
+    /**
      * The sections loaded like Home (e.g. Gaming) don't send the feedback, so their videos get the one of the Home context menu.
+     * So do the videos of Subscriptions: their own feedback is the removal from there (see appendRemoveFromSubscriptionsButton).
      * Not the playlists: their video id is the first video's, so the feedback would be about it.
      */
     private FeedbackEndpoint getFeedbackEndpoint() {
@@ -446,9 +495,14 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
         }
 
         MediaItem mediaItem = mVideo.mediaItem;
+        boolean isHomeFeedback = mVideo.hasVideo() && mediaItem.getType() == MediaItem.TYPE_VIDEO;
+
+        if (mVideo.belongsToSubscriptions()) {
+            return isHomeFeedback ? mMediaItemService.getHomeFeedbackEndpoint(mVideo.videoId) : null;
+        }
 
         if (mediaItem.getFeedbackEndpoint() != null || mediaItem.getFeedbackToken() != null || mediaItem.getFeedbackToken2() != null
-                || !mVideo.belongsToHomeLikeSection() || !mVideo.hasVideo() || mediaItem.getType() != MediaItem.TYPE_VIDEO) {
+                || !mVideo.belongsToHomeLikeSection() || !isHomeFeedback) {
             return mediaItem.getFeedbackEndpoint();
         }
 
@@ -1124,33 +1178,33 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
         mIsOpenChannelUploadsButtonEnabled = true;
         mIsOpenPlaylistButtonEnabled = true;
         mIsReturnToBackgroundVideoEnabled = true;
-        mIsOpenChannelButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_OPEN_CHANNEL);
-        mIsAddToRecentPlaylistButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_RECENT_PLAYLIST);
-        mIsAddToPlaybackQueueButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_ADD_TO_QUEUE);
-        mIsPlayNextButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_PLAY_NEXT);
-        mIsAddToWatchLaterButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_ADD_TO_WATCH_LATER);
-        mIsLikeButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_LIKE);
-        mIsAddToPlaylistButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_ADD_TO_PLAYLIST);
-        mIsShareLinkButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_SHARE_LINK);
-        mIsShareQRLinkButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_SHARE_QR_LINK);
-        mIsShareEmbedLinkButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_SHARE_EMBED_LINK);
-        mIsNotInterestedButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_NOT_INTERESTED);
-        mIsNotRecommendChannelEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_NOT_RECOMMEND_CHANNEL);
-        mIsBlockChannelEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_BLOCK_CHANNEL);
-        mIsReportAiChannelEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_REPORT_AI_CHANNEL);
-        mIsHideKeywordsEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_HIDE_KEYWORDS);
-        mIsRemoveFromHistoryButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_REMOVE_FROM_HISTORY);
-        mIsRemoveFromSubscriptionsButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_REMOVE_FROM_SUBSCRIPTIONS);
-        mIsOpenDescriptionButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_OPEN_DESCRIPTION);
-        mIsPlayVideoButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_PLAY_VIDEO);
-        mIsPlayVideoIncognitoButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_PLAY_VIDEO_INCOGNITO);
-        mIsPlayFromStartButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_PLAY_FROM_START);
-        mIsSubscribeButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_SUBSCRIBE);
-        mIsStreamReminderButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_STREAM_REMINDER);
-        mIsShowPlaybackQueueButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_SHOW_QUEUE);
-        mIsPlaylistOrderButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_PLAYLIST_ORDER);
-        mIsMarkAsWatchedButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_MARK_AS_WATCHED);
-        mIsOpenCommentsButtonEnabled = mainUIData.isMenuItemEnabled(MainUIData.MENU_ITEM_OPEN_COMMENTS);
+        mIsOpenChannelButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_OPEN_CHANNEL);
+        mIsAddToRecentPlaylistButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_RECENT_PLAYLIST);
+        mIsAddToPlaybackQueueButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_ADD_TO_QUEUE);
+        mIsPlayNextButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_PLAY_NEXT);
+        mIsAddToWatchLaterButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_ADD_TO_WATCH_LATER);
+        mIsLikeButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_LIKE);
+        mIsAddToPlaylistButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_ADD_TO_PLAYLIST);
+        mIsShareLinkButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_SHARE_LINK);
+        mIsShareQRLinkButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_SHARE_QR_LINK);
+        mIsShareEmbedLinkButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_SHARE_EMBED_LINK);
+        mIsNotInterestedButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_NOT_INTERESTED);
+        mIsNotRecommendChannelEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_NOT_RECOMMEND_CHANNEL);
+        mIsBlockChannelEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_BLOCK_CHANNEL);
+        mIsReportAiChannelEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_REPORT_AI_CHANNEL);
+        mIsHideKeywordsEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_HIDE_KEYWORDS);
+        mIsRemoveFromHistoryButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_REMOVE_FROM_HISTORY);
+        mIsRemoveFromSubscriptionsButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_REMOVE_FROM_SUBSCRIPTIONS);
+        mIsOpenDescriptionButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_OPEN_DESCRIPTION);
+        mIsPlayVideoButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_PLAY_VIDEO);
+        mIsPlayVideoIncognitoButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_PLAY_VIDEO_INCOGNITO);
+        mIsPlayFromStartButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_PLAY_FROM_START);
+        mIsSubscribeButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_SUBSCRIBE);
+        mIsStreamReminderButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_STREAM_REMINDER);
+        mIsShowPlaybackQueueButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_SHOW_QUEUE);
+        mIsPlaylistOrderButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_PLAYLIST_ORDER);
+        mIsMarkAsWatchedButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_MARK_AS_WATCHED);
+        mIsOpenCommentsButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_OPEN_COMMENTS);
     }
 
     private void initMenuMapping() {
@@ -1208,7 +1262,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
 
     private void appendContextMenuItem(ContextMenuProvider provider) {
         MainUIData mainUIData = MainUIData.instance(getContext());
-        if (mainUIData.isMenuItemEnabled(provider.getId()) && provider.isEnabled(getVideo())) {
+        if (mainUIData.isMenuItemEnabled(mMenu, provider.getId()) && provider.isEnabled(getVideo())) {
             mDialogPresenter.appendSingleButton(
                     UiOptionItem.from(getContext().getString(provider.getTitleResId()), optionItem -> provider.onClicked(getVideo(), getCallback()))
             );
