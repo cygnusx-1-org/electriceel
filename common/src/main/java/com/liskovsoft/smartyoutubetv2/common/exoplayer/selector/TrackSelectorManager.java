@@ -43,6 +43,9 @@ public class TrackSelectorManager implements TrackSelectorCallback {
     public static final int RENDERER_INDEX_SUBTITLE = 2;
     private static final String TAG = TrackSelectorManager.class.getSimpleName();
     private static final String DEFAULT_LANGUAGE = "original"; // original, descriptive, dubbed, secondary
+    private static final String DUBBED_LANGUAGE = "dubbed"; // dubbed, dubbed-auto
+    private static final String AUTO_DUBBED_LANGUAGE = "dubbed-auto";
+    private static final String DESCRIPTIVE_LANGUAGE = "descriptive"; // audio description
     private final Map<String, Integer> mBlacklist = new HashMap<>();
 
     private DefaultTrackSelector mTrackSelector;
@@ -723,7 +726,48 @@ public class TrackSelectorManager implements TrackSelectorCallback {
             return resultTracksFallback.toArray(new MediaTrack[0][]);
         }
 
+        // No track is labelled original. Don't let an unrecognized original lose to a dub or an audio description.
+        MediaTrack[][] notDubbedTracks = excludeByLanguage(trackGroupList, DUBBED_LANGUAGE, DESCRIPTIVE_LANGUAGE);
+
+        if (notDubbedTracks.length > 0) {
+            return notDubbedTracks;
+        }
+
+        // An unrecognized original is labelled dubbed. AI dubs are always labelled as such.
+        MediaTrack[][] notAutoDubbedTracks = excludeByLanguage(trackGroupList, AUTO_DUBBED_LANGUAGE, DESCRIPTIVE_LANGUAGE);
+
+        if (notAutoDubbedTracks.length > 0) {
+            return notAutoDubbedTracks;
+        }
+
         return trackGroupList;
+    }
+
+    /**
+     * Drops the tracks whose language label contains any of the given audio contents, e.g. "de (dubbed-auto)"
+     */
+    private static MediaTrack[][] excludeByLanguage(MediaTrack[][] trackGroupList, String... audioContents) {
+        List<MediaTrack[]> resultTracks = new ArrayList<>();
+
+        for (MediaTrack[] trackGroup : trackGroupList) {
+            if (trackGroup == null) {
+                continue;
+            }
+
+            List<MediaTrack> resultGroup = new ArrayList<>();
+
+            for (MediaTrack mediaTrack : trackGroup) {
+                if (mediaTrack != null && mediaTrack.format != null && !Helpers.containsAny(mediaTrack.format.language, audioContents)) {
+                    resultGroup.add(mediaTrack);
+                }
+            }
+
+            if (!resultGroup.isEmpty()) {
+                resultTracks.add(resultGroup.toArray(new MediaTrack[0]));
+            }
+        }
+
+        return resultTracks.toArray(new MediaTrack[0][]);
     }
 
     // Track array manipulation.
