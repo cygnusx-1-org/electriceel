@@ -15,7 +15,7 @@ public class SignInActivity extends LeanbackActivity {
     }
 
     @Override
-    protected boolean isRecreatedOnColorSchemeChange() {
+    protected boolean isRecreatedOnThemeOrLocaleChange() {
         // The new account (another profile) may come just before the sign-in completes. Recreating would dispose the sign-in
         // (YTSignInPresenter.onViewDestroyed), so the screen wouldn't close and would show a new code.
         return false;

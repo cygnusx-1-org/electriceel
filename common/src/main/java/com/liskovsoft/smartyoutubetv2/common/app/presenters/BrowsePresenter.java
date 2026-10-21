@@ -61,6 +61,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -94,6 +95,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
     private long mLastUpdateTimeMs = -1;
     private int mBootSectionIndex;
     private int mBootstrapSectionId = -1;
+    private Locale mSectionsLocale;
 
     private BrowsePresenter(Context context) {
         super(context);
@@ -136,6 +138,13 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
 
         if (getView() == null) {
             return;
+        }
+
+        // Recreated in another language or country, another account's (see LocaleData): the titles are in the old one
+        if (!Helpers.equals(LocaleUtility.getCurrentLocale(getContext()), mSectionsLocale)) {
+            initSectionMappings();
+            updateChannelSorting();
+            updatePlaylistsStyle();
         }
 
         updateSections();
@@ -192,6 +201,8 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
     }
 
     private void initSectionMappings() {
+        mSectionsLocale = LocaleUtility.getCurrentLocale(getContext());
+
         initSectionMapping();
 
         initRowAndGridMapping();

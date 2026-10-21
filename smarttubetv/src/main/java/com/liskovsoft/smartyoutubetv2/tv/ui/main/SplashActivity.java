@@ -25,7 +25,7 @@ public class SplashActivity extends MotherActivity implements SplashView {
     }
 
     @Override
-    protected boolean isRecreatedOnColorSchemeChange() {
+    protected boolean isRecreatedOnThemeOrLocaleChange() {
         // Recreating would run the start-up intent again (e.g. the account from the intent picked after the master password)
         return false;
     }

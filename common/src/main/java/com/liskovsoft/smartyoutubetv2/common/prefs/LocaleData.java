@@ -2,20 +2,22 @@ package com.liskovsoft.smartyoutubetv2.common.prefs;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Resources;
 import android.text.TextUtils;
 
+import com.liskovsoft.googlecommon.common.locale.LocaleManager;
 import com.liskovsoft.sharedutils.helpers.Helpers;
-import com.liskovsoft.sharedutils.helpers.MessageHelpers;
+import com.liskovsoft.sharedutils.locale.LocaleUpdater;
 import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
-import com.liskovsoft.smartyoutubetv2.common.R;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs.ProfileChangeListener;
 
 /**
  * The language and the country of the Language/Country settings.
  * Each account has its own.<br/>
  * The ones in use stay in GlobalPreferences: the locale code of the shared modules reads them from there when the app starts.
- * This keeps a copy per account and puts the account's into GlobalPreferences when the account changes. The app needs a restart then,
- * like after a change in the settings.
+ * This keeps a copy per account and puts the account's into GlobalPreferences when the account changes. They're in use at once, without
+ * a restart: the content is loaded in them, and the activities are recreated in them (see MotherActivity).<br/>
+ * None (signed out) has none of its own: it keeps the ones in use, so cycling through it from an account doesn't change them.
  */
 public class LocaleData implements ProfileChangeListener {
     static final String LOCALE_DATA = "locale_data";
@@ -56,6 +58,7 @@ public class LocaleData implements ProfileChangeListener {
     public void setLanguage(String language) {
         mGlobalPrefs.setPreferredLanguage(nonNull(language));
         persistState();
+        reloadLocale();
     }
 
     /**
@@ -68,17 +71,39 @@ public class LocaleData implements ProfileChangeListener {
     public void setCountry(String country) {
         mGlobalPrefs.setPreferredCountry(nonNull(country));
         persistState();
+        reloadLocale();
     }
 
     private void persistState() {
+        // None keeps the ones in use (see onProfileChanged)
+        if (mPrefs.isAnonymousProfile()) {
+            return;
+        }
+
         mPrefs.setProfileData(LOCALE_DATA, merge(getLanguage(), getCountry()));
     }
 
     /**
-     * The account (or the per account switch) has changed: its language and country are the ones in use now
+     * The account has changed: its language and country are the ones in use now. None keeps the ones in use.
      */
     @Override
     public void onProfileChanged() {
+        if (mPrefs.isAnonymousProfile()) {
+            return;
+        }
+
+        applyProfileData();
+    }
+
+    /**
+     * The other account's language and country are the ones in use now, None's too
+     */
+    @Override
+    public void onProfileDataCopied() {
+        applyProfileData();
+    }
+
+    private void applyProfileData() {
         String[] split = Helpers.splitData(mPrefs.getProfileData(LOCALE_DATA));
         String language = nonNull(Helpers.parseStr(split, 0));
         String country = nonNull(Helpers.parseStr(split, 1));
@@ -89,8 +114,18 @@ public class LocaleData implements ProfileChangeListener {
 
         mGlobalPrefs.setPreferredLanguage(language);
         mGlobalPrefs.setPreferredCountry(country);
+        reloadLocale();
+    }
 
-        MessageHelpers.showLongMessage(mContext, R.string.msg_restart_app);
+    /**
+     * The ones in GlobalPreferences are in use now
+     */
+    private void reloadLocale() {
+        // Both keep the ones they read first. Read in the system's configuration, like when the app starts: a language or country
+        // not chosen is the system's, while the activities' configuration is the previous one's.
+        LocaleUpdater.clearCache();
+        LocaleUpdater.getSavedLocale(mContext.createConfigurationContext(Resources.getSystem().getConfiguration()));
+        LocaleManager.unhold();
     }
 
     /**

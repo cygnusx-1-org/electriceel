@@ -21,8 +21,13 @@ public class SettingsCardsPresenter extends BasePresenter<SettingsCardsView> {
     private static SettingsCardsPresenter sInstance;
     // The sections open on the screen, the last one is shown. Back goes to the one before.
     private final List<Cards> mStack = new ArrayList<>();
-    // The card that opened each section but the last, to focus it again on Back
-    private final List<Integer> mSelectedPositions = new ArrayList<>();
+    // The card that opened each section but the last, to focus it again on Back. A card is its index in the cards of its section:
+    // the screen shows them sorted in the language of the app, which can change meanwhile (see LocaleData).
+    private final List<Integer> mSelectedCards = new ArrayList<>();
+    // The cards shown, in their order on the screen
+    private final List<Integer> mShownCards = new ArrayList<>();
+    // The card focused when the screen was saved, to focus it again when it's recreated (see onViewSaved)
+    private int mSavedCard = -1;
 
     /**
      * The cards of a section. They're made when the screen opens, with its context, so their settings open over it.
@@ -51,14 +56,15 @@ public class SettingsCardsPresenter extends BasePresenter<SettingsCardsView> {
      */
     public void show(Cards cards) {
         if (getView() != null) {
-            mSelectedPositions.add(getView().getSelectedPosition());
+            mSelectedCards.add(getShownCard(getView().getSelectedPosition()));
             mStack.add(cards);
-            updateView(0);
+            updateView(-1);
             return;
         }
 
         mStack.clear();
-        mSelectedPositions.clear();
+        mSelectedCards.clear();
+        mSavedCard = -1;
         mStack.add(cards);
 
         getViewManager().startView(SettingsCardsView.class);
@@ -73,7 +79,7 @@ public class SettingsCardsPresenter extends BasePresenter<SettingsCardsView> {
         }
 
         mStack.remove(mStack.size() - 1);
-        updateView(mSelectedPositions.remove(mSelectedPositions.size() - 1));
+        updateView(mSelectedCards.remove(mSelectedCards.size() - 1));
 
         return true;
     }
@@ -88,22 +94,56 @@ public class SettingsCardsPresenter extends BasePresenter<SettingsCardsView> {
             return;
         }
 
-        updateView(0);
+        int savedCard = mSavedCard;
+        mSavedCard = -1;
+        updateView(savedCard);
     }
 
-    private void updateView(int selectedPosition) {
+    /**
+     * The screen is saved, e.g. before it's recreated in another language (see MotherActivity)
+     */
+    public void onViewSaved(int selectedPosition) {
+        mSavedCard = getShownCard(selectedPosition);
+    }
+
+    /**
+     * @return the index of the card in the cards of its section, -1 when there's none at the position
+     */
+    private int getShownCard(int position) {
+        return position >= 0 && position < mShownCards.size() ? mShownCards.get(position) : -1;
+    }
+
+    /**
+     * @param selectedCard the index of the card to focus in the cards of the section, -1 for the first one shown
+     */
+    private void updateView(int selectedCard) {
         if (getView() == null || mStack.isEmpty()) {
             return;
         }
 
         Context context = getContext();
         Cards cards = mStack.get(mStack.size() - 1);
-        List<SettingsItem> items = new ArrayList<>(cards.getItems(context));
+        List<SettingsItem> allItems = cards.getItems(context);
+        List<Integer> shownCards = new ArrayList<>();
+
+        for (int i = 0; i < allItems.size(); i++) {
+            shownCards.add(i);
+        }
 
         // Always alphabetical, in the language of the app
         Collator collator = Collator.getInstance();
         collator.setStrength(Collator.SECONDARY);
-        Collections.sort(items, (item1, item2) -> collator.compare(item1.title, item2.title));
+        Collections.sort(shownCards, (card1, card2) -> collator.compare(allItems.get(card1).title, allItems.get(card2).title));
+
+        List<SettingsItem> items = new ArrayList<>();
+
+        for (int card : shownCards) {
+            items.add(allItems.get(card));
+        }
+
+        mShownCards.clear();
+        mShownCards.addAll(shownCards);
+        int selectedPosition = Math.max(0, shownCards.indexOf(selectedCard));
 
         // E.g. "Player - Options". The panels of its cards are titled "Options - <Card>".
         String cardsTitle = cards.getTitle(context);

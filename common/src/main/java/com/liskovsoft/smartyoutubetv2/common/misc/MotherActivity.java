@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Build.VERSION;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -38,6 +39,7 @@ import com.r0adkll.slidr.model.SlidrPosition;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class MotherActivity extends FragmentActivity {
     private static final String TAG = MotherActivity.class.getSimpleName();
@@ -55,10 +57,11 @@ public class MotherActivity extends FragmentActivity {
     private boolean mIsFullscreenModeEnabled;
     private boolean mIsBackPressed;
     private int mColorSchemeId;
-    private final Runnable mRecreateIfColorSchemeChanged = this::recreateIfColorSchemeChanged;
+    private Locale mLocale;
+    private final Runnable mRecreateIfThemeOrLocaleChanged = this::recreateIfThemeOrLocaleChanged;
     // Posted, so the data classes have restored the new profile's settings before the check.
     // A field, because AppPrefs holds its listeners weakly.
-    private final ProfileChangeListener mOnProfileChanged = () -> Utils.post(mRecreateIfColorSchemeChanged);
+    private final ProfileChangeListener mOnProfileChanged = () -> Utils.post(mRecreateIfThemeOrLocaleChanged);
 
     public interface OnPermissions {
         void onPermissions(int requestCode, String[] permissions, int[] grantResults);
@@ -205,11 +208,40 @@ public class MotherActivity extends FragmentActivity {
         Context contextWrapper = null;
 
         if (context != null) {
+            mLocale = getLocale(context);
             // NOTE: Use only cached metrics. Because metrics creation involves using WindowManager, which isn't available at this stage.
-            contextWrapper = LocaleContextWrapper.wrap(context, LocaleUpdater.getSavedLocale(context), sCachedDisplayMetrics);
+            contextWrapper = LocaleContextWrapper.wrap(context, getLocaleToApply(context), sCachedDisplayMetrics);
         }
 
         super.attachBaseContext(contextWrapper);
+    }
+
+    /**
+     * The chosen language and country, or the system's when none is chosen
+     */
+    private static Locale getLocale(Context context) {
+        Locale locale = LocaleUpdater.getSavedLocale(context);
+
+        return locale != null ? locale : getSystemLocale();
+    }
+
+    /**
+     * None chosen: the system's, but only when another one is still the default. That's the previous account's, switched
+     * from without a restart (see LocaleData).
+     */
+    @Nullable
+    private static Locale getLocaleToApply(Context context) {
+        Locale locale = LocaleUpdater.getSavedLocale(context);
+
+        if (locale == null && !Locale.getDefault().equals(getSystemLocale())) {
+            locale = getSystemLocale();
+        }
+
+        return locale;
+    }
+
+    private static Locale getSystemLocale() {
+        return Resources.getSystem().getConfiguration().getLocales().get(0);
     }
 
     @Override
@@ -229,30 +261,39 @@ public class MotherActivity extends FragmentActivity {
         // Restore this activity's screensaver policy after returning to the foreground.
         mScreensaverManager.resume();
 
-        recreateIfColorSchemeChanged();
+        recreateIfThemeOrLocaleChanged();
         // Switching the account (e.g. the account button on Home) changes the profile without pausing this activity
         AppPrefs.instance(this).addListener(mOnProfileChanged);
     }
 
     /**
      * The theme is applied only in onCreate, so a scheme changed since then (picked in the settings or brought by
-     * another account's profile) left this activity in the old colors next to new activities in the new ones.<br/>
+     * another account's profile) left this activity in the old colors next to new activities in the new ones.
+     * The same for the language and country another account's profile brings (see LocaleData).<br/>
      * Recreated in place rather than restarting the app, so the screen doesn't go blank. Activities below the top one
      * are recreated as they come back (onResume).
      */
-    private void recreateIfColorSchemeChanged() {
-        if (isFinishing() || !isRecreatedOnColorSchemeChange() || MainUIData.instance(this).getColorScheme().id == mColorSchemeId) {
+    private void recreateIfThemeOrLocaleChanged() {
+        if (isFinishing() || !isRecreatedOnThemeOrLocaleChange()) {
             return;
         }
 
-        Log.d(TAG, "Color scheme changed. Recreating %s...", getClass().getSimpleName());
+        boolean isColorSchemeChanged = MainUIData.instance(this).getColorScheme().id != mColorSchemeId;
+        boolean isLocaleChanged = mLocale != null && !mLocale.equals(getLocale(this));
+
+        if (!isColorSchemeChanged && !isLocaleChanged) {
+            return;
+        }
+
+        Log.d(TAG, "Color scheme or locale changed. Recreating %s...", getClass().getSimpleName());
         recreate();
     }
 
     /**
-     * Override to keep the activity in its old colors until it's closed, e.g. when recreating would lose what it shows.
+     * Override to keep the activity in its old colors and language until it's closed, e.g. when recreating would lose what
+     * it shows.
      */
-    protected boolean isRecreatedOnColorSchemeChange() {
+    protected boolean isRecreatedOnThemeOrLocaleChange() {
         return true;
     }
 
@@ -263,9 +304,9 @@ public class MotherActivity extends FragmentActivity {
         // Stop managing the screensaver so a paused activity cannot keep the display awake.
         mScreensaverManager.suspend();
 
-        // onResume checks the scheme again
+        // onResume checks the scheme and the locale again
         AppPrefs.instance(this).removeListener(mOnProfileChanged);
-        Utils.removeCallbacks(mRecreateIfColorSchemeChanged);
+        Utils.removeCallbacks(mRecreateIfThemeOrLocaleChanged);
     }
 
     @Override

@@ -83,6 +83,9 @@ public class SettingsCardsFragment extends GridFragment implements SettingsCards
         super.onViewCreated(view, savedInstanceState);
 
         GridFragmentHelper.enableDownToShorterRow(getBrowseGrid(), getGridPresenter().getNumberOfColumns());
+        // The presenter focuses the card again when the screen is recreated (see SettingsCardsPresenter.onViewSaved). The grid would
+        // restore the position it had, where another card can be: the cards are sorted in the language of the app, which can change.
+        getBrowseGrid().setSaveEnabled(false);
         mCardsLayout = SettingsCardsLayout.attach(view, getBrowseGrid());
     }
 
@@ -101,6 +104,13 @@ public class SettingsCardsFragment extends GridFragment implements SettingsCards
         super.onActivityCreated(savedInstanceState);
 
         mPresenter.onViewInitialized();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        mPresenter.onViewSaved(getSelectedPosition());
     }
 
     @Override

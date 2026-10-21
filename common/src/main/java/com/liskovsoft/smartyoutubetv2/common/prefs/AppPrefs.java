@@ -453,6 +453,13 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
     }
 
     /**
+     * None is selected (signed out)
+     */
+    public boolean isAnonymousProfile() {
+        return ANONYMOUS_PROFILE_NAME.equals(getProfileName());
+    }
+
+    /**
      * The settings are from SmartTube's backup or from a version before this one again (see initSharedSettingsProfile)
      */
     void resetSharedSettingsProfileForTesting() {

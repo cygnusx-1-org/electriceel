@@ -45,9 +45,9 @@ public class AppDialogActivity extends MotherActivity {
     }
 
     @Override
-    protected boolean isRecreatedOnColorSchemeChange() {
+    protected boolean isRecreatedOnThemeOrLocaleChange() {
         // The destroyed fragment clears the dialog's data (AppDialogPresenter.onViewDestroyed), so it would come back empty.
-        // The dialog keeps the old colors until it's closed, then the activity below it is recreated.
+        // The dialog keeps the old colors and language until it's closed, then the activity below it is recreated.
         return false;
     }
 

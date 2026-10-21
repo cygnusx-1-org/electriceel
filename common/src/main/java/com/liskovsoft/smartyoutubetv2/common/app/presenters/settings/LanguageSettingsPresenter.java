@@ -2,7 +2,6 @@ package com.liskovsoft.smartyoutubetv2.common.app.presenters.settings;
 
 import android.content.Context;
 import com.liskovsoft.sharedutils.helpers.Helpers;
-import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.sharedutils.locale.LocaleUtility;
 import com.liskovsoft.smartyoutubetv2.common.R;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
@@ -19,13 +18,6 @@ import java.util.Map.Entry;
 
 public class LanguageSettingsPresenter extends BasePresenter<Void> {
     private final LocaleData mLocaleData;
-    private boolean mRestartApp;
-    private final Runnable mOnFinish = () -> {
-        if (mRestartApp) {
-            mRestartApp = false;
-            MessageHelpers.showLongMessage(getContext(), R.string.msg_restart_app);
-        }
-    };
 
     public LanguageSettingsPresenter(Context context) {
         super(context);
@@ -42,7 +34,7 @@ public class LanguageSettingsPresenter extends BasePresenter<Void> {
         appendLanguageCategory(settingsPresenter);
         appendCountryCategory(settingsPresenter);
 
-        settingsPresenter.showDialog(getContext().getString(R.string.settings_language_country), mOnFinish);
+        settingsPresenter.showDialog(getContext().getString(R.string.settings_language_country));
     }
 
     /**
@@ -53,7 +45,7 @@ public class LanguageSettingsPresenter extends BasePresenter<Void> {
 
         appendLanguageCategory(settingsPresenter);
 
-        settingsPresenter.showDialog(getContext().getString(R.string.dialog_select_language), mOnFinish);
+        settingsPresenter.showDialog(getContext().getString(R.string.dialog_select_language));
     }
 
     /**
@@ -64,7 +56,7 @@ public class LanguageSettingsPresenter extends BasePresenter<Void> {
 
         appendCountryCategory(settingsPresenter);
 
-        settingsPresenter.showDialog(getContext().getString(R.string.dialog_select_country), mOnFinish);
+        settingsPresenter.showDialog(getContext().getString(R.string.dialog_select_country));
     }
 
     private void appendLanguageCategory(AppDialogPresenter settingsPresenter) {
@@ -82,8 +74,8 @@ public class LanguageSettingsPresenter extends BasePresenter<Void> {
             options.add(UiOptionItem.from(
                     entry.getKey(),
                     option -> {
+                        // In use at once: the activities are recreated in it when the dialog is closed (see MotherActivity)
                         mLocaleData.setLanguage(entry.getValue());
-                        mRestartApp = true;
                         //settingsPresenter.closeDialog(); // sometimes cause crashes
                     },
                     entry.getValue().equals(language)));
@@ -109,7 +101,6 @@ public class LanguageSettingsPresenter extends BasePresenter<Void> {
                     entry.getKey(),
                     option -> {
                         mLocaleData.setCountry(entry.getValue());
-                        mRestartApp = true;
                         //settingsPresenter.closeDialog(); // sometimes cause crashes
                     },
                     entry.getValue().equals(country)));
