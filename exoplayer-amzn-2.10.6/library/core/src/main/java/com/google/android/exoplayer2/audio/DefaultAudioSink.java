@@ -209,6 +209,15 @@ public final class DefaultAudioSink implements AudioSink {
 
   private static final String TAG = "AudioTrack";
 
+  /**
+   * SmartTube fix: how long a refused AudioTrack creation is retried (see {@link
+   * AudioTrackInitRetry}). The old track's memory is freed once the mixer has played out its last
+   * frames: about 25 ms after a seek on a Shield, bounded by the output latency (42 ms there).
+   */
+  private static final long AUDIO_TRACK_INIT_RETRY_DURATION_MS = 200;
+  /** SmartTube fix: the minimum time between two AudioTrack creation attempts. */
+  private static final long AUDIO_TRACK_INIT_RETRY_INTERVAL_MS = 20;
+
 
   /** Represents states of the {@link #startMediaTimeUs} value. */
   @Documented
@@ -246,6 +255,7 @@ public final class DefaultAudioSink implements AudioSink {
   private final AudioProcessor[] toIntPcmAvailableAudioProcessors;
   private final AudioProcessor[] toFloatPcmAvailableAudioProcessors;
   private final ConditionVariable releasingConditionVariable;
+  private final AudioTrackInitRetry audioTrackInitRetry;
   private final AudioTrackPositionTracker audioTrackPositionTracker;
   private final ArrayDeque<PlaybackParametersCheckpoint> playbackParametersCheckpoints;
 
@@ -354,6 +364,9 @@ public final class DefaultAudioSink implements AudioSink {
     this.audioProcessorChain = Assertions.checkNotNull(audioProcessorChain);
     this.enableConvertHighResIntPcmToFloat = enableConvertHighResIntPcmToFloat;
     releasingConditionVariable = new ConditionVariable(true);
+    audioTrackInitRetry =
+        new AudioTrackInitRetry(
+            AUDIO_TRACK_INIT_RETRY_DURATION_MS, AUDIO_TRACK_INIT_RETRY_INTERVAL_MS);
     audioTrackPositionTracker = new AudioTrackPositionTracker(new PositionTrackerListener(),
                                       isLatencyQuirkEnabled); // AMZN_CHANGE_ONELINE
     channelMappingAudioProcessor = new ChannelMappingAudioProcessor();
@@ -628,7 +641,19 @@ public final class DefaultAudioSink implements AudioSink {
     }
 
     if (!isInitialized()) {
-      initialize(presentationTimeUs);
+      // SmartTube fix: a refused AudioTrack is retried on the next calls (see AudioTrackInitRetry)
+      long nowMs = SystemClock.elapsedRealtime();
+      if (!audioTrackInitRetry.isAttemptDue(nowMs)) {
+        return false;
+      }
+      try {
+        initialize(presentationTimeUs);
+      } catch (InitializationException e) {
+        audioTrackInitRetry.onFailure(e, nowMs);
+        Log.w(TAG, "Retrying AudioTrack creation: " + e.getMessage());
+        return false;
+      }
+      audioTrackInitRetry.reset();
       if (playing) {
         play();
       }
@@ -1013,6 +1038,7 @@ public final class DefaultAudioSink implements AudioSink {
   @Override
   public void flush() {
     log.i("calling flush/reset");
+    audioTrackInitRetry.reset();
     if (isInitialized()) {
       submittedPcmBytes = 0;
       submittedEncodedFrames = 0;

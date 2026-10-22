@@ -3,6 +3,8 @@ package com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers;
 import android.annotation.SuppressLint;
 
 import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.Format;
+import com.google.android.exoplayer2.audio.AudioSink;
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer.DecoderErrorException;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrBackoffError;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrReloadPlayerError;
@@ -37,6 +39,10 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
     private String mDecoderErrorVideoId;
     private FormatItem mVideoFallback;
     private FormatItem mAudioFallback;
+    /**
+     * Refused AudioTracks on the video in mDecoderErrorVideoId
+     */
+    private int mAudioInitErrorCount;
     private String mSabrErrorFixVideoId;
     private int mSabrErrorFixAttempts;
 
@@ -128,6 +134,7 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
         } else {
             mDecoderErrorVideoId = item != null ? item.videoId : null;
             mDecoderErrorCount = 0;
+            mAudioInitErrorCount = 0;
             mVideoFallback = null;
             mAudioFallback = null;
         }
@@ -240,7 +247,7 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
         boolean restartEngine = true;
         boolean showMessage = true;
         String errorContent = error != null ? error.getMessage() : null;
-        String errorTitle = getErrorTitle(type, rendererIndex);
+        String errorTitle = getErrorTitle(type, rendererIndex, error);
         String errorMessage = errorTitle + "\n" + errorContent;
 
         if (Helpers.startsWithAny(errorContent, "Unable to connect to")) {
@@ -307,6 +314,18 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
             } else {
                 restartEngine = false;
             }
+        } else if (type == PlayerEventListener.ERROR_TYPE_RENDERER && error instanceof AudioSink.InitializationException) {
+            // The device refused a new AudioTrack even after DefaultAudioSink retried, e.g. the app's AudioFlinger memory is full
+            // (a seek briefly holds two tracks). The format plays fine, so don't save another one. A reload frees the old track;
+            // if this video keeps failing, restart the engine to free everything the player holds.
+            if (++mAudioInitErrorCount == 1) {
+                restartEngine = false;
+                showMessage = false;
+            } else {
+                // Or the device refuses this audio config (e.g. passthrough): go on with AAC until another video opens
+                FormatItem audioFormat = getPlayer() != null ? getPlayer().getAudioFormat() : null;
+                applyAudioFallback(audioFormat != null && audioFormat.getTrack() != null ? audioFormat.getTrack().format : null);
+            }
         } else if (type == PlayerEventListener.ERROR_TYPE_RENDERER && rendererIndex == PlayerEventListener.RENDERER_INDEX_AUDIO) {
             getPlayerData().setFormat(FormatItem.AUDIO_HQ_MP4A);
             restartEngine = false;
@@ -346,7 +365,7 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
     }
 
     @SuppressLint("StringFormatMatches")
-    private String getErrorTitle(int type, int rendererIndex) {
+    private String getErrorTitle(int type, int rendererIndex, Throwable error) {
         String errorTitle;
         int msgResId;
 
@@ -370,6 +389,11 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
                 errorTitle = getContext().getString(msgResId);
                 break;
             case PlayerEventListener.ERROR_TYPE_RENDERER:
+                if (error instanceof AudioSink.InitializationException) {
+                    // Rarely a format problem (see applyEngineErrorAction)
+                    errorTitle = getContext().getString(R.string.msg_player_error, type);
+                    break;
+                }
                 switch (rendererIndex) {
                     case PlayerEventListener.RENDERER_INDEX_VIDEO:
                         msgResId = R.string.msg_player_error_video_renderer;
@@ -507,17 +531,27 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
                 getPlayerData().setTempVideoFormat(fallback);
             }
         } else if (error.trackType == C.TRACK_TYPE_AUDIO) {
-            FormatItem audioFormat = getPlayerData().getFormat(FormatItem.TYPE_AUDIO);
-            fallback = DecoderErrorFallback.getAudioFormat(error.format, audioFormat != null ? audioFormat.getLanguage() : null);
-
-            if (fallback != null) {
-                mAudioFallback = fallback;
-                getPlayerData().setTempAudioFormat(fallback);
-            }
+            fallback = applyAudioFallback(error.format);
         }
 
         // Null: nothing left to fall back to, the restart is all there is
         Log.e(TAG, "Decoder error fallback: %s", fallback != null ? fallback.getTrack().format : null);
+    }
+
+    /**
+     * AAC in the saved language for the video in mDecoderErrorVideoId, unless the failed format is AAC already.<br/>
+     * NOTE: Applied with restartEngine() (see applyDecoderErrorFallback).
+     */
+    private FormatItem applyAudioFallback(Format failed) {
+        FormatItem audioFormat = getPlayerData().getFormat(FormatItem.TYPE_AUDIO);
+        FormatItem fallback = DecoderErrorFallback.getAudioFormat(failed, audioFormat != null ? audioFormat.getLanguage() : null);
+
+        if (fallback != null) {
+            mAudioFallback = fallback;
+            getPlayerData().setTempAudioFormat(fallback);
+        }
+
+        return fallback;
     }
 
     private void reapplyDecoderErrorFallback() {
