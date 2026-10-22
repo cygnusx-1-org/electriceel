@@ -37,7 +37,6 @@ import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -199,17 +198,75 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
     }
 
     /**
-     * The Boot to section card of the User interface settings, in General (was in the General panel)
+     * The Sidebar card of the User interface settings (was the Boot to section and Set-up sections cards of General): its
+     * sections, their order and the one booted to
      */
-    public void showBootToSection() {
+    public void showSidebar() {
+        AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
+
+        dialog.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.side_panel_sections), option -> showEnabledSections()));
+        dialog.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.sidebar_order), option -> showSidebarOrder()));
+        dialog.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.boot_to_section), option -> showBootToSection()));
+
+        dialog.showDialog(getContext().getString(R.string.sidebar));
+    }
+
+    private void showBootToSection() {
         showCategory(R.string.boot_to_section, this::appendBootToSection);
     }
 
-    /**
-     * The Set-up sections card of the User interface settings, in General (was in the General panel)
-     */
-    public void showEnabledSections() {
+    private void showEnabledSections() {
         showCategory(R.string.side_panel_sections, this::appendEnabledSections);
+    }
+
+    /**
+     * The sections and pinned items of the sidebar put in order with the remote (see OptionCategory.reorderList). Read again
+     * each time it's opened. Not Settings: it's always last (see SidebarService.keepSettingsLast).
+     */
+    private void showSidebarOrder() {
+        List<OptionItem> options = new ArrayList<>();
+
+        // The ones without a title come after them (see SidebarService.setPinnedItemsOrder)
+        for (Video item : mSidebarService.getPinnedItems()) {
+            String title = getSectionTitle(item);
+
+            if (title != null && item.sectionId != MediaGroup.TYPE_SETTINGS) {
+                options.add(UiOptionItem.from(title, null, false, item));
+            }
+        }
+
+        AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
+        dialog.appendReorderCategory(getContext().getString(R.string.sidebar_order), options, items -> {
+            List<Video> pinnedItems = new ArrayList<>();
+
+            for (OptionItem item : items) {
+                pinnedItems.add((Video) item.getData());
+            }
+
+            BrowsePresenter.instance(getContext()).setSectionsOrder(pinnedItems);
+        });
+        dialog.showDialog();
+    }
+
+    /**
+     * As in the sidebar: a section's name (see SidebarService.getDefaultSections), a pinned item's title
+     */
+    private String getSectionTitle(Video item) {
+        if (item == null) {
+            return null;
+        }
+
+        if (item.sectionId == -1) {
+            return item.getTitle();
+        }
+
+        for (Entry<Integer, Integer> section : mSidebarService.getDefaultSections().entrySet()) {
+            if (section.getValue() == item.sectionId) {
+                return getContext().getString(section.getKey());
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -646,34 +703,32 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendCheckedCategory(getContext().getString(R.string.context_menu_items), options);
     }
 
+    /**
+     * First section, then the sections and pinned items in the order of the sidebar. First section is checked when the boot
+     * section isn't in the sidebar too: it's booted to then (see BrowsePresenter.refreshSections).
+     */
     private void appendBootToSection(AppDialogPresenter settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
-        Map<Integer, Integer> sections = mSidebarService.getDefaultSections();
+        int bootSectionId = mSidebarService.getBootSectionId();
+        boolean isBootSectionShown = false;
 
-        for (Entry<Integer, Integer> section : sections.entrySet()) {
-            options.add(
-                    UiOptionItem.from(
-                            getContext().getString(section.getKey()),
-                            optionItem -> mSidebarService.setBootSectionId(section.getValue()),
-                            section.getValue().equals(mSidebarService.getBootSectionId())
-                    )
-            );
-        }
+        for (Video item : mSidebarService.getPinnedItems()) {
+            String title = getSectionTitle(item);
 
-        Collection<Video> pinnedItems = mSidebarService.getPinnedItems();
-
-        for (Video item : pinnedItems) {
-            if (item != null && item.getTitle() != null) {
-                options.add(
-                        UiOptionItem.from(
-                                item.getTitle(),
-                                optionItem -> mSidebarService.setBootSectionId(item.getId()),
-                                item.hashCode() == mSidebarService.getBootSectionId()
-                        )
-                );
+            if (title == null || (item.sectionId == MediaGroup.TYPE_SETTINGS && !mSidebarService.isSettingsSectionEnabled())) {
+                continue;
             }
+
+            // As the section's id (see BrowsePresenter.createPinnedSection)
+            int sectionId = item.sectionId != -1 ? item.sectionId : item.getId();
+            isBootSectionShown |= sectionId == bootSectionId;
+
+            options.add(UiOptionItem.from(title, optionItem -> mSidebarService.setBootSectionId(sectionId), sectionId == bootSectionId));
         }
+
+        options.add(0, UiOptionItem.from(getContext().getString(R.string.boot_to_first_section),
+                optionItem -> mSidebarService.setBootSectionId(SidebarService.BOOT_SECTION_FIRST), !isBootSectionShown));
 
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.boot_to_section), options);
     }

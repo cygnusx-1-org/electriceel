@@ -11,6 +11,7 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs.ProfileChangeListener;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -27,6 +28,11 @@ public class SidebarService implements ProfileChangeListener {
     private boolean mIsSettingsSectionEnabled;
     private int mBootSectionId;
     private final static int RESERVED_ID = 100;
+    /**
+     * Boot to the section at the top of the sidebar, whichever it is. Below RESERVED_ID, so no pinned item has it (see
+     * cleanupPinnedItems), and past the ids of the sections (MediaGroup.TYPE_...).
+     */
+    public final static int BOOT_SECTION_FIRST = RESERVED_ID - 1;
 
     private SidebarService(Context context) {
         mContext = context.getApplicationContext();
@@ -169,6 +175,29 @@ public class SidebarService implements ProfileChangeListener {
         }
     }
 
+    /**
+     * The ones not in it (e.g. Settings) come after them, Settings last (see keepSettingsLast)
+     */
+    public void setPinnedItemsOrder(List<Video> items) {
+        List<Video> result = new ArrayList<>();
+
+        for (Video item : items) {
+            // Not there anymore (e.g. disabled since or another profile's)
+            if (mPinnedItems.contains(item) && !result.contains(item)) {
+                result.add(item);
+            }
+        }
+
+        for (Video item : mPinnedItems) {
+            if (!result.contains(item)) {
+                result.add(item);
+            }
+        }
+
+        mPinnedItems = result;
+        persistState();
+    }
+
     public void moveSectionUp(int sectionId) {
         shiftSection(sectionId, -1);
     }
@@ -267,7 +296,6 @@ public class SidebarService implements ProfileChangeListener {
     }
 
     private void initSections() {
-        mDefaultSections.put(R.string.header_notifications, MediaGroup.TYPE_NOTIFICATIONS);
         mDefaultSections.put(R.string.header_home, MediaGroup.TYPE_HOME);
         mDefaultSections.put(R.string.header_shorts, MediaGroup.TYPE_SHORTS);
         mDefaultSections.put(R.string.header_kids_home, MediaGroup.TYPE_KIDS_HOME);
@@ -280,6 +308,7 @@ public class SidebarService implements ProfileChangeListener {
         mDefaultSections.put(R.string.header_subscriptions, MediaGroup.TYPE_SUBSCRIPTIONS);
         mDefaultSections.put(R.string.header_history, MediaGroup.TYPE_HISTORY);
         mDefaultSections.put(R.string.watch_later, MediaGroup.TYPE_WATCH_LATER);
+        mDefaultSections.put(R.string.header_notifications, MediaGroup.TYPE_NOTIFICATIONS);
         mDefaultSections.put(R.string.header_blocked_channels, MediaGroup.TYPE_BLOCKED_CHANNELS);
         mDefaultSections.put(R.string.header_blocked_ai_channels, MediaGroup.TYPE_BLOCKED_AI_CHANNELS);
         mDefaultSections.put(R.string.header_playlists, MediaGroup.TYPE_USER_PLAYLISTS);
@@ -332,7 +361,8 @@ public class SidebarService implements ProfileChangeListener {
         mBootSectionId = Helpers.parseInt(split, 1, MediaGroup.TYPE_HOME);
 
         // A section that isn't there anymore (e.g. Trending). Pinned items have ids past RESERVED_ID (see cleanupPinnedItems).
-        if (mBootSectionId >= 0 && mBootSectionId < RESERVED_ID && !mDefaultSections.containsValue(mBootSectionId)) {
+        if (mBootSectionId >= 0 && mBootSectionId < RESERVED_ID && mBootSectionId != BOOT_SECTION_FIRST
+                && !mDefaultSections.containsValue(mBootSectionId)) {
             mBootSectionId = MediaGroup.TYPE_HOME;
         }
 
@@ -384,5 +414,16 @@ public class SidebarService implements ProfileChangeListener {
     @Override
     public void onProfileChanged() {
         restoreState();
+    }
+
+    /**
+     * The next instance reads the saved values again. This one isn't told of the profile changes anymore: it would write its
+     * sidebar into another test's profiles (see restoreState).
+     */
+    static void resetInstanceForTesting() {
+        if (sInstance != null) {
+            sInstance.mPrefs.removeListener(sInstance);
+            sInstance = null;
+        }
     }
 }

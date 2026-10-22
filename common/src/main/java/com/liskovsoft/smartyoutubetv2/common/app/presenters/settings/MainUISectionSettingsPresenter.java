@@ -47,6 +47,8 @@ public class MainUISectionSettingsPresenter extends BasePresenter<Void> implemen
                 () -> DeArrowSettingsPresenter.instance(context).show(), R.drawable.settings_dearrow));
         items.add(new SettingsItem(context.getString(R.string.header_home),
                 () -> MainUISettingsPresenter.instance(context).showHome(), R.drawable.settings_home_rows));
+        items.add(new SettingsItem(context.getString(R.string.sidebar),
+                () -> MainUISettingsPresenter.instance(context).showSidebar(), R.drawable.settings_sections));
         if (HomeScreenPlaylistsData.isSupported(context)) {
             items.add(new SettingsItem(context.getString(R.string.home_screen_channels),
                     () -> MainUISettingsPresenter.instance(context).showHomeScreenChannels(), R.drawable.settings_home_screen_channels));

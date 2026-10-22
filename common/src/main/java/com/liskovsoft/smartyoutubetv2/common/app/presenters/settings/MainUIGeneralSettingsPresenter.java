@@ -35,10 +35,6 @@ public class MainUIGeneralSettingsPresenter extends BasePresenter<Void> implemen
     @Override
     public List<SettingsItem> getItems(Context context) {
         List<SettingsItem> items = new ArrayList<>();
-        items.add(new SettingsItem(context.getString(R.string.boot_to_section),
-                () -> MainUISettingsPresenter.instance(context).showBootToSection(), R.drawable.settings_boot_to_section));
-        items.add(new SettingsItem(context.getString(R.string.side_panel_sections),
-                () -> MainUISettingsPresenter.instance(context).showEnabledSections(), R.drawable.settings_sections));
         items.add(new SettingsItem(context.getString(R.string.context_menu),
                 () -> MainUISettingsPresenter.instance(context).showContextMenuItems(), R.drawable.settings_context_menu));
         items.add(new SettingsItem(context.getString(R.string.settings_buttons_options),

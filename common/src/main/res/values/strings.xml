@@ -89,6 +89,9 @@
     <string name="option_never">Never</string>
     <string name="side_panel_sections">Set-up sections</string>
     <string name="boot_to_section">Boot to section</string>
+    <string name="boot_to_first_section">First section</string>
+    <string name="sidebar">Sidebar</string>
+    <string name="sidebar_order">Order of the sidebar</string>
     <string name="large_ui">Large UI</string>
     <string name="video_grid_scale">Video grid scale</string>
     <string name="scale_ui">UI scale</string>

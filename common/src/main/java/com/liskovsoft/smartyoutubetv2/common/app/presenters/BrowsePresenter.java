@@ -90,6 +90,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
     // The rows of channels of the last load of Home, with the channel: their cards don't name it (see findAddedHomeRowChannelId)
     private final Map<VideoGroup, String> mAddedHomeRowChannelIds = Collections.synchronizedMap(new IdentityHashMap<>());
     private final Runnable mRefreshSection = this::refresh;
+    private final Runnable mUpdateSections = this::updateSections;
     private BrowseSection mCurrentSection;
     private Video mCurrentVideo;
     private long mLastUpdateTimeMs = -1;
@@ -400,6 +401,9 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
             getView().addSection(index++, section);
         }
 
+        // The top of the sidebar, past the error sections: First section, or the boot section isn't in the sidebar
+        mBootSectionIndex = index;
+
         for (BrowseSection section : mSections) { // contains sections and pinned items!
             if (section.getId() == MediaGroup.TYPE_SETTINGS) {
                 section.setEnabled(true);
@@ -684,6 +688,15 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
     public void sortSectionsByDefault() {
         getSidebarService().sortSectionsByDefault();
         updateSections();
+    }
+
+    /**
+     * @param items pinned items of the sidebar (see SidebarService.getPinnedItems), the others come after them
+     */
+    public void setSectionsOrder(List<Video> items) {
+        getSidebarService().setPinnedItemsOrder(items);
+        // Once the moves stop: told at each one, with the key held down too (see ReorderListPreferenceDialogFragment)
+        Utils.postDelayed(mUpdateSections, 500);
     }
 
     public void renameSection(BrowseSection section) {
