@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build.VERSION;
 import android.text.SpannableString;
@@ -15,6 +16,9 @@ import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import java.util.Map;
+import java.util.WeakHashMap;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.leanback.widget.Presenter;
@@ -57,6 +61,16 @@ public class VideoCardPresenter extends LongClickPresenter {
     private int mThumbQuality;
     private int mWidth;
     private int mHeight;
+    private CardHold mHold;
+    // The image a card shows: the url asked for, and the one it came from (the original, when that one failed)
+    private final Map<View, Pair<String, String>> mShownImages = new WeakHashMap<>();
+
+    /**
+     * A new card shows when its image is in, together with the others bound with it (see CardHold)
+     */
+    public void enableImageHold() {
+        mHold = new CardHold();
+    }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent) {
@@ -165,24 +179,45 @@ public class VideoCardPresenter extends LongClickPresenter {
             return;
         }
 
+        String imageUrl = getCardImageUrl(video, mThumbQuality);
+
+        // Bound again in place (e.g. synced): the image it shows stays, rather than blinking while it's loaded again
+        if (isImageShown(cardView, imageUrl)) {
+            return;
+        }
+
+        mShownImages.remove(cardView);
+
+        // A new or recycled card has no image (see onUnbindViewHolder). One bound again in place (e.g. synced) has it, so it isn't hidden.
+        boolean isHeld = mHold != null && cardView.getMainImageView().getDrawable() == null;
+
+        if (isHeld) {
+            mHold.hold(cardView);
+        }
+
+        // A new image of a card bound again in place (e.g. DeArrow's): the one it shows stays till the new one is in
+        Drawable shownImage = isHeld ? null : copyOfShownImage(cardView);
+
         Glide.with(context)
                 //.asBitmap() // disable animation (webp, gif)
-                .load(getCardImageUrl(video, mThumbQuality))
-                //.placeholder(mDefaultCardImage)
+                .load(imageUrl)
+                .placeholder(shownImage)
                 .apply(ViewUtil.glideOptions())
                 // improve image compression on low end devices
                 .override(mWidth, mHeight)
                 // com.liskovsoft.smartyoutubetv2.tv.util.CacheGlideModule
                 // Cache makes app crashing on old android versions
-                .diskCacheStrategy(VERSION.SDK_INT > 21 ? DiskCacheStrategy.ALL : DiskCacheStrategy.NONE)
+                .diskCacheStrategy(VERSION.SDK_INT > 21 ? getDiskCacheStrategy(imageUrl) : DiskCacheStrategy.NONE)
                 .listener(mErrorListener)
+                .addListener(new ImageListener(cardView, imageUrl, isHeld, false))
                 .error(
                     // Updated thumbnail url not found
                     Glide.with(context)
                         .load(video.cardImageUrl) // always working
-                        //.placeholder(mDefaultCardImage)
+                        .placeholder(shownImage)
                         .apply(ViewUtil.glideOptions())
                         .listener(mErrorListener)
+                        .addListener(new ImageListener(cardView, imageUrl, isHeld, true))
                         .error(R.drawable.card_placeholder) // R.color.lb_grey
                 )
                 .into(cardView.getMainImageView());
@@ -193,6 +228,12 @@ public class VideoCardPresenter extends LongClickPresenter {
         super.onUnbindViewHolder(viewHolder);
 
         ComplexImageCardView cardView = (ComplexImageCardView) viewHolder.view;
+
+        if (mHold != null) {
+            mHold.drop(cardView);
+        }
+
+        mShownImages.remove(cardView);
 
         // Remove references to images so that the garbage collector can free up memory.
         cardView.setBadgeImage(null);
@@ -318,6 +359,13 @@ public class VideoCardPresenter extends LongClickPresenter {
         return ClickbaitRemover.updateThumbnail(video, thumbQuality);
     }
 
+    /**
+     * The downloaded image is kept along with the card's size of it
+     */
+    protected DiskCacheStrategy getDiskCacheStrategy(String url) {
+        return DiskCacheStrategy.ALL;
+    }
+
     protected Pair<Integer, Integer> getCardDimensPx(Context context) {
         return GridFragmentHelper.getCardDimensPx(context, R.dimen.card_width, R.dimen.card_height, MainUIData.instance(context).getVideoGridScale());
     }
@@ -362,6 +410,7 @@ public class VideoCardPresenter extends LongClickPresenter {
         @Override
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
             Log.e(TAG, "Glide load failed: " + e);
+            onCardImageFailed(e, model);
             return false;
         }
 
@@ -370,6 +419,83 @@ public class VideoCardPresenter extends LongClickPresenter {
             return false;
         }
     };
+
+    /**
+     * @param model the url of the card's image that didn't load
+     */
+    protected void onCardImageFailed(@Nullable GlideException e, Object model) {
+    }
+
+    /**
+     * A copy of the image the card shows, or null when it shows none. Not the image itself: its bitmap goes back to Glide's pool
+     * when the new load starts.
+     */
+    @Nullable
+    private static Drawable copyOfShownImage(ComplexImageCardView cardView) {
+        Drawable shown = cardView.getMainImageView().getDrawable();
+
+        if (shown instanceof BitmapDrawable) {
+            Bitmap bitmap = ((BitmapDrawable) shown).getBitmap();
+
+            if (bitmap == null || bitmap.isRecycled()) {
+                return null;
+            }
+
+            Bitmap.Config config = bitmap.getConfig() != null ? bitmap.getConfig() : Bitmap.Config.ARGB_8888;
+            Bitmap copy = bitmap.copy(config, false);
+
+            return copy != null ? new BitmapDrawable(cardView.getResources(), copy) : null;
+        }
+
+        Drawable.ConstantState state = shown != null ? shown.getConstantState() : null;
+
+        return state != null ? state.newDrawable(cardView.getResources()) : null;
+    }
+
+    private boolean isImageShown(ComplexImageCardView cardView, String imageUrl) {
+        Pair<String, String> shown = mShownImages.get(cardView);
+
+        return imageUrl != null && shown != null && cardView.getMainImageView().getDrawable() != null &&
+                (imageUrl.equals(shown.first) || imageUrl.equals(shown.second));
+    }
+
+    /**
+     * Notes the image the card shows, and shows the held card when it's in. The first url falls back to the original one
+     * (see onBindViewHolder), so only the failure of the last counts.
+     */
+    private final class ImageListener implements RequestListener<Drawable> {
+        private final ComplexImageCardView mCard;
+        private final String mImageUrl;
+        private final boolean mIsHeld;
+        private final boolean mIsLast;
+
+        ImageListener(ComplexImageCardView card, String imageUrl, boolean isHeld, boolean isLast) {
+            mCard = card;
+            mImageUrl = imageUrl;
+            mIsHeld = isHeld;
+            mIsLast = isLast;
+        }
+
+        @Override
+        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+            if (mIsLast && mIsHeld) {
+                mHold.ready(mCard);
+            }
+
+            return false;
+        }
+
+        @Override
+        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+            mShownImages.put(mCard, new Pair<>(mImageUrl, model instanceof String ? (String) model : null));
+
+            if (mIsHeld) {
+                mHold.ready(mCard);
+            }
+
+            return false;
+        }
+    }
 
     private final RequestListener<Bitmap> mErrorListener2 = new RequestListener<Bitmap>() {
         @Override

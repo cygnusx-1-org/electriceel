@@ -55,6 +55,7 @@ public class VideoGridFragment extends GridFragment implements VideoSection {
 
         mMainPresenter = getMainPresenter();
         mCardPresenter = isShorts() ? new ShortsCardPresenter() : new VideoCardPresenter();
+        mCardPresenter.enableImageHold();
         mBackgroundManager = ((LeanbackActivity) getActivity()).getBackgroundManager();
         mVideoGridScale = MainUIData.instance(getActivity()).getVideoGridScale();
 

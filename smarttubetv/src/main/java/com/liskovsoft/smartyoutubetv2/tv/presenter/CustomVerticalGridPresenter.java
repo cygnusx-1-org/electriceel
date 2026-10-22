@@ -1,9 +1,11 @@
 package com.liskovsoft.smartyoutubetv2.tv.presenter;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.leanback.widget.VerticalGridPresenter;
+import androidx.leanback.widget.VerticalGridView;
 import com.liskovsoft.smartyoutubetv2.tv.util.ViewUtil;
 
 public class CustomVerticalGridPresenter extends VerticalGridPresenter {
@@ -44,5 +46,34 @@ public class CustomVerticalGridPresenter extends VerticalGridPresenter {
         //}
 
         return viewHolder;
+    }
+
+    @Override
+    protected void initializeGridViewHolder(ViewHolder vh) {
+        super.initializeGridViewHolder(vh);
+
+        preloadNextRow(vh.getGridView());
+    }
+
+    /**
+     * Lays out a row past each edge of the grid, so a row's cards are bound and their images loaded before it scrolls in.
+     * Leanback lays out only the visible rows, with the item prefetch off (see GridLayoutManager).
+     */
+    @SuppressLint("RestrictedApi")
+    private static void preloadNextRow(VerticalGridView gridView) {
+        gridView.addOnLayoutChangeListener((view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+            int rowHeight = 0;
+
+            for (int i = 0; i < gridView.getChildCount(); i++) {
+                rowHeight = Math.max(rowHeight, gridView.getChildAt(i).getHeight());
+            }
+
+            int extraSpace = rowHeight + gridView.getVerticalSpacing();
+
+            if (rowHeight > 0 && extraSpace > gridView.getExtraLayoutSpace()) {
+                // Another layout, so not in this one
+                gridView.post(() -> gridView.setExtraLayoutSpace(extraSpace));
+            }
+        });
     }
 }

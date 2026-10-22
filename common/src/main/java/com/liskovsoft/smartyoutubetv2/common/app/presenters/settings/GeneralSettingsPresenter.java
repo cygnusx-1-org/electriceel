@@ -594,6 +594,8 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
 
         appendConscrypt(settingsPresenter, options);
 
+        appendIpv6Test(options);
+
         settingsPresenter.appendCheckedCategory(getContext().getString(R.string.network_settings), options);
     }
 
@@ -626,6 +628,14 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
                     mRestartApp = true;
                 },
                 mNetworkData.isConscryptEnabled()));
+    }
+
+    private void appendIpv6Test(List<OptionItem> options) {
+        options.add(UiOptionItem.from(getContext().getString(R.string.ipv6_test),
+                getContext().getString(R.string.ipv6_test_desc),
+                // Applies at the next connection, no restart (see Ipv6CheckDns)
+                option -> mPlayerTweaksData.setIpv6TestEnabled(option.isSelected()),
+                mPlayerTweaksData.isIpv6TestEnabled()));
     }
 
     private void enableChildMode(boolean enable) {

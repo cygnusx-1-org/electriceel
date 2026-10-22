@@ -61,7 +61,9 @@ public class MultiVideoGridFragment extends MultiGridFragment implements VideoSe
 
         mMainPresenter = getMainPresenter();
         mCardPresenter1 = new ChannelCardPresenter();
-        mCardPresenter2 = new VideoCardPresenter();
+        VideoCardPresenter cardPresenter2 = new VideoCardPresenter();
+        cardPresenter2.enableImageHold();
+        mCardPresenter2 = cardPresenter2;
         mBackgroundManager = ((LeanbackActivity) getActivity()).getBackgroundManager();
         mVideoGridScale = MainUIData.instance(getActivity()).getVideoGridScale();
 

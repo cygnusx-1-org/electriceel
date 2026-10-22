@@ -658,6 +658,14 @@ public class PlayerTweaksData implements ProfileChangeListener {
         GlobalPreferences.instance(mPrefs.getContext()).setPreferredDnsType(dnsType);
     }
 
+    public boolean isIpv6TestEnabled() {
+        return GlobalPreferences.instance(mPrefs.getContext()).isIpv6TestEnabled();
+    }
+
+    public void setIpv6TestEnabled(boolean enable) {
+        GlobalPreferences.instance(mPrefs.getContext()).setIpv6TestEnabled(enable);
+    }
+
     public boolean isNetworkErrorFixingDisabled() {
         return mIsNetworkErrorFixingDisabled;
     }

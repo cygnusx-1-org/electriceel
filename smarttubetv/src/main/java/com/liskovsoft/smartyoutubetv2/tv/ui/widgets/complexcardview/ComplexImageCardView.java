@@ -1,9 +1,11 @@
 package com.liskovsoft.smartyoutubetv2.tv.ui.widgets.complexcardview;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
+import android.view.ViewOutlineProvider;
 import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
 import androidx.leanback.widget.ImageCardView;
@@ -17,6 +19,8 @@ public class ComplexImageCardView extends ImageCardView {
     private Handler mHandler;
     private boolean mIsCardTextAutoScrollEnabled;
     private boolean mIsBadgeEnabled;
+    private boolean mIsContentHidden;
+    private ViewOutlineProvider mOutlineProvider;
 
     public ComplexImageCardView(Context context) {
         super(context);
@@ -200,5 +204,42 @@ public class ComplexImageCardView extends ImageCardView {
     public void setMainImageDimensions(int width, int height) {
         super.setMainImageDimensions(width, height);
         mComplexImageView.setMainImageDimensions(width, height);
+    }
+
+    /**
+     * Draws nothing while hidden (e.g. till its image is in, see CardHold), keeping its place and its focus.
+     * Not with the alpha, which the grid's item animations set (e.g. the fade in of the cards added).
+     */
+    public void setContentHidden(boolean hidden) {
+        if (mIsContentHidden == hidden) {
+            return;
+        }
+
+        mIsContentHidden = hidden;
+
+        // No outline, no shadow of the focused card while it's hidden
+        if (hidden) {
+            mOutlineProvider = getOutlineProvider();
+            setOutlineProvider(null);
+        } else {
+            setOutlineProvider(mOutlineProvider);
+            mOutlineProvider = null;
+        }
+
+        invalidate();
+    }
+
+    @Override
+    public void draw(Canvas canvas) {
+        if (!mIsContentHidden) {
+            super.draw(canvas);
+        }
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        if (!mIsContentHidden) {
+            super.dispatchDraw(canvas);
+        }
     }
 }
