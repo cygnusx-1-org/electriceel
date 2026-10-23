@@ -867,7 +867,7 @@
     <string name="prefer_ipv4">Prefer IPv4 DNS</string>
     <string name="prefer_ipv4_desc">Could fix situations when the app isn\'t working at all.\nNote. May cause hangs and crashes (especially on Android 8 devices or Dune HD)</string>
     <string name="ipv6_test">IPv6 connectivity test</string>
-    <string name="ipv6_test_desc">Checks IPv6 once per app run. When it doesn\'t connect, only IPv4 is used until the app restarts, so a broken IPv6 network doesn\'t stall loading.</string>
+    <string name="ipv6_test_desc">Checks IPv6 once per app run. When it doesn\'t connect, only IPv4 is used until the app restarts, so a broken IPv6 network doesn\'t stall loading.\nWarning: then the player uses OkHttp, whatever the network engine is set to, and the engine options are greyed out.</string>
     <string name="long_press_for_settings">LONG PRESS FOR SETTINGS</string>
     <string name="long_press_for_options">LONG PRESS FOR OPTIONS</string>
     <string name="device_specific_backup">Backup for this device only</string>

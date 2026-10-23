@@ -133,7 +133,8 @@ public class ExoMediaSourceFactory {
      */
     private HttpDataSource.Factory buildHttpDataSourceFactory(boolean useBandwidthMeter, int readTimeoutMs) {
         PlayerTweaksData tweaksData = PlayerTweaksData.instance(mContext);
-        int source = tweaksData.getPlayerDataSource();
+        // IPv6 doesn't connect: only OkHttp can leave it out, the saved engine is used again after a restart
+        int source = OkHttpManager.isIpv6Disabled() ? PlayerTweaksData.PLAYER_DATA_SOURCE_OKHTTP : tweaksData.getPlayerDataSource();
         DefaultBandwidthMeter bandwidthMeter = useBandwidthMeter ? BANDWIDTH_METER : null;
         return source == PlayerTweaksData.PLAYER_DATA_SOURCE_OKHTTP ? buildOkHttpDataSourceFactory(bandwidthMeter, readTimeoutMs) :
                         source == PlayerTweaksData.PLAYER_DATA_SOURCE_CRONET && CronetManager.getEngine(mContext) != null ? buildCronetDataSourceFactory(bandwidthMeter, readTimeoutMs) :

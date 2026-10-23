@@ -17,6 +17,7 @@ import com.liskovsoft.mediaserviceinterfaces.data.PlaylistInfo;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.sharedutils.helpers.PermissionHelpers;
+import com.liskovsoft.sharedutils.okhttp.OkHttpManager;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.sharedutils.rx.RxHelper;
 import com.liskovsoft.smartyoutubetv2.common.R;
@@ -907,6 +908,13 @@ public class AppDialogUtil {
                     onModeSelected.run();
                 },
                 playerTweaksData.getPlayerDataSource() == PlayerTweaksData.PLAYER_DATA_SOURCE_OKHTTP));
+
+        // IPv6 doesn't connect: the player uses OkHttp whatever is chosen, till the app restarts (see ExoMediaSourceFactory)
+        if (OkHttpManager.isIpv6Disabled()) {
+            for (OptionItem option : options) {
+                option.setEnabled(false);
+            }
+        }
 
         return OptionCategory.from(
                 PLAYER_ENGINE_ID,

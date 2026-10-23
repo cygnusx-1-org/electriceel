@@ -38,6 +38,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.PlaybackPresenter;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.smartyoutubetv2.tv.R;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.DependentListPreference;
+import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.RadioListPreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.mod.clickable.LinkifyCompat;
 import com.liskovsoft.smartyoutubetv2.tv.ui.mod.clickable.LinkifyCompat.LinkifyClickHandler;
 
@@ -258,17 +259,27 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
         public void onBindViewHolder(ViewHolder holder, int position) {
             holder.getWidgetView().setChecked(mEntryValues[position].equals(mSelectedValue));
             holder.getTitleView().setText(mEntries[position]);
+            holder.itemView.setAlpha(isDisabled(position) ? DISABLED_ALPHA : 1f);
+        }
+
+        /**
+         * MOD: greyed out and can't be chosen (see RadioListPreference)
+         */
+        protected boolean isDisabled(int position) {
+            final DialogPreference preference = getPreference();
+
+            return preference instanceof RadioListPreference && ((RadioListPreference) preference).isDisabled(mEntryValues[position].toString());
         }
 
         @Override
         public int getItemCount() {
             return mEntries.length;
         }
-        
+
         @Override
         public void onItemClick(ViewHolder viewHolder) {
             final int index = viewHolder.getAdapterPosition();
-            if (index == RecyclerView.NO_POSITION) {
+            if (index == RecyclerView.NO_POSITION || isDisabled(index)) {
                 return;
             }
             final CharSequence entry = mEntryValues[index];

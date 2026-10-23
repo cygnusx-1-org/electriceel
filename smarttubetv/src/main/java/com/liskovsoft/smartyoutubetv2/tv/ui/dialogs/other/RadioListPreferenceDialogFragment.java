@@ -82,7 +82,7 @@ public class RadioListPreferenceDialogFragment extends LeanbackListPreferenceDia
         @Override
         public void onItemClick(ViewHolder viewHolder) {
             final int index = viewHolder.getAdapterPosition();
-            if (index == RecyclerView.NO_POSITION) {
+            if (index == RecyclerView.NO_POSITION || isDisabled(index)) {
                 return;
             }
             final CharSequence entry = mEntryValues[index];

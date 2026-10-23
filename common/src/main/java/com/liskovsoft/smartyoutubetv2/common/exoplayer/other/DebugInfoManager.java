@@ -30,6 +30,7 @@ import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.liskovsoft.sharedutils.cronet.CronetManager;
 import com.liskovsoft.sharedutils.helpers.AppInfoHelpers;
 import com.liskovsoft.sharedutils.helpers.DeviceHelpers;
+import com.liskovsoft.sharedutils.okhttp.OkHttpManager;
 import com.liskovsoft.sharedutils.helpers.FileHelpers;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.querystringparser.UrlQueryStringFactory;
@@ -371,7 +372,8 @@ public final class DebugInfoManager implements Runnable, Player.EventListener {
     private void appendVersion() {
         //appendRow("ExoPlayer version", ExoPlayerLibraryInfo.VERSION);
         PlayerTweaksData playerTweaksData = PlayerTweaksData.instance(mContext);
-        String engine = playerTweaksData.getPlayerDataSource() == PlayerTweaksData.PLAYER_DATA_SOURCE_OKHTTP ? "OkHttp" :
+        String engine = OkHttpManager.isIpv6Disabled() ? "OkHttp (no IPv6)" :
+                playerTweaksData.getPlayerDataSource() == PlayerTweaksData.PLAYER_DATA_SOURCE_OKHTTP ? "OkHttp" :
                 playerTweaksData.getPlayerDataSource() == PlayerTweaksData.PLAYER_DATA_SOURCE_CRONET
                         && CronetManager.getEngine(mContext) != null ? "Cronet" : "Default";
         String protocol;

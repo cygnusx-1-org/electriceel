@@ -16,6 +16,7 @@ import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.ChatPreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.CommentsPreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.DependentListPreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.QrCodePreference;
+import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.RadioListPreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.ReorderListPreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.StringListPreference;
 
@@ -290,9 +291,15 @@ public class AppPreferenceManager {
     }
 
     public Preference createRadioListPreference(OptionCategory category) {
-        ListPreference pref = new ListPreference(mContext);
+        RadioListPreference pref = new RadioListPreference(mContext);
 
         initSingleSelectListPreference(category, pref);
+
+        for (OptionItem item : category.options) {
+            if (!item.isEnabled()) {
+                pref.setDisabled(item.toString());
+            }
+        }
 
         return pref;
     }
