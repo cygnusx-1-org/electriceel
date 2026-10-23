@@ -79,7 +79,7 @@ public final class Ipv6AwareUrlLoader implements ModelLoader<GlideUrl, InputStre
     }
 
     /**
-     * Like Glide's HttpUrlFetcher: an HTTP error fails with its status code (e.g. a missing thumbnail's 404, see ShortsCardPresenter)
+     * Like Glide's HttpUrlFetcher: an HTTP error fails with its status code (e.g. a missing thumbnail's 404, see VideoCardPresenter)
      */
     private static final class OkHttpFetcher implements DataFetcher<InputStream> {
         private final OkHttpClient mClient;

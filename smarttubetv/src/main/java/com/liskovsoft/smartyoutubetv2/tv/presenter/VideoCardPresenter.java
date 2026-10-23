@@ -17,13 +17,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.leanback.widget.Presenter;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.HttpException;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
@@ -39,6 +42,7 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.ShowsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.StreamedData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.TopChannelsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.WatchLaterData;
+import com.liskovsoft.smartyoutubetv2.common.utils.CardImageUrls;
 import com.liskovsoft.smartyoutubetv2.common.utils.ClickbaitRemover;
 import com.liskovsoft.smartyoutubetv2.common.utils.CompactInfo;
 import com.liskovsoft.smartyoutubetv2.tv.R;
@@ -53,6 +57,8 @@ import com.liskovsoft.smartyoutubetv2.tv.util.ViewUtil;
  */
 public class VideoCardPresenter extends LongClickPresenter {
     private static final String TAG = VideoCardPresenter.class.getSimpleName();
+    // The urls the card images are tried from, and the ones that aren't there, of all the cards
+    private static final CardImageUrls sImageUrls = new CardImageUrls();
     private int mDefaultBackgroundColor = -1;
     private int mDefaultTextColor = -1;
     private int mSelectedBackgroundColor = -1;
@@ -198,29 +204,31 @@ public class VideoCardPresenter extends LongClickPresenter {
         // A new image of a card bound again in place (e.g. DeArrow's): the one it shows stays till the new one is in
         Drawable shownImage = isHeld ? null : copyOfShownImage(cardView);
 
-        Glide.with(context)
-                //.asBitmap() // disable animation (webp, gif)
-                .load(imageUrl)
-                .placeholder(shownImage)
-                .apply(ViewUtil.glideOptions())
-                // improve image compression on low end devices
-                .override(mWidth, mHeight)
-                // com.liskovsoft.smartyoutubetv2.tv.util.CacheGlideModule
-                // Cache makes app crashing on old android versions
-                .diskCacheStrategy(VERSION.SDK_INT > 21 ? getDiskCacheStrategy(imageUrl) : DiskCacheStrategy.NONE)
-                .listener(mErrorListener)
-                .addListener(new ImageListener(cardView, imageUrl, isHeld, false))
-                .error(
-                    // Updated thumbnail url not found
-                    Glide.with(context)
-                        .load(video.cardImageUrl) // always working
-                        .placeholder(shownImage)
-                        .apply(ViewUtil.glideOptions())
-                        .listener(mErrorListener)
-                        .addListener(new ImageListener(cardView, imageUrl, isHeld, true))
-                        .error(R.drawable.card_placeholder) // R.color.lb_grey
-                )
-                .into(cardView.getMainImageView());
+        // Each failed url falls back to the next one, the last to the placeholder
+        List<String> urls = sImageUrls.get(imageUrl, video.cardImageUrl, video.videoId);
+        RequestBuilder<Drawable> request = null;
+
+        for (int i = urls.size() - 1; i >= 0; i--) {
+            String url = urls.get(i);
+            RequestBuilder<Drawable> fallback = request;
+
+            request = Glide.with(context)
+                    //.asBitmap() // disable animation (webp, gif)
+                    .load(url)
+                    .placeholder(shownImage)
+                    .apply(ViewUtil.glideOptions())
+                    // improve image compression on low end devices
+                    .override(mWidth, mHeight)
+                    // com.liskovsoft.smartyoutubetv2.tv.util.CacheGlideModule
+                    // Cache makes app crashing on old android versions
+                    .diskCacheStrategy(VERSION.SDK_INT > 21 ? getDiskCacheStrategy(url) : DiskCacheStrategy.NONE)
+                    .listener(mErrorListener)
+                    .addListener(new ImageListener(cardView, imageUrl, isHeld, fallback == null));
+
+            request = fallback != null ? request.error(fallback) : request.error(R.drawable.card_placeholder); // R.color.lb_grey
+        }
+
+        request.into(cardView.getMainImageView());
     }
 
     @Override
@@ -410,7 +418,11 @@ public class VideoCardPresenter extends LongClickPresenter {
         @Override
         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
             Log.e(TAG, "Glide load failed: " + e);
-            onCardImageFailed(e, model);
+
+            if (model instanceof String && isNotFound(e)) {
+                sImageUrls.setMissing((String) model);
+            }
+
             return false;
         }
 
@@ -420,10 +432,18 @@ public class VideoCardPresenter extends LongClickPresenter {
         }
     };
 
-    /**
-     * @param model the url of the card's image that didn't load
-     */
-    protected void onCardImageFailed(@Nullable GlideException e, Object model) {
+    private static boolean isNotFound(@Nullable GlideException e) {
+        if (e == null) {
+            return false;
+        }
+
+        for (Throwable cause : e.getRootCauses()) {
+            if (cause instanceof HttpException && ((HttpException) cause).getStatusCode() == 404) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -460,7 +480,7 @@ public class VideoCardPresenter extends LongClickPresenter {
     }
 
     /**
-     * Notes the image the card shows, and shows the held card when it's in. The first url falls back to the original one
+     * Notes the image the card shows, and shows the held card when it's in. Each url falls back to the next one
      * (see onBindViewHolder), so only the failure of the last counts.
      */
     private final class ImageListener implements RequestListener<Drawable> {

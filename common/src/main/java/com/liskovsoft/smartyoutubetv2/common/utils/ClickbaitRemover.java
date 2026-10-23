@@ -11,7 +11,8 @@ public class ClickbaitRemover {
     public static final int THUMB_QUALITY_MIDDLE = 2;
     public static final int THUMB_QUALITY_END = 3;
 
-    private static final Pattern THUMB_QUALITY_PATTERN = Pattern.compile("/(hq1|hq2|hq3|hqdefault|mqdefault|sddefault|hq720)\\.");
+    // Also the variant of a thumbnail test (e.g. "sddefault_custom_2.jpg"): the frames are there with its query too
+    private static final Pattern THUMB_QUALITY_PATTERN = Pattern.compile("/(hq1|hq2|hq3|hqdefault|mqdefault|sddefault|hq720)(_custom_\\d+)?\\.");
 
     public static String updateThumbnail(String thumbUrl, int thumbQuality) {
         if (thumbUrl == null || thumbQuality == THUMB_QUALITY_DEFAULT) {
