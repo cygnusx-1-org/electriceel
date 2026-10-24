@@ -39,6 +39,8 @@ import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.smartyoutubetv2.tv.R;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.DependentListPreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.RadioListPreference;
+import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.StringListPreference;
+import com.liskovsoft.smartyoutubetv2.tv.ui.mod.clickable.LineMovementMethod;
 import com.liskovsoft.smartyoutubetv2.tv.ui.mod.clickable.LinkifyCompat;
 import com.liskovsoft.smartyoutubetv2.tv.ui.mod.clickable.LinkifyCompat.LinkifyClickHandler;
 
@@ -55,6 +57,7 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
             "LeanbackListPreferenceDialogFragment.entryValues";
     private static final String SAVE_STATE_TITLE = "LeanbackListPreferenceDialogFragment.title";
     private static final String SAVE_STATE_MESSAGE = "LeanbackListPreferenceDialogFragment.message";
+    private static final String SAVE_STATE_IS_MESSAGE_LINKIFIED = "LeanbackListPreferenceDialogFragment.isMessageLinkified";
     private static final String SAVE_STATE_INITIAL_SELECTIONS =
             "LeanbackListPreferenceDialogFragment.initialSelections";
     private static final String SAVE_STATE_INITIAL_SELECTION =
@@ -72,6 +75,10 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
     protected CharSequence[] mEntryValues;
     private CharSequence mDialogTitle;
     private CharSequence mDialogMessage;
+    /**
+     * The addresses and time codes of the message are links (see StringListPreference#isLinkified)
+     */
+    private boolean mIsMessageLinkified = true;
     private int mDialogLayoutRes;
     protected Set<String> mInitialSelections;
     protected String mInitialSelection;
@@ -106,6 +113,7 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
             final DialogPreference preference = getPreference();
             mDialogTitle = preference.getDialogTitle();
             mDialogMessage = preference.getDialogMessage();
+            mIsMessageLinkified = !(preference instanceof StringListPreference) || ((StringListPreference) preference).isLinkified();
             mDialogLayoutRes = preference.getDialogLayoutResource();
 
             if (preference instanceof ListPreference) {
@@ -125,6 +133,7 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
         } else {
             mDialogTitle = savedInstanceState.getCharSequence(SAVE_STATE_TITLE);
             mDialogMessage = savedInstanceState.getCharSequence(SAVE_STATE_MESSAGE);
+            mIsMessageLinkified = savedInstanceState.getBoolean(SAVE_STATE_IS_MESSAGE_LINKIFIED, true);
             mMulti = savedInstanceState.getBoolean(SAVE_STATE_IS_MULTI);
             mEntries = savedInstanceState.getCharSequenceArray(SAVE_STATE_ENTRIES);
             mEntryValues = savedInstanceState.getCharSequenceArray(SAVE_STATE_ENTRY_VALUES);
@@ -147,6 +156,7 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
         super.onSaveInstanceState(outState);
         outState.putCharSequence(SAVE_STATE_TITLE, mDialogTitle);
         outState.putCharSequence(SAVE_STATE_MESSAGE, mDialogMessage);
+        outState.putBoolean(SAVE_STATE_IS_MESSAGE_LINKIFIED, mIsMessageLinkified);
         outState.putBoolean(SAVE_STATE_IS_MULTI, mMulti);
         outState.putCharSequenceArray(SAVE_STATE_ENTRIES, mEntries);
         outState.putCharSequenceArray(SAVE_STATE_ENTRY_VALUES, mEntryValues);
@@ -190,8 +200,13 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
             messageView.setFocusable(true);
             messageView.setVisibility(View.VISIBLE);
             messageView.setText(message);
+            // A line at a time, the top one whole. Kept by LinkifyCompat: it's a LinkMovementMethod.
+            messageView.setMovementMethod(LineMovementMethod.getInstance());
 
-            LinkifyCompat.addLinks(messageView, LinkifyCompat.WEB_URLS | LinkifyCompat.TIME_CODES, new LinkifyClickHandler() {
+            // None: nothing is linked (see StringListPreference#isLinkified)
+            int linkMask = mIsMessageLinkified ? LinkifyCompat.WEB_URLS | LinkifyCompat.TIME_CODES : 0;
+
+            LinkifyCompat.addLinks(messageView, linkMask, new LinkifyClickHandler() {
                 private final Context context = messageView.getContext();
 
                 @Override

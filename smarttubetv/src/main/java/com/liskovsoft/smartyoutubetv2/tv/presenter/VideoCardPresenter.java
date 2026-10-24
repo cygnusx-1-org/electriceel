@@ -253,7 +253,7 @@ public class VideoCardPresenter extends LongClickPresenter {
 
     /**
      * The second title, shortened for a short (see CompactInfo), after the "AI", "Collab", "Watch later", "Show", "Top channel", "Topic"
-     * and "Streamed" markers the video has. The "Streamed" marker takes the word off the date ("Streamed • 5 hours ago").
+     * and "Streamed" or "Live" markers the video has. The "Streamed" marker takes the word off the date ("Streamed • 5 hours ago").
      */
     private static CharSequence getContentText(Context context, Video video, boolean selected) {
         CharSequence secondTitle = video.isStreamedMarked ? CompactInfo.removeStreamed(video.getSecondTitle()) : video.getSecondTitle();
@@ -261,6 +261,10 @@ public class VideoCardPresenter extends LongClickPresenter {
 
         if (video.isStreamedMarked) {
             text = addMark(context, text, R.string.streamed_label, StreamedData.instance(context).getMarkColor(), selected);
+        }
+
+        if (video.isLiveMarked) {
+            text = addMark(context, text, R.string.live_label, StreamedData.instance(context).getMarkColor(), selected);
         }
 
         if (video.isExploreTopicMarked) {
@@ -343,7 +347,7 @@ public class VideoCardPresenter extends LongClickPresenter {
     }
 
     /**
-     * Colors a marker ("AI", "Collab", "Watch later", "Show", "Top channel", "Streamed") with the shade of the saved color that suits the card background
+     * Colors a marker ("AI", "Collab", "Watch later", "Show", "Top channel", "Streamed", "Live") with the shade of the saved color that suits the card background
      */
     private static class MarkSpan extends ForegroundColorSpan {
         private final int mColor;

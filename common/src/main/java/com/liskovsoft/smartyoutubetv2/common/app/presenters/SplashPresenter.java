@@ -20,6 +20,8 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.BootDialogPr
 import com.liskovsoft.smartyoutubetv2.common.app.views.BrowseView;
 import com.liskovsoft.smartyoutubetv2.common.app.views.SplashView;
 import com.liskovsoft.smartyoutubetv2.common.app.views.ViewManager;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.AppExits;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.DataSubmitter;
 import com.liskovsoft.smartyoutubetv2.common.misc.AiSListManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.GDriveBackupWorker;
 import com.liskovsoft.smartyoutubetv2.common.misc.LocalDriveBackupWorker;
@@ -124,6 +126,13 @@ public class SplashPresenter extends BasePresenter<SplashView> {
         Utils.updateChannels(getContext());
         GDriveBackupWorker.schedule(getContext());
         LocalDriveBackupWorker.schedule(getContext());
+
+        if (getContext() != null) {
+            Context context = getContext().getApplicationContext();
+            // The ANRs and native crashes since the last start, before the data is submitted
+            RxHelper.execute(RxHelper.fromRunnable(() -> AppExits.recordNew(context)),
+                    () -> DataSubmitter.autoSubmit(context)); // Settings → Debugging → Submit data on startup
+        }
     }
 
     private void showAccountSelectionIfNeeded() {

@@ -7,6 +7,8 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.os.UserManagerCompat;
 import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
@@ -62,6 +64,12 @@ public final class SafeWorkManager {
     public void enqueueUniquePeriodicWork(@NonNull String uniqueWorkName, @NonNull ExistingPeriodicWorkPolicy policy, @NonNull PeriodicWorkRequest request) {
         if (mDelegate != null) {
             mDelegate.enqueueUniquePeriodicWork(uniqueWorkName, policy, request);
+        }
+    }
+
+    public void enqueueUniqueWork(@NonNull String uniqueWorkName, @NonNull ExistingWorkPolicy policy, @NonNull OneTimeWorkRequest request) {
+        if (mDelegate != null) {
+            mDelegate.enqueueUniqueWork(uniqueWorkName, policy, request);
         }
     }
 

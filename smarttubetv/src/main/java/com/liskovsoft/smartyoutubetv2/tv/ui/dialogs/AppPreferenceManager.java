@@ -203,9 +203,10 @@ public class AppPreferenceManager {
     }
 
     private Preference createLongTextPreference(OptionCategory category) {
-        MultiSelectListPreference pref = new StringListPreference(mContext);
+        StringListPreference pref = new StringListPreference(mContext);
 
         pref.setDialogMessage(category.options.get(0).getTitle());
+        pref.setLinkified(category.isLinkified);
 
         initMultiSelectListPreference(category, pref);
 

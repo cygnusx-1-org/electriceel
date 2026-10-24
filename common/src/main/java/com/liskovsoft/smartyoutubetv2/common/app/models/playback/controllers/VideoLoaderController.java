@@ -21,12 +21,14 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.manager.PlayerC
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.VideoActionPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.PlaybackView;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailure;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MusicAutoplayManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.service.YouTubeServiceManager;
+import com.liskovsoft.youtubeapi.videoinfo.V2.ClientAttempts;
 
 import java.util.Collections;
 
@@ -42,6 +44,12 @@ public class VideoLoaderController extends BasePlayerController {
     private CensoredWordsController mCensoredWordsController;
     private Disposable mFormatInfoAction;
     private Disposable mMusicAutoplayAction;
+    /**
+     * Where the formats in use are from and how they're played (see PlayerFailure#source), of the video in mFormatVideoId
+     */
+    private String mFormatVideoId;
+    private String mFormatClient;
+    private String mFormatProtocol;
     private final Runnable mReloadVideo = () -> {
         getMainController().onNewVideo(getVideo());
     };
@@ -284,6 +292,10 @@ public class VideoLoaderController extends BasePlayerController {
 
         getVideo().sync(formatInfo);
 
+        mFormatVideoId = getVideo().videoId;
+        mFormatClient = getClientName(formatInfo);
+        mFormatProtocol = null;
+
         mCensoredWordsController.onFormatInfo(getVideo(), formatInfo);
 
         // Fix stretched video for a couple milliseconds (before the onVideoSizeChanged gets called)
@@ -294,10 +306,15 @@ public class VideoLoaderController extends BasePlayerController {
         }
 
         if (formatInfo.isUnplayable()) {
+            PlayerFailure failure = newFailure(PlayerFailure.KIND_UNPLAYABLE, formatInfo);
+
             if (isEmbedPlayer()) {
+                failure.action("finish_embed").record();
                 player.finish();
                 return;
             }
+
+            failure.action("load_next_video").record();
 
             player.setTitle(formatInfo.getPlayabilityReason());
             player.showProgressBar(false);
@@ -317,24 +334,31 @@ public class VideoLoaderController extends BasePlayerController {
             Log.d(TAG, "Loading regular video in dash format...");
 
             if (getPlayerTweaksData().isHighBitrateFormatsEnabled() && formatInfo.hasExtendedHlsFormats()) {
+                mFormatProtocol = PlayerFailure.PROTOCOL_DASH + "+" + PlayerFailure.PROTOCOL_HLS;
                 player.openMerged(formatInfo, formatInfo.getHlsManifestUrl());
             } else {
+                mFormatProtocol = PlayerFailure.PROTOCOL_DASH;
                 player.openDash(formatInfo);
             }
         } else if (acceptAdaptiveFormats(formatInfo) && formatInfo.containsSabrFormats() && !formatInfo.isLive()) { // TODO: SABR live not implemented yet
             Log.d(TAG, "Loading video in sabr format...");
+            mFormatProtocol = PlayerFailure.PROTOCOL_SABR;
             player.openSabr(formatInfo);
         } else if (acceptDashLive(formatInfo)) {
             Log.d(TAG, "Loading live video (current or past live stream) in dash format...");
+            mFormatProtocol = PlayerFailure.PROTOCOL_DASH_LIVE;
             player.openDashUrl(formatInfo.getDashManifestUrl());
         } else if (formatInfo.isLive() && formatInfo.containsHlsUrl()) {
             Log.d(TAG, "Loading live video (current or past live stream) in hls format...");
+            mFormatProtocol = PlayerFailure.PROTOCOL_HLS;
             player.openHlsUrl(formatInfo.getHlsManifestUrl());
         } else if (formatInfo.containsUrlFormats()) {
             Log.d(TAG, "Loading url list video. This is always LQ...");
+            mFormatProtocol = PlayerFailure.PROTOCOL_URL_LIST;
             player.openUrlList(formatInfo.createUrlList());
         } else {
             Log.d(TAG, "Empty format info received. Seems future live translation. No video data to pass to the player.");
+            newFailure(PlayerFailure.KIND_EMPTY_FORMATS, formatInfo).action("reload_video").record();
             player.setTitle(formatInfo.getPlayabilityReason());
             player.showProgressBar(false);
             mSuggestionsController.loadSuggestions(getVideo());
@@ -346,7 +370,51 @@ public class VideoLoaderController extends BasePlayerController {
         player.showBackground(bgImageUrl); // remove bg (if video playing) or set another bg
     }
 
-    private void reloadVideo(int delayMs) {
+    /**
+     * Of the video playing (or failing to): null when it has none yet
+     */
+    public String getFormatClient() {
+        return isFormatOfVideo() ? mFormatClient : null;
+    }
+
+    /**
+     * See PlayerFailure.PROTOCOL_ constants. Of the video playing (or failing to): null when it has none yet.
+     */
+    public String getFormatProtocol() {
+        return isFormatOfVideo() ? mFormatProtocol : null;
+    }
+
+    private boolean isFormatOfVideo() {
+        return getVideo() != null && mFormatVideoId != null && mFormatVideoId.equals(getVideo().videoId);
+    }
+
+    /**
+     * The YouTube client's name, e.g. TV
+     */
+    private static String getClientName(MediaItemFormatInfo formatInfo) {
+        MediaItemFormatInfo.ClientInfo client = formatInfo.getClientInfo();
+
+        if (client == null) {
+            return null;
+        }
+
+        return client instanceof Enum ? ((Enum<?>) client).name() : client.getClientName();
+    }
+
+    /**
+     * Of a video that has no formats to play
+     */
+    private PlayerFailure newFailure(String kind, MediaItemFormatInfo formatInfo) {
+        Video video = getVideo();
+
+        return PlayerFailure.create(getContext(), kind)
+                .video(video)
+                .source(mFormatClient, null)
+                .playability(formatInfo.getPlayabilityStatus(), formatInfo.getPlayabilityReason())
+                .clientAttempts(video != null ? ClientAttempts.get(video.videoId) : null);
+    }
+
+    public void reloadVideo(int delayMs) {
         if (getPlayer() == null) {
             return;
         }

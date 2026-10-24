@@ -230,6 +230,13 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
         mCategories.add(OptionCategory.longText(categoryTitle, item));
     }
 
+    /**
+     * @param isLinkified its addresses and time codes are links
+     */
+    public void appendLongTextCategory(CharSequence categoryTitle, OptionItem item, boolean isLinkified) {
+        mCategories.add(OptionCategory.longText(categoryTitle, item, isLinkified));
+    }
+
     public void appendChatCategory(CharSequence categoryTitle, OptionItem item) {
         mCategories.add(OptionCategory.chat(categoryTitle, item));
     }

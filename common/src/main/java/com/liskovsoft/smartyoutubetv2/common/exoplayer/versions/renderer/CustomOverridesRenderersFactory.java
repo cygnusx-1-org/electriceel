@@ -13,6 +13,7 @@ import com.google.android.exoplayer2.drm.FrameworkMediaCrypto;
 import com.google.android.exoplayer2.mediacodec.MediaCodecSelector;
 import com.google.android.exoplayer2.util.AmazonQuirks;
 import com.google.android.exoplayer2.video.VideoRendererEventListener;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.SilenceDetector;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.versions.selector.BlacklistMediaCodecSelector;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
@@ -117,6 +118,14 @@ public class CustomOverridesRenderersFactory extends CustomRenderersFactoryBase 
     //
     //    replaceVideoRenderer(out, videoRenderer);
     //}
+
+    /**
+     * A copy of the decoded sound for the diagnostics (see SilenceDetector): the sound itself isn't changed
+     */
+    @Override
+    protected AudioProcessor[] buildAudioProcessors() {
+        return new AudioProcessor[] {SilenceDetector.createProcessor()};
+    }
 
     // 2.10, 2.11
     @Override

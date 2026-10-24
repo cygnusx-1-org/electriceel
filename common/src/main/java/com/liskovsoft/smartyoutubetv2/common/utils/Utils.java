@@ -60,6 +60,7 @@ import androidx.work.PeriodicWorkRequest;
 import com.liskovsoft.leanbackassistant.utils.SafeWorkManager;
 
 import com.jakewharton.processphoenix.ProcessPhoenix;
+import com.liskovsoft.sharedutils.cronet.CronetManager;
 import com.liskovsoft.sharedutils.helpers.AppInfoHelpers;
 import com.liskovsoft.sharedutils.helpers.DeviceHelpers;
 import com.liskovsoft.sharedutils.helpers.Helpers;
@@ -1155,6 +1156,45 @@ public class Utils {
     public static int getFasterDataSource() {
         return skipCronet() ? PlayerTweaksData.PLAYER_DATA_SOURCE_DEFAULT : preferOkHttp()
                 ? PlayerTweaksData.PLAYER_DATA_SOURCE_OKHTTP : PlayerTweaksData.PLAYER_DATA_SOURCE_CRONET;
+    }
+
+    public static final String NETWORK_ENGINE_DEFAULT = "default";
+    public static final String NETWORK_ENGINE_OKHTTP = "okhttp";
+    public static final String NETWORK_ENGINE_CRONET = "cronet";
+    /**
+     * IPv6 doesn't connect this app run: OkHttp, whatever engine is chosen (see OkHttpManager.isIpv6Disabled)
+     */
+    public static final String NETWORK_ENGINE_OKHTTP_NO_IPV6 = "okhttp_no_ipv6";
+
+    /**
+     * The id of the engine chosen in the settings (see PlayerTweaksData#getPlayerDataSource)
+     */
+    public static String getNetworkEngineId(int playerDataSource) {
+        switch (playerDataSource) {
+            case PlayerTweaksData.PLAYER_DATA_SOURCE_OKHTTP:
+                return NETWORK_ENGINE_OKHTTP;
+            case PlayerTweaksData.PLAYER_DATA_SOURCE_CRONET:
+                return NETWORK_ENGINE_CRONET;
+            default:
+                return NETWORK_ENGINE_DEFAULT;
+        }
+    }
+
+    /**
+     * The id of the engine the player uses: the chosen one, unless it can't be (see ExoMediaSourceFactory#buildHttpDataSourceFactory)
+     */
+    public static String getEffectiveNetworkEngine(Context context) {
+        if (OkHttpManager.isIpv6Disabled()) {
+            return NETWORK_ENGINE_OKHTTP_NO_IPV6;
+        }
+
+        int source = PlayerTweaksData.instance(context).getPlayerDataSource();
+
+        if (source == PlayerTweaksData.PLAYER_DATA_SOURCE_CRONET && CronetManager.getEngine(context) == null) {
+            return NETWORK_ENGINE_DEFAULT;
+        }
+
+        return getNetworkEngineId(source);
     }
 
     public static boolean skipCronet() {

@@ -92,6 +92,7 @@ dependencies {
     implementation 'com.google.guava:guava:' + guavaVersion // Work library deps
 
     implementation 'androidx.browser:browser:' + browserXVersion
+    implementation 'androidx.webkit:webkit:' + webkitVersion // the WebView version of the diagnostics (youtubeapi has it already)
 
     implementation 'com.google.zxing:core:3.5.4' // the QR codes (e.g. About, Share link (QR code)), made on the device (see QrCodeEncoder)
 

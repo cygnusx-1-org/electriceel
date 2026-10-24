@@ -3,6 +3,8 @@ package com.liskovsoft.smartyoutubetv2.common.exoplayer.controller;
 import android.content.Context;
 import android.os.Build;
 import android.os.Build.VERSION;
+import android.os.SystemClock;
+import android.view.Surface;
 
 import androidx.annotation.Nullable;
 
@@ -12,6 +14,10 @@ import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.analytics.AnalyticsListener;
+import com.google.android.exoplayer2.decoder.DecoderCounters;
+import com.google.android.exoplayer2.source.MediaSourceEventListener.LoadEventInfo;
+import com.google.android.exoplayer2.source.MediaSourceEventListener.MediaLoadData;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MergingMediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
@@ -23,6 +29,10 @@ import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.smartyoutubetv2.common.BuildConfig;
 import com.liskovsoft.smartyoutubetv2.common.R;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.FormatAttempts;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlaybackHealth;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailure;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.SilenceDetector;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.listener.PlayerEventListener;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.ExoMediaSourceFactory;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.errors.TrackErrorFixer;
@@ -41,6 +51,7 @@ import com.liskovsoft.smartyoutubetv2.common.exoplayer.versions.ExoUtils;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.versions.renderer.DebugInfoMediaCodecVideoRenderer;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
+import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
@@ -66,6 +77,48 @@ public class ExoPlayerController implements Player.EventListener {
     // The volume set, kept while the range muter has the sound off
     private float mVolume = 1f;
     private boolean mIsMuted;
+    private static final long HEALTH_CHECK_MS = 2_000;
+    private final PlaybackHealth mHealth = new PlaybackHealth();
+    private final Runnable mHealthCheck = this::checkHealth;
+    /**
+     * The video has a surface to be shown on. Without one (e.g. the sound plays on in the background) no frame is rendered.
+     */
+    private boolean mHasSurface;
+    /**
+     * How the formats tried do (see FormatAttempts): a frame shown means the video works, plus the decoders, the frames dropped
+     * and the throughput of the segments
+     */
+    private final AnalyticsListener mDiagnosticsListener = new AnalyticsListener() {
+        @Override
+        public void onRenderedFirstFrame(EventTime eventTime, @Nullable Surface surface) {
+            FormatAttempts.onVideoRendered();
+        }
+
+        @Override
+        public void onSurfaceSizeChanged(EventTime eventTime, int width, int height) {
+            // 0x0 is none. A surface of a size not known yet is -1x-1.
+            mHasSurface = width != 0 || height != 0;
+        }
+
+        @Override
+        public void onDecoderInitialized(EventTime eventTime, int trackType, String decoderName, long initializationDurationMs) {
+            if (trackType == C.TRACK_TYPE_VIDEO || trackType == C.TRACK_TYPE_AUDIO) {
+                FormatAttempts.onDecoder(trackType == C.TRACK_TYPE_VIDEO, decoderName);
+            }
+        }
+
+        @Override
+        public void onDroppedVideoFrames(EventTime eventTime, int droppedFrames, long elapsedMs) {
+            FormatAttempts.onDroppedFrames(droppedFrames);
+        }
+
+        @Override
+        public void onLoadCompleted(EventTime eventTime, LoadEventInfo loadEventInfo, MediaLoadData mediaLoadData) {
+            if (mediaLoadData.dataType == C.DATA_TYPE_MEDIA) {
+                FormatAttempts.onLoad(loadEventInfo.bytesLoaded, loadEventInfo.loadDurationMs);
+            }
+        }
+    };
 
     public ExoPlayerController(Context context, PlayerEventListener eventListener) {
         PlayerTweaksData playerTweaksData = PlayerTweaksData.instance(context);
@@ -75,6 +128,7 @@ public class ExoPlayerController implements Player.EventListener {
         mTrackFormatter = new TrackInfoFormatter2();
         mTrackFormatter.enableBitrate(PlayerTweaksData.instance(context).isQualityInfoBitrateEnabled());
         mTrackErrorFixer = new TrackErrorFixer(mTrackSelectorManager);
+        mTrackErrorFixer.setOnHttpError(this::onHttpError);
         mFrameStepper = new FrameStepper(this::onFramePositionChanged);
         mRangeMuter = new RangeMuter(this::onMuteChanged);
 
@@ -85,6 +139,100 @@ public class ExoPlayerController implements Player.EventListener {
         VideoTrack.sIsAltPresetsEnabled = playerTweaksData.isAltPresetsEnabled();
         MediaTrack.setAvcOverVp9Preferred(playerTweaksData.isAvcOverVp9Preferred());
         TrackSelectorUtil.setVoiceBoostMark(context.getString(R.string.audio_voice_boost));
+    }
+
+    /**
+     * To the player failure log: ExoPlayer retries the segment, a fatal one comes again as an engine error
+     */
+    private void onHttpError(int responseCode, String track, @Nullable Format failed, boolean switched) {
+        PlayerFailure failure = PlayerFailure.create(mContext, PlayerFailure.KIND_TRACK_LOAD_ERROR)
+                .video(getVideo())
+                .http(responseCode, track, failed);
+
+        if (mPlayer != null) {
+            failure.position(mPlayer.getCurrentPosition(), mPlayer.getDuration());
+        }
+
+        if (switched) {
+            failure.action("select_other_codec");
+
+            // Given up on: ExoPlayer retries the segments of one it hasn't
+            if (!"other".equals(track)) {
+                FormatAttempts.onStreamFailed("video".equals(track));
+            }
+        }
+
+        failure.record();
+    }
+
+    /**
+     * The failures that throw no error (see PlaybackHealth): the video never shows or freezes, frames drop, it stalls again and
+     * again, the sound is silent
+     */
+    private void checkHealth() {
+        if (mPlayer == null) {
+            return;
+        }
+
+        try {
+            PlaybackHealth.Sample sample = new PlaybackHealth.Sample();
+            sample.nowMs = SystemClock.elapsedRealtime();
+            sample.attempt = FormatAttempts.getAttemptId();
+            sample.isPlaying = mPlayer.getPlayWhenReady() && mPlayer.getPlaybackState() == Player.STATE_READY;
+            sample.positionMs = mPlayer.getCurrentPosition();
+            // Not shown, the video isn't checked
+            sample.hasVideo = mPlayer.getVideoFormat() != null && mHasSurface;
+            sample.hasAudio = mPlayer.getAudioFormat() != null;
+            sample.isMuted = mIsMuted || mPlayer.getVolume() == 0;
+            sample.silentMs = SilenceDetector.getSilentMs();
+            sample.stalls = FormatAttempts.getStalls();
+
+            DecoderCounters counters = mPlayer.getVideoDecoderCounters();
+
+            if (counters != null) {
+                counters.ensureUpdated();
+                sample.renderedFrames = counters.renderedOutputBufferCount;
+                sample.droppedFrames = counters.droppedBufferCount;
+            }
+
+            // The renderer goes on with the same video when only the audio is switched: its first frame isn't rendered again.
+            // Its counters start over each time it's enabled, so frames rendered are of the format tried.
+            if (sample.hasVideo && sample.renderedFrames > 0 && !FormatAttempts.isVideoRendered()) {
+                FormatAttempts.onVideoRendered();
+            }
+
+            sample.isVideoRendered = FormatAttempts.isVideoRendered();
+
+            for (String kind : mHealth.onSample(sample)) {
+                recordHealthFailure(kind, sample);
+            }
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Can't check the playback: " + e.getMessage());
+        } finally {
+            if (mPlayer != null) {
+                Utils.postDelayed(mHealthCheck, HEALTH_CHECK_MS);
+            }
+        }
+    }
+
+    private void recordHealthFailure(String kind, PlaybackHealth.Sample sample) {
+        PlayerFailure failure = PlayerFailure.create(mContext, kind)
+                .video(getVideo())
+                .position(sample.positionMs, mPlayer.getDuration())
+                .formats(getVideoFormat(), getAudioFormat())
+                .detail("renderedFrames", sample.renderedFrames)
+                .detail("droppedFrames", sample.droppedFrames)
+                .detail("silentMs", sample.silentMs)
+                .detail("stalls", sample.stalls);
+
+        // The stream that didn't work: frame drops and stalls play, worse
+        if (PlaybackHealth.KIND_NO_VIDEO.equals(kind) || PlaybackHealth.KIND_VIDEO_FROZEN.equals(kind)) {
+            FormatAttempts.onStreamFailed(true);
+        } else if (PlaybackHealth.KIND_AUDIO_SILENT.equals(kind)) {
+            FormatAttempts.onStreamFailed(false);
+        }
+
+        failure.record();
     }
 
     private void applyShield720pFix() {
@@ -225,6 +373,10 @@ public class ExoPlayerController implements Player.EventListener {
     public void setPlayer(SimpleExoPlayer player) {
         mPlayer = player;
         player.addListener(this);
+        // Set by the view after this (see onSurfaceSizeChanged)
+        mHasSurface = false;
+        player.addAnalyticsListener(mDiagnosticsListener);
+        Utils.postDelayed(mHealthCheck, HEALTH_CHECK_MS);
         mRangeMuter.setPlayer(player);
     }
 
@@ -563,6 +715,7 @@ public class ExoPlayerController implements Player.EventListener {
     }
 
     private void releasePlayer() {
+        Utils.removeCallbacks(mHealthCheck);
         mFrameStepper.setPlayer(null, null);
         mRangeMuter.setPlayer(null);
 
@@ -572,6 +725,7 @@ public class ExoPlayerController implements Player.EventListener {
 
         try {
             mPlayer.removeListener(this);
+            mPlayer.removeAnalyticsListener(mDiagnosticsListener);
             mPlayer.stop(true); // Cause input lags due to high cpu load?
             mPlayer.clearVideoSurface();
             mPlayer.release();

@@ -35,7 +35,14 @@ public class OptionCategory {
     }
 
     public static OptionCategory longText(CharSequence title, OptionItem item) {
-        return new OptionCategory(title, Collections.singletonList(item), TYPE_LONG_TEXT);
+        return longText(title, item, true);
+    }
+
+    /**
+     * @param isLinkified its addresses and time codes are links (e.g. not in JSON, where a name like OMX.google reads as one)
+     */
+    public static OptionCategory longText(CharSequence title, OptionItem item, boolean isLinkified) {
+        return new OptionCategory(title, Collections.singletonList(item), TYPE_LONG_TEXT, -1, null, null, isLinkified);
     }
 
     public static OptionCategory chat(CharSequence title, OptionItem item) {
@@ -88,12 +95,18 @@ public class OptionCategory {
     }
 
     private OptionCategory(CharSequence title, List<OptionItem> options, int type, int id, String qrCodeText, OnReorder onReorder) {
+        this(title, options, type, id, qrCodeText, onReorder, true);
+    }
+
+    private OptionCategory(CharSequence title, List<OptionItem> options, int type, int id, String qrCodeText, OnReorder onReorder,
+                           boolean isLinkified) {
         this.id = id;
         this.type = type;
         this.title = title;
         this.options = options;
         this.qrCodeText = qrCodeText;
         this.onReorder = onReorder;
+        this.isLinkified = isLinkified;
     }
 
     public static final int TYPE_RADIO_LIST = 0;
@@ -118,4 +131,8 @@ public class OptionCategory {
      * Of {@link #TYPE_REORDER_LIST}, null for the others
      */
     public final OnReorder onReorder;
+    /**
+     * Of {@link #TYPE_LONG_TEXT}: its addresses and time codes are links
+     */
+    public final boolean isLinkified;
 }

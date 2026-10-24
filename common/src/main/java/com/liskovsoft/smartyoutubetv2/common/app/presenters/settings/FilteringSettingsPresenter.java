@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The Hide or mark content card of the Content Filtering settings: Collaborations, Watch later, Shows, Streamed,
+ * The Hide or mark content card of the Content Filtering settings: Collaborations, Watch later, Shows, Streamed or Live,
  * Top channels you watch and Explore more topics
  */
 public class FilteringSettingsPresenter extends BasePresenter<Void> {

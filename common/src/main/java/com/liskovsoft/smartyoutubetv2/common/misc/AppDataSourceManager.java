@@ -8,6 +8,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.AboutSettin
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.AboutSimpleSettingsPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.AccountSettingsPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.ContentFilteringSettingsPresenter;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.DebuggingSettingsPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.MainUISectionSettingsPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.PlayerSectionSettingsPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.SearchSectionSettingsPresenter;
@@ -51,6 +52,8 @@ public class AppDataSourceManager {
 
         settingItems.add(new SettingsItem(
                 context.getString(R.string.settings_updates), () -> UpdatesSettingsPresenter.instance(context).show(), R.drawable.settings_updates));
+        settingItems.add(new SettingsItem(
+                context.getString(R.string.settings_debugging), () -> DebuggingSettingsPresenter.instance(context).show(), R.drawable.settings_debugging));
 
         if (Helpers.equalsAny(context.getPackageName(), Utils.KNOWN_PACKAGES)) {
             settingItems.add(new SettingsItem(

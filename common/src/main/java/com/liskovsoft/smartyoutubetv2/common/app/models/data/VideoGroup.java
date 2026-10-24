@@ -790,21 +790,22 @@ public class VideoGroup {
     }
 
     /**
-     * A live stream that ended ("Streamed 5 hours ago"), only in the sections picked in the Streamed setting.
-     * Also marks the video when the setting marks instead of hiding, or its channel is excluded from the hiding. Only the English date is known (see CompactInfo.isStreamed).
-     * History cards come without the date: it's looked up before the group is created (see StreamedManager).
+     * A live stream that ended ("Streamed 5 hours ago") or one that's live now, only in the sections picked in the Streamed or Live setting.
+     * Also marks the video when the setting marks instead of hiding, or its channel is excluded from the hiding. Only the English date
+     * of a stream that ended is known (see CompactInfo.isStreamed). History cards come without the date: it's looked up before the group
+     * is created (see StreamedManager). A stream to come is left alone.
      */
     private boolean isHiddenStreamed(Video video) {
         int sectionId = getFilterSectionId();
 
         // No context before the app is initialized (GlobalPreferences)
-        if (video.isChapter || video.videoId == null || video.isLive || video.isUpcoming || sectionId == -1 || GlobalPreferences.context() == null) {
+        if (video.isChapter || video.videoId == null || video.isUpcoming || sectionId == -1 || GlobalPreferences.context() == null) {
             return false;
         }
 
         StreamedData data = StreamedData.instance(GlobalPreferences.context());
 
-        if (!data.isEnabled(sectionId) || !isStreamed(video)) {
+        if (!data.isEnabled(sectionId) || (!video.isLive && !isStreamed(video))) {
             return false;
         }
 
@@ -812,7 +813,11 @@ public class VideoGroup {
             return true;
         }
 
-        video.isStreamedMarked = true;
+        if (video.isLive) {
+            video.isLiveMarked = true;
+        } else {
+            video.isStreamedMarked = true;
+        }
 
         return false;
     }
