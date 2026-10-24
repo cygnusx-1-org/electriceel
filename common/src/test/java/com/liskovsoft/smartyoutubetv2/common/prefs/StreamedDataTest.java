@@ -48,6 +48,22 @@ public class StreamedDataTest {
         assertFalse(data.isHidingEnabled(MediaGroup.TYPE_HOME));
     }
 
+    /**
+     * The Live section, where every video is a stream, isn't one of the setting's sections
+     */
+    @Test
+    public void liveSectionIsntFiltered() {
+        StreamedData data = getData();
+
+        data.setMode(StreamedData.MODE_HIDE);
+        data.setSectionEnabled(MediaGroup.TYPE_LIVE, true);
+
+        assertFalse(data.isFilteredSection(MediaGroup.TYPE_LIVE));
+        assertFalse(data.isSectionEnabled(MediaGroup.TYPE_LIVE));
+        assertFalse(data.isEnabled(MediaGroup.TYPE_LIVE));
+        assertTrue(data.isFilteredSection(MediaGroup.TYPE_SUBSCRIPTIONS));
+    }
+
     @Test
     public void savedApartFromShows() {
         StreamedData streamed = getData();

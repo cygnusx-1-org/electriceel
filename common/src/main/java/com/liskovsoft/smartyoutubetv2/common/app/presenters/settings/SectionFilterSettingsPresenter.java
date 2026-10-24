@@ -24,7 +24,7 @@ import java.util.Map.Entry;
 
 /**
  * A card of the Content Filtering settings that shows, marks or hides a filter's videos, where, and the color of the label
- * (e.g. Collaborations, Watch later, Shows, Streamed, Top channels you watch, Explore more topics)
+ * (e.g. Collaborations, Watch later, Shows, Streamed or Live, Top channels you watch, Explore more topics)
  */
 public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
     // Outside the sidebar: the title, the section id the filter knows it by (see VideoGroup.getFilterSectionId)

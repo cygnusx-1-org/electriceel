@@ -51,6 +51,16 @@ public class ViewManager {
     private long mPendingActivityMs;
     private Class<?> mPendingActivityClass;
     private WeakHashSet<Runnable> mOnFinish;
+    /**
+     * After the app is finished, unless it's started again before: its views hold these presenters then, a new instance
+     * wouldn't reach them (e.g. the sidebar not updated by Set-up sections). On the main thread, where the views take them.
+     */
+    private final Runnable mResetPresenters = () -> {
+        SplashPresenter.unhold();
+        BrowsePresenter.unhold();
+        AppUpdatePresenter.unhold();
+        MotherActivity.invalidate();
+    };
 
     private ViewManager(Context context) {
         mContext = context;
@@ -330,12 +340,9 @@ public class ViewManager {
             // Fix: can't start finished app activity from history.
             // Do reset state because the app should continue to run in the background.
             // NOTE: Don't rely on MotherActivity.onDestroy() because activity can be killed silently.
+            Utils.postDelayed(mResetPresenters, 1_000);
             RxHelper.runAsync(() -> {
                 clearCaches();
-                SplashPresenter.unhold();
-                BrowsePresenter.unhold();
-                AppUpdatePresenter.unhold();
-                MotherActivity.invalidate();
                 runOnFinish();
                 mIsMoveToBackEnabled = false;
             }, 1_000);
@@ -390,6 +397,7 @@ public class ViewManager {
      */
     private void safeStartActivity(Context context, Intent intent) {
         mIsFinished = false;
+        Utils.removeCallbacks(mResetPresenters);
 
         if (PlaybackPresenter.instance(mContext).isEngineBlocked()) { // Android 14 no-pip fix???
             Utils.postDelayed(() -> safeStartActivityInt(context, intent), 0); // 50 ms old val
@@ -506,7 +514,12 @@ public class ViewManager {
         return null;
     }
 
+    /**
+     * The app is started again (see SplashPresenter): it keeps its presenters too
+     */
     public void cancelOnFinish() {
+        Utils.removeCallbacks(mResetPresenters);
+
         if (mOnFinish != null) {
             mOnFinish.clear();
         }

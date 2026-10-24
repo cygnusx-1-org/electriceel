@@ -22,7 +22,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
- * The Streamed setting in the groups of the sections (see StreamedData)
+ * The Streamed or Live setting in the groups of the sections (see StreamedData)
  */
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 28)
@@ -121,32 +121,80 @@ public class VideoGroupStreamedTest {
     }
 
     /**
-     * Only a stream that ended: one that's live or to come isn't marked or hidden, whatever its line says
+     * A stream that's live now is marked "Live", not "Streamed", whatever its line says
      */
     @Test
-    public void liveAndUpcomingAreLeftAlone() {
+    public void liveIsMarkedLive() {
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME);
+        home.add(createLive("Channel • 1.2K watching"));
+        home.add(createLive("Channel • Streamed 2 hours ago"));
+
+        assertEquals(2, home.getSize());
+        assertTrue(home.get(0).isLiveMarked);
+        assertFalse(home.get(0).isStreamedMarked);
+        assertTrue(home.get(1).isLiveMarked);
+        assertFalse(home.get(1).isStreamedMarked);
+    }
+
+    /**
+     * Only a stream that ended or that's live now: one to come isn't marked or hidden, whatever its line says
+     */
+    @Test
+    public void liveIsHiddenAndUpcomingIsLeftAlone() {
         mData.setMode(StreamedData.MODE_HIDE);
 
-        Video live = createStreamed("Channel • Streamed 2 hours ago");
-        live.isLive = true;
         Video upcoming = createStreamed("Channel • Streamed 2 hours ago");
         upcoming.isUpcoming = true;
 
         VideoGroup home = createGroup(MediaGroup.TYPE_HOME);
-        home.add(live);
+        home.add(createLive("Channel • 1.2K watching"));
         home.add(upcoming);
 
-        assertEquals(2, home.getSize());
+        assertEquals(1, home.getSize());
+        assertEquals(upcoming.videoId, home.get(0).videoId);
         assertFalse(home.get(0).isStreamedMarked);
-        assertFalse(home.get(1).isStreamedMarked);
+        assertFalse(home.get(0).isLiveMarked);
+    }
+
+    /**
+     * Nothing is hidden from History: it's marked there instead
+     */
+    @Test
+    public void liveIsMarkedInHistoryInHideMode() {
+        mData.setMode(StreamedData.MODE_HIDE);
+
+        VideoGroup history = createGroup(MediaGroup.TYPE_HISTORY);
+        history.add(createLive("Channel • 1.2K watching"));
+
+        assertEquals(1, history.getSize());
+        assertTrue(history.get(0).isLiveMarked);
+    }
+
+    /**
+     * The Live section, where every video is a stream, isn't one of the setting's sections
+     */
+    @Test
+    public void liveSectionIsLeftAlone() {
+        mData.setMode(StreamedData.MODE_HIDE);
+        mData.setSectionEnabled(MediaGroup.TYPE_LIVE, true);
+
+        VideoGroup live = createGroup(MediaGroup.TYPE_LIVE);
+        live.add(createLive("Channel • 1.2K watching"));
+        live.add(createStreamed("Channel • Streamed 2 hours ago"));
+
+        assertEquals(2, live.getSize());
+        assertFalse(live.get(0).isLiveMarked);
+        assertFalse(live.get(1).isStreamedMarked);
     }
 
     @Test
     public void markIsKeptByTheCopy() {
         VideoGroup home = createGroup(MediaGroup.TYPE_HOME);
         home.add(createStreamed("Channel • Streamed 2 weeks ago"));
+        home.add(createLive("Channel • 1.2K watching"));
 
         assertTrue(Video.from(home.get(0)).isStreamedMarked);
+        assertTrue(Video.from(home.get(1)).isLiveMarked);
     }
 
     private static VideoGroup createGroup(int type) {
@@ -163,6 +211,13 @@ public class VideoGroupStreamedTest {
         video.author = "Channel";
         video.badge = "2:15:39";
         video.secondTitle = secondTitle;
+        return video;
+    }
+
+    private static Video createLive(String secondTitle) {
+        Video video = createStreamed(secondTitle);
+        video.badge = null;
+        video.isLive = true;
         return video;
     }
 
