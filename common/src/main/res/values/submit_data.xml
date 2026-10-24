@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Settings → Debugging → Submit data posts here (see ElectricEelDataRestAPI) -->
+    <string name="submit_data_url" translatable="false">https://electriceel-data.cygnusx-1.org/v1/submissions</string>
+    <!-- A new GitHub issue with the submission's ID in it (the QR code after Submit data) -->
+    <string name="submit_data_issue_url" translatable="false">https://github.com/cygnusx-1-org/electriceel/issues/new?body=%s</string>
+</resources>

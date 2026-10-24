@@ -27,10 +27,8 @@ import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.manifest.DashManifest;
 import com.google.android.exoplayer2.source.sabr.manifest.SabrManifest;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.liskovsoft.sharedutils.cronet.CronetManager;
 import com.liskovsoft.sharedutils.helpers.AppInfoHelpers;
 import com.liskovsoft.sharedutils.helpers.DeviceHelpers;
-import com.liskovsoft.sharedutils.okhttp.OkHttpManager;
 import com.liskovsoft.sharedutils.helpers.FileHelpers;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.querystringparser.UrlQueryStringFactory;
@@ -41,7 +39,6 @@ import com.liskovsoft.smartyoutubetv2.common.exoplayer.versions.ExoUtils;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
-import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.app.models.AppInfo;
 import com.liskovsoft.youtubeapi.common.helpers.AppClient;
@@ -371,11 +368,7 @@ public final class DebugInfoManager implements Runnable, Player.EventListener {
 
     private void appendVersion() {
         //appendRow("ExoPlayer version", ExoPlayerLibraryInfo.VERSION);
-        PlayerTweaksData playerTweaksData = PlayerTweaksData.instance(mContext);
-        String engine = OkHttpManager.isIpv6Disabled() ? "OkHttp (no IPv6)" :
-                playerTweaksData.getPlayerDataSource() == PlayerTweaksData.PLAYER_DATA_SOURCE_OKHTTP ? "OkHttp" :
-                playerTweaksData.getPlayerDataSource() == PlayerTweaksData.PLAYER_DATA_SOURCE_CRONET
-                        && CronetManager.getEngine(mContext) != null ? "Cronet" : "Default";
+        String engine = getEngineLabel(Utils.getEffectiveNetworkEngine(mContext));
         String protocol;
         Object manifest = mPlayer.getCurrentManifest();
         if (manifest == null) {
@@ -391,6 +384,19 @@ public final class DebugInfoManager implements Runnable, Player.EventListener {
         //appendRow("Cronet version", ApiVersion.getCronetVersion());
         //appendRow("OkHttp version", Version.userAgent());
         appendRow(mAppVersion, AppInfoHelpers.getAppVersionName(mContext));
+    }
+
+    private static String getEngineLabel(String engineId) {
+        switch (engineId) {
+            case Utils.NETWORK_ENGINE_OKHTTP_NO_IPV6:
+                return "OkHttp (no IPv6)";
+            case Utils.NETWORK_ENGINE_OKHTTP:
+                return "OkHttp";
+            case Utils.NETWORK_ENGINE_CRONET:
+                return "Cronet";
+            default:
+                return "Default";
+        }
     }
 
     private void appendDeviceNameSDKCache() {

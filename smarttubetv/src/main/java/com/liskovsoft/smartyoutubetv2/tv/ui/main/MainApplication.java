@@ -24,6 +24,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.views.SignInView;
 import com.liskovsoft.smartyoutubetv2.common.app.views.SplashView;
 import com.liskovsoft.smartyoutubetv2.common.app.views.ViewManager;
 import com.liskovsoft.smartyoutubetv2.common.app.views.WebBrowserView;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.AppExits;
 import com.liskovsoft.smartyoutubetv2.common.prefs.HomeScreenPlaylistsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.NetworkData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
@@ -164,6 +165,8 @@ public class MainApplication extends MultiDexApplication implements Configuratio
                 return;
             }
 
+            // To the player failure log, before the app dies (see Settings → Debugging)
+            AppExits.recordCrash(this, t, e);
             applyCrashFixes(e);
             //e = wrapWithAdditionalInfo(e);
 

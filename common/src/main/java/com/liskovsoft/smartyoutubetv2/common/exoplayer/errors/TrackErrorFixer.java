@@ -2,6 +2,7 @@ package com.liskovsoft.smartyoutubetv2.common.exoplayer.errors;
 
 import androidx.annotation.Nullable;
 import com.google.android.exoplayer2.ExoPlaybackException;
+import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer.DecoderInitializationException;
 import com.google.android.exoplayer2.source.DefaultMediaSourceEventListener;
 import com.google.android.exoplayer2.source.MediaSource.MediaPeriodId;
@@ -29,9 +30,25 @@ public class TrackErrorFixer extends DefaultMediaSourceEventListener {
     private long mSelectionTimeMs;
     private final Map<MediaTrack, Long> mBlacklistedTracks = new HashMap<>();
     private InvalidResponseCodeException mLastEx;
+    private OnHttpError mOnHttpError;
+
+    public interface OnHttpError {
+        /**
+         * A segment of a track failed with the HTTP code
+         *
+         * @param track audio, video or other (e.g. subtitles)
+         * @param failed the format of the track in use, when it's audio or video
+         * @param switched another codec is selected instead
+         */
+        void onHttpError(int responseCode, String track, @Nullable Format failed, boolean switched);
+    }
 
     public TrackErrorFixer(TrackSelectorManager trackSelectorManager) {
         mTrackSelectorManager = trackSelectorManager;
+    }
+
+    public void setOnHttpError(OnHttpError listener) {
+        mOnHttpError = listener;
     }
 
     /**
@@ -80,14 +97,7 @@ public class TrackErrorFixer extends DefaultMediaSourceEventListener {
             return false;
         }
 
-        MediaTrack currentTrack = null;
-
-        for (MediaTrack track : tracks) {
-            if (track.isSelected) {
-                currentTrack = track;
-                break;
-            }
-        }
+        MediaTrack currentTrack = getSelectedTrack(tracks);
 
         if (currentTrack == null || currentTrack.format == null || currentTrack.format.codecs == null) {
             return false;
@@ -219,6 +229,21 @@ public class TrackErrorFixer extends DefaultMediaSourceEventListener {
     //    }
     //}
 
+    @Nullable
+    private static MediaTrack getSelectedTrack(@Nullable Set<MediaTrack> tracks) {
+        if (tracks == null) {
+            return null;
+        }
+
+        for (MediaTrack track : tracks) {
+            if (track.isSelected) {
+                return track;
+            }
+        }
+
+        return null;
+    }
+
     private boolean isAudio(InvalidResponseCodeException ex) {
         String url = ex.dataSpec.uri.toString();
 
@@ -257,6 +282,19 @@ public class TrackErrorFixer extends DefaultMediaSourceEventListener {
     @Override
     public void onLoadError(int windowIndex, @Nullable MediaPeriodId mediaPeriodId, LoadEventInfo loadEventInfo,
                             MediaLoadData mediaLoadData, IOException error, boolean wasCanceled) {
-        fixError(error);
+        if (!(error instanceof InvalidResponseCodeException) || mOnHttpError == null) {
+            fixError(error);
+            return;
+        }
+
+        InvalidResponseCodeException ex = (InvalidResponseCodeException) error;
+        String url = ex.dataSpec.uri.toString();
+        String track = url.contains("mime/audio") ? "audio" : url.contains("mime/video") ? "video" : "other";
+        MediaTrack failed = "audio".equals(track) ? getSelectedTrack(mTrackSelectorManager.getAudioTracks()) :
+                "video".equals(track) ? getSelectedTrack(mTrackSelectorManager.getVideoTracks()) : null;
+
+        boolean switched = fixError(error);
+
+        mOnHttpError.onHttpError(ex.responseCode, track, failed != null ? failed.format : null, switched);
     }
 }
