@@ -17,10 +17,12 @@ import com.liskovsoft.smartyoutubetv2.common.misc.NotInterestedManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.OldVideoFilter;
 import com.liskovsoft.smartyoutubetv2.common.misc.ShortsDateManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.StreamedManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.WatchLaterManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AiSListFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.ExploreTopicsData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.FilterExclusionData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.KeywordFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.SectionFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.ShowsData;
@@ -699,7 +701,7 @@ public class VideoGroup {
 
     /**
      * A collaboration, only in the sections picked in the Collaborations setting.
-     * Also marks the video when the setting marks instead of hiding. The names are looked up before the group is created (see HiddenVideoResolver).
+     * Also marks the video when the setting marks instead of hiding, or a channel of it is excluded from the hiding. The names are looked up before the group is created (see HiddenVideoResolver).
      */
     private boolean isHiddenCollaboration(Video video) {
         int sectionId = getFilterSectionId();
@@ -721,7 +723,7 @@ public class VideoGroup {
             return false;
         }
 
-        if (manager.isHidden(sectionId)) {
+        if (manager.isHidden(sectionId) && !isExcludedCollaboration(video, author)) {
             return true;
         }
 
@@ -732,7 +734,7 @@ public class VideoGroup {
 
     /**
      * In the account's Watch later, only in the sections picked in the Watch later setting.
-     * Also marks the video when the setting marks instead of hiding. The list is read before the group is created (see HiddenVideoResolver).
+     * Also marks the video when the setting marks instead of hiding, or its channel is excluded from the hiding. The list is read before the group is created (see HiddenVideoResolver).
      */
     private boolean isHiddenWatchLater(Video video) {
         int sectionId = getFilterSectionId();
@@ -752,7 +754,7 @@ public class VideoGroup {
             return false;
         }
 
-        if (manager.isHidden(sectionId)) {
+        if (manager.isHidden(sectionId) && !isExcludedChannel(FilterExclusionData.FILTER_WATCH_LATER, video)) {
             return true;
         }
 
@@ -789,7 +791,8 @@ public class VideoGroup {
 
     /**
      * A live stream that ended ("Streamed 5 hours ago"), only in the sections picked in the Streamed setting.
-     * Also marks the video when the setting marks instead of hiding. Only the English date is known (see CompactInfo.isStreamed).
+     * Also marks the video when the setting marks instead of hiding, or its channel is excluded from the hiding. Only the English date is known (see CompactInfo.isStreamed).
+     * History cards come without the date: it's looked up before the group is created (see StreamedManager).
      */
     private boolean isHiddenStreamed(Video video) {
         int sectionId = getFilterSectionId();
@@ -801,15 +804,49 @@ public class VideoGroup {
 
         StreamedData data = StreamedData.instance(GlobalPreferences.context());
 
-        if (!data.isEnabled(sectionId) || !CompactInfo.isStreamed(video.getSecondTitle())) {
+        if (!data.isEnabled(sectionId) || !isStreamed(video)) {
             return false;
         }
 
-        if (data.isHidingEnabled(sectionId)) {
+        if (data.isHidingEnabled(sectionId) && !isExcludedChannel(FilterExclusionData.FILTER_STREAMED, video)) {
             return true;
         }
 
         video.isStreamedMarked = true;
+
+        return false;
+    }
+
+    /**
+     * The date on the card says it, or a lookup found it (see StreamedManager)
+     */
+    private static boolean isStreamed(Video video) {
+        return CompactInfo.isStreamed(video.getSecondTitle()) || StreamedManager.instance(GlobalPreferences.context()).isStreamed(video.videoId);
+    }
+
+    /**
+     * The channel of the video is excluded from the hiding of the filter (see FilterExclusionData): the video is marked instead
+     * @param filter one of FilterExclusionData.FILTER_*
+     */
+    private static boolean isExcludedChannel(int filter, Video video) {
+        return FilterExclusionData.instance(GlobalPreferences.context()).isExcluded(filter, video.channelId, video.getAuthor());
+    }
+
+    /**
+     * Excluded as a whole or by one of its channels: the card only has "X and Y" (see CollaborationManager.getChannelNames)
+     */
+    private static boolean isExcludedCollaboration(Video video, String author) {
+        if (isExcludedChannel(FilterExclusionData.FILTER_COLLABORATIONS, video)) {
+            return true;
+        }
+
+        FilterExclusionData data = FilterExclusionData.instance(GlobalPreferences.context());
+
+        for (String name : CollaborationManager.getChannelNames(author)) {
+            if (data.isExcluded(FilterExclusionData.FILTER_COLLABORATIONS, null, name)) {
+                return true;
+            }
+        }
 
         return false;
     }

@@ -7,6 +7,7 @@ import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.BrowseSection;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.VideoGroup;
+import com.liskovsoft.smartyoutubetv2.common.prefs.FilterExclusionData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.WatchLaterData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
@@ -65,6 +66,7 @@ public class WatchLaterManagerTest {
     @After
     public void tearDown() {
         mData.setMode(WatchLaterData.MODE_SHOW);
+        getExclusions().setExcluded(FilterExclusionData.FILTER_WATCH_LATER, null, "Climbing", false);
         Utils.sHandler.removeCallbacksAndMessages(null);
     }
 
@@ -328,6 +330,24 @@ public class WatchLaterManagerTest {
         assertFalse(gaming.get(0).isInWatchLater);
     }
 
+    /**
+     * Its channel is excluded from the hiding in the context menu (see FilterExclusionData)
+     */
+    @Test
+    public void videoOfAnExcludedChannelIsMarkedInHideMode() {
+        assertTrue(resolve());
+        mData.setMode(WatchLaterData.MODE_HIDE);
+        getExclusions().setExcluded(FilterExclusionData.FILTER_WATCH_LATER, null, "Climbing", true);
+
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME);
+        home.add(createVideo("later1", "Climbing"));
+        home.add(createVideo("later2"));
+
+        assertEquals(1, home.getSize());
+        assertEquals("later1", home.get(0).videoId);
+        assertTrue(home.get(0).isInWatchLater);
+    }
+
     @Test
     public void videoIsMarkedInMarkMode() {
         assertTrue(resolve());
@@ -435,11 +455,19 @@ public class WatchLaterManagerTest {
     }
 
     private static Video createVideo(String videoId) {
+        return createVideo(videoId, "Channel");
+    }
+
+    private static Video createVideo(String videoId, String author) {
         Video video = new Video();
         video.videoId = videoId;
         video.title = "Video " + videoId;
-        video.author = "Channel";
-        video.secondTitle = "Channel • 5K views • 3 weeks ago";
+        video.author = author;
+        video.secondTitle = author + " • 5K views • 3 weeks ago";
         return video;
+    }
+
+    private static FilterExclusionData getExclusions() {
+        return FilterExclusionData.instance(RuntimeEnvironment.getApplication());
     }
 }

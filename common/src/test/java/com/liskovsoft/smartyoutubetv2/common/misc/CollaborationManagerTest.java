@@ -9,6 +9,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.VideoGroup;
 import com.liskovsoft.smartyoutubetv2.common.misc.CollaborationManager.Verdict;
 import com.liskovsoft.smartyoutubetv2.common.prefs.CollaborationsData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.FilterExclusionData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
 import org.junit.After;
@@ -75,6 +76,7 @@ public class CollaborationManagerTest {
     @After
     public void tearDown() {
         mData.setMode(CollaborationsData.MODE_SHOW);
+        getExclusions().setExcluded(FilterExclusionData.FILTER_COLLABORATIONS, "UCsidemen", "Sidemen", false);
         Utils.sHandler.removeCallbacksAndMessages(null);
     }
 
@@ -150,6 +152,15 @@ public class CollaborationManagerTest {
 
         // Never looked up
         assertEquals(Boolean.FALSE, CollaborationManager.judge("Sidemen", name -> null).isCollaboration);
+    }
+
+    @Test
+    public void channelNamesAreTheSidesOfEachAnd() {
+        assertEquals(Arrays.asList("Sidemen", "Jesser"), CollaborationManager.getChannelNames(COLLABORATION));
+        assertEquals(Arrays.asList("Rock", "Roll and Jesser", "Rock and Roll", "Jesser"),
+                CollaborationManager.getChannelNames("Rock and Roll and Jesser"));
+        assertTrue(CollaborationManager.getChannelNames("Sidemen").isEmpty());
+        assertTrue(CollaborationManager.getChannelNames(null).isEmpty());
     }
 
     @Test
@@ -240,6 +251,25 @@ public class CollaborationManagerTest {
         assertFalse(gaming.get(0).isCollaboration);
     }
 
+    /**
+     * One of its channels is excluded from the hiding in the context menu (see FilterExclusionData): the card only has "X and Y"
+     */
+    @Test
+    public void collaborationWithAnExcludedChannelIsMarkedInHideMode() {
+        learn(COLLABORATION);
+        learn("Phil and Jesser");
+        mData.setMode(CollaborationsData.MODE_HIDE);
+        getExclusions().setExcluded(FilterExclusionData.FILTER_COLLABORATIONS, "UCsidemen", "Sidemen", true);
+
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME);
+        home.add(createVideo("collab", COLLABORATION));
+        home.add(createVideo("other", "Phil and Jesser"));
+
+        assertEquals(1, home.getSize());
+        assertEquals("collab", home.get(0).videoId);
+        assertTrue(home.get(0).isCollaboration);
+    }
+
     @Test
     public void knownCollaborationIsMarkedInMarkMode() {
         learn(COLLABORATION);
@@ -317,6 +347,10 @@ public class CollaborationManagerTest {
 
     private static VideoGroup createGroup(int type) {
         return VideoGroup.from(new BrowseSection(type, "Section", BrowseSection.TYPE_GRID, 0));
+    }
+
+    private static FilterExclusionData getExclusions() {
+        return FilterExclusionData.instance(RuntimeEnvironment.getApplication());
     }
 
     private static Video createVideo(String videoId, String author) {

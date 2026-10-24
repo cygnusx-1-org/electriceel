@@ -51,7 +51,7 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
      */
     private static final String[] PROFILE_DATA_KEYS = {
             MainUIData.MAIN_UI_DATA, GeneralData.GENERAL_DATA, PlayerData.VIDEO_PLAYER_DATA, PlayerTweaksData.VIDEO_PLAYER_TWEAKS_DATA,
-            LocaleData.LOCALE_DATA, BlockedChannelData.BLOCKED_CHANNEL_DATA, KeywordFilterData.KEYWORD_FILTER_DATA,
+            LocaleData.LOCALE_DATA, BlockedChannelData.BLOCKED_CHANNEL_DATA, KeywordFilterData.KEYWORD_FILTER_DATA, FilterExclusionData.FILTER_EXCLUSION_DATA,
             CollaborationsData.class.getSimpleName(), TopChannelsData.class.getSimpleName(), ExploreTopicsData.class.getSimpleName(),
             ShowsData.class.getSimpleName(), StreamedData.class.getSimpleName(), WatchLaterData.class.getSimpleName(), MusicAutoplayData.class.getSimpleName(),
             OldVideosData.class.getSimpleName(), AiSListFilterData.class.getSimpleName(), SponsorBlockData.SPONSOR_BLOCK_DATA,

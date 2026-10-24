@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
 import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
+import com.liskovsoft.smartyoutubetv2.common.prefs.FilterExclusionData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.StreamedData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
@@ -28,12 +29,14 @@ import static org.junit.Assert.assertTrue;
 @Config(sdk = 28)
 public class VideoGroupStreamedTest {
     private StreamedData mData;
+    private FilterExclusionData mExclusions;
 
     @Before
     public void setUp() {
         Context context = RuntimeEnvironment.getApplication();
         GlobalPreferences.instance(context);
         mData = StreamedData.instance(context);
+        mExclusions = FilterExclusionData.instance(context);
         mData.setSectionEnabled(MediaGroup.TYPE_HOME, true);
         mData.setSectionEnabled(MediaGroup.TYPE_GAMING, false);
     }
@@ -43,6 +46,8 @@ public class VideoGroupStreamedTest {
         // The defaults
         mData.setMode(StreamedData.MODE_MARK);
         mData.setSectionEnabled(MediaGroup.TYPE_GAMING, true);
+        mExclusions.setExcluded(FilterExclusionData.FILTER_STREAMED, "UCclimbing", "World Climbing", false);
+        mExclusions.setExcluded(FilterExclusionData.FILTER_WATCH_LATER, "UCclimbing", "World Climbing", false);
         Utils.sHandler.removeCallbacksAndMessages(null);
     }
 
@@ -139,6 +144,41 @@ public class VideoGroupStreamedTest {
         assertEquals(2, home.getSize());
         assertFalse(home.get(0).isStreamedMarked);
         assertFalse(home.get(1).isStreamedMarked);
+    }
+
+    /**
+     * Its channel is excluded from the hiding in the context menu (see FilterExclusionData). Found by the name, which is
+     * all most TV cards have.
+     */
+    @Test
+    public void streamedOfAnExcludedChannelIsMarkedInHideMode() {
+        mData.setMode(StreamedData.MODE_HIDE);
+        mExclusions.setExcluded(FilterExclusionData.FILTER_STREAMED, "UCclimbing", "World Climbing", true);
+
+        Video climbing = createStreamed("World Climbing • 40K views • Streamed 2 days ago");
+        climbing.author = "World Climbing";
+
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME);
+        home.add(climbing);
+        home.add(createStreamed("Channel • 11K views • Streamed 7 days ago"));
+
+        assertEquals(1, home.getSize());
+        assertEquals(climbing.videoId, home.get(0).videoId);
+        assertTrue(home.get(0).isStreamedMarked);
+    }
+
+    @Test
+    public void channelExcludedFromAnotherFilterIsHidden() {
+        mData.setMode(StreamedData.MODE_HIDE);
+        mExclusions.setExcluded(FilterExclusionData.FILTER_WATCH_LATER, "UCclimbing", "World Climbing", true);
+
+        Video climbing = createStreamed("World Climbing • 40K views • Streamed 2 days ago");
+        climbing.author = "World Climbing";
+
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME);
+        home.add(climbing);
+
+        assertEquals(0, home.getSize());
     }
 
     @Test

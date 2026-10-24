@@ -22,7 +22,8 @@ import io.reactivex.Observable;
  * Holds each emission until what hides its videos after a lookup is known: the channel handles of AiSList,
  * the collaborations and Watch later, in the sections they apply to. The groups are then built without those videos (see VideoGroup),
  * so a hidden video never appears first and vanishes after. The categories of Home are held the same way (see VideoCategoryManager).<br/>
- * The dates of shorts are held too (see ShortsDateManager): the card never gets its date after it's shown, and Hide old videos reads it.<br/>
+ * The dates of shorts are held too (see ShortsDateManager): the card never gets its date after it's shown, and Hide old videos reads it.
+ * So are the live streams that ended in History (see StreamedManager): its cards come without the date that tells them.<br/>
  * A failed lookup doesn't hold the group back: its videos are shown.
  */
 public class HiddenVideoResolver {
@@ -59,8 +60,10 @@ public class HiddenVideoResolver {
         AiSListManager aiSListManager = AiSListManager.instance(context);
         CollaborationManager collaborationManager = CollaborationManager.instance(context);
         WatchLaterManager watchLaterManager = WatchLaterManager.instance(context);
+        StreamedManager streamedManager = StreamedManager.instance(context);
         Map<String, String> videoIdByKey = new LinkedHashMap<>();
         Set<String> authors = new LinkedHashSet<>();
+        Set<String> streamedIds = new LinkedHashSet<>();
         boolean isAiSListUsed = false;
         boolean isWatchLaterEnabled = false;
 
@@ -75,8 +78,9 @@ public class HiddenVideoResolver {
             boolean isAiSListEnabled = aiSListManager.isSectionEnabled(aiSListSection);
             boolean isCollaborationEnabled = filterSectionId != -1 && collaborationManager.isEnabled(filterSectionId);
             isWatchLaterEnabled |= filterSectionId != -1 && watchLaterManager.isEnabled(filterSectionId);
+            boolean isStreamedLookedUp = filterSectionId != -1 && streamedManager.isLookedUp(filterSectionId);
 
-            if (!isAiSListEnabled && !isCollaborationEnabled) {
+            if (!isAiSListEnabled && !isCollaborationEnabled && !isStreamedLookedUp) {
                 continue;
             }
 
@@ -104,13 +108,18 @@ public class HiddenVideoResolver {
                 if (CollaborationManager.isCandidate(author)) {
                     authors.add(author);
                 }
+
+                if (isStreamedLookedUp && StreamedManager.isCandidate(video)) {
+                    streamedIds.add(video.videoId);
+                }
             }
         }
 
         Observable<Boolean> shortsDates = ShortsDateManager.instance(context).resolve(mediaGroups);
+        Observable<Boolean> streamed = streamedManager.resolve(streamedIds);
 
         if (!isAiSListUsed && authors.isEmpty() && !isWatchLaterEnabled) {
-            return shortsDates;
+            return Observable.zip(shortsDates, streamed, (dates, streams) -> true);
         }
 
         return Observable.zip(
@@ -120,7 +129,8 @@ public class HiddenVideoResolver {
                 collaborationManager.resolve(authors),
                 isWatchLaterEnabled ? watchLaterManager.resolve() : Observable.just(true),
                 shortsDates,
-                (lists, handles, collaborations, watchLater, dates) -> true)
+                streamed,
+                (lists, handles, collaborations, watchLater, dates, streams) -> true)
                 // Show the videos rather than nothing
                 .onErrorReturn(error -> {
                     Log.e(TAG, "Can't resolve the hidden videos: %s", error.getMessage());

@@ -136,6 +136,33 @@ public class CollaborationManager {
     }
 
     /**
+     * The sides of each "and" of the channel name on the card, the names its channels might have
+     * (e.g. "A", "B and C", "A and B" and "C" for "A and B and C")
+     */
+    public static List<String> getChannelNames(String author) {
+        List<String> names = new ArrayList<>();
+
+        if (!isCandidate(author)) {
+            return names;
+        }
+
+        for (int index = author.indexOf(SEPARATOR); index != -1; index = author.indexOf(SEPARATOR, index + 1)) {
+            String first = author.substring(0, index).trim();
+            String second = author.substring(index + SEPARATOR.length()).trim();
+
+            if (!first.isEmpty()) {
+                names.add(first);
+            }
+
+            if (!second.isEmpty()) {
+                names.add(second);
+            }
+        }
+
+        return names;
+    }
+
+    /**
      * @return null while a name it needs hasn't been looked up
      */
     public Boolean getCachedResult(String author) {

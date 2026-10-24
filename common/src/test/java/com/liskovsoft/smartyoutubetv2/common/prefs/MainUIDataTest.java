@@ -275,6 +275,37 @@ public class MainUIDataTest {
     }
 
     /**
+     * In the menu of every card: a channel's hidden videos have none, any other card of it does
+     */
+    @Test
+    public void excludeChannelFromHidingIsInEveryCardMenuByDefault() {
+        MainUIData data = getData();
+
+        assertTrue(data.isMenuItemEnabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_EXCLUDE_CHANNEL_FROM_HIDING));
+        assertTrue(data.isMenuItemEnabled(MainUIData.MENU_SUBSCRIPTIONS, MainUIData.MENU_ITEM_EXCLUDE_CHANNEL_FROM_HIDING));
+        assertTrue(data.isMenuItemEnabled(MainUIData.MENU_HISTORY, MainUIData.MENU_ITEM_EXCLUDE_CHANNEL_FROM_HIDING));
+        assertTrue(data.isMenuItemEnabled(MainUIData.MENU_PLAYLISTS, MainUIData.MENU_ITEM_EXCLUDE_CHANNEL_FROM_HIDING));
+        assertFalse(data.isMenuItemEnabled(MainUIData.MENU_SIDEBAR, MainUIData.MENU_ITEM_EXCLUDE_CHANNEL_FROM_HIDING));
+    }
+
+    @Test
+    public void excludeChannelFromHidingComesAfterHideKeywords() {
+        MainUIData data = getData();
+
+        assertEquals(data.getMenuItemIndex(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_HIDE_KEYWORDS) + 1,
+                data.getMenuItemIndex(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_EXCLUDE_CHANNEL_FROM_HIDING));
+    }
+
+    @Test
+    public void excludeChannelFromHidingTurnedOffStaysOff() {
+        getData().setMenuItemDisabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_EXCLUDE_CHANNEL_FROM_HIDING);
+        ShadowLooper.shadowMainLooper().idle();
+        MainUIData.resetInstanceForTesting();
+
+        assertFalse(getData().isMenuItemEnabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_EXCLUDE_CHANNEL_FROM_HIDING));
+    }
+
+    /**
      * The enabled ones put in order: the others come after them, in their order
      */
     @Test

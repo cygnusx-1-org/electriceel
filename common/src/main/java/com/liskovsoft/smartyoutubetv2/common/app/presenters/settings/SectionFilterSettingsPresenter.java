@@ -1,6 +1,7 @@
 package com.liskovsoft.smartyoutubetv2.common.app.presenters.settings;
 
 import android.content.Context;
+import android.util.Pair;
 
 import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
 import com.liskovsoft.smartyoutubetv2.common.R;
@@ -11,6 +12,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.SidebarService;
 import com.liskovsoft.smartyoutubetv2.common.prefs.CollaborationsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.ExploreTopicsData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.FilterExclusionData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.SectionFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.ShowsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.StreamedData;
@@ -23,7 +25,8 @@ import java.util.List;
 import java.util.Map.Entry;
 
 /**
- * A card of the Content Filtering settings that shows, marks or hides a filter's videos, where, and the color of the label
+ * A card of the Content Filtering settings that shows, marks or hides a filter's videos, where, the color of the label,
+ * and the channels excluded from the hiding
  * (e.g. Collaborations, Watch later, Shows, Streamed, Top channels you watch, Explore more topics)
  */
 public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
@@ -39,10 +42,11 @@ public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
     private final int mMarkDescResId;
     private final int mSectionsResId;
     private final boolean mHasPageSections; // also in search and on channel pages
+    private final int mExclusionFilter; // the FilterExclusionData.FILTER_* channels are excluded from, or 0
 
     private SectionFilterSettingsPresenter(Context context, SectionFilterData data, int titleResId,
                                            int showResId, int markResId, int markDescResId, int hideResId, int sectionsResId,
-                                           boolean hasPageSections) {
+                                           boolean hasPageSections, int exclusionFilter) {
         super(context);
         mData = data;
         mSidebarService = SidebarService.instance(context);
@@ -55,42 +59,43 @@ public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
         mMarkDescResId = markDescResId;
         mSectionsResId = sectionsResId;
         mHasPageSections = hasPageSections;
+        mExclusionFilter = exclusionFilter;
     }
 
     public static SectionFilterSettingsPresenter collaborations(Context context) {
         return new SectionFilterSettingsPresenter(context, CollaborationsData.instance(context), R.string.collaborations,
                 R.string.collaborations_show, R.string.collaborations_mark, R.string.collaborations_mark_desc, R.string.collaborations_hide,
-                R.string.collaborations_sections, true);
+                R.string.collaborations_sections, true, FilterExclusionData.FILTER_COLLABORATIONS);
     }
 
     public static SectionFilterSettingsPresenter watchLater(Context context) {
         return new SectionFilterSettingsPresenter(context, WatchLaterData.instance(context), R.string.watch_later,
                 R.string.watch_later_show, R.string.watch_later_mark, R.string.watch_later_mark_desc, R.string.watch_later_hide,
-                R.string.watch_later_sections, true);
+                R.string.watch_later_sections, true, FilterExclusionData.FILTER_WATCH_LATER);
     }
 
     public static SectionFilterSettingsPresenter shows(Context context) {
         return new SectionFilterSettingsPresenter(context, ShowsData.instance(context), R.string.shows,
                 R.string.shows_show, R.string.shows_mark, R.string.shows_mark_desc, R.string.shows_hide,
-                R.string.shows_sections, true);
+                R.string.shows_sections, true, 0);
     }
 
     public static SectionFilterSettingsPresenter streamed(Context context) {
         return new SectionFilterSettingsPresenter(context, StreamedData.instance(context), R.string.streamed,
                 R.string.streamed_show, R.string.streamed_mark, R.string.streamed_mark_desc, R.string.streamed_hide,
-                R.string.streamed_sections, true);
+                R.string.streamed_sections, true, FilterExclusionData.FILTER_STREAMED);
     }
 
     public static SectionFilterSettingsPresenter topChannels(Context context) {
         return new SectionFilterSettingsPresenter(context, TopChannelsData.instance(context), R.string.top_channels,
                 R.string.top_channels_show, R.string.top_channels_mark, R.string.top_channels_mark_desc, R.string.top_channels_hide,
-                R.string.top_channels_sections, false);
+                R.string.top_channels_sections, false, 0);
     }
 
     public static SectionFilterSettingsPresenter exploreTopics(Context context) {
         return new SectionFilterSettingsPresenter(context, ExploreTopicsData.instance(context), R.string.explore_topics,
                 R.string.explore_topics_show, R.string.explore_topics_mark, R.string.explore_topics_mark_desc, R.string.explore_topics_hide,
-                R.string.explore_topics_sections, false);
+                R.string.explore_topics_sections, false, 0);
     }
 
     public void show() {
@@ -99,6 +104,7 @@ public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
         OptionItem markMode = appendModeCategory(presenter);
         appendSectionsCategory(presenter);
         appendMarkColorCategory(presenter, markMode);
+        appendExcludedChannelsCategory(presenter);
 
         presenter.showDialog(getContext().getString(mTitleResId));
     }
@@ -181,5 +187,32 @@ public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
         }
 
         presenter.appendRadioCategory(getContext().getString(R.string.aislist_mark_color), options);
+    }
+
+    /**
+     * The channels excluded from the hiding in the video context menu (see FilterExclusionSettingsPresenter), only when there's one.
+     * Unchecking includes a channel again. It stays in the list until the list is opened again, so it can be checked back.
+     */
+    private void appendExcludedChannelsCategory(AppDialogPresenter presenter) {
+        if (mExclusionFilter == 0) {
+            return;
+        }
+
+        FilterExclusionData data = FilterExclusionData.instance(getContext());
+        List<Pair<String, String>> channels = data.getChannels(mExclusionFilter);
+
+        if (channels.isEmpty()) {
+            return;
+        }
+
+        List<OptionItem> options = new ArrayList<>();
+
+        for (Pair<String, String> channel : channels) {
+            options.add(UiOptionItem.from(channel.second != null ? channel.second : channel.first,
+                    option -> data.setExcluded(mExclusionFilter, channel.first, channel.second, option.isSelected()),
+                    true));
+        }
+
+        presenter.appendCheckedCategory(getContext().getString(R.string.excluded_channels), options);
     }
 }

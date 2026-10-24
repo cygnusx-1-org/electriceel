@@ -30,6 +30,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.PlaybackPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.AiSListReportPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.providers.ContextMenuManager;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.providers.ContextMenuProvider;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.FilterExclusionSettingsPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.KeywordFilterSettingsPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.ChannelUploadsView;
 import com.liskovsoft.smartyoutubetv2.common.app.views.PlaybackView;
@@ -67,6 +68,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
     private boolean mIsBlockChannelEnabled;
     private boolean mIsReportAiChannelEnabled;
     private boolean mIsHideKeywordsEnabled;
+    private boolean mIsExcludeChannelFromHidingEnabled;
     private boolean mIsRemoveFromHistoryButtonEnabled;
     private boolean mIsRemoveFromSubscriptionsButtonEnabled;
     private boolean mIsOpenChannelButtonEnabled;
@@ -658,6 +660,37 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
                 })));
     }
 
+    /**
+     * The filters of Hide or mark content set to hide that the channel is excluded from: its videos are marked instead.
+     * On any card of the channel: its hidden videos have none (see FilterExclusionSettingsPresenter).
+     */
+    private void appendExcludeChannelFromHidingButton() {
+        if (mVideo == null || mVideo.isChapter || mVideo.isShow || !mIsExcludeChannelFromHidingEnabled) {
+            return;
+        }
+
+        // A video or a channel. A playlist card would give its own title as the channel.
+        if (!mVideo.hasVideo() && (!mVideo.isChannel() || mVideo.isPlaylistAsChannel())) {
+            return;
+        }
+
+        String channelId = mVideo.channelId;
+        String channelName = mVideo.getAuthor();
+
+        if (channelName == null || FilterExclusionSettingsPresenter.getHidingFilters(getContext()).isEmpty()) {
+            return;
+        }
+
+        Context context = getContext();
+        VideoGroup group = mVideo.getGroup();
+        // A section is loaded again, for the videos to show or go. Search and the channel pages have them on their next load.
+        Runnable onChanged = group != null && group.getSection() != null ? () -> BrowsePresenter.instance(context).refresh(false) : null;
+
+        mDialogPresenter.appendSingleButton(
+                UiOptionItem.from(getContext().getString(R.string.exclude_channel_from_hiding),
+                        optionItem -> FilterExclusionSettingsPresenter.instance(context).show(channelId, channelName, onChanged)));
+    }
+
     private void showHideBlockedChannelsSection(BlockedChannelData blockedChannelData) {
         if (blockedChannelData.getChannelCount() == 1) { // show on add first channel
             BrowsePresenter.instance(getContext()).enableSection(MediaGroup.TYPE_BLOCKED_CHANNELS, true);
@@ -1193,6 +1226,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
         mIsBlockChannelEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_BLOCK_CHANNEL);
         mIsReportAiChannelEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_REPORT_AI_CHANNEL);
         mIsHideKeywordsEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_HIDE_KEYWORDS);
+        mIsExcludeChannelFromHidingEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_EXCLUDE_CHANNEL_FROM_HIDING);
         mIsRemoveFromHistoryButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_REMOVE_FROM_HISTORY);
         mIsRemoveFromSubscriptionsButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_REMOVE_FROM_SUBSCRIPTIONS);
         mIsOpenDescriptionButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_OPEN_DESCRIPTION);
@@ -1230,6 +1264,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
         mMenuMapping.put(MainUIData.MENU_ITEM_BLOCK_CHANNEL, new MenuAction(this::appendBlockChannelButton, false));
         mMenuMapping.put(MainUIData.MENU_ITEM_REPORT_AI_CHANNEL, new MenuAction(this::appendReportAiChannelButton, false));
         mMenuMapping.put(MainUIData.MENU_ITEM_HIDE_KEYWORDS, new MenuAction(this::appendHideKeywordsButton, false));
+        mMenuMapping.put(MainUIData.MENU_ITEM_EXCLUDE_CHANNEL_FROM_HIDING, new MenuAction(this::appendExcludeChannelFromHidingButton, false));
         mMenuMapping.put(MainUIData.MENU_ITEM_MARK_AS_WATCHED, new MenuAction(this::appendMarkAsWatchedButton, false));
         mMenuMapping.put(MainUIData.MENU_ITEM_PLAYLIST_ORDER, new MenuAction(this::appendPlaylistOrderButton, true));
         mMenuMapping.put(MainUIData.MENU_ITEM_ADD_TO_QUEUE, new MenuAction(() -> { appendAddToPlaybackQueueButton(); appendRemoveFromPlaybackQueueButton(); }, false));

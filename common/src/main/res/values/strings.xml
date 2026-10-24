@@ -490,6 +490,9 @@
     <string name="explore_topic_label">Topic</string>
     <string name="sections_all">All</string>
     <string name="channel_pages">Channel pages</string>
+    <string name="exclude_channel_from_hiding">Exclude channel from hiding</string>
+    <string name="exclude_channel_from_hiding_title">Exclude %s from hiding</string>
+    <string name="excluded_channels">Channels excluded from hiding</string>
     <string name="keyword_filter_keywords">Keywords</string>
     <string name="keyword_filter_common">Common keywords</string>
     <string name="keyword_filter_feed_words">Words from a feed</string>
