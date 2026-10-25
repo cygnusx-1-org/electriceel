@@ -11,7 +11,6 @@ import androidx.leanback.app.RowsSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.HeaderItem;
 import androidx.leanback.widget.ListRow;
-import androidx.leanback.widget.ListRowPresenter;
 import androidx.leanback.widget.ObjectAdapter;
 import androidx.leanback.widget.RowPresenter.ViewHolder;
 import androidx.leanback.widget.SpeechRecognitionCallback;
@@ -26,6 +25,7 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.SearchData;
 import com.liskovsoft.smartyoutubetv2.tv.R;
 import com.liskovsoft.smartyoutubetv2.tv.adapter.vineyard.PaginationAdapter;
 import com.liskovsoft.smartyoutubetv2.tv.adapter.vineyard.TagAdapter;
+import com.liskovsoft.smartyoutubetv2.tv.presenter.CardHold;
 import com.liskovsoft.smartyoutubetv2.tv.presenter.CustomListRowPresenter;
 import com.liskovsoft.smartyoutubetv2.tv.presenter.base.OnItemLongPressedListener;
 import com.liskovsoft.smartyoutubetv2.tv.presenter.vineyard.TagPresenter;
@@ -49,7 +49,9 @@ public abstract class SearchTagsFragmentBase extends SearchSupportFragment
     private TagAdapter mSearchTagsAdapter;
     //private ObjectAdapter mItemResultsAdapter;
     private ArrayObjectAdapter mResultsAdapter; // contains tags adapter and results adapter (see attachAdapter method)
-    private ListRowPresenter mResultsPresenter;
+    private CustomListRowPresenter mResultsPresenter;
+    // Shared by the rows and their cards, so all bound together shows together
+    private final CardHold mImageHold = new CardHold();
     private TagPresenter mTagsPresenter;
 
     private boolean mIsStopping;
@@ -62,6 +64,7 @@ public abstract class SearchTagsFragmentBase extends SearchSupportFragment
 
         mProgressBarManager = new ProgressBarManager();
         mResultsPresenter = new CustomListRowPresenter();
+        mResultsPresenter.enableImageHold(mImageHold);
         mResultsPresenter.enableChildRoundedCorners(getMainUIData().isUiTweakEnabled(MainUIData.UI_TWEAK_ROUNDED_CORNERS));
         mResultsAdapter = new ArrayObjectAdapter(mResultsPresenter);
         mTagsPresenter = new TagPresenter();
@@ -105,6 +108,13 @@ public abstract class SearchTagsFragmentBase extends SearchSupportFragment
                 }
                 break;
         }
+    }
+
+    /**
+     * The hold of the rows, for the presenters of their cards (see VideoCardPresenter.enableImageHold)
+     */
+    protected CardHold getImageHold() {
+        return mImageHold;
     }
 
     @Override

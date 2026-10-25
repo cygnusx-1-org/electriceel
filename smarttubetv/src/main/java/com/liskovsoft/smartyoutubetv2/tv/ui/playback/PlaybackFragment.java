@@ -69,6 +69,7 @@ import com.liskovsoft.smartyoutubetv2.common.utils.CompactInfo;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.smartyoutubetv2.tv.R;
 import com.liskovsoft.smartyoutubetv2.tv.adapter.VideoGroupObjectAdapter;
+import com.liskovsoft.smartyoutubetv2.tv.presenter.CardHold;
 import com.liskovsoft.smartyoutubetv2.tv.presenter.CustomListRowPresenter;
 import com.liskovsoft.smartyoutubetv2.tv.presenter.ShortsCardPresenter;
 import com.liskovsoft.smartyoutubetv2.tv.presenter.VideoCardPresenter;
@@ -108,7 +109,7 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
     private SimpleExoPlayer mPlayer;
     private PlaybackPresenter mPlaybackPresenter;
     private ArrayObjectAdapter mRowsAdapter;
-    private ListRowPresenter mRowPresenter;
+    private CustomListRowPresenter mRowPresenter;
     private VideoCardPresenter mCardPresenter;
     private ShortsCardPresenter mShortsPresenter;
     private Map<Integer, VideoGroupObjectAdapter> mVideoGroupAdapters;
@@ -707,6 +708,8 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
     }
 
     private void initPresenters() {
+        // Shared by the rows and their cards, so all bound together shows together
+        CardHold imageHold = new CardHold();
         mRowPresenter = new CustomListRowPresenter() {
             @Override
             protected void onBindRowViewHolder(RowPresenter.ViewHolder holder, Object item) {
@@ -727,10 +730,13 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
                 //}
             }
         };
+        mRowPresenter.enableImageHold(imageHold);
         mRowPresenter.enableChildRoundedCorners(getMainUIData().isUiTweakEnabled(MainUIData.UI_TWEAK_ROUNDED_CORNERS));
 
         mCardPresenter = new VideoCardPresenter();
         mShortsPresenter = new ShortsCardPresenter();
+        mCardPresenter.enableImageHold(imageHold);
+        mShortsPresenter.enableImageHold(imageHold);
     }
 
     private void setupEventListeners() {

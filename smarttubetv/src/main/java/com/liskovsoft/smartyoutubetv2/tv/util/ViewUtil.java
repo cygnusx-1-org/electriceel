@@ -1,5 +1,6 @@
 package com.liskovsoft.smartyoutubetv2.tv.util;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
@@ -15,7 +16,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.core.content.ContextCompat;
+import androidx.leanback.widget.BaseGridView;
 import androidx.leanback.widget.FocusHighlight;
+import androidx.leanback.widget.HorizontalGridView;
 import androidx.leanback.widget.ListRow;
 import androidx.leanback.widget.RowPresenter;
 import androidx.leanback.widget.VerticalGridView;
@@ -174,6 +177,31 @@ public class ViewUtil {
         }
 
         return true;
+    }
+
+    /**
+     * Lays out an item past each end of the grid (a row of a vertical one, a card of a horizontal one), so its cards are bound
+     * and their images loaded before it scrolls in. Leanback lays out only the visible items, with the item prefetch off (see GridLayoutManager).
+     */
+    @SuppressLint("RestrictedApi")
+    public static void preloadNextItem(BaseGridView gridView) {
+        boolean isHorizontal = gridView instanceof HorizontalGridView;
+
+        gridView.addOnLayoutChangeListener((view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+            int itemSize = 0;
+
+            for (int i = 0; i < gridView.getChildCount(); i++) {
+                View child = gridView.getChildAt(i);
+                itemSize = Math.max(itemSize, isHorizontal ? child.getWidth() : child.getHeight());
+            }
+
+            int extraSpace = itemSize + (isHorizontal ? gridView.getHorizontalSpacing() : gridView.getVerticalSpacing());
+
+            if (itemSize > 0 && extraSpace > gridView.getExtraLayoutSpace()) {
+                // Another layout, so not in this one
+                gridView.post(() -> gridView.setExtraLayoutSpace(extraSpace));
+            }
+        });
     }
 
     public static RequestOptions glideOptions() {

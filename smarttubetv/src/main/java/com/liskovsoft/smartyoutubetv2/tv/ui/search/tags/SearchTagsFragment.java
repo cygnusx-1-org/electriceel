@@ -60,6 +60,8 @@ public class SearchTagsFragment extends SearchTagsFragmentBase {
         mSearchPresenter.setView(this);
         mCardPresenter = new VideoCardPresenter();
         mShortsPresenter = new ShortsCardPresenter();
+        mCardPresenter.enableImageHold(getImageHold());
+        mShortsPresenter.enableImageHold(getImageHold());
         mSearchGroupAdapters = new HashMap<>();
         mSearchData = SearchData.instance(getContext());
 

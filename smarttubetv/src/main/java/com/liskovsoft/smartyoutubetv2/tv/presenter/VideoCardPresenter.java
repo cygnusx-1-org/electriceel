@@ -75,7 +75,14 @@ public class VideoCardPresenter extends LongClickPresenter {
      * A new card shows when its image is in, together with the others bound with it (see CardHold)
      */
     public void enableImageHold() {
-        mHold = new CardHold();
+        enableImageHold(new CardHold());
+    }
+
+    /**
+     * Shares the hold with the other presenters of the view (e.g. of the shorts, of the rows), so all their cards bound together show together
+     */
+    public void enableImageHold(CardHold hold) {
+        mHold = hold;
     }
 
     @Override
