@@ -32,6 +32,8 @@ public class AiSListFilterData extends DataSaverBase {
     private static final int MARK_MODE_INDEX = WARNLIST_MARK_INDEX + 1; // one per list, replaces the mark switches
     private static final int REPORT_AS_INDEX = MARK_MODE_INDEX + 2;
     private static final int BLOCK_ON_REPORT_INDEX = REPORT_AS_INDEX + 1;
+    private static final int QUICK_TOGGLE_INDEX = BLOCK_ON_REPORT_INDEX + 1; // one for both lists
+    private static final int QUICK_TOGGLE_SHOWING_INDEX = QUICK_TOGGLE_INDEX + 1; // saved the other way round: a value never set comes back as false
     public static final int MARK_MODE_OFF = 0; // hide, mark only sections are left alone
     public static final int MARK_MODE_MARK_ONLY_SECTIONS = 1; // hide, mark in the mark only sections
     public static final int MARK_MODE_ALL = 2; // mark everywhere, never hide
@@ -142,6 +144,61 @@ public class AiSListFilterData extends DataSaverBase {
 
     public void setBlockOnReportEnabled(boolean enable) {
         setBoolean(BLOCK_ON_REPORT_INDEX, enable);
+    }
+
+    /**
+     * The button on the main screen that turns the hiding of both lists off and on (see QuickTogglePresenter)
+     */
+    public boolean isQuickToggleEnabled() {
+        return getBoolean(QUICK_TOGGLE_INDEX);
+    }
+
+    public void setQuickToggleEnabled(boolean enable) {
+        setBoolean(QUICK_TOGGLE_INDEX, enable);
+    }
+
+    /**
+     * The quick toggle is on: the listed videos are hidden, as the lists are set (while it's enabled).
+     * Off, they're marked instead where they'd be hidden (see AiSListManager).
+     */
+    public boolean isQuickToggleHiding() {
+        return !getBoolean(QUICK_TOGGLE_SHOWING_INDEX);
+    }
+
+    public void setQuickToggleHiding(boolean hide) {
+        setBoolean(QUICK_TOGGLE_SHOWING_INDEX, !hide);
+    }
+
+    /**
+     * The quick toggle is enabled and off: nothing is hidden, the listed videos are marked instead
+     */
+    public boolean isHidingPaused() {
+        return isQuickToggleEnabled() && !isQuickToggleHiding();
+    }
+
+    /**
+     * A list is set to hide its videos from a section, whether the quick toggle is on or not
+     */
+    public boolean isSetToHide() {
+        return isSetToHide(LIST_BLOCKLIST) || isSetToHide(LIST_WARNLIST);
+    }
+
+    private boolean isSetToHide(int list) {
+        if (getMarkMode(list) == MARK_MODE_ALL) {
+            return false;
+        }
+
+        if (isEverythingEnabled(list)) {
+            return true;
+        }
+
+        for (int section = 0; section < SECTION_COUNT; section++) {
+            if (!isMarkOnly(section) && isSectionChecked(list, section)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

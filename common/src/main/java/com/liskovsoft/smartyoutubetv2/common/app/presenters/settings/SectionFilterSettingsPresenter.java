@@ -26,7 +26,7 @@ import java.util.Map.Entry;
 
 /**
  * A card of the Content Filtering settings that shows, marks or hides a filter's videos, where, the color of the label,
- * and the channels excluded from the hiding
+ * the channels excluded from the hiding and the quick toggle of the hiding
  * (e.g. Collaborations, Watch later, Shows, Streamed or Live, Top channels you watch, Explore more topics)
  */
 public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
@@ -43,10 +43,11 @@ public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
     private final int mSectionsResId;
     private final boolean mHasPageSections; // also in search and on channel pages
     private final int mExclusionFilter; // the FilterExclusionData.FILTER_* channels are excluded from, or 0
+    private final boolean mHasQuickToggle; // the button on the main screen turns the hiding off and on (see QuickTogglePresenter)
 
     private SectionFilterSettingsPresenter(Context context, SectionFilterData data, int titleResId,
                                            int showResId, int markResId, int markDescResId, int hideResId, int sectionsResId,
-                                           boolean hasPageSections, int exclusionFilter) {
+                                           boolean hasPageSections, int exclusionFilter, boolean hasQuickToggle) {
         super(context);
         mData = data;
         mSidebarService = SidebarService.instance(context);
@@ -60,61 +61,63 @@ public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
         mSectionsResId = sectionsResId;
         mHasPageSections = hasPageSections;
         mExclusionFilter = exclusionFilter;
+        mHasQuickToggle = hasQuickToggle;
     }
 
     public static SectionFilterSettingsPresenter collaborations(Context context) {
         return new SectionFilterSettingsPresenter(context, CollaborationsData.instance(context), R.string.collaborations,
                 R.string.collaborations_show, R.string.collaborations_mark, R.string.collaborations_mark_desc, R.string.collaborations_hide,
-                R.string.collaborations_sections, true, FilterExclusionData.FILTER_COLLABORATIONS);
+                R.string.collaborations_sections, true, FilterExclusionData.FILTER_COLLABORATIONS, true);
     }
 
     public static SectionFilterSettingsPresenter watchLater(Context context) {
         return new SectionFilterSettingsPresenter(context, WatchLaterData.instance(context), R.string.watch_later,
                 R.string.watch_later_show, R.string.watch_later_mark, R.string.watch_later_mark_desc, R.string.watch_later_hide,
-                R.string.watch_later_sections, true, FilterExclusionData.FILTER_WATCH_LATER);
+                R.string.watch_later_sections, true, FilterExclusionData.FILTER_WATCH_LATER, true);
     }
 
     public static SectionFilterSettingsPresenter shows(Context context) {
         return new SectionFilterSettingsPresenter(context, ShowsData.instance(context), R.string.shows,
                 R.string.shows_show, R.string.shows_mark, R.string.shows_mark_desc, R.string.shows_hide,
-                R.string.shows_sections, true, 0);
+                R.string.shows_sections, true, 0, false);
     }
 
     public static SectionFilterSettingsPresenter streamed(Context context) {
         return new SectionFilterSettingsPresenter(context, StreamedData.instance(context), R.string.streamed,
                 R.string.streamed_show, R.string.streamed_mark, R.string.streamed_mark_desc, R.string.streamed_hide,
-                R.string.streamed_sections, true, FilterExclusionData.FILTER_STREAMED);
+                R.string.streamed_sections, true, FilterExclusionData.FILTER_STREAMED, true);
     }
 
     public static SectionFilterSettingsPresenter topChannels(Context context) {
         return new SectionFilterSettingsPresenter(context, TopChannelsData.instance(context), R.string.top_channels,
                 R.string.top_channels_show, R.string.top_channels_mark, R.string.top_channels_mark_desc, R.string.top_channels_hide,
-                R.string.top_channels_sections, false, 0);
+                R.string.top_channels_sections, false, 0, false);
     }
 
     public static SectionFilterSettingsPresenter exploreTopics(Context context) {
         return new SectionFilterSettingsPresenter(context, ExploreTopicsData.instance(context), R.string.explore_topics,
                 R.string.explore_topics_show, R.string.explore_topics_mark, R.string.explore_topics_mark_desc, R.string.explore_topics_hide,
-                R.string.explore_topics_sections, false, 0);
+                R.string.explore_topics_sections, false, 0, false);
     }
 
     public void show() {
         AppDialogPresenter presenter = AppDialogPresenter.instance(getContext());
 
-        OptionItem markMode = appendModeCategory(presenter);
+        OptionItem[] modes = appendModeCategory(presenter);
+        appendQuickToggleSwitch(presenter, modes[SectionFilterData.MODE_HIDE]);
         appendSectionsCategory(presenter);
-        appendMarkColorCategory(presenter, markMode);
+        appendMarkColorCategory(presenter, modes[SectionFilterData.MODE_MARK]);
         appendExcludedChannelsCategory(presenter);
 
         presenter.showDialog(getContext().getString(mTitleResId));
     }
 
     /**
-     * @return the mode that marks videos
+     * @return the modes, by their value (SectionFilterData.MODE_*)
      */
-    private OptionItem appendModeCategory(AppDialogPresenter presenter) {
+    private OptionItem[] appendModeCategory(AppDialogPresenter presenter) {
         List<OptionItem> options = new ArrayList<>();
-        OptionItem markMode = null;
+        OptionItem[] modes = new OptionItem[mModes.length];
 
         for (int[] pair : mModes) {
             String description = pair[1] == SectionFilterData.MODE_MARK ? getContext().getString(mMarkDescResId) : null;
@@ -122,14 +125,33 @@ public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
                     optionItem -> mData.setMode(pair[1]),
                     mData.getMode() == pair[1]);
             options.add(option);
-
-            if (pair[1] == SectionFilterData.MODE_MARK) {
-                markMode = option;
-            }
+            modes[pair[1]] = option;
         }
 
         presenter.appendRadioCategory(getContext().getString(mTitleResId), options);
-        return markMode;
+        return modes;
+    }
+
+    /**
+     * The button on the main screen that turns the hiding off and on, only for a filter that has one. Greyed out while the mode isn't Hide.
+     */
+    private void appendQuickToggleSwitch(AppDialogPresenter presenter, OptionItem hideMode) {
+        if (!mHasQuickToggle) {
+            return;
+        }
+
+        OptionItem quickToggle = UiOptionItem.from(getContext().getString(R.string.quick_toggle),
+                option -> {
+                    if (option.isSelected()) {
+                        // Starts on: the videos are hidden as before
+                        mData.setQuickToggleHiding(true);
+                    }
+
+                    mData.setQuickToggleEnabled(option.isSelected());
+                },
+                mData.isQuickToggleEnabled());
+        quickToggle.setRequired(hideMode);
+        presenter.appendSingleSwitch(quickToggle);
     }
 
     /**

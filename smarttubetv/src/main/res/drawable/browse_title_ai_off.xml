@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- The icon of browse_title_ai_on crossed out: videos of AiSList channels are marked instead. Same size and icon,
+     cut around the slash like browse_title_old_videos_off. The orb tints it. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <group>
+        <!-- Everything but a band along the slash (y = x) -->
+        <clip-path android:pathData="M2.5,0L24,0L24,21.5z M0,2.5L0,24L21.5,24z" />
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M19,9l1.25,-2.75L23,5l-2.75,-1.25L19,1l-1.25,2.75L15,5l2.75,1.25L19,9zM11.5,9.5L9,4 6.5,9.5 1,12l5.5,2.5L9,20l2.5,-5.5L17,12l-5.5,-2.5zM19,15l-1.25,2.75L15,19l2.75,1.25L19,23l1.25,-2.75L23,19l-2.75,-1.25L19,15z" />
+    </group>
+    <path
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="2"
+        android:pathData="M3,3L21,21" />
+</vector>

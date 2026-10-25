@@ -374,6 +374,111 @@ public class AiSListManagerTest {
     }
 
     /**
+     * Off, the quick toggle marks the listed videos where they'd be hidden. A mark only section stays as the lists are set.
+     */
+    @Test
+    public void quickToggleOffMarksInsteadOfHiding() {
+        mFilterData.setHideEnabled(AiSListFilterData.LIST_BLOCKLIST, AiSListFilterData.SECTION_HOME, true);
+        mFilterData.setHideEnabled(AiSListFilterData.LIST_BLOCKLIST, AiSListFilterData.SECTION_HISTORY, true);
+        mFilterData.setQuickToggleEnabled(true);
+        mFilterData.setQuickToggleHiding(false);
+
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME);
+        addVideos(home);
+
+        assertEquals(3, home.getSize());
+        for (Video video : home.getVideos()) {
+            assertEquals(AI_HANDLE.equals(video.channelHandle) ? AiSListFilterData.LIST_BLOCKLIST : -1, video.aiMarkList);
+        }
+        // Marked, not blocked
+        assertTrue(AiSListManager.instance(RuntimeEnvironment.getApplication()).getBlockedChannels().isEmpty());
+
+        // The lists mark nothing in History (mark mode Off), the quick toggle doesn't either
+        VideoGroup history = createGroup(MediaGroup.TYPE_HISTORY);
+        addVideos(history);
+        assertEquals(3, history.getSize());
+        assertFalse(containsMarked(history));
+    }
+
+    @Test
+    public void quickToggleOnHidesAsTheListsAreSet() {
+        mFilterData.setHideEnabled(AiSListFilterData.LIST_BLOCKLIST, AiSListFilterData.SECTION_HOME, true);
+        mFilterData.setQuickToggleEnabled(true);
+
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME);
+        addVideos(home);
+        assertEquals(2, home.getSize());
+        assertFalse(containsHandle(home, AI_HANDLE));
+
+        // Disabled, the quick toggle's state doesn't count
+        mFilterData.setQuickToggleHiding(false);
+        mFilterData.setQuickToggleEnabled(false);
+
+        VideoGroup home2 = createGroup(MediaGroup.TYPE_HOME);
+        addVideos(home2);
+        assertEquals(2, home2.getSize());
+        assertFalse(containsHandle(home2, AI_HANDLE));
+    }
+
+    @Test
+    public void turningTheQuickToggleOffClearsBlockedChannels() {
+        mFilterData.setHideEnabled(AiSListFilterData.LIST_BLOCKLIST, AiSListFilterData.SECTION_HOME, true);
+        mFilterData.setQuickToggleEnabled(true);
+        addVideos(createGroup(MediaGroup.TYPE_HOME));
+        assertEquals(1, AiSListManager.instance(RuntimeEnvironment.getApplication()).getBlockedChannels().size());
+
+        mFilterData.setQuickToggleHiding(false);
+
+        assertTrue(AiSListManager.instance(RuntimeEnvironment.getApplication()).getBlockedChannels().isEmpty());
+    }
+
+    /**
+     * The list marks where it hid, so a channel card there is marked too
+     */
+    @Test
+    public void channelCardIsMarkedWhileTheQuickToggleIsOff() {
+        mFilterData.setHideEnabled(AiSListFilterData.LIST_BLOCKLIST, AiSListFilterData.SECTION_SEARCH, true);
+        mFilterData.setQuickToggleEnabled(true);
+        mFilterData.setQuickToggleHiding(false);
+
+        VideoGroup search = createGroup(MediaGroup.TYPE_SEARCH);
+        search.add(createChannel(AI_HANDLE));
+        search.add(createChannel(HUMAN_HANDLE));
+
+        assertEquals(AiSListFilterData.LIST_BLOCKLIST, search.get(0).aiMarkList);
+        assertEquals(-1, search.get(1).aiMarkList);
+    }
+
+    /**
+     * Where the quick toggle changes what a section shows
+     */
+    @Test
+    public void setToHideWhateverTheQuickToggle() {
+        AiSListManager manager = AiSListManager.instance(RuntimeEnvironment.getApplication());
+
+        assertFalse(manager.isSetToHide(AiSListFilterData.SECTION_HOME));
+
+        mFilterData.setHideEnabled(AiSListFilterData.LIST_WARNLIST, AiSListFilterData.SECTION_HOME, true);
+        assertTrue(manager.isSetToHide(AiSListFilterData.SECTION_HOME));
+        assertFalse(manager.isSetToHide(AiSListFilterData.SECTION_SEARCH));
+
+        mFilterData.setQuickToggleEnabled(true);
+        mFilterData.setQuickToggleHiding(false);
+        assertTrue(manager.isSetToHide(AiSListFilterData.SECTION_HOME));
+
+        // Nothing is hidden from a mark only section
+        mFilterData.setHideEnabled(AiSListFilterData.LIST_WARNLIST, AiSListFilterData.SECTION_HISTORY, true);
+        setMarkMode(AiSListFilterData.MARK_MODE_MARK_ONLY_SECTIONS);
+        assertFalse(manager.isSetToHide(AiSListFilterData.SECTION_HISTORY));
+        assertFalse(manager.isSetToHide(AiSListManager.SECTION_CHANNEL_PAGE));
+        assertFalse(manager.isSetToHide(-1));
+
+        // Nor by a list that marks everywhere
+        setMarkEnabled(true);
+        assertFalse(manager.isSetToHide(AiSListFilterData.SECTION_HOME));
+    }
+
+    /**
      * A playlist or a show opens like a channel, but it isn't one
      */
     @Test
@@ -533,6 +638,8 @@ public class AiSListManagerTest {
     }
 
     private void disableAll() {
+        mFilterData.setQuickToggleEnabled(false);
+        mFilterData.setQuickToggleHiding(true);
         // Toggling the mark mode also clears the collected channels
         setMarkEnabled(true);
         setMarkEnabled(false);

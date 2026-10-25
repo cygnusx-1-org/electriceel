@@ -94,8 +94,8 @@ public class AiSListManager implements OnDataChange {
     private AiSListManager(Context context) {
         mFilterData = AiSListFilterData.instance(context);
         mFilterData.setOnChange(this);
-        mIsBlocklistMarked = isMarkedEverywhere(AiSListFilterData.LIST_BLOCKLIST);
-        mIsWarnlistMarked = isMarkedEverywhere(AiSListFilterData.LIST_WARNLIST);
+        mIsBlocklistMarked = isNeverHidden(AiSListFilterData.LIST_BLOCKLIST);
+        mIsWarnlistMarked = isNeverHidden(AiSListFilterData.LIST_WARNLIST);
         mItemService = YouTubeServiceManager.instance().getMediaItemService();
         mHandleLookup = mItemService::getChannelHandlesObserve;
         mHandlesFile = new File(FileHelpers.getFilesDir(context), HANDLES_FILE);
@@ -123,8 +123,8 @@ public class AiSListManager implements OnDataChange {
 
     @Override
     public void onDataChange() {
-        boolean isBlocklistMarked = isMarkedEverywhere(AiSListFilterData.LIST_BLOCKLIST);
-        boolean isWarnlistMarked = isMarkedEverywhere(AiSListFilterData.LIST_WARNLIST);
+        boolean isBlocklistMarked = isNeverHidden(AiSListFilterData.LIST_BLOCKLIST);
+        boolean isWarnlistMarked = isNeverHidden(AiSListFilterData.LIST_WARNLIST);
 
         if ((isBlocklistMarked && !mIsBlocklistMarked) || (isWarnlistMarked && !mIsWarnlistMarked)) {
             // Marked channels aren't blocked
@@ -147,7 +147,7 @@ public class AiSListManager implements OnDataChange {
     public boolean isHidden(String handle, int section) {
         int list = getListedIn(handle, section);
 
-        return list != -1 && !isMarkOnly(section) && !isMarkedEverywhere(list);
+        return list != -1 && !isMarkOnly(section) && !isNeverHidden(list);
     }
 
     /**
@@ -177,20 +177,34 @@ public class AiSListManager implements OnDataChange {
     public int getChannelMarkedList(String handle, int section) {
         int list = getListedIn(handle, section);
 
-        return list != -1 && mFilterData.getMarkMode(list) != AiSListFilterData.MARK_MODE_OFF ? list : -1;
+        if (list == -1) {
+            return -1;
+        }
+
+        // While the quick toggle is off, the list marks where it hid
+        return mFilterData.getMarkMode(list) != AiSListFilterData.MARK_MODE_OFF || mFilterData.isHidingPaused() ? list : -1;
     }
 
     /**
-     * The list's videos are marked in the section instead of hidden (or left alone in a mark only section)
+     * The list's videos are marked in the section instead of hidden (or left alone in a mark only section).
+     * While the quick toggle is off, they're marked where they'd be hidden. A mark only section stays as the list is set.
      */
     private boolean isMarkedIn(int list, int section) {
         int mode = mFilterData.getMarkMode(list);
 
-        return mode == AiSListFilterData.MARK_MODE_ALL || (mode == AiSListFilterData.MARK_MODE_MARK_ONLY_SECTIONS && isMarkOnly(section));
+        return mode == AiSListFilterData.MARK_MODE_ALL || (mode == AiSListFilterData.MARK_MODE_MARK_ONLY_SECTIONS && isMarkOnly(section))
+                || (mFilterData.isHidingPaused() && !isMarkOnly(section));
     }
 
     private boolean isMarkedEverywhere(int list) {
         return mFilterData.getMarkMode(list) == AiSListFilterData.MARK_MODE_ALL;
+    }
+
+    /**
+     * The list's videos are hidden nowhere: it marks them everywhere, or the quick toggle is off
+     */
+    private boolean isNeverHidden(int list) {
+        return isMarkedEverywhere(list) || mFilterData.isHidingPaused();
     }
 
     /**
@@ -312,6 +326,19 @@ public class AiSListManager implements OnDataChange {
      */
     public boolean isSectionEnabled(int section) {
         return isListEnabled(AiSListFilterData.LIST_BLOCKLIST, section) || isListEnabled(AiSListFilterData.LIST_WARNLIST, section);
+    }
+
+    /**
+     * A list is set to hide its videos from the section, whether the quick toggle is on or not
+     * @param section one of AiSListFilterData.SECTION_* or -1
+     */
+    public boolean isSetToHide(int section) {
+        if (isMarkOnly(section)) {
+            return false;
+        }
+
+        return (isListEnabled(AiSListFilterData.LIST_BLOCKLIST, section) && !isMarkedEverywhere(AiSListFilterData.LIST_BLOCKLIST))
+                || (isListEnabled(AiSListFilterData.LIST_WARNLIST, section) && !isMarkedEverywhere(AiSListFilterData.LIST_WARNLIST));
     }
 
     /**

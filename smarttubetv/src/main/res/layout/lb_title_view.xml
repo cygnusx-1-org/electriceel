@@ -50,7 +50,7 @@
             app:searchOrbIconColor="@color/orb_icon_color"
             android:visibility="gone" />
 
-        <!-- Quick toggle of Hide videos older than and of the Shorts (Content Filtering settings), see QuickTogglePresenter -->
+        <!-- Quick toggle of Hide videos older than, the Shorts and the hiding of Hide or mark content and AiSList (Content Filtering settings), see QuickTogglePresenter -->
         <androidx.leanback.widget.SearchOrbView
             android:id="@+id/quick_toggle_orb"
             android:layout_width="wrap_content"

@@ -31,10 +31,14 @@ import com.liskovsoft.smartyoutubetv2.common.app.views.ViewManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager.AccountChangeListener;
 import com.liskovsoft.smartyoutubetv2.common.prefs.common.DataChangeBase.OnDataChange;
+import com.liskovsoft.smartyoutubetv2.common.prefs.AiSListFilterData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.CollaborationsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.HideContentData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.OldVideosData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.StreamedData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.WatchLaterData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.smartyoutubetv2.tv.R;
 import com.liskovsoft.smartyoutubetv2.tv.ui.mod.leanback.playerglue.tooltips.TooltipCompatHandler;
@@ -199,6 +203,10 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
 
         OldVideosData.instance(getContext()).setOnChange(mOnQuickToggleChange);
         HideContentData.instance(getContext()).setOnChange(mOnQuickToggleChange);
+        WatchLaterData.instance(getContext()).setOnChange(mOnQuickToggleChange);
+        AiSListFilterData.instance(getContext()).setOnChange(mOnQuickToggleChange);
+        StreamedData.instance(getContext()).setOnChange(mOnQuickToggleChange);
+        CollaborationsData.instance(getContext()).setOnChange(mOnQuickToggleChange);
 
         mInitDone = true;
     }
@@ -281,7 +289,7 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
 
         if (hasWindowFocus) { // pip window closed, dialog closed
             applyPipParameters();
-            // The Shorts quick toggle is changed in the settings and in the panel of the button
+            // The quick toggles are changed in the settings and in the panel of the button
             updateQuickToggle();
         }
     }
@@ -352,7 +360,7 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
     }
 
     /**
-     * Same orb in all the states, only the icon changes: the state of its filter, or the panel with both
+     * Same orb in all the states, only the icon changes: the state of its filter, or the panel with them all
      */
     private void updateQuickToggleIcon() {
         if (!mIsQuickToggleViewEnabled) {
@@ -360,22 +368,40 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
         }
 
         QuickTogglePresenter presenter = QuickTogglePresenter.instance(getContext());
+        int toggle = presenter.getSingleToggle();
         int iconResId;
         String tooltip;
 
-        if (presenter.isOldVideosEnabled() && presenter.isShortsEnabled()) {
+        if (toggle == -1) {
             iconResId = R.drawable.browse_title_quick_toggles;
             tooltip = getContext().getString(R.string.quick_toggles);
-        } else if (presenter.isOldVideosEnabled()) {
-            iconResId = OldVideosData.instance(getContext()).isEnabled() ? R.drawable.browse_title_old_videos_on : R.drawable.browse_title_old_videos_off;
-            tooltip = presenter.getOldVideosState();
         } else {
-            iconResId = presenter.isShortsHiding() ? R.drawable.browse_title_shorts_on : R.drawable.browse_title_shorts_off;
-            tooltip = presenter.getShortsState();
+            iconResId = getQuickToggleIcon(toggle, presenter.isHiding(toggle));
+            tooltip = presenter.getState(toggle);
         }
 
         mQuickToggleView.setOrbIcon(ContextCompat.getDrawable(getContext(), iconResId));
         TooltipCompatHandler.setTooltipText(mQuickToggleView, tooltip);
+    }
+
+    /**
+     * The icon of the filter, crossed out while its videos are shown
+     */
+    private static int getQuickToggleIcon(int toggle, boolean isHiding) {
+        switch (toggle) {
+            case QuickTogglePresenter.TOGGLE_OLD_VIDEOS:
+                return isHiding ? R.drawable.browse_title_old_videos_on : R.drawable.browse_title_old_videos_off;
+            case QuickTogglePresenter.TOGGLE_SHORTS:
+                return isHiding ? R.drawable.browse_title_shorts_on : R.drawable.browse_title_shorts_off;
+            case QuickTogglePresenter.TOGGLE_WATCH_LATER:
+                return isHiding ? R.drawable.browse_title_watch_later_on : R.drawable.browse_title_watch_later_off;
+            case QuickTogglePresenter.TOGGLE_AI:
+                return isHiding ? R.drawable.browse_title_ai_on : R.drawable.browse_title_ai_off;
+            case QuickTogglePresenter.TOGGLE_STREAMED:
+                return isHiding ? R.drawable.browse_title_streamed_on : R.drawable.browse_title_streamed_off;
+            default:
+                return isHiding ? R.drawable.browse_title_collaborations_on : R.drawable.browse_title_collaborations_off;
+        }
     }
 
     private void updateLanguageIcon() {

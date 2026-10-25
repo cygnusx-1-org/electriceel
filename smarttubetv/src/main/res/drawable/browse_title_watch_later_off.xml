@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- The icon of browse_title_watch_later_on crossed out: Watch later videos are marked instead. Same size and icon,
+     cut around the slash like browse_title_old_videos_off. The orb tints it. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <group>
+        <!-- Everything but a band along the slash (y = x) -->
+        <clip-path android:pathData="M2.5,0L24,0L24,21.5z M0,2.5L0,24L21.5,24z" />
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M11.99,2C6.47,2 2,6.48 2,12s4.47,10 9.99,10C17.52,22 22,17.52 22,12S17.52,2 11.99,2zM15.29,16.71L11,12.41V7h2v4.59l3.71,3.71L15.29,16.71z" />
+    </group>
+    <path
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="2"
+        android:pathData="M3,3L21,21" />
+</vector>

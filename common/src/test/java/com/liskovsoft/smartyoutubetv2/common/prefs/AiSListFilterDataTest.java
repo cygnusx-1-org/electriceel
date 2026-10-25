@@ -71,6 +71,80 @@ public class AiSListFilterDataTest {
         assertTrue(getData().isBlockOnReportEnabled());
     }
 
+    @Test
+    public void quickToggleIsDisabledAndOnByDefault() {
+        AiSListFilterData data = getData();
+
+        assertFalse(data.isQuickToggleEnabled());
+        assertTrue(data.isQuickToggleHiding());
+        assertFalse(data.isHidingPaused());
+
+        // Off counts only while it's enabled
+        data.setQuickToggleHiding(false);
+        assertFalse(data.isHidingPaused());
+
+        data.setQuickToggleEnabled(true);
+        assertTrue(data.isHidingPaused());
+    }
+
+    @Test
+    public void quickToggleSurvivesRestart() {
+        getData().setQuickToggleEnabled(true);
+        getData().setQuickToggleHiding(false);
+        ShadowLooper.shadowMainLooper().idle(); // saved right away
+        AiSListFilterData.resetInstanceForTesting();
+
+        assertTrue(getData().isQuickToggleEnabled());
+        assertFalse(getData().isQuickToggleHiding());
+    }
+
+    /**
+     * Saved before the quick toggle came, or with only the switch set: it's on
+     */
+    @Test
+    public void quickToggleIsOnUntilTurnedOff() {
+        getData().setBlockOnReportEnabled(true);
+        ShadowLooper.shadowMainLooper().idle();
+        AiSListFilterData.resetInstanceForTesting();
+
+        assertFalse(getData().isQuickToggleEnabled());
+        assertTrue(getData().isQuickToggleHiding());
+
+        getData().setQuickToggleEnabled(true);
+        ShadowLooper.shadowMainLooper().idle();
+        AiSListFilterData.resetInstanceForTesting();
+
+        assertTrue(getData().isQuickToggleEnabled());
+        assertTrue(getData().isQuickToggleHiding());
+    }
+
+    @Test
+    public void setToHideNeedsAListThatHidesSomewhere() {
+        AiSListFilterData data = getData();
+
+        assertFalse(data.isSetToHide());
+
+        // Only marks in the mark only sections
+        data.setHideEnabled(AiSListFilterData.LIST_BLOCKLIST, AiSListFilterData.SECTION_HISTORY, true);
+        data.setHideEnabled(AiSListFilterData.LIST_BLOCKLIST, AiSListFilterData.SECTION_CHANNELS, true);
+        assertFalse(data.isSetToHide());
+
+        data.setHideEnabled(AiSListFilterData.LIST_BLOCKLIST, AiSListFilterData.SECTION_SUGGESTIONS, true);
+        assertTrue(data.isSetToHide());
+
+        // Marks everywhere
+        data.setMarkMode(AiSListFilterData.LIST_BLOCKLIST, AiSListFilterData.MARK_MODE_ALL);
+        assertFalse(data.isSetToHide());
+
+        data.setEverythingEnabled(AiSListFilterData.LIST_WARNLIST, true);
+        assertTrue(data.isSetToHide());
+
+        // The quick toggle doesn't change what the lists are set to
+        data.setQuickToggleEnabled(true);
+        data.setQuickToggleHiding(false);
+        assertTrue(data.isSetToHide());
+    }
+
     private static void clearSaved() {
         TestAccounts.clearSaved(getPrefs(), AiSListFilterData.class.getSimpleName());
         AiSListFilterData.resetInstanceForTesting();

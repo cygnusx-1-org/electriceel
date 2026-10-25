@@ -60,6 +60,7 @@ public class AiSListSettingsPresenter extends BasePresenter<Void> {
 
         appendListMenu(settingsPresenter, AiSListFilterData.LIST_BLOCKLIST, R.string.aislist_blocklist);
         appendListMenu(settingsPresenter, AiSListFilterData.LIST_WARNLIST, R.string.aislist_warnlist);
+        appendQuickToggleSwitch(settingsPresenter);
         appendReportsMenu(settingsPresenter);
         appendStatus(settingsPresenter);
         appendLinks(settingsPresenter);
@@ -77,6 +78,23 @@ public class AiSListSettingsPresenter extends BasePresenter<Void> {
     private void appendListMenu(AppDialogPresenter settingsPresenter, int list, int titleResId) {
         String title = getContext().getString(titleResId);
         settingsPresenter.appendSingleButton(UiOptionItem.from(title, option -> showListMenu(list, title)));
+    }
+
+    /**
+     * The button on the main screen that turns the hiding of both lists off and on (see QuickTogglePresenter).
+     * Shown there while a list is set to hide.
+     */
+    private void appendQuickToggleSwitch(AppDialogPresenter settingsPresenter) {
+        settingsPresenter.appendSingleSwitch(UiOptionItem.from(getContext().getString(R.string.quick_toggle),
+                option -> {
+                    if (option.isSelected()) {
+                        // Starts on: the videos are hidden as before
+                        mFilterData.setQuickToggleHiding(true);
+                    }
+
+                    mFilterData.setQuickToggleEnabled(option.isSelected());
+                },
+                mFilterData.isQuickToggleEnabled()));
     }
 
     private void showListMenu(int list, String title) {

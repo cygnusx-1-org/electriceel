@@ -270,6 +270,86 @@ public class CollaborationsDataTest {
         assertEquals(CollaborationsData.MODE_SHOW, data.getMode());
     }
 
+    /**
+     * Off, the quick toggle marks the videos the filter hides. It counts only while it's enabled.
+     */
+    @Test
+    public void quickToggleOffMarksInsteadOfHiding() {
+        CollaborationsData data = getData();
+
+        data.setMode(CollaborationsData.MODE_HIDE);
+
+        assertFalse(data.isQuickToggleEnabled());
+        assertTrue(data.isQuickToggleHiding());
+
+        data.setQuickToggleHiding(false);
+        assertTrue(data.isHidingEnabled(MediaGroup.TYPE_HOME));
+        assertFalse(data.isHidingPaused());
+
+        data.setQuickToggleEnabled(true);
+        assertTrue(data.isHidingPaused());
+        assertTrue(data.isEnabled(MediaGroup.TYPE_HOME));
+        assertFalse(data.isHidingEnabled(MediaGroup.TYPE_HOME));
+        assertTrue(data.isMarkingEnabled(MediaGroup.TYPE_HOME));
+        // What the filter is set to
+        assertTrue(data.isSetToHide(MediaGroup.TYPE_HOME));
+
+        data.setQuickToggleHiding(true);
+        assertTrue(data.isHidingEnabled(MediaGroup.TYPE_HOME));
+        assertFalse(data.isMarkingEnabled(MediaGroup.TYPE_HOME));
+    }
+
+    @Test
+    public void setToHideOnlyInPickedSectionsOtherThanHistory() {
+        CollaborationsData data = getData();
+
+        assertFalse(data.isSetToHide(MediaGroup.TYPE_HOME)); // marked by default
+
+        data.setMode(CollaborationsData.MODE_HIDE);
+        data.setSectionEnabled(MediaGroup.TYPE_GAMING, false);
+
+        assertTrue(data.isSetToHide(MediaGroup.TYPE_HOME));
+        assertFalse(data.isSetToHide(MediaGroup.TYPE_GAMING));
+        assertFalse(data.isSetToHide(MediaGroup.TYPE_HISTORY));
+    }
+
+    @Test
+    public void quickToggleSurvivesRestart() {
+        CollaborationsData data = getData();
+
+        data.setQuickToggleEnabled(true);
+        data.setQuickToggleHiding(false);
+        ShadowLooper.shadowMainLooper().idle(); // saved right away
+        CollaborationsData.resetInstanceForTesting();
+
+        CollaborationsData restored = getData();
+
+        assertTrue(restored.isQuickToggleEnabled());
+        assertFalse(restored.isQuickToggleHiding());
+    }
+
+    /**
+     * Saved before the quick toggle came, or with only the switch set: it's on
+     */
+    @Test
+    public void quickToggleIsOnUntilTurnedOff() {
+        CollaborationsData data = getData();
+
+        data.setMarkColor(AiSListFilterData.MARK_COLOR_RED);
+        ShadowLooper.shadowMainLooper().idle();
+        CollaborationsData.resetInstanceForTesting();
+
+        assertFalse(getData().isQuickToggleEnabled());
+        assertTrue(getData().isQuickToggleHiding());
+
+        getData().setQuickToggleEnabled(true);
+        ShadowLooper.shadowMainLooper().idle();
+        CollaborationsData.resetInstanceForTesting();
+
+        assertTrue(getData().isQuickToggleEnabled());
+        assertTrue(getData().isQuickToggleHiding());
+    }
+
     private static void clearSaved() {
         TestAccounts.clearSaved(getPrefs(), CollaborationsData.class.getSimpleName());
         CollaborationsData.resetInstanceForTesting();

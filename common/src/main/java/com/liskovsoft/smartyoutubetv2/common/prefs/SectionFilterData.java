@@ -20,6 +20,8 @@ public abstract class SectionFilterData extends DataSaverBase {
     private static final int MODE_INDEX = 0;
     private static final int SECTIONS_INDEX = 1; // a bit per section, by the section id (MediaGroup.TYPE_*)
     private static final int MARK_COLOR_INDEX = 2;
+    private static final int QUICK_TOGGLE_INDEX = 3;
+    private static final int QUICK_TOGGLE_SHOWING_INDEX = 4; // saved the other way round: a value never set comes back as false
     private static final int MAX_SECTION_ID = 30; // the bits of an int. Pinned items use hash ids, they're never filtered.
     private static final int DEFAULT_SECTIONS = Integer.MAX_VALUE; // every section (bits 0-30), the ones added later too
 
@@ -114,6 +116,35 @@ public abstract class SectionFilterData extends DataSaverBase {
     }
 
     /**
+     * The button on the main screen that turns the hiding off and on (see QuickTogglePresenter)
+     */
+    public boolean isQuickToggleEnabled() {
+        return getBoolean(QUICK_TOGGLE_INDEX);
+    }
+
+    public void setQuickToggleEnabled(boolean enable) {
+        setBoolean(QUICK_TOGGLE_INDEX, enable);
+    }
+
+    /**
+     * The quick toggle is on: the videos are hidden, as the filter is set (while it's enabled). Off, they're marked instead.
+     */
+    public boolean isQuickToggleHiding() {
+        return !getBoolean(QUICK_TOGGLE_SHOWING_INDEX);
+    }
+
+    public void setQuickToggleHiding(boolean hide) {
+        setBoolean(QUICK_TOGGLE_SHOWING_INDEX, !hide);
+    }
+
+    /**
+     * The quick toggle is enabled and off: nothing is hidden, the videos are marked instead
+     */
+    public boolean isHidingPaused() {
+        return isQuickToggleEnabled() && !isQuickToggleHiding();
+    }
+
+    /**
      * The filter's videos in the section are found now, to be marked or hidden
      */
     public boolean isEnabled(int sectionId) {
@@ -121,10 +152,18 @@ public abstract class SectionFilterData extends DataSaverBase {
     }
 
     /**
-     * Nothing is hidden from History: the videos are marked there instead
+     * The filter is set to hide its videos in the section, whether its quick toggle is on or not.
+     * Nothing is hidden from History: the videos are marked there instead.
+     */
+    public boolean isSetToHide(int sectionId) {
+        return getMode() == MODE_HIDE && sectionId != MediaGroup.TYPE_HISTORY && isSectionEnabled(sectionId);
+    }
+
+    /**
+     * The videos are hidden from the section. They're marked instead while the quick toggle is off.
      */
     public boolean isHidingEnabled(int sectionId) {
-        return getMode() == MODE_HIDE && sectionId != MediaGroup.TYPE_HISTORY && isSectionEnabled(sectionId);
+        return isSetToHide(sectionId) && !isHidingPaused();
     }
 
     public boolean isMarkingEnabled(int sectionId) {
