@@ -16,14 +16,17 @@ Electric Eel is a fork of [SmartTube](https://github.com/yuliskov/SmartTube), an
 - Ability to move local playlists to YouTube
 - Ability to autoplay music videos without autoplaying non-music videos
 - Frame by frame forward playback support
+- Quick toggles
+- Ability to exclude channels from individual hidden video types
+- Ability to mute words censored in YouTube auto-captions
+- Ability to re-order YouTube clients
+- Ability to hide or mark various video types like Collabs, Watch later, Streamed, Live, etc 
+- Ability to import and export playlists
 - Filtering of channels via [AiSList](https://github.com/Override92/AiSList)'s lists
 - Hide shorts checkboxes for Sports, Live, "My videos", Gaming, News and Music
 - Hide videos older than setting with period, sections and quick toggle
 - Videos once marked as "Not interested" disappear in every row
 - "Don't recommend channel" and "Not interested" are available in Gaming, Music, Sports, etc now
-- Marking videos as Collaborations and Watch later by default, but can also hide them
-- Shorts quick toggle
-- Quick toggles button next to the account button
 - Settings are per account
 - Apply to copy all settings from one account to another
 - Refactored Settings to use more cards
@@ -31,6 +34,7 @@ Electric Eel is a fork of [SmartTube](https://github.com/yuliskov/SmartTube), an
 - Full-screen word picker for keywords and a Hide words item to the context menu
 - Blocking videos in different sections by category
 - "My videos" includes a rows section with a Shorts row after the videos
+- View release notes with rendered markdown and images in app
 
 ### SmartTub Features
 - Clean interface 
