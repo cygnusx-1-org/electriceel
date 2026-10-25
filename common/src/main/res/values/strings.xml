@@ -202,6 +202,10 @@
     <string name="settings_remember_options">Remember options</string>
     <string name="settings_voice_engine">Voice engine</string>
     <string name="settings_updates">Updates</string>
+    <string name="release_notes">Release notes</string>
+    <string name="release_notes_none">No releases yet</string>
+    <string name="release_notes_failed">Couldn\'t load the release notes: %s</string>
+    <string name="release_notes_gone">The release notes closed: the WebView stopped</string>
     <string name="settings_debugging">Debugging</string>
     <string name="submit_data">Submit data</string>
     <string name="submit_data_desc">Sends app settings, device info and the recorded player failures to %s</string>

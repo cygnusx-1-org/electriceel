@@ -32,6 +32,7 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
     private int mId;
     private CharSequence mTitlePrefix;
     private boolean mIsNestedTitlesEnabled;
+    private OptionItem mFocusedItem;
 
     private CharSequence mBackupTitle;
     private List<OptionCategory> mBackupCategories;
@@ -41,6 +42,7 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
     private boolean mBackupIsExpandable;
     private CharSequence mBackupTitlePrefix;
     private boolean mBackupIsNestedTitlesEnabled;
+    private OptionItem mBackupFocusedItem;
 
     public AppDialogPresenter(Context context) {
         super(context);
@@ -73,6 +75,7 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
         mHandler.removeCallbacks(mCloseDialog);
         resetData();
         mBackupCategories = null; // Mem leak fix (UiOption callback holds PlaybackActivity)
+        mBackupFocusedItem = null; // Same
         mOnStart.clear();
         mOnFinish.clear();
     }
@@ -89,6 +92,7 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
         mBackupIsOverlay = mIsOverlay;
         mBackupTitlePrefix = mTitlePrefix;
         mBackupIsNestedTitlesEnabled = mIsNestedTitlesEnabled;
+        mBackupFocusedItem = mFocusedItem;
     }
 
     private void resetData() {
@@ -98,6 +102,7 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
         mIsOverlay = false;
         mId = 0;
         mTitle = null;
+        mFocusedItem = null;
     }
 
     @Override
@@ -157,6 +162,21 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
      */
     public void enableNestedTitles(boolean enable) {
         mIsNestedTitlesEnabled = enable;
+    }
+
+    /**
+     * The row of the next dialog that has the focus when it opens, instead of the first one: e.g. the one opened last,
+     * when the dialog is opened again after it. Of the items appended to it.
+     */
+    public void setFocusedItem(OptionItem item) {
+        mFocusedItem = item;
+    }
+
+    /**
+     * Of the dialog shown: null for the first row
+     */
+    public OptionItem getFocusedItem() {
+        return mBackupFocusedItem;
     }
 
     /**

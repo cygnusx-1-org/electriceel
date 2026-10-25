@@ -20,6 +20,7 @@ import androidx.preference.PreferenceScreen;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionCategory;
+import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.AppDialogView;
 import com.liskovsoft.smartyoutubetv2.common.misc.MotherActivity;
@@ -129,6 +130,7 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
         fragment.setCategories(categories);
         fragment.setTitle(title);
         fragment.enableTransparent(mIsTransparent);
+        fragment.setFocusedItem(mPresenter.getFocusedItem());
         return fragment;
     }
 
@@ -365,6 +367,7 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
         private AppPreferenceManager mManager;
         private CharSequence mTitle;
         private boolean mIsTransparent;
+        private OptionItem mFocusedItem;
 
         @Override
         public void onCreatePreferences(Bundle bundle, String s) {
@@ -402,12 +405,24 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
         }
 
         private void addPreferences(PreferenceScreen screen) {
+            Preference focused = null;
+
             if (mCategories != null) {
                 for (OptionCategory category : mCategories) {
                     if (category.options != null) {
-                        screen.addPreference(mManager.createPreference(category));
+                        Preference preference = mManager.createPreference(category);
+                        screen.addPreference(preference);
+
+                        if (focused == null && mFocusedItem != null && category.options.contains(mFocusedItem)) {
+                            focused = preference;
+                        }
                     }
                 }
+            }
+
+            // Selected once the list is there (see AppDialogPresenter#setFocusedItem)
+            if (focused != null) {
+                scrollToPreference(focused);
             }
         }
 
@@ -433,6 +448,13 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
 
         public void enableTransparent(boolean enable) {
             mIsTransparent = enable;
+        }
+
+        /**
+         * The row that has the focus when the list opens, null for the first one
+         */
+        public void setFocusedItem(OptionItem item) {
+            mFocusedItem = item;
         }
     }
 }

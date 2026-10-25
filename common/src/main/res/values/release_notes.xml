@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Settings → Updates → Release notes lists these (see GitHubReleases) -->
+    <string name="release_notes_url" translatable="false">https://api.github.com/repos/cygnusx-1-org/electriceel/releases?per_page=10</string>
+</resources>
