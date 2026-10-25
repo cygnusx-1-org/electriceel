@@ -17,6 +17,8 @@
   <string name="action_signin">შესვლა</string>
   <string name="title_video_formats">ვიდეოფორმატი</string>
   <string name="title_audio_formats">აუდიოფორმატი</string>
+  <string name="audio_format_default">ნაგულისხმევი</string>
+  <string name="audio_formats">ფორმატები</string>
   <string name="subtitle_category_title">სუბტიტრები</string>
   <string name="playback_queue_category_title">ჩვენების რიგი</string>
   <string name="video_max_quality">ავტო (მაქს. ხარისხი)</string>

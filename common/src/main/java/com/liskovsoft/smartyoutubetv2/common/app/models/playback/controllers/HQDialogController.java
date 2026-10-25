@@ -8,6 +8,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.track.MediaTrack;
 import com.liskovsoft.smartyoutubetv2.common.utils.AppDialogUtil;
 
 import java.util.HashSet;
@@ -117,6 +118,14 @@ public class HQDialogController extends BasePlayerController {
             } else {
                 getPlayerData().setTempVideoFormat(formatItem);
             }
+        } else if (formatItem.getType() == FormatItem.TYPE_AUDIO) {
+            // For this video only. The audio format of the other videos is in the settings.
+            getPlayerData().setTempAudioFormat(formatItem);
+
+            // A track picked: the sound is on
+            if (!formatItem.isDefault() && getPlayerData().isSoundOff()) {
+                getPlayerData().setSoundOff(false);
+            }
         } else {
             getPlayerData().setFormat(formatItem);
         }
@@ -151,7 +160,17 @@ public class HQDialogController extends BasePlayerController {
             return;
         }
         addCategoryInt(AppDialogUtil.createAudioLanguageCategory(getContext(),
-                () -> getPlayer().restartEngine()));
+                () -> {
+                    // The format picked for this video goes on in the language chosen
+                    MediaTrack track = FormatItem.toMediaTrack(getPlayerData().getTempAudioFormat());
+                    if (track != null) {
+                        track.isSaved = true;
+                    }
+
+                    if (getPlayer() != null) {
+                        getPlayer().restartEngine();
+                    }
+                }));
     }
 
     private void addNetworkEngine() {

@@ -18,6 +18,8 @@
     <string name="action_signin">PRIJAVA</string>
     <string name="title_video_formats">Video formati</string>
     <string name="title_audio_formats">Zvučni formati</string>
+    <string name="audio_format_default">Zadano</string>
+    <string name="audio_formats">Formati</string>
     <string name="subtitle_category_title">Podnaslovi</string>
     <string name="playback_queue_category_title">Red izvođenja</string>
     <string name="video_max_quality">Automatski (najveća kvaliteta)</string>

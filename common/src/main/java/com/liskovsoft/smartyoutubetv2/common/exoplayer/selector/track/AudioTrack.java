@@ -37,8 +37,6 @@ public class AudioTrack extends MediaTrack {
 
         int result = -1;
 
-        String id1 = format.id;
-        String id2 = track2.format.id;
         int bitrate1 = format.bitrate;
         int bitrate2 = track2.format.bitrate;
 
@@ -47,9 +45,10 @@ public class AudioTrack extends MediaTrack {
         String language2 = track2.format.language;
         boolean sameLanguage = sameLanguage(language1, language2);
 
-        // Copies of the same itag (original, DRC, voice boost) share the id
-        if (Helpers.equals(id1, id2) && TrackSelectorUtil.isSameVariant(format, track2.format)) {
-            result = 0;
+        // Copies of the same itag (original, DRC, voice boost) share the id.
+        // Another copy is in bounds too, whatever its bitrate: the video may not have the copy chosen.
+        if (TrackSelectorUtil.isSameITag(format, track2.format)) {
+            result = TrackSelectorUtil.isSameVariant(format, track2.format) ? 0 : 1;
         } else if (bitrate1 != -1 && bitrateLessOrEquals(bitrate2, bitrate1)) {
             result = 1;
         } else if (bitrate1 == -1 && (TrackSelectorUtil.is51Audio(format) || !TrackSelectorUtil.is51Audio(track2.format))) {

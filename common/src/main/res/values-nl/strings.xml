@@ -18,6 +18,8 @@
   <string name="action_signin">INLOGGEN</string>
   <string name="title_video_formats">Videokwaliteit</string>
   <string name="title_audio_formats">Audiokwaliteit</string>
+  <string name="audio_format_default">Standaard</string>
+  <string name="audio_formats">Formaten</string>
   <string name="subtitle_category_title">Ondertiteling</string>
   <string name="playback_queue_category_title">Afspeelwachtrij</string>
   <string name="video_max_quality">Automatisch (max. kwaliteit)</string>

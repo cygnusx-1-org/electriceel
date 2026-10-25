@@ -18,6 +18,8 @@
   <string name="action_signin">MASUK</string>
   <string name="title_video_formats">Format video</string>
   <string name="title_audio_formats">Format audio</string>
+  <string name="audio_format_default">Bawaan</string>
+  <string name="audio_formats">Format</string>
   <string name="subtitle_category_title">Subtitle</string>
   <string name="playback_queue_category_title">Antrean pemutaran</string>
   <string name="video_max_quality">Otomatis (kualitas tertinggi)</string>

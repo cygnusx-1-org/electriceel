@@ -14,7 +14,10 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.PlayerSecti
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.SearchSectionSettingsPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.SystemSectionSettingsPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.UpdatesSettingsPresenter;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.ExoFormatItem;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem.VideoPreset;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.TrackSelectorManager;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
 import java.util.ArrayList;
@@ -132,5 +135,37 @@ public class AppDataSourceManager {
         };
 
         return presets;
+    }
+
+    /**
+     * The audio formats of the settings, by itag, with its DRC and voice boost copies.<br/>
+     * A video without the copy chosen plays the original of the itag.
+     */
+    public List<FormatItem> getAudioFormats() {
+        List<FormatItem> formats = new ArrayList<>();
+
+        addAudioFormat(formats, "380", "ac-3", 384_000, false);
+        addAudioFormat(formats, "328", "ec-3", 384_000, false);
+        addAudioFormat(formats, "251", "opus", 160_000, true);
+        addAudioFormat(formats, "140", "mp4a.40.2", 128_000, true);
+        addAudioFormat(formats, "250", "opus", 70_000, true);
+        addAudioFormat(formats, "249", "opus", 50_000, true);
+        addAudioFormat(formats, "139", "mp4a.40.5", 48_000, true);
+
+        return formats;
+    }
+
+    private static void addAudioFormat(List<FormatItem> formats, String iTag, String codecs, int bitrate, boolean hasCopies) {
+        formats.add(audioFormat(iTag, codecs, bitrate, false, false));
+
+        if (hasCopies) {
+            formats.add(audioFormat(iTag, codecs, bitrate, true, false));
+            formats.add(audioFormat(iTag, codecs, bitrate, false, true));
+        }
+    }
+
+    private static FormatItem audioFormat(String iTag, String codecs, int bitrate, boolean isDrc, boolean isVb) {
+        return ExoFormatItem.from(FormatItem.TYPE_AUDIO, TrackSelectorManager.RENDERER_INDEX_AUDIO, iTag, codecs,
+                -1, -1, -1, null, false, bitrate, isDrc, isVb);
     }
 }

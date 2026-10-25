@@ -18,6 +18,8 @@
   <string name="action_signin">BEJELENTKEZÉS</string>
   <string name="title_video_formats">Videó formátum</string>
   <string name="title_audio_formats">Audió formátum</string>
+  <string name="audio_format_default">Alapértelmezett</string>
+  <string name="audio_formats">Formátumok</string>
   <string name="subtitle_category_title">Feliratok</string>
   <string name="video_max_quality">Auto (max minőség)</string>
   <string name="audio_max_quality">Auto (max minőség)</string>

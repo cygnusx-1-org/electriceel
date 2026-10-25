@@ -66,6 +66,15 @@ public class TrackSelectorUtil {
     }
 
     /**
+     * Name of an audio format of the settings, e.g. "0.16Mbps, opus, DRC". Like the name of a track, without its language.
+     */
+    public static CharSequence buildAudioFormatName(Format format) {
+        String name = joinWithSeparator(buildBitrateString(format), extractCodec(format), buildChannels(format),
+                buildDrcMark(format), buildVbMark(format));
+        return name.length() == 0 ? "unknown" : name;
+    }
+
+    /**
      * Add high bitrate (Premium) mark
      */
     public static String buildHighBitrateMark(Format format) {
@@ -255,6 +264,28 @@ public class TrackSelectorUtil {
      */
     public static boolean isUnwantedVb(Format origin, Format format) {
         return isVb(format) && !isVb(origin);
+    }
+
+    /**
+     * Copies of the same itag: original, DRC or voice boost.<br/>
+     * SABR copies share the id. The MPD builder adds "-vb" and "-drc" to it.
+     */
+    public static boolean isSameITag(Format format1, Format format2) {
+        if (format1 == null || format2 == null) {
+            return false;
+        }
+
+        return Helpers.equals(getITag(format1.id), getITag(format2.id));
+    }
+
+    private static String getITag(String id) {
+        if (id == null) {
+            return null;
+        }
+
+        String result = id.endsWith("-drc") ? id.substring(0, id.length() - "-drc".length()) : id;
+
+        return result.endsWith("-vb") ? result.substring(0, result.length() - "-vb".length()) : result;
     }
 
     /**

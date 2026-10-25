@@ -18,6 +18,8 @@
   <string name="action_signin">ZALOGUJ SIĘ</string>
   <string name="title_video_formats">Formaty wideo</string>
   <string name="title_audio_formats">Formaty dźwięku</string>
+  <string name="audio_format_default">Domyślnie</string>
+  <string name="audio_formats">Formaty</string>
   <string name="subtitle_category_title">Napisy</string>
   <string name="playback_queue_category_title">Kolejka odtwarzania</string>
   <string name="video_max_quality">Automatycznie (maks. jakość)</string>

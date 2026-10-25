@@ -10,6 +10,7 @@ import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.exoplayer2.Format;
 import com.liskovsoft.mediaserviceinterfaces.MediaItemService;
 import com.liskovsoft.mediaserviceinterfaces.data.ItemGroup;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItem;
@@ -39,6 +40,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.views.ViewManager;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.other.SubtitleManager.SubtitleStyle;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem.VideoPreset;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.TrackSelectorUtil;
 import com.liskovsoft.smartyoutubetv2.common.misc.AppDataSourceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MotherActivity;
@@ -85,6 +87,7 @@ public class AppDialogUtil {
     private static final int PLAYER_ENGINE_ID = 147;
     private static final int IGNORE_DURATION_ID = 148;
     private static final int SLEEP_TIMER_ID = 149;
+    private static final int AUDIO_FORMATS_ID = 150;
     private static final int SUBTITLE_STYLES_ID = 45;
     private static final int SUBTITLE_SIZE_ID = 46;
     private static final int SUBTITLE_POSITION_ID = 47;
@@ -324,6 +327,55 @@ public class AppDialogUtil {
         }
         playerData.setFormat(formatItem);
         onFormatSelected.run();
+    }
+
+    /**
+     * The audio format of every video. A format picked in the player is for that video only.
+     */
+    public static OptionCategory createAudioFormatsCategory(Context context) {
+        PlayerData playerData = PlayerData.instance(context);
+        FormatItem savedFormat = playerData.getSavedAudioFormat();
+        FormatItem defaultFormat = playerData.getDefaultAudioFormat();
+        List<OptionItem> options = new ArrayList<>();
+
+        // Set by the player, the settings may be opened before it
+        TrackSelectorUtil.setVoiceBoostMark(context.getString(R.string.audio_voice_boost));
+
+        boolean isDefault = isSameAudioFormat(defaultFormat, savedFormat);
+        boolean isFound = isDefault;
+
+        options.add(UiOptionItem.from(context.getString(R.string.audio_format_default),
+                option -> playerData.setFormat(defaultFormat), isDefault));
+
+        for (FormatItem format : AppDataSourceManager.instance().getAudioFormats()) {
+            boolean isSelected = !isFound && isSameAudioFormat(format, savedFormat);
+            isFound |= isSelected;
+            options.add(UiOptionItem.from(TrackSelectorUtil.buildAudioFormatName(format.getTrack().format),
+                    option -> playerData.setFormat(format), isSelected));
+        }
+
+        // Saved by an older version (picked in the player) or by an error fix
+        if (!isFound && savedFormat != null && savedFormat.getTrack() != null && savedFormat.getTrack().format != null) {
+            options.add(1, UiOptionItem.from(TrackSelectorUtil.buildAudioFormatName(savedFormat.getTrack().format),
+                    option -> playerData.setFormat(savedFormat), true));
+        }
+
+        return OptionCategory.from(AUDIO_FORMATS_ID, OptionCategory.TYPE_RADIO_LIST, context.getString(R.string.audio_formats), options);
+    }
+
+    /**
+     * Same itag and copy (original, DRC, voice boost), whatever the bitrate and the language
+     */
+    private static boolean isSameAudioFormat(FormatItem format1, FormatItem format2) {
+        Format first = format1 != null && format1.getTrack() != null ? format1.getTrack().format : null;
+        Format second = format2 != null && format2.getTrack() != null ? format2.getTrack().format : null;
+
+        if (first == null || second == null) {
+            return false;
+        }
+
+        return TrackSelectorUtil.isSameITag(first, second) && TrackSelectorUtil.isSameVariant(first, second)
+                && Helpers.equals(TrackSelectorUtil.codecNameShort(first.codecs), TrackSelectorUtil.codecNameShort(second.codecs));
     }
 
     public static OptionCategory createVideoBufferCategory(Context context, Runnable onBufferSelected) {

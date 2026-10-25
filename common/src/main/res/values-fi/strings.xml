@@ -18,6 +18,8 @@
   <string name="action_signin">Kirjaudu sisään</string>
   <string name="title_video_formats">Videoformaatti</string>
   <string name="title_audio_formats">Audioformaatti</string>
+  <string name="audio_format_default">Oletus</string>
+  <string name="audio_formats">Formaatit</string>
   <string name="subtitle_category_title">Tekstitykset</string>
   <string name="video_max_quality">Auto (paras kuvanlaatu)</string>
   <string name="audio_max_quality">Auto (paras äänenlaatu)</string>

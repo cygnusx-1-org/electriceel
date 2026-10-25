@@ -18,6 +18,8 @@
     <string name="action_signin">ПРИЈАВА</string>
     <string name="title_video_formats">Видео формати</string>
     <string name="title_audio_formats">Аудио формати</string>
+    <string name="audio_format_default">подразумевано</string>
+    <string name="audio_formats">Формати</string>
     <string name="subtitle_category_title">Титлови</string>
     <string name="playback_queue_category_title">Ред за пуштање</string>
     <string name="video_max_quality">Ауто (макс. квалитет)</string>

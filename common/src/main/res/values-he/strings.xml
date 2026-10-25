@@ -22,6 +22,8 @@ So, make a copy of values-he and name it values-iw. Keep both in your structure.
     <string name="action_signin">כניסה</string>
     <string name="title_video_formats">פורמטי סרטון</string>
     <string name="title_audio_formats">פורמטי שמע</string>
+    <string name="audio_format_default">ברירת מחדל</string>
+    <string name="audio_formats">פורמטים</string>
     <string name="subtitle_category_title">כתוביות</string>
     <string name="playback_queue_category_title">תור הפעלה</string>
     <string name="video_max_quality">באופן אוטומטי (איכות מרבית)</string>

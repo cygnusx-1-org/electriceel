@@ -18,6 +18,8 @@
     <string name="header_settings">Налаштування</string>
     <string name="title_video_formats">Відеоформат</string>
     <string name="title_audio_formats">Аудіоформат</string>
+    <string name="audio_format_default">За замовчуванням</string>
+    <string name="audio_formats">Формати</string>
     <string name="subtitle_category_title">Субтитри</string>
     <string name="playback_queue_category_title">Черга відтворення</string>
     <string name="video_max_quality">Авто (макс. якість)</string>

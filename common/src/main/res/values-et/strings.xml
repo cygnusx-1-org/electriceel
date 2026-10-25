@@ -17,6 +17,8 @@
   <string name="action_signin">SISENE</string>
   <string name="title_video_formats">Videovormingud</string>
   <string name="title_audio_formats">Helivormingud</string>
+  <string name="audio_format_default">Vaikimisi</string>
+  <string name="audio_formats">Vormingud</string>
   <string name="subtitle_category_title">Subtiitrid</string>
   <string name="video_max_quality">Automaatne (parim kvaliteet)</string>
   <string name="audio_max_quality">Automaatne (parim kvaliteet)</string>

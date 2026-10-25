@@ -18,6 +18,8 @@
   <string name="action_signin">Identifikohu</string>
   <string name="title_video_formats">Formatet e videos</string>
   <string name="title_audio_formats">Formatet e tingullit</string>
+  <string name="audio_format_default">I paracaktuar</string>
+  <string name="audio_formats">Formatet</string>
   <string name="subtitle_category_title">Titra</string>
   <string name="playback_queue_category_title">Radha e luajtjes</string>
   <string name="video_max_quality">Automatike (cilësia maksimale)</string>

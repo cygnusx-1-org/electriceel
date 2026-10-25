@@ -18,6 +18,8 @@
     <string name="action_signin">ANMELDEN</string>
     <string name="title_video_formats">Video-Formate</string>
     <string name="title_audio_formats">Audio-Formate</string>
+    <string name="audio_format_default">Standard</string>
+    <string name="audio_formats">Formate</string>
     <string name="subtitle_category_title">Untertitel</string>
     <string name="playback_queue_category_title">Warteschlange</string>
     <string name="video_max_quality">Auto (maximale Qualität)</string>

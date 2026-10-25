@@ -18,6 +18,8 @@
   <string name="action_signin">登入</string>
   <string name="title_video_formats">影片格式</string>
   <string name="title_audio_formats">音訊格式</string>
+  <string name="audio_format_default">預設</string>
+  <string name="audio_formats">格式</string>
   <string name="subtitle_category_title">字幕</string>
   <string name="playback_queue_category_title">播放佇列</string>
   <string name="video_max_quality">自動（最高畫質）</string>

@@ -17,6 +17,8 @@
     <string name="action_signin">PRISIJUNKITE</string>
     <string name="title_video_formats">Vaizdo įrašų formatai</string>
     <string name="title_audio_formats">Garso formatai</string>
+    <string name="audio_format_default">Numatytasis</string>
+    <string name="audio_formats">Formatai</string>
     <string name="subtitle_category_title">Subtitrai</string>
     <string name="playback_queue_category_title">Atkūrimo eilė</string>
     <string name="video_max_quality">Automatinis (aukščiausia kokybė)</string>

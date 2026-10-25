@@ -17,6 +17,8 @@
   <string name="action_signin">ورود</string>
   <string name="title_video_formats">فرمت‌های ویدیو</string>
   <string name="title_audio_formats">فرمت‌های صوتی</string>
+  <string name="audio_format_default">پیش‌فرض</string>
+  <string name="audio_formats">فرمت‌ها</string>
   <string name="subtitle_category_title">زیرنویس</string>
   <string name="video_max_quality">خودکار (بالاترین کیفیت)</string>
   <string name="audio_max_quality">خودکار (بالاترین کیفیت)</string>

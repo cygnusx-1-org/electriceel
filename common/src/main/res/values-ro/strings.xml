@@ -18,6 +18,8 @@
   <string name="action_signin">Conectează-te</string>
   <string name="title_video_formats">Formate Video</string>
   <string name="title_audio_formats">Formate Audio</string>
+  <string name="audio_format_default">Implicit</string>
+  <string name="audio_formats">Formate</string>
   <string name="subtitle_category_title">Subtitrări</string>
   <string name="video_max_quality">Auto (calitate maximă)</string>
   <string name="audio_max_quality">Auto (calitate maximă)</string>

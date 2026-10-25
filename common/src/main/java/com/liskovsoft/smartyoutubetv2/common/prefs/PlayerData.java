@@ -52,6 +52,7 @@ public class PlayerData extends DataChangeBase implements PlayerConstants, Profi
     private FormatItem mTempVideoFormat;
     private FormatItem mAudioFormat;
     private FormatItem mTempAudioFormat;
+    private boolean mIsSoundOff;
     private FormatItem mSubtitleFormat;
     private int mVideoBufferType;
     private final List<SubtitleStyle> mSubtitleStyles = new ArrayList<>();
@@ -364,7 +365,7 @@ public class PlayerData extends DataChangeBase implements PlayerConstants, Profi
                 format = mVideoFormat;
                 break;
             case FormatItem.TYPE_AUDIO:
-                format = mAudioFormat;
+                format = mIsSoundOff ? FormatItem.NO_AUDIO : mAudioFormat;
                 break;
             case FormatItem.TYPE_SUBTITLE:
                 format = mSubtitleFormat;
@@ -413,6 +414,7 @@ public class PlayerData extends DataChangeBase implements PlayerConstants, Profi
     }
 
     /**
+     * The format picked in the player for the video playing, or a decoder error fallback.<br/>
      * Like the temp video format: kept between engine restarts, not saved
      */
     public void setTempAudioFormat(FormatItem format) {
@@ -421,6 +423,25 @@ public class PlayerData extends DataChangeBase implements PlayerConstants, Profi
 
     public FormatItem getTempAudioFormat() {
         return mTempAudioFormat;
+    }
+
+    /**
+     * The audio format chosen in the settings, kept while the sound is off
+     */
+    public FormatItem getSavedAudioFormat() {
+        return mAudioFormat;
+    }
+
+    public boolean isSoundOff() {
+        return mIsSoundOff;
+    }
+
+    /**
+     * No audio for every video, till the sound is on again. The audio format chosen in the settings stays.
+     */
+    public void setSoundOff(boolean soundOff) {
+        mIsSoundOff = soundOff;
+        persistState();
     }
 
     public FormatItem getLastSubtitleFormat() {
@@ -811,6 +832,11 @@ public class PlayerData extends DataChangeBase implements PlayerConstants, Profi
         // afrData was there
         mVideoFormat = Helpers.firstNonNull(ExoFormatItem.from(Helpers.parseStr(split, 9)), getDefaultVideoFormat());
         mAudioFormat = Helpers.firstNonNull(ExoFormatItem.from(Helpers.parseStr(split, 10)), getDefaultAudioFormat());
+        // Sound off was saved as the audio format
+        boolean isLegacySoundOff = mAudioFormat.isDefault();
+        if (isLegacySoundOff) {
+            mAudioFormat = getDefaultAudioFormat();
+        }
         mSubtitleFormat = Helpers.firstNonNull(ExoFormatItem.from(Helpers.parseStr(split, 11)), getDefaultSubtitleFormat());
         mVideoBufferType = Helpers.parseInt(split, 12, PlayerEngine.BUFFER_MEDIUM);
         mSubtitleStyleIndex = Helpers.parseInt(split, 13, yellowOnSemiBgSubIdx);
@@ -862,6 +888,7 @@ public class PlayerData extends DataChangeBase implements PlayerConstants, Profi
         mLastAudioLanguages = Helpers.parseStrList(split, 60);
         mIsVideoFlipEnabled = Helpers.parseBoolean(split, 61, false);
         mIsAudioDelayEnabled = Helpers.parseBoolean(split, 62, false);
+        mIsSoundOff = Helpers.parseBoolean(split, 63, isLegacySoundOff);
 
         if (speeds != null) {
             for (String speedSpec : speeds) {
@@ -899,7 +926,7 @@ public class PlayerData extends DataChangeBase implements PlayerConstants, Profi
                 mIsNumberKeySeekEnabled, mIsSkip24RateEnabled, mAfrPauseMs, mIsLiveChatEnabled, mLastSubtitleFormats, mLastSpeed, mRotationAngle,
                 mZoomPercents, mPlaybackMode, mAudioLanguage, mSubtitleLanguage, mEnabledSubtitlesPerChannel, mIsSubtitlesPerChannelEnabled,
                 mIsSpeedPerChannelEnabled, Helpers.mergeArray(mSpeeds.values().toArray()), mPitch, mIsSkipShortsEnabled, mLastAudioLanguages,
-                mIsVideoFlipEnabled, mIsAudioDelayEnabled
+                mIsVideoFlipEnabled, mIsAudioDelayEnabled, mIsSoundOff
         ));
     }
 

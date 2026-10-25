@@ -18,6 +18,8 @@
     <string name="action_signin">Iniciar sessão</string>
     <string name="title_video_formats">Formatos de vídeo</string>
     <string name="title_audio_formats">Formatos de áudio</string>
+    <string name="audio_format_default">Padrão</string>
+    <string name="audio_formats">Formatos</string>
     <string name="subtitle_category_title">Legendas</string>
     <string name="playback_queue_category_title">Fila de reprodução</string>
     <string name="video_max_quality">Automático (qualidade máxima)</string>

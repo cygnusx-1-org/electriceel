@@ -18,6 +18,8 @@
     <string name="action_signin">ลงชื่อเข้าใช้</string>
     <string name="title_video_formats">รูปแบบไฟล์วิดีโอ</string>
     <string name="title_audio_formats">รูปแบบไฟล์เสียง</string>
+    <string name="audio_format_default">ค่าเริ่มต้น</string>
+    <string name="audio_formats">รูปแบบไฟล์</string>
     <string name="subtitle_category_title">คำบรรยาย</string>
     <string name="playback_queue_category_title">คิวการเล่น</string>
     <string name="video_max_quality">อัตโนมัติ (คุณภาพวิดีโอสูงสุด)</string>

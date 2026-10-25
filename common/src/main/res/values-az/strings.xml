@@ -18,6 +18,8 @@
     <string name="action_signin">DAXİL OL</string>
     <string name="title_video_formats">Video formatları</string>
     <string name="title_audio_formats">Audio formatları</string>
+    <string name="audio_format_default">Varsayılan</string>
+    <string name="audio_formats">Formatlar</string>
     <string name="subtitle_category_title">Subtitrlər</string>
     <string name="playback_queue_category_title">Oynatma növbəsi</string>
     <string name="video_max_quality">Avtomatik (maksimum keyfiyyət)</string>

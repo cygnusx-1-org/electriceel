@@ -18,6 +18,8 @@
   <string name="action_signin">REGISTRAR-SE</string>
   <string name="title_video_formats">Formats de vídeo</string>
   <string name="title_audio_formats">Formats d\'àudio</string>
+  <string name="audio_format_default">Per defecte</string>
+  <string name="audio_formats">Formats</string>
   <string name="subtitle_category_title">Subtítols</string>
   <string name="playback_queue_category_title">Cua de reproducció</string>
   <string name="video_max_quality">Automàtic (qualitat màxima)</string>

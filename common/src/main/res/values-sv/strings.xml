@@ -18,6 +18,8 @@
   <string name="action_signin">LOGGA IN</string>
   <string name="title_video_formats">Videoformat</string>
   <string name="title_audio_formats">Ljudformat</string>
+  <string name="audio_format_default">Standard</string>
+  <string name="audio_formats">Format</string>
   <string name="subtitle_category_title">Undertexter</string>
   <string name="playback_queue_category_title">Uppspelningskö</string>
   <string name="video_max_quality">Automatisk (maximal kvalitet)</string>

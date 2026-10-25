@@ -19,6 +19,8 @@
     <string name="action_signin">సైన్ ఇన్ చేయండి</string>
     <string name="title_video_formats">వీడియో ఆకృతులు</string>
     <string name="title_audio_formats">ఆడియో ఆకృతులు</string>
+    <string name="audio_format_default">డిఫాల్ట్</string>
+    <string name="audio_formats">ఆకృతులు</string>
     <string name="subtitle_category_title">ఉపశీర్షికలు</string>
     <string name="video_max_quality">ఆటో (గరిష్ట నాణ్యత)</string>
     <string name="audio_max_quality">ఆటో (గరిష్ట నాణ్యత)</string>

@@ -138,6 +138,7 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
     public void showAudio() {
         AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
 
+        appendAudioFormatsCategory(settingsPresenter);
         appendAudioLanguageCategory(settingsPresenter);
         appendAudioDelayCategory(settingsPresenter);
         appendMasterVolumeCategory(settingsPresenter);
@@ -481,6 +482,11 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
 
     private void appendVideoZoomCategory(AppDialogPresenter settingsPresenter) {
         OptionCategory category = AppDialogUtil.createVideoZoomCategory(getContext());
+        settingsPresenter.appendCategory(category);
+    }
+
+    private void appendAudioFormatsCategory(AppDialogPresenter settingsPresenter) {
+        OptionCategory category = AppDialogUtil.createAudioFormatsCategory(getContext());
         settingsPresenter.appendCategory(category);
     }
 

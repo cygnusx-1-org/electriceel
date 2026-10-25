@@ -18,6 +18,8 @@
     <string name="action_signin">ログイン</string>
     <string name="title_video_formats">動画フォーマット</string>
     <string name="title_audio_formats">音声フォーマット</string>
+    <string name="audio_format_default">デフォルト</string>
+    <string name="audio_formats">フォーマット</string>
     <string name="subtitle_category_title">字幕</string>
     <string name="playback_queue_category_title">再生キュー</string>
     <string name="video_max_quality">自動 (最高画質)</string>

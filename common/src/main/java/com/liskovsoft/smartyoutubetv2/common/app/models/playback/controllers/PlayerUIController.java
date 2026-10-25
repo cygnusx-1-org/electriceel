@@ -58,7 +58,6 @@ public class PlayerUIController extends BasePlayerController {
     private final MediaItemService mMediaItemService;
     private SuggestionsController mSuggestionsController;
     private List<PlaylistInfo> mPlaylistInfos;
-    private FormatItem mAudioFormat = FormatItem.AUDIO_HQ_MP4A;
     private boolean mEngineReady;
     private boolean mDebugViewEnabled;
     private boolean mIsMetadataLoaded;
@@ -1066,15 +1065,28 @@ public class PlayerUIController extends BasePlayerController {
         }
 
         if (buttonState == PlayerUI.BUTTON_OFF) {
-            mAudioFormat = getPlayer().getAudioFormat();
             getPlayer().setFormat(FormatItem.NO_AUDIO);
-            getPlayerData().setFormat(FormatItem.NO_AUDIO);
-        } else {
-            getPlayer().setFormat(mAudioFormat);
-            getPlayerData().setFormat(mAudioFormat);
+            getPlayerData().setSoundOff(true);
+        } else if (getPlayerData().isSoundOff() || isNoAudio(getPlayer().getAudioFormat())) {
+            // The audio format isn't saved here: it's the one of the settings, or the one picked for this video
+            getPlayerData().setSoundOff(false);
+
+            FormatItem tempFormat = getPlayerData().getTempAudioFormat();
+
+            // No audio picked for this video
+            if (tempFormat != null && tempFormat.isDefault()) {
+                getPlayerData().setTempAudioFormat(null);
+                tempFormat = null;
+            }
+
+            getPlayer().setFormat(tempFormat != null ? tempFormat : getPlayerData().getFormat(FormatItem.TYPE_AUDIO));
         }
 
         getPlayer().setButtonState(R.id.action_sound_off, buttonState == PlayerUI.BUTTON_OFF ? PlayerUI.BUTTON_ON : PlayerUI.BUTTON_OFF);
+    }
+
+    private static boolean isNoAudio(FormatItem audioFormat) {
+        return audioFormat != null && audioFormat.isDefault();
     }
 
     private void applySoundOffButtonState() {

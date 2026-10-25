@@ -849,12 +849,15 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
     }
 
     /**
-     * AAC in the saved language for the video in mDecoderErrorVideoId, unless the failed format is AAC already.<br/>
+     * AAC in the language of the failed track for the video in mDecoderErrorVideoId, unless the failed format is AAC already.<br/>
      * NOTE: Applied with restartEngine() (see applyDecoderErrorFallback).
      */
     private FormatItem applyAudioFallback(Format failed) {
         FormatItem audioFormat = getPlayerData().getFormat(FormatItem.TYPE_AUDIO);
-        FormatItem fallback = DecoderErrorFallback.getAudioFormat(failed, audioFormat != null ? audioFormat.getLanguage() : null);
+        // The language of the failed track: the format picked for this video isn't saved
+        String language = failed != null && failed.language != null ? failed.language
+                : audioFormat != null ? audioFormat.getLanguage() : null;
+        FormatItem fallback = DecoderErrorFallback.getAudioFormat(failed, language);
 
         if (fallback != null) {
             mAudioFallback = fallback;

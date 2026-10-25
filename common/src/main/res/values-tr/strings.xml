@@ -18,6 +18,8 @@
     <string name="action_signin">OTURUM AÇ</string>
     <string name="title_video_formats">Video biçimleri</string>
     <string name="title_audio_formats">Ses biçimleri</string>
+    <string name="audio_format_default">Varsayılan</string>
+    <string name="audio_formats">Biçimler</string>
     <string name="subtitle_category_title">Altyazılar</string>
     <string name="playback_queue_category_title">Oynatma sırası</string>
     <string name="video_max_quality">Otomatik (en iyi kalite)</string>

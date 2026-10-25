@@ -18,6 +18,8 @@
   <string name="action_signin">로그인</string>
   <string name="title_video_formats">동영상 형식</string>
   <string name="title_audio_formats">오디오 형식</string>
+  <string name="audio_format_default">기본</string>
+  <string name="audio_formats">형식</string>
   <string name="subtitle_category_title">자막</string>
   <string name="playback_queue_category_title">재생 대기열</string>
   <string name="video_max_quality">자동 (최고 품질)</string>

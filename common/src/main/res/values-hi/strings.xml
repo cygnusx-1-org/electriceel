@@ -18,6 +18,8 @@
   <string name="action_signin">साइन इन करें</string>
   <string name="title_video_formats">वीडियो प्रारूप</string>
   <string name="title_audio_formats">ऑडियो प्रारूप</string>
+  <string name="audio_format_default">डिफ़ॉल्ट</string>
+  <string name="audio_formats">प्रारूप</string>
   <string name="subtitle_category_title">उपशीर्षक</string>
   <string name="video_max_quality">स्वत:(अधिकतम गुणवत्ता)</string>
   <string name="audio_max_quality">स्वत:(अधिकतम गुणवत्ता)</string>

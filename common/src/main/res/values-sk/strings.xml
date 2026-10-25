@@ -18,6 +18,8 @@
     <string name="action_signin">PRIHLÁSIŤ SA</string>
     <string name="title_video_formats">Video formáty</string>
     <string name="title_audio_formats">Audio formáty</string>
+    <string name="audio_format_default">Predvolené</string>
+    <string name="audio_formats">Formáty</string>
     <string name="subtitle_category_title">Titulky</string>
     <string name="playback_queue_category_title">Poradie prehrávania</string>
     <string name="video_max_quality">Auto (najvyššia kvalita)</string>

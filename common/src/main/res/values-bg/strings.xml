@@ -18,6 +18,8 @@
   <string name="action_signin">ВПИШЕТЕ СЕ</string>
   <string name="title_video_formats">Видео формати</string>
   <string name="title_audio_formats">Аудио формати</string>
+  <string name="audio_format_default">По подразбиране</string>
+  <string name="audio_formats">Формати</string>
   <string name="subtitle_category_title">Субтитри</string>
   <string name="video_max_quality">Автоматично (максимално качество)</string>
   <string name="audio_max_quality">Автоматично (максимално качество)</string>

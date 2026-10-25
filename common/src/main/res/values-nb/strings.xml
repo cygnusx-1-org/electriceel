@@ -18,6 +18,8 @@
     <string name="action_signin">LOGG PÅ</string>
     <string name="title_video_formats">Video formater</string>
     <string name="title_audio_formats">Audio formater</string>
+    <string name="audio_format_default">Standard</string>
+    <string name="audio_formats">Formater</string>
     <string name="subtitle_category_title">Undertekster</string>
     <string name="video_max_quality">Auto (høyeste kvalitet)</string>
     <string name="audio_max_quality">Auto (høyeste kvalitet)</string>

@@ -18,6 +18,8 @@
   <string name="action_signin">ĐĂNG NHẬP</string>
   <string name="title_video_formats">Định dạng video</string>
   <string name="title_audio_formats">Định dạng âm thanh</string>
+  <string name="audio_format_default">Mặc định</string>
+  <string name="audio_formats">Định dạng</string>
   <string name="subtitle_category_title">Phụ đề</string>
   <string name="video_max_quality">Tự động (chất lượng cao nhất)</string>
   <string name="audio_max_quality">Tự động (chất lượng cao nhất)</string>

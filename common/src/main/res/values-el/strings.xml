@@ -18,6 +18,8 @@
   <string name="action_signin">ΕΙΣΟΔΟΣ</string>
   <string name="title_video_formats">Μορφές βίντεο</string>
   <string name="title_audio_formats">Μορφές ήχου</string>
+  <string name="audio_format_default">Προεπιλεγμένο</string>
+  <string name="audio_formats">Μορφές</string>
   <string name="subtitle_category_title">Υπότιτλοι</string>
   <string name="video_max_quality">Αυτόματα (μεγ. ποιότητα)</string>
   <string name="audio_max_quality">Αυτόματα (μεγ. ποιότητα)</string>

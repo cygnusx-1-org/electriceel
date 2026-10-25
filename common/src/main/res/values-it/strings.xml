@@ -18,6 +18,8 @@
     <string name="action_signin">ACCEDI</string>
     <string name="title_video_formats">Formati video</string>
     <string name="title_audio_formats">Formati audio</string>
+    <string name="audio_format_default">Predefinito</string>
+    <string name="audio_formats">Formati</string>
     <string name="subtitle_category_title">Sottotitoli</string>
     <string name="playback_queue_category_title">Coda di riproduzione</string>
     <string name="video_max_quality">Automatico (qualità massima)</string>

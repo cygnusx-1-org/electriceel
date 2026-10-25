@@ -63,14 +63,18 @@ public class VideoStateController extends BasePlayerController {
             saveState();
         }
 
-        if (!item.equals(getVideo())) {
+        if (item != null && !item.equals(getVideo())) {
             mNewVideoTimeMs = System.currentTimeMillis();
         }
 
         setPlayEnabled(true); // video just added
 
         getPlayerData().setTempVideoFormat(null);
-        getPlayerData().setTempAudioFormat(null);
+
+        // The audio format picked in the player is for that video only. Kept when it's reloaded.
+        if (item == null || getVideo() == null || !Helpers.equals(item.videoId, getVideo().videoId)) {
+            getPlayerData().setTempAudioFormat(null);
+        }
 
         enableIncognitoIfNeeded(item);
 
@@ -462,7 +466,7 @@ public class VideoStateController extends BasePlayerController {
             return;
         }
 
-        if (getPlayerData().getTempAudioFormat() != null) {
+        if (getPlayerData().getTempAudioFormat() != null && !getPlayerData().isSoundOff()) {
             getPlayer().setFormat(getPlayerData().getTempAudioFormat());
         } else {
             getPlayer().setFormat(getPlayerData().getFormat(FormatItem.TYPE_AUDIO));

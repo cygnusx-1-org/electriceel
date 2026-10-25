@@ -17,6 +17,8 @@
     <string name="action_signin">ՄՈՒՏՔ ԳՈՐԾԵԼ</string>
     <string name="title_video_formats">Վիդեոֆորմատ</string>
     <string name="title_audio_formats">Աուդիոֆորմատ</string>
+    <string name="audio_format_default">Լռելյայն</string>
+    <string name="audio_formats">Ֆորմատներ</string>
     <string name="subtitle_category_title">Ենթագրեր</string>
     <string name="video_max_quality">Ավտոմատ (առավելագույն որակ)</string>
     <string name="audio_max_quality">Ավտոմատ (առավելագույն որակ)</string>
