@@ -1,13 +1,37 @@
 {
   "package": {
     "downloadUrlList_arm64-v8a": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.68.2/ElectricEel_stable_32.68.2_arm64-v8a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.68.3/ElectricEel_stable_32.68.3_arm64-v8a.apk"
     ],
     "downloadUrlList_armeabi-v7a": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.68.2/ElectricEel_stable_32.68.2_armeabi-v7a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.68.3/ElectricEel_stable_32.68.3_armeabi-v7a.apk"
     ],
     "downloadUrlList": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.68.2/ElectricEel_stable_32.68.2_armeabi-v7a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.68.3/ElectricEel_stable_32.68.3_armeabi-v7a.apk"
+    ]
+  },
+  "32.68.3": {
+    "versionCode": 2458,
+    "changelog": [
+      "Implemented Add ability to quick toggle individual hidden video types #50",
+      "Implemented Way to exclude channels from individual hidden video types #51",
+      "Marked streams in History by looking up whether each video was a live stream",
+      "Fixed Deal with Live videos as their own category or part of Streamed for Hide or mark only #54",
+      "Fixed sidebar changes not showing after relaunching the app within a second of exiting",
+      "Added \"Settings > Debugging\" to submit debugging data",
+      "Fixed missing card thumbnails when the feed's thumbnail url is dead",
+      "Implemented a IPv6 connectivity test at startup that disables IPv6 when it doesn't work",
+      "Greyed out Network engine options when IPv6 is disabled",
+      "Route different parts of the app through OkHttp when IPv6 is disabled",
+      "Implemented Prevent Shorts thumbnail pop-in to the card #45",
+      "Replaced the first-frame thumbnails of the Shorts section with the real ones",
+      "Added an IPv6 connectivity test option to Network settings",
+      "Consolidated \"Set-up sections\" and \"Boot to section\" into Sidebar",
+      "Added \"Order of the sidebar\" in Sidebar",
+      "Fixed \"Selected AUDIO format isn't supported\" error on Nvidia Shields #53",
+      "Fixed [BUG]: Settings message when switching accounts #48",
+      "Changed it so switching an account's language and country does not require a restart",
+      "Hardened the Original audio fallback to skip dubs and audio descriptions"
     ]
   },
   "32.68.2": {
