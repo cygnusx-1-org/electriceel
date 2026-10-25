@@ -4,12 +4,14 @@ import android.content.Context;
 
 import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItem;
+import com.liskovsoft.mediaserviceinterfaces.data.VideoChannel;
 import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.BrowseSection;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.VideoGroup;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AiSListFilterData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
+import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
 
 import org.junit.After;
 import org.junit.Before;
@@ -20,6 +22,7 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import io.reactivex.Observable;
+import io.reactivex.subjects.PublishSubject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,6 +62,7 @@ public class AiSListManagerTest {
     @After
     public void tearDown() {
         disableAll();
+        MediaServiceData.instance().setDataApiKey(null);
         Utils.sHandler.removeCallbacksAndMessages(null);
     }
 
@@ -626,6 +630,215 @@ public class AiSListManagerTest {
         channel.author = "Someone Else";
 
         assertTrue(manager.getChannelHandles(channel).blockingFirst().isEmpty());
+    }
+
+    @Test
+    public void channelsAreLookedUpTogetherWithDataApiKey() {
+        MediaServiceData.instance().setDataApiKey("key");
+        AiSListManager manager = AiSListManager.instance(RuntimeEnvironment.getApplication());
+        List<String> lookedUp = new ArrayList<>();
+        manager.setHandleLookupForTesting(videoId -> {
+            lookedUp.add(videoId);
+            return Observable.just(Collections.singletonMap("@" + videoId, null));
+        });
+        List<List<String>> batches = new ArrayList<>();
+        manager.setBatchHandleLookupForTesting(videoIds -> {
+            batches.add(videoIds);
+            Map<String, VideoChannel> found = new LinkedHashMap<>();
+            found.put("a", createChannel("UCalpha", "@Alpha", "Alpha"));
+            found.put("b", createChannel("UCbeta", "@Beta", "Beta"));
+            return Observable.just(found);
+        });
+        Map<String, String> videoIdByKey = new LinkedHashMap<>();
+        videoIdByKey.put("Alpha", "a");
+        videoIdByKey.put("Beta", "b");
+        videoIdByKey.put("Gamma", "g"); // its channel has no handle the Data API knows
+
+        manager.resolveHandles(videoIdByKey).blockingFirst();
+
+        assertEquals(Collections.singletonList(Arrays.asList("a", "b", "g")), batches);
+        // The one the batch didn't find is looked up on its own
+        assertEquals(Collections.singletonList("g"), lookedUp);
+        assertEquals("@Alpha", manager.getCachedHandle("Alpha", -1));
+        assertEquals("@Beta", manager.getCachedHandle("Beta", -1));
+        assertEquals("@g", manager.getCachedHandle("Gamma", -1));
+
+        // Known now: no lookup at all
+        manager.resolveHandles(videoIdByKey).blockingFirst();
+
+        assertEquals(1, batches.size());
+        assertEquals(1, lookedUp.size());
+    }
+
+    /**
+     * "Dan and Phil" is one channel: the uploader is called that
+     */
+    @Test
+    public void channelWithAndInItsNameIsLookedUpTogether() {
+        MediaServiceData.instance().setDataApiKey("key");
+        AiSListManager manager = AiSListManager.instance(RuntimeEnvironment.getApplication());
+        List<String> lookedUp = new ArrayList<>();
+        manager.setHandleLookupForTesting(videoId -> {
+            lookedUp.add(videoId);
+            return Observable.just(Collections.singletonMap("@" + videoId, null));
+        });
+        manager.setBatchHandleLookupForTesting(videoIds ->
+                Observable.just(Collections.singletonMap("duo", createChannel("UCdanandphil", "@danandphil", "Dan and Phil"))));
+
+        manager.resolveHandles(Collections.singletonMap("Dan and Phil", "duo")).blockingFirst();
+
+        assertTrue(lookedUp.isEmpty());
+        assertEquals("@danandphil", manager.getCachedHandle("Dan and Phil", -1));
+    }
+
+    /**
+     * The uploader is one side of the "and", the other side's handle was found on its own cards
+     */
+    @Test
+    public void collaborationOfKnownChannelNeedsNoWatchNext() {
+        MediaServiceData.instance().setDataApiKey("key");
+        AiSListManager manager = AiSListManager.instance(RuntimeEnvironment.getApplication());
+        List<String> lookedUp = new ArrayList<>();
+        manager.setHandleLookupForTesting(videoId -> {
+            lookedUp.add(videoId);
+            return Observable.just(Collections.singletonMap("@" + videoId, null));
+        });
+        Map<String, VideoChannel> found = new LinkedHashMap<>();
+        found.put("solo", createChannel("UCfrequensi", "@Frequensyt", "Frequensi"));
+        found.put("collab", createChannel("UCfexl", "@fexl", "Fexl"));
+        manager.setBatchHandleLookupForTesting(videoIds -> Observable.just(found));
+
+        manager.resolveHandles(Collections.singletonMap("Frequensi", "solo")).blockingFirst();
+        manager.resolveHandles(Collections.singletonMap("Fexl and Frequensi", "collab")).blockingFirst();
+
+        Map<String, String> handles = new LinkedHashMap<>(); // the uploader first
+        handles.put("@fexl", "UCfexl");
+        handles.put("@Frequensyt", "UCfrequensi");
+        Video video = createVideo("collab", null);
+        video.author = "Fexl and Frequensi";
+
+        assertEquals(handles, manager.getChannelHandles(video).blockingFirst());
+        assertTrue(lookedUp.isEmpty());
+    }
+
+    /**
+     * Only watch-next has the channel the uploader collaborated with
+     */
+    @Test
+    public void collaborationOfUnknownChannelIsLookedUpByWatchNext() {
+        MediaServiceData.instance().setDataApiKey("key");
+        AiSListManager manager = AiSListManager.instance(RuntimeEnvironment.getApplication());
+        List<String> lookedUp = new ArrayList<>();
+        Map<String, String> collaborators = new LinkedHashMap<>();
+        collaborators.put("@fexl", "UCfexl");
+        collaborators.put("@Frequensyt", null);
+        manager.setHandleLookupForTesting(videoId -> {
+            lookedUp.add(videoId);
+            return Observable.just(collaborators);
+        });
+        manager.setBatchHandleLookupForTesting(videoIds ->
+                Observable.just(Collections.singletonMap("collab", createChannel("UCfexl", "@fexl", "Fexl"))));
+
+        manager.resolveHandles(Collections.singletonMap("Fexl and Frequensi", "collab")).blockingFirst();
+
+        assertEquals(Collections.singletonList("collab"), lookedUp);
+        Video video = createVideo("collab", null);
+        video.author = "Fexl and Frequensi";
+        assertEquals(collaborators, manager.getChannelHandles(video).blockingFirst());
+    }
+
+    @Test
+    public void channelsAreLookedUpOneByOneWithoutDataApiKey() {
+        MediaServiceData.instance().setDataApiKey(null);
+        AiSListManager manager = AiSListManager.instance(RuntimeEnvironment.getApplication());
+        List<String> lookedUp = new ArrayList<>();
+        manager.setHandleLookupForTesting(videoId -> {
+            lookedUp.add(videoId);
+            return Observable.just(Collections.singletonMap("@" + videoId, null));
+        });
+        List<List<String>> batches = new ArrayList<>();
+        manager.setBatchHandleLookupForTesting(videoIds -> {
+            batches.add(videoIds);
+            return Observable.just(Collections.<String, VideoChannel>emptyMap());
+        });
+        Map<String, String> videoIdByKey = new LinkedHashMap<>();
+        videoIdByKey.put("Alpha", "a");
+        videoIdByKey.put("Beta", "b");
+
+        manager.resolveHandles(videoIdByKey).blockingFirst();
+
+        assertTrue(batches.isEmpty());
+        assertEquals(Arrays.asList("a", "b"), lookedUp);
+    }
+
+    @Test
+    public void failedBatchFallsBackToOneLookupPerChannel() {
+        MediaServiceData.instance().setDataApiKey("key");
+        AiSListManager manager = AiSListManager.instance(RuntimeEnvironment.getApplication());
+        List<String> lookedUp = new ArrayList<>();
+        manager.setHandleLookupForTesting(videoId -> {
+            lookedUp.add(videoId);
+            return Observable.just(Collections.singletonMap("@" + videoId, null));
+        });
+        manager.setBatchHandleLookupForTesting(videoIds -> Observable.error(new IllegalStateException("Offline")));
+        Map<String, String> videoIdByKey = new LinkedHashMap<>();
+        videoIdByKey.put("Alpha", "a");
+        videoIdByKey.put("Beta", "b");
+
+        manager.resolveHandles(videoIdByKey).blockingFirst();
+
+        assertEquals(Arrays.asList("a", "b"), lookedUp);
+        assertEquals("@a", manager.getCachedHandle("Alpha", -1));
+    }
+
+    @Test
+    public void channelBeingLookedUpIsNotBatchedAgain() {
+        MediaServiceData.instance().setDataApiKey("key");
+        AiSListManager manager = AiSListManager.instance(RuntimeEnvironment.getApplication());
+        manager.setHandleLookupForTesting(videoId -> Observable.just(Collections.singletonMap("@" + videoId, null)));
+        PublishSubject<Map<String, VideoChannel>> firstBatch = PublishSubject.create(); // ends when the test says
+        List<List<String>> batches = new ArrayList<>();
+        manager.setBatchHandleLookupForTesting(videoIds -> {
+            batches.add(videoIds);
+            return batches.size() == 1 ? firstBatch : Observable.just(Collections.<String, VideoChannel>emptyMap());
+        });
+        List<Boolean> resolved = new ArrayList<>();
+
+        manager.resolveHandles(Collections.singletonMap("Alpha", "a")).subscribe(resolved::add);
+
+        Map<String, String> videoIdByKey = new LinkedHashMap<>();
+        videoIdByKey.put("Alpha", "a");
+        videoIdByKey.put("Beta", "b");
+        manager.resolveHandles(videoIdByKey).subscribe(resolved::add);
+
+        // The second waits for the first's lookup of Alpha
+        assertEquals(Arrays.asList(Collections.singletonList("a"), Collections.singletonList("b")), batches);
+        assertTrue(resolved.isEmpty());
+
+        firstBatch.onNext(Collections.singletonMap("a", createChannel("UCalpha", "@Alpha", "Alpha")));
+        firstBatch.onComplete();
+
+        assertEquals(Arrays.asList(true, true), resolved);
+        assertEquals("@Alpha", manager.getCachedHandle("Alpha", -1));
+    }
+
+    private static VideoChannel createChannel(String channelId, String handle, String title) {
+        return new VideoChannel() {
+            @Override
+            public String getChannelId() {
+                return channelId;
+            }
+
+            @Override
+            public String getHandle() {
+                return handle;
+            }
+
+            @Override
+            public String getTitle() {
+                return title;
+            }
+        };
     }
 
     private void setMarkEnabled(boolean enable) {

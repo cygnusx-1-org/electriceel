@@ -237,8 +237,11 @@ public class VideoCategoryManager {
         // The top row (Recommended) mixes everything, a single video left in it says nothing about the row
         AtomicBoolean isTopRowPending = new AtomicBoolean(true);
 
-        return groups.concatMap(mediaGroups -> resolve(mediaGroups)
-                .map(unused -> removeHiddenRows(mediaGroups, isTopRowPending)));
+        // The lookups of an emission start while the one before is still held (see HiddenVideoResolver).
+        // The rows are dropped as the emissions come out, in their order: the first one has the top row.
+        return groups.concatMapEager(mediaGroups -> resolve(mediaGroups).map(unused -> mediaGroups),
+                        HiddenVideoResolver.MAX_RESOLVING_EMISSIONS, 1)
+                .map(mediaGroups -> removeHiddenRows(mediaGroups, isTopRowPending));
     }
 
     /**

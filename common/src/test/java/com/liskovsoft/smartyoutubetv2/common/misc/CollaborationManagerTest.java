@@ -182,11 +182,46 @@ public class CollaborationManagerTest {
         assertEquals(3, mSearches.size());
     }
 
+    /**
+     * The channel the uploader collaborated with (see AiSListManager)
+     */
     @Test
-    public void duoChannelNeedsOneSearch() {
+    public void otherSideOfCollaborationIsFound() {
+        assertEquals("Jesser", CollaborationManager.getOtherChannelName(COLLABORATION, "sidemen"));
+        assertEquals("Sidemen", CollaborationManager.getOtherChannelName(COLLABORATION, "Jesser"));
+        assertEquals("Rock and Roll", CollaborationManager.getOtherChannelName("Rock and Roll and Jesser", "Jesser"));
+        assertNull(CollaborationManager.getOtherChannelName(COLLABORATION, "MoreSidemen"));
+        assertNull(CollaborationManager.getOtherChannelName("Sidemen", "Sidemen"));
+        assertNull(CollaborationManager.getOtherChannelName(COLLABORATION, null));
+    }
+
+    @Test
+    public void namesAreSearchedAtOnce() {
+        PublishSubject<List<String>> wholeSearch = PublishSubject.create(); // ends when the test says
+        mManager.resetForTesting(query -> COLLABORATION.equals(query) ? wholeSearch : search(query));
+        List<Boolean> done = new ArrayList<>();
+
+        mManager.resolve(Collections.singletonList(COLLABORATION)).subscribe(done::add);
+
+        // The sides don't wait for the whole name
+        assertEquals(Arrays.asList("Sidemen", "Jesser"), mSearches);
+        assertTrue(done.isEmpty());
+
+        wholeSearch.onNext(SEARCH_RESULTS.get(COLLABORATION));
+        wholeSearch.onComplete();
+
+        assertEquals(Collections.singletonList(true), done);
+        assertEquals(Boolean.TRUE, mManager.getCachedResult(COLLABORATION));
+    }
+
+    /**
+     * Its sides are searched together with it: they aren't needed in the end, but they're kept
+     */
+    @Test
+    public void duoChannelIsSearchedWithItsSides() {
         assertTrue(resolve(DUO));
 
-        assertEquals(Collections.singletonList(DUO), mSearches);
+        assertEquals(Arrays.asList(DUO, "Dan", "Phil"), mSearches);
         assertEquals(Boolean.FALSE, mManager.getCachedResult(DUO));
     }
 
@@ -207,7 +242,8 @@ public class CollaborationManagerTest {
         assertTrue(resolve(COLLABORATION));
         assertTrue(resolve(COLLABORATION));
 
-        assertEquals(Collections.singletonList(COLLABORATION), mSearches);
+        // Each name once, all at once
+        assertEquals(Arrays.asList(COLLABORATION, "Sidemen", "Jesser"), mSearches);
         assertNull(mManager.getCachedResult(COLLABORATION));
     }
 

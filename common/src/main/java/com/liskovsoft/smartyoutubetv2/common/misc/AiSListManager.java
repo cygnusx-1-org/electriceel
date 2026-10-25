@@ -6,6 +6,7 @@ import android.content.Context;
 import com.liskovsoft.mediaserviceinterfaces.MediaItemService;
 import com.liskovsoft.mediaserviceinterfaces.data.AiSListData;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
+import com.liskovsoft.mediaserviceinterfaces.data.VideoChannel;
 import com.liskovsoft.sharedutils.helpers.FileHelpers;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.sharedutils.rx.RxHelper;
@@ -40,7 +41,8 @@ import io.reactivex.subjects.BehaviorSubject;
  * Hidden channels are collected for the Blocked AI Channels section (this session only).<br/>
  * Most TV Home cards carry only the channel name. The handle of such a channel is looked up once
  * (one watch-next request for one of its videos), before the card is shown (see HiddenVideoResolver),
- * and cached on disk by the channel name. A collaboration ("X and Y") gets the handle of each of its channels.<br/>
+ * and cached on disk by the channel name. A collaboration ("X and Y") gets the handle of each of its channels.
+ * With the user's own Data API key, the channels of a row batch are looked up together instead (see {@link #startBatchLookup}).<br/>
  * A channel card is never hidden, only marked (see {@link #getChannelMarkedList}).<br/>
  * The channels reported to AiSList from this device are kept on disk, so none is sent twice (see AiSListReportPresenter).
  */
@@ -56,6 +58,7 @@ public class AiSListManager implements OnDataChange {
     private static final String PLAYLIST_CHANNEL_ID_PREFIX = "VL"; // a playlist page is opened as a channel "VL<playlist id>"
     private static final String WATCH_LATER_CHANNEL_ID = "VLWL";
     private static final String HANDLES_FILE = "aislist/handles.tsv";
+    private static final String CHANNEL_ID_KEY_PREFIX = "id:"; // the key of a card without a channel name (see getLookupKey)
     private static final Map<String, String> NO_HANDLES = Collections.emptyMap(); // the lookup failed, don't repeat it this session
     private static final long SAVE_DELAY_MS = 10_000;
     private static final int MAX_PARALLEL_LOOKUPS = 4;
@@ -66,6 +69,7 @@ public class AiSListManager implements OnDataChange {
     private final AiSListFilterData mFilterData;
     private final MediaItemService mItemService;
     private HandleLookup mHandleLookup;
+    private BatchHandleLookup mBatchHandleLookup;
     private final File mHandlesFile;
     private final File mReportedFile;
     // Lowercase handles of the channels reported from this device, the most recent last
@@ -98,6 +102,7 @@ public class AiSListManager implements OnDataChange {
         mIsWarnlistMarked = isNeverHidden(AiSListFilterData.LIST_WARNLIST);
         mItemService = YouTubeServiceManager.instance().getMediaItemService();
         mHandleLookup = mItemService::getChannelHandlesObserve;
+        mBatchHandleLookup = mItemService::getVideoChannelsObserve;
         mHandlesFile = new File(FileHelpers.getFilesDir(context), HANDLES_FILE);
         mReportedFile = new File(FileHelpers.getFilesDir(context), REPORTED_FILE);
         RxHelper.runAsync(this::restoreHandles);
@@ -111,6 +116,14 @@ public class AiSListManager implements OnDataChange {
          * an error when none is found
          */
         Observable<Map<String, String>> getChannelHandles(String videoId);
+    }
+
+    interface BatchHandleLookup {
+        /**
+         * @return video id -> the channel that uploaded it. The videos it doesn't find are left out,
+         * all of them without the user's Data API key.
+         */
+        Observable<Map<String, VideoChannel>> getVideoChannels(List<String> videoIds);
     }
 
     public static AiSListManager instance(Context context) {
@@ -362,7 +375,7 @@ public class AiSListManager implements OnDataChange {
             return author;
         }
 
-        return video.channelId != null ? "id:" + video.channelId : null;
+        return video.channelId != null ? CHANNEL_ID_KEY_PREFIX + video.channelId : null;
     }
 
     /**
@@ -406,16 +419,24 @@ public class AiSListManager implements OnDataChange {
      * @param videoIdByKey the key of the handle cache (see {@link #getLookupKey}) -> a video of the channel
      */
     public Observable<Boolean> resolveHandles(Map<String, String> videoIdByKey) {
-        List<Observable<Map<String, String>>> lookups = new ArrayList<>();
+        Map<String, String> unknown = new LinkedHashMap<>();
 
         for (Map.Entry<String, String> entry : videoIdByKey.entrySet()) {
             if (!mHandlesByAuthor.containsKey(entry.getKey())) {
-                lookups.add(getHandleLookup(entry.getKey(), entry.getValue()));
+                unknown.put(entry.getKey(), entry.getValue());
             }
         }
 
-        if (lookups.isEmpty()) {
+        if (unknown.isEmpty()) {
             return Observable.just(true);
+        }
+
+        startBatchLookup(unknown);
+
+        List<Observable<Map<String, String>>> lookups = new ArrayList<>();
+
+        for (Map.Entry<String, String> entry : unknown.entrySet()) {
+            lookups.add(getHandleLookup(entry.getKey(), entry.getValue()));
         }
 
         return Observable.fromIterable(lookups)
@@ -426,10 +447,96 @@ public class AiSListManager implements OnDataChange {
     }
 
     /**
+     * With the user's own Data API key, the channel names not being looked up already get one lookup together:
+     * two requests for 50 of them, rather than a watch-next request each (about a second on a Shield).
+     * The ones it doesn't tell get their watch-next request after it (see {@link #getBatchHandles}).
+     * @param videoIdByKey the key of the handle cache -> a video of the channel
+     */
+    private void startBatchLookup(Map<String, String> videoIdByKey) {
+        BatchHandleLookup batchLookup = mBatchHandleLookup;
+
+        if (batchLookup == null || !VideoCategoryManager.isAvailable()) {
+            return;
+        }
+
+        Map<String, String> batched = new LinkedHashMap<>();
+
+        for (Map.Entry<String, String> entry : videoIdByKey.entrySet()) {
+            if (!mRunningLookups.containsKey(entry.getKey())) {
+                batched.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        if (batched.isEmpty()) {
+            return;
+        }
+
+        Observable<Map<String, VideoChannel>> batch = batchLookup.getVideoChannels(new ArrayList<>(batched.values()))
+                .onErrorReturn(error -> {
+                    Log.e(TAG, "Can't find the handles of %s channels: %s", batched.size(), error.getMessage());
+                    return Collections.emptyMap();
+                })
+                .cache();
+
+        for (Map.Entry<String, String> entry : batched.entrySet()) {
+            String videoId = entry.getValue();
+
+            mRunningLookups.computeIfAbsent(entry.getKey(), key -> createLookup(key, batch.concatMap(found -> {
+                Map<String, String> handles = getBatchHandles(key, found.get(videoId));
+
+                return handles != null ? Observable.just(handles) : mHandleLookup.getChannelHandles(videoId);
+            })));
+        }
+    }
+
+    /**
+     * The handles of the channel name from the uploader of its video, when the card is named after the uploader
+     * (e.g. "Dan and Phil", one channel). Another name is a collaboration's: of the uploader and the other side of
+     * "X and Y", whose handle is known once a card with its name was looked up. In another language ("X y Y")
+     * it isn't told apart.
+     * @return null when the uploader doesn't tell (see {@link #startBatchLookup})
+     */
+    private Map<String, String> getBatchHandles(String author, VideoChannel channel) {
+        if (channel == null || !isHandle(channel.getHandle())) {
+            return null;
+        }
+
+        Map<String, String> uploader = Collections.singletonMap(channel.getHandle(), channel.getChannelId());
+
+        if (author.startsWith(CHANNEL_ID_KEY_PREFIX) || CollaborationManager.isSameName(author, channel.getTitle())) {
+            return uploader;
+        }
+
+        if (!CollaborationManager.isCandidate(author)) {
+            return null;
+        }
+
+        String other = CollaborationManager.getOtherChannelName(author, channel.getTitle());
+        Map<String, String> otherHandles = other != null ? mHandlesByAuthor.get(other) : null;
+
+        if (otherHandles == null || otherHandles.isEmpty()) {
+            return null;
+        }
+
+        // The uploader first, like watch-next
+        Map<String, String> result = new LinkedHashMap<>(uploader);
+        result.putAll(otherHandles);
+
+        return result;
+    }
+
+    /**
      * One lookup per channel name at a time, shared by the groups that need it
      */
     private Observable<Map<String, String>> getHandleLookup(String author, String videoId) {
-        return mRunningLookups.computeIfAbsent(author, key -> mHandleLookup.getChannelHandles(videoId)
+        return mRunningLookups.computeIfAbsent(author, key -> createLookup(author, mHandleLookup.getChannelHandles(videoId)));
+    }
+
+    /**
+     * Keeps what the lookup finds for the channel name, on disk unless it failed
+     */
+    private Observable<Map<String, String>> createLookup(String author, Observable<Map<String, String>> lookup) {
+        return lookup
                 .map(AiSListManager::copyHandles)
                 .onErrorReturn(error -> {
                     Log.e(TAG, "Can't find the handle of %s: %s", author, error.getMessage());
@@ -443,7 +550,7 @@ public class AiSListManager implements OnDataChange {
                     }
                 })
                 .doFinally(() -> mRunningLookups.remove(author))
-                .cache());
+                .cache();
     }
 
     private void restoreHandles() {
@@ -751,12 +858,21 @@ public class AiSListManager implements OnDataChange {
     }
 
     /**
-     * Looks up with the given one from now on and forgets every handle found
+     * Looks up with the given one from now on, a video at a time (see {@link #setBatchHandleLookupForTesting}),
+     * and forgets every handle found
      */
     void setHandleLookupForTesting(HandleLookup lookup) {
         mHandleLookup = lookup;
+        mBatchHandleLookup = null;
         mHandlesByAuthor.clear();
         mRunningLookups.clear();
+    }
+
+    /**
+     * Looks up the channels together with the given one first (with a Data API key, see VideoCategoryManager.isAvailable)
+     */
+    void setBatchHandleLookupForTesting(BatchHandleLookup lookup) {
+        mBatchHandleLookup = lookup;
     }
 
     /**

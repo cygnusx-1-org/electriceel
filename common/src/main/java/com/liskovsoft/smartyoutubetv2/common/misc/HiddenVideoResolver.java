@@ -28,6 +28,9 @@ import io.reactivex.Observable;
  */
 public class HiddenVideoResolver {
     private static final String TAG = HiddenVideoResolver.class.getSimpleName();
+    // The lookups of an emission start while the one before is still held, they come out in their order.
+    // More at once would crowd the requests of the rows being filled (see GroupFiller).
+    static final int MAX_RESOLVING_EMISSIONS = 2;
 
     /**
      * @param section the sidebar section of the groups built from the emission or null (e.g. search, a channel)
@@ -37,7 +40,8 @@ public class HiddenVideoResolver {
             return null;
         }
 
-        return groups.concatMap(mediaGroups -> resolve(context, mediaGroups, section).map(unused -> mediaGroups));
+        return groups.concatMapEager(mediaGroups -> resolve(context, mediaGroups, section).map(unused -> mediaGroups),
+                MAX_RESOLVING_EMISSIONS, 1);
     }
 
     /**

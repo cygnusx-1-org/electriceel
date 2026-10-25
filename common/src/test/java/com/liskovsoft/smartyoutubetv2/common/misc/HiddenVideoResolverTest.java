@@ -303,6 +303,33 @@ public class HiddenVideoResolverTest {
         assertEquals(Arrays.asList(first, second), shown);
     }
 
+    @Test
+    public void nextRowsAreLookedUpWhileTheOnesBeforeAreHeld() {
+        PublishSubject<Map<String, String>> aiLookup = PublishSubject.create(); // ends when the test says
+        AiSListManager.instance(mContext).setHandleLookupForTesting(videoId -> "ai".equals(videoId) ? aiLookup : lookupHandle(videoId));
+        mAiSListData.setHideEnabled(AiSListFilterData.LIST_BLOCKLIST, AiSListFilterData.SECTION_HOME, true);
+        List<MediaGroup> first = Collections.singletonList(createRow(createVideo("ai", AI_CHANNEL)));
+        List<MediaGroup> second = Collections.singletonList(createRow(createVideo("human", HUMAN_CHANNEL)));
+        List<MediaGroup> third = Collections.singletonList(createRow(createVideo("solo", "Sidemen")));
+        List<List<MediaGroup>> shown = new ArrayList<>();
+
+        HiddenVideoResolver.resolveGroups(mContext, Observable.just(first, second, third), createSection(MediaGroup.TYPE_HOME))
+                .subscribe(shown::add);
+
+        // The second is looked up meanwhile, the third waits for a place
+        assertTrue(shown.isEmpty());
+        assertTrue(mHandleLookups.contains("human"));
+        assertFalse(mHandleLookups.contains("solo"));
+
+        aiLookup.onNext(HANDLES.get("ai"));
+        aiLookup.onComplete();
+
+        // In their order, without the listed channel
+        assertEquals(3, shown.size());
+        assertEquals(0, VideoGroup.from(shown.get(0).get(0), createSection(MediaGroup.TYPE_HOME)).getSize());
+        assertEquals(Arrays.asList(second, third), shown.subList(1, 3));
+    }
+
     /**
      * Search and channel pages have no sidebar section: they're picked in the setting as their own sections
      */

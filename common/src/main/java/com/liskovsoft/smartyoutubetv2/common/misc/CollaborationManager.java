@@ -171,39 +171,83 @@ public class CollaborationManager {
 
     /**
      * Looks up the names the cards need, a few at a time, before they're shown (see HiddenVideoResolver).
+     * Every name a card might need is searched at once, its whole name and each side of each "and", rather than one after
+     * the other: a search takes about 0.4 s on a Shield. A name the answer doesn't need costs a search, kept like the others
+     * (e.g. the sides of "Dan and Phil", one channel).<br/>
      * Completes once every card is answered or its search failed.
      */
     public Observable<Boolean> resolve(Collection<String> authors) {
-        List<String> undecided = new ArrayList<>();
+        Map<String, String> names = new LinkedHashMap<>(); // key -> the name searched
 
         for (String author : authors) {
-            if (needsSearch(judge(author, this::getKnown))) {
-                undecided.add(author);
+            if (!needsSearch(judge(author, this::getKnown))) {
+                continue;
+            }
+
+            for (String name : getSearchNames(author)) {
+                String key = getKey(name);
+
+                if (getKnown(name) == null && !mFailedNames.contains(key)) {
+                    names.putIfAbsent(key, name);
+                }
             }
         }
 
-        if (undecided.isEmpty()) {
+        if (names.isEmpty()) {
             return Observable.just(true);
         }
 
-        return Observable.fromIterable(undecided)
-                .flatMap(this::resolveAuthor, MAX_PARALLEL_SEARCHES)
+        return Observable.fromIterable(names.values())
+                .flatMap(this::search, MAX_PARALLEL_SEARCHES)
                 .toList()
                 .map(results -> true)
                 .toObservable();
     }
 
     /**
-     * A card might need three searches, one after the other: its whole name, then each side of the "and"
+     * The names the answer for the card might need (see {@link #judge}): the whole name, then each side of each "and"
      */
-    private Observable<Boolean> resolveAuthor(String author) {
-        Verdict verdict = judge(author, this::getKnown);
+    private static List<String> getSearchNames(String author) {
+        List<String> names = new ArrayList<>();
+        names.add(author.trim());
+        names.addAll(getChannelNames(author));
+        return names;
+    }
 
-        if (!needsSearch(verdict)) {
-            return Observable.just(true);
+    /**
+     * The same channel name, without case (see {@link #getKey})
+     */
+    static boolean isSameName(String name, String other) {
+        return name != null && other != null && getKey(name).equals(getKey(other));
+    }
+
+    /**
+     * The other side of the "and" that has the channel on one side, e.g. "Jesser" for "Sidemen and Jesser" and "Sidemen"
+     * @return null when no side is that channel
+     */
+    static String getOtherChannelName(String author, String channelName) {
+        if (!isCandidate(author) || channelName == null) {
+            return null;
         }
 
-        return search(verdict.neededName).concatMap(done -> resolveAuthor(author));
+        for (int index = author.indexOf(SEPARATOR); index != -1; index = author.indexOf(SEPARATOR, index + 1)) {
+            String first = author.substring(0, index).trim();
+            String second = author.substring(index + SEPARATOR.length()).trim();
+
+            if (first.isEmpty() || second.isEmpty()) {
+                continue;
+            }
+
+            if (isSameName(first, channelName)) {
+                return second;
+            }
+
+            if (isSameName(second, channelName)) {
+                return first;
+            }
+        }
+
+        return null;
     }
 
     private boolean needsSearch(Verdict verdict) {
