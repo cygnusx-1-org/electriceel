@@ -1,5 +1,11 @@
 package com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers;
 
+import android.net.Uri;
+
+import com.google.android.exoplayer2.upstream.DataSpec;
+import com.google.android.exoplayer2.upstream.HttpDataSource.HttpDataSourceException;
+import com.google.android.exoplayer2.upstream.HttpDataSource.InvalidResponseCodeException;
+import com.google.android.exoplayer2.upstream.Loader.UnexpectedLoaderException;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.listener.PlayerEventListener;
 import com.liskovsoft.smartyoutubetv2.common.app.views.PlaybackView;
@@ -23,6 +29,10 @@ import org.robolectric.annotation.Config;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
+import java.net.SocketTimeoutException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -81,6 +91,42 @@ public class ErrorFixerControllerTest {
     }
 
     /**
+     * SABR's read timed out while it played: the same client again (it streams from the same servers), three times a video
+     */
+    @Test
+    public void aReadTimeoutWhilePlayingReloadsWithTheSameClient() throws Exception {
+        TestController controller = new TestController(video("eCRhdEua6gE"));
+        controller.onPlay();
+
+        for (int i = 0; i < 4; i++) {
+            controller.onEngineError(PlayerEventListener.ERROR_TYPE_SOURCE, PlayerEventListener.RENDERER_INDEX_UNKNOWN,
+                    new UnexpectedLoaderException(new IllegalStateException(new HttpDataSourceException(
+                            new SocketTimeoutException("timeout"), dataSpec(), HttpDataSourceException.TYPE_READ))));
+        }
+
+        // The same failure again: the first and the last of the repeats
+        List<JSONObject> events = mLog.readAll();
+
+        assertEquals(2, events.size());
+        assertEquals(Arrays.asList("network_reload 1/3", "reload_video"), getActions(events.get(0)));
+        assertEquals(Arrays.asList("switch_next_client", "reload_video"), getActions(events.get(1)));
+    }
+
+    /**
+     * A 403 while it played is the client's: switched as before
+     */
+    @Test
+    public void aResponseCodeWhilePlayingSwitchesTheClient() throws Exception {
+        TestController controller = new TestController(video("dQw4w9WgXcQ"));
+        controller.onPlay();
+
+        controller.onEngineError(PlayerEventListener.ERROR_TYPE_SOURCE, PlayerEventListener.RENDERER_INDEX_UNKNOWN,
+                new InvalidResponseCodeException(403, "Forbidden", Collections.emptyMap(), dataSpec()));
+
+        assertEquals(Arrays.asList("switch_next_client", "reload_video"), getActions(mLog.readAll().get(0)));
+    }
+
+    /**
      * Every client said it can't be played: unplayable with its why, tried again in 30 s (not each second)
      */
     @Test
@@ -113,6 +159,21 @@ public class ErrorFixerControllerTest {
         controller.runFormatErrorAction(new IllegalStateException("fromNullable result is null"));
 
         assertEquals("format_error", mLog.readAll().get(0).getString("kind"));
+    }
+
+    private static DataSpec dataSpec() {
+        return new DataSpec(Uri.parse("https://rr1---sn-test.googlevideo.com/videoplayback"));
+    }
+
+    private static List<String> getActions(JSONObject event) throws Exception {
+        JSONArray actions = event.getJSONArray("actions");
+        List<String> result = new ArrayList<>();
+
+        for (int i = 0; i < actions.length(); i++) {
+            result.add(actions.getString(i));
+        }
+
+        return result;
     }
 
     private static Video video(String videoId) {

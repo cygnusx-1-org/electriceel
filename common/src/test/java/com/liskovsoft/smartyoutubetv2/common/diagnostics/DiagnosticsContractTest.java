@@ -223,7 +223,8 @@ public class DiagnosticsContractTest {
         AppExits.recordCrash(getContext(), new Thread("main"), new IllegalStateException("Boom"));
         PlayerFailure.create(getContext(), AppExits.KIND_APP_EXIT).at(now[0] - 60_000).withoutState()
                 .detail("reason", "anr").detail("description", "Input dispatching timed out").detail("process", getContext().getPackageName())
-                .detail("foreground", true).detail("pssMb", 300L).detail("rssMb", 400L)
+                .detail("foreground", true).detail("importance", 100).detail("status", 0).detail("lowMemoryKillReport", true)
+                .detail("pssMb", 300L).detail("rssMb", 400L)
                 .detail("mainThread", new JSONArray().put("\"main\" prio=5 tid=1 Blocked"))
                 .record();
 

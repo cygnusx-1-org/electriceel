@@ -565,6 +565,8 @@ public class ExoPlayerController implements Player.EventListener {
 
         if (reason == Player.DISCONTINUITY_REASON_SEEK) {
             mFrameStepper.onSeek();
+            // Any seek (SponsorBlock, chapters, remote, not only the UI's): its buffering comes before onSeekProcessed and isn't a stall
+            FormatAttempts.onSeek();
         }
 
         mRangeMuter.onSeek();

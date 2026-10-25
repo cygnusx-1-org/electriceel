@@ -104,6 +104,12 @@ public final class AppExits {
                     .detail("description", Scrubber.scrub(exit.getDescription()))
                     .detail("process", exit.getProcessName())
                     .detail("foreground", exit.getImportance() <= RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE)
+                    // E.g. 400 cached, 125 a foreground service (background playback, the remote control)
+                    .detail("importance", exit.getImportance())
+                    // The signal of a "signaled" one (9: killed)
+                    .detail("status", exit.getStatus())
+                    // Without it the low memory killer's kills are "signaled" ones
+                    .detail("lowMemoryKillReport", ActivityManager.isLowMemoryKillReportSupported())
                     .detail("pssMb", exit.getPss() / 1024)
                     .detail("rssMb", exit.getRss() / 1024);
 

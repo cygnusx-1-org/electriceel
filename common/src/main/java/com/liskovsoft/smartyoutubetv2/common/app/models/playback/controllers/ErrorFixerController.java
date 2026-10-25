@@ -12,6 +12,7 @@ import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer.DecoderErrorE
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer.DecoderInitializationException;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrBackoffError;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrReloadPlayerError;
+import com.google.android.exoplayer2.upstream.HttpDataSource.HttpDataSourceException;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
@@ -34,12 +35,14 @@ import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.service.YouTubeServiceManager;
 import com.liskovsoft.youtubeapi.videoinfo.V2.ClientAttempts;
 
+import java.io.IOException;
 import java.util.List;
 
 public class ErrorFixerController extends BasePlayerController implements OnLongBuffering {
     private static final String TAG = ErrorFixerController.class.getSimpleName();
     private static final long STREAM_END_THRESHOLD_MS = 180_000;
     private static final int MAX_SABR_ERROR_FIX_ATTEMPTS = 3;
+    private static final int MAX_NETWORK_ERROR_RELOADS = 3;
     private static final long AUDIO_PLAYED_MS = 1_000;
     private static final int UNPLAYABLE_RELOAD_MS = 30_000;
     private static final long AUDIO_PLAYED_CHECK_MS = 2_000;
@@ -58,6 +61,11 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
     private int mAudioInitErrorCount;
     private String mSabrErrorFixVideoId;
     private int mSabrErrorFixAttempts;
+    /**
+     * The video the reloads on a broken connection are counted for (see applyNetworkErrorReload)
+     */
+    private String mNetworkErrorVideoId;
+    private int mNetworkErrorReloads;
     /**
      * Where the playback started (see onPlay)
      */
@@ -398,6 +406,45 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
         return true;
     }
 
+    /**
+     * The connection to the server broke, not its answer (e.g. a read timeout, not a 403): another client would stream from the
+     * same servers. Up to MAX_NETWORK_ERROR_RELOADS reloads a video, then the client is switched.
+     */
+    private boolean applyNetworkErrorReload(Throwable error, PlayerFailure failure) {
+        Video video = getVideo();
+
+        if (video == null || !isConnectionError(error)) {
+            return false;
+        }
+
+        if (!Helpers.equals(video.videoId, mNetworkErrorVideoId)) {
+            mNetworkErrorVideoId = video.videoId;
+            mNetworkErrorReloads = 0;
+        }
+
+        if (++mNetworkErrorReloads > MAX_NETWORK_ERROR_RELOADS) {
+            return false;
+        }
+
+        failure.action("network_reload " + mNetworkErrorReloads + "/" + MAX_NETWORK_ERROR_RELOADS);
+
+        return true;
+    }
+
+    /**
+     * The data source failed on the connection: an I/O error under it. An answer of the server (a response code, a content type)
+     * has none. SABR wraps it in an IllegalStateException (see UMPDecoder).
+     */
+    private static boolean isConnectionError(Throwable error) {
+        for (Throwable cause = error; cause != null; cause = cause.getCause()) {
+            if (cause instanceof HttpDataSourceException) {
+                return cause.getCause() instanceof IOException;
+            }
+        }
+
+        return false;
+    }
+
     private void applyEngineErrorAction(int type, int rendererIndex, Throwable error, PlayerFailure failure) {
         boolean restartEngine = true;
         boolean showMessage = true;
@@ -464,7 +511,8 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
                 failure.action("switch_next_client_now");
                 YouTubeServiceManager.instance().switchNextClientNow();
                 showMessage = true;
-            } else {
+            } else if (!applyNetworkErrorReload(error, failure)) {
+                // A broken connection (e.g. a read timeout) is only reloaded, with the same client
                 failure.action("switch_next_client");
                 YouTubeServiceManager.instance().switchNextClient(); // Response code: 403
             }
