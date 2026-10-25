@@ -78,3 +78,5 @@ backup/
 __pycache__/
 
 changelog_override.txt
+
+.env
