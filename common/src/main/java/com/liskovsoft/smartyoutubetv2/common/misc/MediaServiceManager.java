@@ -61,6 +61,7 @@ public class MediaServiceManager implements OnAccountChange {
     private static final int MIN_SCALED_ROW_GROUP_SIZE = 10;
     private final GroupFiller mGroupFiller = new GroupFiller();
     private final List<AccountChangeListener> mAccountListeners = new CopyOnWriteArrayList<>();
+    private boolean mIsPlaybackWarmedUp;
 
     public interface OnMetadata {
         void onMetadata(MediaItemMetadata metadata);
@@ -243,6 +244,26 @@ public class MediaServiceManager implements OnAccountChange {
                 item,
                 mediaGroupList -> callback.onMediaGroup(mediaGroupList.get(0))
         );
+    }
+
+    /**
+     * Once per run, when the first videos are shown: the first one opened needn't wait for what the formats of the run's first
+     * video wait for (see ServiceManager#warmUpPlayback)
+     */
+    public void warmUpPlaybackIfNeeded(VideoGroup group) {
+        if (mIsPlaybackWarmedUp || group == null || group.isEmpty()) {
+            return;
+        }
+
+        // For the languages that subtitles translate to: a live stream may have none
+        Video video = Helpers.findFirst(group.getVideos(), item -> item.videoId != null && !item.isLive && !item.isUpcoming);
+
+        if (video == null) {
+            return;
+        }
+
+        mIsPlaybackWarmedUp = true;
+        YouTubeServiceManager.instance().warmUpPlayback(video.videoId);
     }
 
     public void loadFormatInfo(Video item, OnFormatInfo onFormatInfo) {

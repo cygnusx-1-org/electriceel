@@ -960,6 +960,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
                             for (VideoGroup videoGroup : videoGroups) {
                                 getView().updateSection(videoGroup);
                                 mBrowseProcessor.process(videoGroup);
+                                MediaServiceManager.instance().warmUpPlaybackIfNeeded(videoGroup);
 
                                 continueGroupIfNeeded(videoGroup, false);
                             }
@@ -1060,6 +1061,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
                             appendLocalHistory(videoGroup);
                             getView().updateSection(videoGroup);
                             mBrowseProcessor.process(videoGroup);
+                            MediaServiceManager.instance().warmUpPlaybackIfNeeded(videoGroup);
 
                             continueGroupIfNeeded(videoGroup);
                         },

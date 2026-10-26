@@ -32,6 +32,8 @@ import com.liskovsoft.youtubeapi.videoinfo.V2.ClientAttempts;
 
 import java.util.Collections;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 
 public class VideoLoaderController extends BasePlayerController {
@@ -43,6 +45,11 @@ public class VideoLoaderController extends BasePlayerController {
     private ErrorFixerController mErrorFixerController;
     private CensoredWordsController mCensoredWordsController;
     private Disposable mFormatInfoAction;
+    /**
+     * Fetched while the engine starts (see prefetchFormatInfo), for the video in mPrefetchVideoId
+     */
+    private Observable<MediaItemFormatInfo> mPrefetchedFormatInfo;
+    private String mPrefetchVideoId;
     private Disposable mMusicAutoplayAction;
     /**
      * Where the formats in use are from and how they're played (see PlayerFailure#source), of the video in mFormatVideoId
@@ -105,6 +112,7 @@ public class VideoLoaderController extends BasePlayerController {
             loadVideo(item); // force play immediately even the same video
         } else {
             mPendingVideo = item;
+            prefetchFormatInfo(item);
         }
     }
 
@@ -271,14 +279,48 @@ public class VideoLoaderController extends BasePlayerController {
         Utils.post(mShowProgressBar);
         disposeActions();
 
-        ServiceManager service = YouTubeServiceManager.instance();
-        MediaItemService mediaItemManager = service.getMediaItemService();
-        mFormatInfoAction = mediaItemManager.getFormatInfoObserve(video.videoId)
+        mFormatInfoAction = takeFormatInfoObserve(video)
                 .subscribe(this::processFormatInfo,
                            error -> {
-                               getPlayer().showProgressBar(false);
+                               if (getPlayer() != null) {
+                                   getPlayer().showProgressBar(false);
+                               }
                                mErrorFixerController.runFormatErrorAction(error);
                            });
+    }
+
+    /**
+     * The formats are fetched while the engine starts, rather than after: the load of the video gets them (see takeFormatInfoObserve)
+     */
+    private void prefetchFormatInfo(Video video) {
+        if (video.videoId == null) {
+            return;
+        }
+
+        // Cached: its fetch isn't disposed with the load, which waits for it rather than fetching again
+        mPrefetchedFormatInfo = getFormatInfoObserve(video.videoId).cache();
+        mPrefetchVideoId = video.videoId;
+        RxHelper.execute(mPrefetchedFormatInfo, error -> {}); // the load handles the error
+    }
+
+    /**
+     * The formats fetched while the engine started, once. A reload of the video fetches them again.
+     */
+    private Observable<MediaItemFormatInfo> takeFormatInfoObserve(Video video) {
+        Observable<MediaItemFormatInfo> prefetched = Helpers.equals(video.videoId, mPrefetchVideoId) ? mPrefetchedFormatInfo : null;
+
+        mPrefetchedFormatInfo = null;
+        mPrefetchVideoId = null;
+
+        // Delivered after the load returns, like a fetch: a prefetch that's done (e.g. its formats were cached) would otherwise reach
+        // the player inside onEngineInitialized, before the other controllers have had theirs
+        return prefetched != null ? prefetched.observeOn(AndroidSchedulers.mainThread()) : getFormatInfoObserve(video.videoId);
+    }
+
+    private static Observable<MediaItemFormatInfo> getFormatInfoObserve(String videoId) {
+        ServiceManager service = YouTubeServiceManager.instance();
+        MediaItemService mediaItemManager = service.getMediaItemService();
+        return mediaItemManager.getFormatInfoObserve(videoId);
     }
 
     private void processFormatInfo(MediaItemFormatInfo formatInfo) {
