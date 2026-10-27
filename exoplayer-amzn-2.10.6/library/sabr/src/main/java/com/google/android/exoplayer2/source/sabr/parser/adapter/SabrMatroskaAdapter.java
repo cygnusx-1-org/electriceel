@@ -13,14 +13,17 @@ import java.io.IOException;
 
 public class SabrMatroskaAdapter extends MatroskaExtractor {
     private static final String TAG = SabrMatroskaAdapter.class.getSimpleName();
+    private final SabrStream sabrStream;
     private final SabrExtractorInput extractorInput;
 
     public SabrMatroskaAdapter(SabrStream sabrStream) {
+        this.sabrStream = sabrStream;
         this.extractorInput = new SabrExtractorInput(sabrStream);
     }
 
     public SabrMatroskaAdapter(int flags, SabrStream sabrStream) {
         super(flags);
+        this.sabrStream = sabrStream;
         this.extractorInput = new SabrExtractorInput(sabrStream);
     }
 
@@ -38,6 +41,14 @@ public class SabrMatroskaAdapter extends MatroskaExtractor {
         } catch (Exception e) {
             Log.e(TAG, "User doing seek? %s: %s", e.getClass().getSimpleName(), e.getMessage());
             e.printStackTrace();
+
+            IOException connectionError = SabrStream.getConnectionError(e);
+
+            if (connectionError != null) {
+                // FIX: the connection broke in the middle of the response. A media network that stalls is left as after a
+                // failed load (see DefaultSabrChunkSource.onChunkLoadCompleted).
+                sabrStream.setResponseError(connectionError);
+            }
         } finally {
             if (result != RESULT_CONTINUE) {
                 Log.e(TAG, "MatroskaAdapter: disposing, result=%s", result);

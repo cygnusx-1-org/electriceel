@@ -19,14 +19,17 @@ import java.util.List;
 
 public class SabrFragmentedMp4Adapter extends FragmentedMp4Extractor {
     private static final String TAG = SabrFragmentedMp4Adapter.class.getSimpleName();
+    private final SabrStream sabrStream;
     private final SabrExtractorInput extractorInput;
 
     public SabrFragmentedMp4Adapter(SabrStream sabrStream) {
+        this.sabrStream = sabrStream;
         this.extractorInput = new SabrExtractorInput(sabrStream);
     }
 
     public SabrFragmentedMp4Adapter(int flags, SabrStream sabrStream) {
         super(flags);
+        this.sabrStream = sabrStream;
         this.extractorInput = new SabrExtractorInput(sabrStream);
     }
 
@@ -35,6 +38,7 @@ public class SabrFragmentedMp4Adapter extends FragmentedMp4Extractor {
             @Nullable TimestampAdjuster timestampAdjuster,
             SabrStream sabrStream) {
         super(flags, timestampAdjuster);
+        this.sabrStream = sabrStream;
         this.extractorInput = new SabrExtractorInput(sabrStream);
     }
 
@@ -45,6 +49,7 @@ public class SabrFragmentedMp4Adapter extends FragmentedMp4Extractor {
             @Nullable DrmInitData sideloadedDrmInitData,
             SabrStream sabrStream) {
         super(flags, timestampAdjuster, sideloadedTrack, sideloadedDrmInitData);
+        this.sabrStream = sabrStream;
         this.extractorInput = new SabrExtractorInput(sabrStream);
     }
 
@@ -56,6 +61,7 @@ public class SabrFragmentedMp4Adapter extends FragmentedMp4Extractor {
             List<Format> closedCaptionFormats,
             SabrStream sabrStream) {
         super(flags, timestampAdjuster, sideloadedTrack, sideloadedDrmInitData, closedCaptionFormats);
+        this.sabrStream = sabrStream;
         this.extractorInput = new SabrExtractorInput(sabrStream);
     }
 
@@ -68,6 +74,7 @@ public class SabrFragmentedMp4Adapter extends FragmentedMp4Extractor {
             @Nullable TrackOutput additionalEmsgTrackOutput,
             SabrStream sabrStream) {
         super(flags, timestampAdjuster, sideloadedTrack, sideloadedDrmInitData, closedCaptionFormats, additionalEmsgTrackOutput);
+        this.sabrStream = sabrStream;
         this.extractorInput = new SabrExtractorInput(sabrStream);
     }
 
@@ -79,6 +86,18 @@ public class SabrFragmentedMp4Adapter extends FragmentedMp4Extractor {
         try {
             extractorInput.init(input);
             result = super.read(extractorInput, seekPosition);
+        } catch (IOException | IllegalStateException e) {
+            IOException connectionError = SabrStream.getConnectionError(e);
+
+            if (connectionError == null) {
+                throw e;
+            }
+
+            // FIX: a retry would resume the response at a byte offset, which a SABR request can't do ("Unknown part
+            // encountered"), and fail the playback. The chunk ends with the media it has instead: the next request
+            // gets the segment again, and SabrSampleDeduplicator drops what is already queued.
+            Log.e(TAG, "Mp4Adapter: the response broke off: %s", e.getMessage());
+            sabrStream.setResponseError(connectionError);
         } finally {
             if (result != RESULT_CONTINUE) {
                 Log.e(TAG, "Mp4Adapter: disposing, result=%s", result);

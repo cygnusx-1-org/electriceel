@@ -13,6 +13,7 @@ import com.google.android.exoplayer2.extractor.Extractor;
 import com.google.android.exoplayer2.extractor.TrackOutput;
 import com.google.android.exoplayer2.extractor.rawcc.RawCcExtractor;
 import com.google.android.exoplayer2.source.BehindLiveWindowException;
+import com.google.android.exoplayer2.source.chunk.BaseMediaChunkOutput;
 import com.google.android.exoplayer2.source.chunk.Chunk;
 import com.google.android.exoplayer2.source.chunk.ChunkExtractorWrapper;
 import com.google.android.exoplayer2.source.chunk.ChunkHolder;
@@ -125,6 +126,7 @@ public class DefaultSabrChunkSource implements SabrChunkSource {
     private long liveEdgeTimeUs;
 
     @Nullable private final SabrStream sabrStream;
+    @Nullable private final SabrSampleDeduplicator sampleDeduplicator;
     private final Map<String, String> sabrHeaders;
     private int nexChunkIdx = -1;
     private long pendingSeekTimeUs = C.TIME_UNSET;
@@ -201,6 +203,7 @@ public class DefaultSabrChunkSource implements SabrChunkSource {
                             stream);
         }
         this.sabrStream = stream;
+        this.sampleDeduplicator = stream != null ? new SabrSampleDeduplicator(stream) : null;
     }
 
     @Override
@@ -271,7 +274,11 @@ public class DefaultSabrChunkSource implements SabrChunkSource {
         if (fatalError != null || trackSelection.length() < 2) {
             return queue.size();
         }
-        return trackSelection.evaluateQueueSize(playbackPositionUs, queue);
+        int preferredQueueSize = trackSelection.evaluateQueueSize(playbackPositionUs, queue);
+        if (preferredQueueSize < queue.size() && sampleDeduplicator != null) {
+            sampleDeduplicator.reset(); // the queued chunks past the preferred size may be discarded
+        }
+        return preferredQueueSize;
     }
 
     @Override
@@ -422,6 +429,9 @@ public class DefaultSabrChunkSource implements SabrChunkSource {
         //}
 
         long seekTimeUs = queue.isEmpty() ? loadPositionUs : C.TIME_UNSET;
+        if (queue.isEmpty() && sampleDeduplicator != null) {
+            sampleDeduplicator.reset(); // nothing is queued
+        }
         if (sabrStream != null) {
             if (seekTimeUs != C.TIME_UNSET) {
                 pendingSeekTimeUs = seekTimeUs;
@@ -475,6 +485,13 @@ public class DefaultSabrChunkSource implements SabrChunkSource {
         if (playerTrackEmsgHandler != null) {
             playerTrackEmsgHandler.onChunkLoadCompleted(chunk);
         }
+        // FIX: the connection broke in the middle of the response, which ended the chunk early (see
+        // SabrFragmentedMp4Adapter, SabrMatroskaAdapter). A media network that stalls is left as after a failed load.
+        IOException responseError = sabrStream != null ? sabrStream.pollResponseError() : null;
+        if (responseError != null && isEndpointConnectionFailure(chunk, responseError)
+                && manifest.maybeUseNextCdn(chunk.dataSpec.uri.toString())) {
+            Log.w(TAG, "Requesting the rest of the segment on an alternate media network");
+        }
     }
 
     @Override
@@ -496,6 +513,7 @@ public class DefaultSabrChunkSource implements SabrChunkSource {
         if (!(chunk instanceof SingleSampleMediaChunk) && isEndpointConnectionFailure(chunk, e)) {
             if (manifest.maybeUseNextCdn(chunk.dataSpec.uri.toString())) {
                 Log.w(TAG, "Retrying SABR request on an alternate media network");
+                resetSampleDeduplicator(); // the chunk is discarded with its samples
                 return true;
             }
 
@@ -505,6 +523,7 @@ public class DefaultSabrChunkSource implements SabrChunkSource {
         }
         if (playerTrackEmsgHandler != null
                 && playerTrackEmsgHandler.maybeRefreshManifestOnLoadingError(chunk)) {
+            resetSampleDeduplicator(); // the chunk is discarded with its samples
             return true;
         }
         // Workaround for missing segment at the end of the period
@@ -522,8 +541,18 @@ public class DefaultSabrChunkSource implements SabrChunkSource {
         //        }
         //    }
         //}
-        return blacklistDurationMs != C.TIME_UNSET
+        boolean blacklisted = blacklistDurationMs != C.TIME_UNSET
                 && trackSelection.blacklist(trackSelection.indexOf(chunk.trackFormat), blacklistDurationMs);
+        if (blacklisted) {
+            resetSampleDeduplicator(); // the chunk is discarded with its samples
+        }
+        return blacklisted;
+    }
+
+    private void resetSampleDeduplicator() {
+        if (sampleDeduplicator != null) {
+            sampleDeduplicator.reset();
+        }
     }
 
     private static boolean isEndpointConnectionFailure(Chunk chunk, Exception error) {
@@ -718,7 +747,13 @@ public class DefaultSabrChunkSource implements SabrChunkSource {
                 firstSegmentNum,
                 segmentCount,
                 sampleOffsetUs,
-                representationHolder.extractorWrapper);
+                representationHolder.extractorWrapper) {
+            @Override
+            protected ChunkExtractorWrapper.TrackOutputProvider getTrackOutputProvider(BaseMediaChunkOutput output) {
+                // FIX: a response that ends mid-segment makes the server send that segment again
+                return sampleDeduplicator != null ? sampleDeduplicator.wrap(this, output) : output;
+            }
+        };
 
         //if (representationHolder.extractorWrapper == null) {
         //    long endTimeUs = representationHolder.getSegmentEndTimeUs(firstSegmentNum);

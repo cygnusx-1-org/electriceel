@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Build.VERSION;
 import android.view.Window;
+import androidx.annotation.Nullable;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.smartyoutubetv2.common.autoframerate.internal.DisplayHolder.Mode;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs;
@@ -38,6 +39,10 @@ public class DisplaySyncHelper implements UhdHelperListener {
         void onModeStart(Mode newMode);
         void onModeError(Mode newMode);
         void onModeCancel();
+        /**
+         * The display reported the end of a mode switch
+         */
+        void onModeEnd();
     }
 
     public DisplaySyncHelper(Context context) {
@@ -328,12 +333,13 @@ public class DisplaySyncHelper implements UhdHelperListener {
 
         if (mNewMode == null) {
             Log.d(TAG, "Ignore mode change. AFR isn't activated.");
+            notifyModeEnd();
             return;
         }
 
         Mode currentMode = getUhdHelper().getCurrentMode();
 
-        if (mode == null && currentMode == null) {
+        if (currentMode == null) {
             Log.e(TAG, "Mode change failure. Internal error occurred.");
         } else {
             if (currentMode.getModeId() != mNewMode.getModeId()) {
@@ -347,6 +353,14 @@ public class DisplaySyncHelper implements UhdHelperListener {
             } else {
                 Log.d(TAG, "Mode changed successfully");
             }
+        }
+
+        notifyModeEnd();
+    }
+
+    private void notifyModeEnd() {
+        if (mListener != null) {
+            mListener.onModeEnd();
         }
     }
 
@@ -378,29 +392,8 @@ public class DisplaySyncHelper implements UhdHelperListener {
             Log.d(TAG, "Modes supported by device:");
             Log.d(TAG, Arrays.asList(modes));
 
-            boolean needResolutionSwitch = false;
-
-            List<Mode> resultModes = new ArrayList<>();
-
-            if (mIsResolutionSwitchEnabled) {
-                resultModes = filterModesByWidth(modes, Math.max(videoWidth, HD));
-            }
-
-            if (!resultModes.isEmpty()) {
-                needResolutionSwitch = true;
-            }
-
-            Log.i(TAG, "Need resolution switch: " + needResolutionSwitch);
-
             Mode currentMode = mUhdHelper.getCurrentMode();
-
-            if (!needResolutionSwitch) {
-                resultModes = filterSameResolutionModes(modes, currentMode);
-            }
-
-            // Rate boundaries slightly increased to perfect compare between two floats
-            boolean skipFps = mIsSkip24RateEnabled && videoFramerate >= 23.96 && videoFramerate <= 24.98 && currentMode != null;
-            Mode closerMode = findCloserMode(resultModes, skipFps ? currentMode.getRefreshRate() : videoFramerate);
+            Mode closerMode = findMode(modes, currentMode, videoWidth, videoFramerate);
 
             if (closerMode == null) {
                 String msg = "Could not find closer refresh rate for " + videoFramerate + "fps";
@@ -434,6 +427,46 @@ public class DisplaySyncHelper implements UhdHelperListener {
         }
 
         return false;
+    }
+
+    /**
+     * Whether syncDisplayMode would switch the display mode for the video
+     */
+    public boolean isModeSwitchNeeded(int videoWidth, float videoFramerate) {
+        if (!supportsDisplayModeChange() || videoWidth < 10) {
+            return false;
+        }
+
+        Mode currentMode = getUhdHelper().getCurrentMode();
+        Mode closerMode = findMode(getUhdHelper().getSupportedModes(), currentMode, videoWidth, videoFramerate);
+
+        return closerMode != null && !closerMode.equals(currentMode);
+    }
+
+    @Nullable
+    private Mode findMode(Mode[] modes, Mode currentMode, int videoWidth, float videoFramerate) {
+        boolean needResolutionSwitch = false;
+
+        List<Mode> resultModes = new ArrayList<>();
+
+        if (mIsResolutionSwitchEnabled) {
+            resultModes = filterModesByWidth(modes, Math.max(videoWidth, HD));
+        }
+
+        if (!resultModes.isEmpty()) {
+            needResolutionSwitch = true;
+        }
+
+        Log.i(TAG, "Need resolution switch: " + needResolutionSwitch);
+
+        if (!needResolutionSwitch) {
+            resultModes = filterSameResolutionModes(modes, currentMode);
+        }
+
+        // Rate boundaries slightly increased to perfect compare between two floats
+        boolean skipFps = mIsSkip24RateEnabled && videoFramerate >= 23.96 && videoFramerate <= 24.98 && currentMode != null;
+
+        return findCloserMode(resultModes, skipFps ? currentMode.getRefreshRate() : videoFramerate);
     }
 
     public void resetMode(Window window) {

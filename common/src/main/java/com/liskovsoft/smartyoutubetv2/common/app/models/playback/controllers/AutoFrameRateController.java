@@ -33,11 +33,16 @@ public class AutoFrameRateController extends BasePlayerController implements Aut
     private static final int AUTO_FRAME_RATE_MODES_ID = 23;
     private static final long SHORTS_DURATION_MIN_MS = 30 * 1_000;
     private static final long SHORTS_DURATION_MAX_MS = 61 * 1_000;
+    /** The longest wait for the display to report a mode switch */
+    private static final long MODE_SWITCH_TIMEOUT_MS = 5_000;
     private final AutoFrameRateHelper mAutoFrameRateHelper;
     private final ModeSyncManager mModeSyncManager;
     private final Runnable mApplyAfr = this::applyAfr;
     private final Runnable mApplyAfrStop = this::applyAfrStop;
     private boolean mIsPlay;
+    private boolean mIsHeld;
+    private boolean mIsHeldPlay;
+    private final Runnable mReleasePlayback = this::releasePlayback;
     private VideoStateController mStateController;
     private HQDialogController mHQDialogController;
     private final Runnable mPlaybackResumeHandler = () -> {
@@ -73,6 +78,7 @@ public class AutoFrameRateController extends BasePlayerController implements Aut
     @Override
     public void onVideoLoaded(Video item) {
         savePlayback();
+        maybeHoldPlayback();
 
         // Sometimes AFR is not working on activity startup. Trying to fix with delay.
         applyAfrDelayed();
@@ -95,6 +101,9 @@ public class AutoFrameRateController extends BasePlayerController implements Aut
         Log.d(TAG, message);
         //MessageHelpers.showLongMessage(getActivity(), message);
         maybePausePlayback();
+        if (getPlayerData().getAfrPauseMs() == 0) {
+            holdPlayback();
+        }
         getPlayerData().setAfrSwitchTimeMs(System.currentTimeMillis());
     }
 
@@ -111,15 +120,24 @@ public class AutoFrameRateController extends BasePlayerController implements Aut
         // Seems that the device doesn't support direct mode switching.
         // Use tvQuickActions instead.
         maybePausePlayback();
+        releasePlayback();
     }
 
     @Override
     public void onModeCancel() {
         restorePlayback();
+        releasePlayback();
+    }
+
+    @Override
+    public void onModeEnd() {
+        releasePlayback();
     }
 
     @Override
     public void onEngineReleased() {
+        releasePlayback();
+
         if (getPlayerData().isAfrEnabled()) {
             applyAfrStopDelayed();
         }
@@ -212,6 +230,51 @@ public class AutoFrameRateController extends BasePlayerController implements Aut
         }
 
         Utils.postDelayed(mPlaybackResumeHandler, delayMs);
+    }
+
+    /**
+     * Holds the playback from the start when the display mode will switch for the video (see holdPlayback)
+     */
+    private void maybeHoldPlayback() {
+        if (getPlayer() != null && getPlayerData().getAfrPauseMs() == 0 && !skipAfr() && getPlayerData().isAfrEnabled()
+                && mAutoFrameRateHelper.isModeSwitchNeeded(getPlayer().getVideoFormat())) {
+            holdPlayback();
+        }
+    }
+
+    /**
+     * FIX: a mode switch stalls the video for up to 2 seconds while the audio plays on, so the video falls behind. Without a
+     * pause chosen by the user, the playback waits for the display to report the new mode instead.
+     */
+    private void holdPlayback() {
+        if (getPlayer() == null) {
+            return;
+        }
+
+        if (!mIsHeld) {
+            mIsHeld = true;
+            mIsHeldPlay = mStateController.isPlayEnabled(); // the pause below clears it
+            mStateController.blockPlay(true);
+            getPlayer().setPlayWhenReady(false);
+        }
+
+        Utils.removeCallbacks(mReleasePlayback);
+        Utils.postDelayed(mReleasePlayback, MODE_SWITCH_TIMEOUT_MS); // the display may never report it
+    }
+
+    private void releasePlayback() {
+        Utils.removeCallbacks(mReleasePlayback);
+
+        if (!mIsHeld) {
+            return;
+        }
+
+        mIsHeld = false;
+        mStateController.blockPlay(false);
+
+        if (getPlayer() != null) {
+            getPlayer().setPlayWhenReady(mIsHeldPlay);
+        }
     }
 
     private void savePlayback() {

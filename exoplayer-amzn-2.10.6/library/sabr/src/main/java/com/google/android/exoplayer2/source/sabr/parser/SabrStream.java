@@ -1,6 +1,7 @@
 package com.google.android.exoplayer2.source.sabr.parser;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.android.exoplayer2.extractor.ExtractorInput;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.MediaSegmentMismatchError;
@@ -35,12 +36,15 @@ import com.google.android.exoplayer2.source.sabr.protos.videostreaming.SabrSeek;
 import com.google.android.exoplayer2.source.sabr.protos.videostreaming.StreamProtectionStatus;
 import com.google.android.exoplayer2.source.sabr.protos.videostreaming.StreamerContext;
 import com.google.android.exoplayer2.source.sabr.protos.videostreaming.StreamerContext.ClientInfo;
+import com.google.android.exoplayer2.upstream.HttpDataSource.HttpDataSourceException;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.sharedutils.querystringparser.UrlQueryString;
 import com.liskovsoft.sharedutils.querystringparser.UrlQueryStringFactory;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.net.SocketTimeoutException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -83,6 +87,9 @@ public class SabrStream {
     private boolean receivedNewSegments;
     private String url;
     private List<? extends  SabrPart> multiResult = null;
+    private int segmentItag = -1;
+    private long segmentSequenceNumber = -1;
+    @Nullable private volatile IOException responseError;
 
     private static class NoSegmentsTracker {
         public int consecutiveRequests = 0;
@@ -155,7 +162,61 @@ public class SabrStream {
             }
         }
 
+        if (result instanceof MediaSegmentDataSabrPart) {
+            MediaSegmentDataSabrPart data = (MediaSegmentDataSabrPart) result;
+            segmentItag = data.formatId.getItag();
+            segmentSequenceNumber = data.sequenceNumber;
+        }
+
         return result != null ? result : multiResult != null && !multiResult.isEmpty() ? multiResult.remove(0) : null;
+    }
+
+    /**
+     * Itag of the segment whose media is being read, -1 before the first one.
+     */
+    public int getSegmentItag() {
+        return segmentItag;
+    }
+
+    /**
+     * Sequence number of the segment whose media is being read, -1 before the first one or for an init segment.
+     */
+    public long getSegmentSequenceNumber() {
+        return segmentSequenceNumber;
+    }
+
+    /**
+     * The connection broke in the middle of a response, which ended early with the media it had.
+     */
+    public void setResponseError(IOException error) {
+        responseError = error;
+    }
+
+    /**
+     * The connection error that ended a response early since the last call, null if none did.
+     */
+    @Nullable
+    public IOException pollResponseError() {
+        IOException error = responseError;
+        responseError = null;
+        return error;
+    }
+
+    /**
+     * The data source failed on the connection: an I/O error under it. An answer of the server (a response code, a content type)
+     * has none, and an interrupted read is a canceled load. SABR wraps it in an IllegalStateException (see UMPDecoder).
+     */
+    @Nullable
+    public static IOException getConnectionError(Throwable error) {
+        for (Throwable cause = error; cause != null; cause = cause.getCause()) {
+            if (cause instanceof HttpDataSourceException) {
+                Throwable ioError = cause.getCause();
+                boolean canceled = ioError instanceof InterruptedIOException && !(ioError instanceof SocketTimeoutException);
+                return ioError instanceof IOException && !canceled ? (IOException) cause : null;
+            }
+        }
+
+        return null;
     }
 
     public void reset() {

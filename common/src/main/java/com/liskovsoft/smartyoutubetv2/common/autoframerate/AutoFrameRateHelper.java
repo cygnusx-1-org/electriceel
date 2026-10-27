@@ -43,6 +43,14 @@ public class AutoFrameRateHelper {
         apply(activity, format, false);
     }
 
+    /**
+     * Whether apply would switch the display mode for the video
+     */
+    public boolean isModeSwitchNeeded(FormatItem format) {
+        return format != null && isSupported() && System.currentTimeMillis() - mPrevCall >= THROTTLE_INTERVAL_MS
+                && mSyncHelper.isModeSwitchNeeded(format.getWidth(), correctFrameRate(format.getFrameRate()));
+    }
+
     public boolean isSupported() {
         resetStats();
         return mSyncHelper.supportsDisplayModeChangeComplex();
