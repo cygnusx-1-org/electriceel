@@ -2,6 +2,8 @@ package com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import com.liskovsoft.appupdatechecker2.AppUpdateChecker;
 import com.liskovsoft.appupdatechecker2.AppUpdateCheckerListener;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
@@ -22,10 +24,16 @@ import java.util.List;
 public class AppUpdatePresenter extends BasePresenter<Void> implements AppUpdateCheckerListener {
     @SuppressLint("StaticFieldLeak")
     private static AppUpdatePresenter sInstance;
+    // Waits before the second and the third attempt of a forced check
+    private static final long[] RETRY_DELAYS_MS = {10_000, 20_000};
     private final AppUpdateChecker mUpdateChecker;
     private final AppDialogPresenter mSettingsPresenter;
     private final String[] mUpdateManifestUrls;
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
+    private final Runnable mRetryCheck = this::forceCheck;
     private boolean mIsForceCheck;
+    private boolean mIsForceCheckRunning;
+    private int mFailedAttempts;
 
     public AppUpdatePresenter(Context context) {
         super(context);
@@ -45,24 +53,54 @@ public class AppUpdatePresenter extends BasePresenter<Void> implements AppUpdate
     }
 
     public static void unhold() {
+        if (sInstance != null) {
+            sInstance.stopForceCheck();
+        }
+
         sInstance = null;
     }
 
+    /**
+     * After the app is finished: no retries and no messages
+     */
+    void stopForceCheck() {
+        mIsForceCheck = false;
+        mIsForceCheckRunning = false;
+        mHandler.removeCallbacks(mRetryCheck);
+    }
+
     public void start(boolean forceCheck) {
+        // The running forced check reports back, after its retries
+        if (mIsForceCheckRunning) {
+            return;
+        }
+
         mIsForceCheck = forceCheck;
 
         if (forceCheck) {
+            mIsForceCheckRunning = true;
+            mFailedAttempts = 0;
             LoadingManager.showLoading(getContext(), true);
-            mUpdateChecker.forceCheckForUpdates(mUpdateManifestUrls);
+            forceCheck();
         } else {
             mUpdateChecker.checkForUpdates(mUpdateManifestUrls);
         }
     }
 
+    void forceCheck() {
+        mUpdateChecker.forceCheckForUpdates(mUpdateManifestUrls);
+    }
+
+    private void finishForceCheck() {
+        mIsForceCheckRunning = false;
+        mHandler.removeCallbacks(mRetryCheck);
+        LoadingManager.showLoading(getContext(), false);
+    }
+
     @Override
     public void onUpdateFound(String versionName, List<String> changelog, String apkPath) {
         if (mIsForceCheck) {
-            LoadingManager.showLoading(getContext(), false);
+            finishForceCheck();
             showUpdateDialog(versionName, changelog, apkPath);
         } else if (GeneralData.instance(getContext()).isOldUpdateNotificationsEnabled()) {
             showUpdateDialog(versionName, changelog, apkPath);
@@ -74,13 +112,21 @@ public class AppUpdatePresenter extends BasePresenter<Void> implements AppUpdate
     @Override
     public void onUpdateError(Exception error) {
         if (mIsForceCheck) {
-            LoadingManager.showLoading(getContext(), false);
+            boolean isLatestVersion = AppUpdateCheckerListener.LATEST_VERSION.equals(error.getMessage());
 
-            if (AppUpdateCheckerListener.LATEST_VERSION.equals(error.getMessage())) {
+            if (!isLatestVersion && mFailedAttempts < RETRY_DELAYS_MS.length) {
+                // The spinner stays while waiting
+                mHandler.postDelayed(mRetryCheck, RETRY_DELAYS_MS[mFailedAttempts++]);
+                return;
+            }
+
+            finishForceCheck();
+
+            if (isLatestVersion) {
                 MessageHelpers.showMessage(getContext(), R.string.update_not_found);
             } else {
                 MessageHelpers.showMessage(getContext(), String.format("%s: %s", getContext().getString(R.string.update_error),
-                        error.getCause() != null ? error.getCause().getMessage() : error.getMessage()));
+                        getContext().getString(R.string.update_try_again_later)));
             }
         }
 

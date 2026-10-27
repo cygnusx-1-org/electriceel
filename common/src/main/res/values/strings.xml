@@ -562,6 +562,7 @@
     <string name="data_api_key_fails">The YouTube Data API key doesn\'t work: %s</string>
     <string name="finish_on_disconnect">Close the app after disconnecting the phone/tablet</string>
     <string name="update_error">Update error</string>
+    <string name="update_try_again_later">try again later</string>
     <string name="hide_shorts_from_search">Hide shorts from the search result</string>
     <string name="hide_shorts_from_history">Hide shorts from History</string>
     <string name="hide_shorts_from_sports">Hide shorts from Sports</string>
