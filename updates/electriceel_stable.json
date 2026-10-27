@@ -1,13 +1,25 @@
 {
   "package": {
     "downloadUrlList_arm64-v8a": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.68.3/ElectricEel_stable_32.68.3_arm64-v8a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.68.4/ElectricEel_stable_32.68.4_arm64-v8a.apk"
     ],
     "downloadUrlList_armeabi-v7a": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.68.3/ElectricEel_stable_32.68.3_armeabi-v7a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.68.4/ElectricEel_stable_32.68.4_armeabi-v7a.apk"
     ],
     "downloadUrlList": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.68.3/ElectricEel_stable_32.68.3_armeabi-v7a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.68.4/ElectricEel_stable_32.68.4_armeabi-v7a.apk"
+    ]
+  },
+  "32.68.4": {
+    "versionCode": 2458,
+    "changelog": [
+      "Implemented Make playback post SponsorBlock jumps smoother #37",
+      "Implemented Enhance the speed of loading of videos #56",
+      "Fixed [BUG]: Wrong bitrate chosen for normal Opus when previous video used Opus DRC or Voice Enhanced #57",
+      "Removed Player > HQ button > Audio formats auto-save",
+      "Added Settings > Player > Audio > Formats",
+      "Implemented Enhance the speed of the loading of the Home feed #55",
+      "Added \"Settings > Updates > Release notes\" with the latest ten GitHub releases rendered like GitHub"
     ]
   },
   "32.68.3": {
