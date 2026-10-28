@@ -10,8 +10,10 @@ import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.audio.AudioSink;
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer.DecoderErrorException;
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer.DecoderInitializationException;
+import com.google.android.exoplayer2.source.sabr.parser.exceptions.PoTokenError;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrBackoffError;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrReloadPlayerError;
+import com.google.android.exoplayer2.source.sabr.parser.parts.PoTokenStatusSabrPart.PoTokenStatus;
 import com.google.android.exoplayer2.upstream.HttpDataSource.HttpDataSourceException;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.liskovsoft.sharedutils.helpers.Helpers;
@@ -332,6 +334,10 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
             return;
         }
 
+        if (applySabrPoTokenAction(error, failure)) {
+            return;
+        }
+
         applyEngineErrorAction(type, rendererIndex, error, failure);
     }
 
@@ -401,6 +407,32 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
 
         failure.action("sabr_backoff " + mSabrErrorFixAttempts + "/" + MAX_SABR_ERROR_FIX_ATTEMPTS).action("reload_video");
         // SABR may hang if the server issues a high backoffTime
+        mVideoLoaderController.reloadVideo();
+
+        return true;
+    }
+
+    /**
+     * SABR server requires attestation: it won't send media past its grace period (about a minute) with this poToken, at the same
+     * position after every reload. A TV token it rejects goes (e.g. the WebView's BotGuard makes bad ones): the client streams
+     * without one, like before it had any. Otherwise another client.
+     */
+    private boolean applySabrPoTokenAction(Throwable error, PlayerFailure failure) {
+        Throwable cause = error.getCause();
+
+        if (!(cause instanceof PoTokenError) || getVideo() == null) {
+            return false;
+        }
+
+        PoTokenStatus status = ((PoTokenError) cause).status;
+
+        if (status == PoTokenStatus.INVALID && YouTubeServiceManager.instance().rejectPoToken(mVideoLoaderController.getFormatClient())) {
+            failure.action("reject_potoken").action("reload_video");
+        } else {
+            failure.action("switch_next_client_now").action("reload_video");
+            YouTubeServiceManager.instance().switchNextClientNow();
+        }
+
         mVideoLoaderController.reloadVideo();
 
         return true;

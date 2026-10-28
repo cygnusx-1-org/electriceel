@@ -3,9 +3,12 @@ package com.google.android.exoplayer2.source.sabr.parser.misc;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.extractor.ExtractorInput;
 import com.google.android.exoplayer2.source.sabr.parser.SabrStream;
+import com.google.android.exoplayer2.source.sabr.parser.exceptions.PoTokenError;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrReloadPlayerError;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrBackoffError;
 import com.google.android.exoplayer2.source.sabr.parser.parts.MediaSegmentDataSabrPart;
+import com.google.android.exoplayer2.source.sabr.parser.parts.PoTokenStatusSabrPart;
+import com.google.android.exoplayer2.source.sabr.parser.parts.PoTokenStatusSabrPart.PoTokenStatus;
 import com.google.android.exoplayer2.source.sabr.parser.parts.RefreshPlayerResponseSabrPart;
 import com.google.android.exoplayer2.source.sabr.parser.parts.SabrPart;
 import com.liskovsoft.sharedutils.mylogger.Log;
@@ -203,6 +206,12 @@ public final class SabrExtractorInput implements ExtractorInput {
             if (sabrPart instanceof RefreshPlayerResponseSabrPart) {
                 throwPlayerResponseReloadRequested((RefreshPlayerResponseSabrPart) sabrPart);
             }
+
+            // The server won't send media past its grace period (about a minute) with this poToken.
+            // Ignoring this part stalls the playback there, at the same position after every reload.
+            if (sabrPart instanceof PoTokenStatusSabrPart) {
+                throwIfAttestationRequired((PoTokenStatusSabrPart) sabrPart);
+            }
         }
     }
 
@@ -343,5 +352,11 @@ public final class SabrExtractorInput implements ExtractorInput {
 
     private static void throwBackoffRequested(int backoffMs) {
         throw new SabrBackoffError(backoffMs);
+    }
+
+    private static void throwIfAttestationRequired(PoTokenStatusSabrPart sabrPart) {
+        if (sabrPart.status == PoTokenStatus.INVALID || sabrPart.status == PoTokenStatus.MISSING) {
+            throw new PoTokenError(sabrPart.status);
+        }
     }
 }

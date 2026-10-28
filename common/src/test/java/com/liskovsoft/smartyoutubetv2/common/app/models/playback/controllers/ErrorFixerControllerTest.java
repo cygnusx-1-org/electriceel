@@ -2,6 +2,8 @@ package com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers;
 
 import android.net.Uri;
 
+import com.google.android.exoplayer2.source.sabr.parser.exceptions.PoTokenError;
+import com.google.android.exoplayer2.source.sabr.parser.parts.PoTokenStatusSabrPart.PoTokenStatus;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.HttpDataSource.HttpDataSourceException;
 import com.google.android.exoplayer2.upstream.HttpDataSource.InvalidResponseCodeException;
@@ -12,6 +14,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.views.PlaybackView;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailureLog;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
+import com.liskovsoft.youtubeapi.app.PoTokenGate;
 import com.liskovsoft.youtubeapi.videoinfo.V2.ClientAttempts;
 
 import org.json.JSONArray;
@@ -46,18 +49,20 @@ public class ErrorFixerControllerTest {
     private int mSavedEngine;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         mLog = PlayerFailureLog.useForTesting(mFolder.getRoot());
         // Cronet can't load under Robolectric
         mSavedEngine = getTweaks().getPlayerDataSource();
         getTweaks().setPlayerDataSource(PlayerTweaksData.PLAYER_DATA_SOURCE_OKHTTP);
+        setTvPotRejected(false);
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
         PlayerFailureLog.useForTesting(null);
         getTweaks().setPlayerDataSource(mSavedEngine);
         Utils.sHandler.removeCallbacksAndMessages(null);
+        setTvPotRejected(false);
     }
 
     /**
@@ -127,6 +132,55 @@ public class ErrorFixerControllerTest {
     }
 
     /**
+     * SABR rejected the TV poToken (e.g. a WebView whose BotGuard makes bad ones): the TV client again, without one. Rejected once
+     * more, it has none to go without: the next client.
+     */
+    @Test
+    public void aRejectedTvPoTokenReloadsWithoutIt() throws Exception {
+        TestController controller = new TestController(video("dQw4w9WgXcQ"), "TV");
+        controller.onPlay();
+
+        controller.onEngineError(PlayerEventListener.ERROR_TYPE_SOURCE, PlayerEventListener.RENDERER_INDEX_UNKNOWN,
+                new UnexpectedLoaderException(new PoTokenError(PoTokenStatus.INVALID)));
+        controller.onEngineError(PlayerEventListener.ERROR_TYPE_SOURCE, PlayerEventListener.RENDERER_INDEX_UNKNOWN,
+                new UnexpectedLoaderException(new PoTokenError(PoTokenStatus.INVALID)));
+
+        List<JSONObject> events = mLog.readAll();
+
+        assertEquals(2, events.size());
+        assertEquals(Arrays.asList("reject_potoken", "reload_video"), getActions(events.get(0)));
+        assertEquals(Arrays.asList("switch_next_client_now", "reload_video"), getActions(events.get(1)));
+    }
+
+    /**
+     * SABR requires a poToken the client didn't send: there's none to go without, the next client
+     */
+    @Test
+    public void aMissingPoTokenSwitchesTheClient() throws Exception {
+        TestController controller = new TestController(video("dQw4w9WgXcQ"), "TV");
+        controller.onPlay();
+
+        controller.onEngineError(PlayerEventListener.ERROR_TYPE_SOURCE, PlayerEventListener.RENDERER_INDEX_UNKNOWN,
+                new UnexpectedLoaderException(new PoTokenError(PoTokenStatus.MISSING)));
+
+        assertEquals(Arrays.asList("switch_next_client_now", "reload_video"), getActions(mLog.readAll().get(0)));
+    }
+
+    /**
+     * A web client can't stream without its poToken: the next client
+     */
+    @Test
+    public void aRejectedWebPoTokenSwitchesTheClient() throws Exception {
+        TestController controller = new TestController(video("dQw4w9WgXcQ"), "WEB");
+        controller.onPlay();
+
+        controller.onEngineError(PlayerEventListener.ERROR_TYPE_SOURCE, PlayerEventListener.RENDERER_INDEX_UNKNOWN,
+                new UnexpectedLoaderException(new PoTokenError(PoTokenStatus.INVALID)));
+
+        assertEquals(Arrays.asList("switch_next_client_now", "reload_video"), getActions(mLog.readAll().get(0)));
+    }
+
+    /**
      * Every client said it can't be played: unplayable with its why, tried again in 30 s (not each second)
      */
     @Test
@@ -182,6 +236,15 @@ public class ErrorFixerControllerTest {
         return video;
     }
 
+    /**
+     * Kept by PoTokenGate till the app restarts
+     */
+    private static void setTvPotRejected(boolean rejected) throws Exception {
+        Field field = PoTokenGate.class.getDeclaredField("mTvPotRejected");
+        field.setAccessible(true);
+        field.setBoolean(null, rejected);
+    }
+
     private static PlayerTweaksData getTweaks() {
         return PlayerTweaksData.instance(RuntimeEnvironment.getApplication());
     }
@@ -215,13 +278,25 @@ public class ErrorFixerControllerTest {
         private final Video mVideo;
 
         private TestController(Video video) throws Exception {
+            this(video, null);
+        }
+
+        /**
+         * @param formatClient of the video's formats, null when it has none
+         */
+        private TestController(Video video, String formatClient) throws Exception {
             mVideo = video;
             setAltContext(RuntimeEnvironment.getApplication());
 
             // Without a player: reloads and restarts do nothing
             Field loader = ErrorFixerController.class.getDeclaredField("mVideoLoaderController");
             loader.setAccessible(true);
-            loader.set(this, new VideoLoaderController());
+            loader.set(this, new VideoLoaderController() {
+                @Override
+                public String getFormatClient() {
+                    return formatClient;
+                }
+            });
         }
 
         @Override
