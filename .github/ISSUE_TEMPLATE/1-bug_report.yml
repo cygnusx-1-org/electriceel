@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for helping to make ElectricEel better by reporting a bug.
+        Thank you for helping to make Electric Eel better by reporting a bug.
 
         Please fill in as much information as possible about your bug.
 
@@ -29,7 +29,7 @@ body:
     id: app-version
     attributes:
      label: Affected version
-     description: "In which ElectricEel version did you encounter the bug?"
+     description: "In which Electric Eel version did you encounter the bug?"
      placeholder: "x.xx.x - Can be seen in the app from the 'About' section in Settings"
     validations:
       required: true
