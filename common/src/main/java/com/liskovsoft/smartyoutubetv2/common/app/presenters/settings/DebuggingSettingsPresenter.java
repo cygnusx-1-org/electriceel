@@ -16,6 +16,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.DataSubmitter;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.JsonHighlighter;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailureLog;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStartLog;
 import com.liskovsoft.smartyoutubetv2.common.prefs.DebuggingData;
 
 import java.text.DateFormat;
@@ -47,7 +48,7 @@ public class DebuggingSettingsPresenter extends BasePresenter<Void> {
     }
 
     /**
-     * Once the failures are counted (the log is read in the background)
+     * Once the failures and the video starts are counted (the logs are read in the background)
      */
     public void show() {
         Context context = getContext();
@@ -57,11 +58,13 @@ public class DebuggingSettingsPresenter extends BasePresenter<Void> {
         }
 
         PlayerFailureLog log = PlayerFailureLog.instance(context);
+        VideoStartLog videoStarts = VideoStartLog.instance(context);
 
-        RxHelper.execute(RxHelper.fromCallable(() -> log.readAll().size()), this::showPanel, error -> showPanel(0));
+        RxHelper.execute(RxHelper.fromCallable(() -> new int[] {log.readAll().size(), videoStarts.readAll().size()}),
+                counts -> showPanel(counts[0], counts[1]), error -> showPanel(0, 0));
     }
 
-    private void showPanel(int failureCount) {
+    private void showPanel(int failureCount, int videoStartCount) {
         Context context = getContext();
 
         if (context == null) {
@@ -71,8 +74,9 @@ public class DebuggingSettingsPresenter extends BasePresenter<Void> {
         String host = Uri.parse(context.getString(R.string.submit_data_url)).getHost();
         AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(context);
 
+        // One line for both counts: the summary shows 4 lines at most, and the last submission's is below
         String description = context.getString(R.string.submit_data_desc, host)
-                + "\n" + context.getString(R.string.submit_data_failures, failureCount);
+                + "\n" + context.getString(R.string.submit_data_recorded, failureCount, videoStartCount);
         String lastId = mDebuggingData.getLastSubmissionId();
 
         if (lastId != null) {
@@ -98,6 +102,11 @@ public class DebuggingSettingsPresenter extends BasePresenter<Void> {
                 context.getString(R.string.submit_data_include_video_ids_desc),
                 option -> mDebuggingData.setVideoIdsIncluded(option.isSelected()),
                 mDebuggingData.isVideoIdsIncluded()));
+
+        settingsPresenter.appendSingleSwitch(UiOptionItem.from(context.getString(R.string.start_graph),
+                context.getString(R.string.start_graph_desc),
+                option -> mDebuggingData.setStartGraphShown(option.isSelected()),
+                mDebuggingData.isStartGraphShown()));
 
         settingsPresenter.appendSingleSwitch(UiOptionItem.from(context.getString(R.string.submit_data_on_startup),
                 context.getString(R.string.submit_data_on_startup_desc),

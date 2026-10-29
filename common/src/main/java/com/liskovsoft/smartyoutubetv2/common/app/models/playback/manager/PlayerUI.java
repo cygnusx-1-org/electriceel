@@ -1,9 +1,12 @@
 package com.liskovsoft.smartyoutubetv2.common.app.models.playback.manager;
 
+import androidx.annotation.Nullable;
+
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.VideoGroup;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.SeekBarSegment;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.ChatReceiver;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStart;
 
 import java.util.List;
 
@@ -32,6 +35,10 @@ public interface PlayerUI {
     void setSeekPreviewTitle(String title);
     void setNextTitle(Video nextVideo);
     void showDebugInfo(boolean show);
+    /**
+     * Where the time of the video's start went, as a graph (see VideoStarts). Null hides it.
+     */
+    void showStartGraph(@Nullable VideoStart start);
     void showSubtitles(boolean show);
     void loadStoryboard();
     void setTitle(String title);

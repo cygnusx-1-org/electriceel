@@ -22,6 +22,8 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.VideoActionPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.PlaybackView;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailure;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStart;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStarts;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MusicAutoplayManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
@@ -60,10 +62,10 @@ public class VideoLoaderController extends BasePlayerController {
     private final Runnable mReloadVideo = () -> {
         getMainController().onNewVideo(getVideo());
     };
-    private final Runnable mLoadNext = this::loadNext;
+    private final Runnable mLoadNext = () -> loadNext(VideoStart.TRIGGER_AUTOPLAY);
     private final Runnable mMetadataSync = () -> {
         if (getPlayer() != null) {
-            waitMetadataSync(getVideo(), false);
+            waitMetadataSync(getVideo(), false, VideoStart.TRIGGER_AUTOPLAY);
         }
     };
     private final Runnable mRestartEngine = () -> {
@@ -111,6 +113,7 @@ public class VideoLoaderController extends BasePlayerController {
             // Fix improperly resized video after exit from PIP (Device Formuler Z8 Pro)
             loadVideo(item); // force play immediately even the same video
         } else {
+            VideoStarts.onEngineWait(item.videoId);
             mPendingVideo = item;
             prefetchFormatInfo(item);
         }
@@ -121,7 +124,8 @@ public class VideoLoaderController extends BasePlayerController {
         if (getPlayer() == null) {
             return;
         }
-        
+
+        VideoStarts.onEngineInitialized();
         loadVideo(Helpers.firstNonNull(mPendingVideo, getVideo()));
         updateRepeatButton();
         mPendingVideo = null;
@@ -167,7 +171,7 @@ public class VideoLoaderController extends BasePlayerController {
             return;
         }
 
-        openVideoInt(mSuggestionsController.getPrevious());
+        openVideoInt(mSuggestionsController.getPrevious(), VideoStart.TRIGGER_PREVIOUS);
 
         if (getPlayerTweaksData().isPlayerUiOnNextEnabled()) {
             getPlayer().showOverlay(true);
@@ -175,6 +179,13 @@ public class VideoLoaderController extends BasePlayerController {
     }
 
     public void loadNext() {
+        loadNext(VideoStart.TRIGGER_NEXT);
+    }
+
+    /**
+     * @param trigger of the start of the next video, see VideoStart#TRIGGER_NEXT
+     */
+    private void loadNext(String trigger) {
         if (getPlayer() == null || getVideo() == null) {
             return;
         }
@@ -182,9 +193,9 @@ public class VideoLoaderController extends BasePlayerController {
         Video next = mSuggestionsController.getNext();
 
         if (next != null) {
-            openVideoInt(next);
+            openVideoInt(next, trigger);
         } else {
-            waitMetadataSync(getVideo(), true);
+            waitMetadataSync(getVideo(), true, trigger);
         }
 
         if (getPlayerTweaksData().isPlayerUiOnNextEnabled()) {
@@ -209,7 +220,7 @@ public class VideoLoaderController extends BasePlayerController {
 
     @Override
     public void onSuggestionItemClicked(Video item) {
-        openVideoInt(item);
+        openVideoInt(item, VideoStart.TRIGGER_SUGGESTION);
 
         if (getPlayer() != null)
             getPlayer().showControls(false);
@@ -249,13 +260,13 @@ public class VideoLoaderController extends BasePlayerController {
         }
     }
 
-    private void waitMetadataSync(Video current, boolean showLoadingMsg) {
+    private void waitMetadataSync(Video current, boolean showLoadingMsg, String trigger) {
         if (current == null) {
             return;
         }
 
         if (current.nextMediaItem != null) {
-            openVideoInt(Video.from(current.nextMediaItem));
+            openVideoInt(Video.from(current.nextMediaItem), trigger);
         } else if (!current.isSynced) { // Maybe there's nothing left. E.g. when casting from phone
             // Wait in a loop while suggestions have been loaded...
             if (showLoadingMsg) {
@@ -279,6 +290,10 @@ public class VideoLoaderController extends BasePlayerController {
         Utils.post(mShowProgressBar);
         disposeActions();
 
+        if (mPrefetchedFormatInfo == null || !Helpers.equals(video.videoId, mPrefetchVideoId)) {
+            VideoStarts.onFetch(video.videoId); // a prefetch was timed when it started
+        }
+
         mFormatInfoAction = takeFormatInfoObserve(video)
                 .subscribe(this::processFormatInfo,
                            error -> {
@@ -297,6 +312,7 @@ public class VideoLoaderController extends BasePlayerController {
             return;
         }
 
+        VideoStarts.onFetch(video.videoId);
         // Cached: its fetch isn't disposed with the load, which waits for it rather than fetching again
         mPrefetchedFormatInfo = getFormatInfoObserve(video.videoId).cache();
         mPrefetchVideoId = video.videoId;
@@ -332,6 +348,7 @@ public class VideoLoaderController extends BasePlayerController {
 
         String bgImageUrl = null;
 
+        VideoStarts.onFormats(getVideo().videoId, getClientName(formatInfo));
         getVideo().sync(formatInfo);
 
         mFormatVideoId = getVideo().videoId;
@@ -409,6 +426,7 @@ public class VideoLoaderController extends BasePlayerController {
             reloadVideo(30 * 1_000);
         }
 
+        VideoStarts.onProtocol(mFormatProtocol); // none: the video isn't played
         player.showBackground(bgImageUrl); // remove bg (if video playing) or set another bg
     }
 
@@ -485,7 +503,10 @@ public class VideoLoaderController extends BasePlayerController {
         }
     }
 
-    private void openVideoInt(Video item) {
+    /**
+     * @param trigger of the start of the video, see VideoStart#TRIGGER_NEXT
+     */
+    private void openVideoInt(Video item, String trigger) {
         if (item == null) {
             return;
         }
@@ -493,6 +514,10 @@ public class VideoLoaderController extends BasePlayerController {
         disposeActions();
 
         if (item.hasVideo()) {
+            if (!isEmbedPlayer()) { // a card's preview isn't timed
+                VideoStarts.start(item.videoId, trigger);
+            }
+
             // NOTE: Next clicked: instant playback even a mix
             // NOTE: Bypass PIP fullscreen on next caused by startView
             getMainController().onNewVideo(item);
@@ -553,7 +578,7 @@ public class VideoLoaderController extends BasePlayerController {
                 }
             case PlayerConstants.PLAYBACK_MODE_ALL:
             case PlayerConstants.PLAYBACK_MODE_SHUFFLE:
-                loadNext();
+                loadNext(VideoStart.TRIGGER_AUTOPLAY);
                 break;
             case PlayerConstants.PLAYBACK_MODE_ONE:
                 if (VERSION.SDK_INT <= 19) {
@@ -567,7 +592,7 @@ public class VideoLoaderController extends BasePlayerController {
                 // Close player if suggestions not shown
                 // Except when playing from queue
                 if (mPlaylist.getNext() != null && !getPlayerTweaksData().isQueueRespectsPlaybackMode()) {
-                    loadNext();
+                    loadNext(VideoStart.TRIGGER_AUTOPLAY);
                 } else {
                     AppDialogPresenter dialog = getAppDialogPresenter();
                     if (!getPlayer().isSuggestionsShown() && (!dialog.isDialogShown() || dialog.isOverlay())) {
@@ -580,7 +605,7 @@ public class VideoLoaderController extends BasePlayerController {
                 // Stop player after each video.
                 // Except when playing from queue
                 if (mPlaylist.getNext() != null && !getPlayerTweaksData().isQueueRespectsPlaybackMode()) {
-                    loadNext();
+                    loadNext(VideoStart.TRIGGER_AUTOPLAY);
                 } else {
                     stopPlayback();
                 }
@@ -588,7 +613,7 @@ public class VideoLoaderController extends BasePlayerController {
             case PlayerConstants.PLAYBACK_MODE_LIST:
                 // if video has a playlist load next or restart playlist
                 if (video.hasNextPlaylist() || mPlaylist.getNext() != null) {
-                    loadNext();
+                    loadNext(VideoStart.TRIGGER_AUTOPLAY);
                 } else {
                     //restartPlaylistIfNeeded();
                     stopPlayback();
@@ -709,7 +734,7 @@ public class VideoLoaderController extends BasePlayerController {
         VideoGroup group = getVideo().getGroup(); // Get the VideoGroup (playlist)
 
         if (group != null && !group.isEmpty() && getVideo().belongsToSamePlaylistGroup()) {
-            openVideoInt(group.get(0));
+            openVideoInt(group.get(0), VideoStart.TRIGGER_AUTOPLAY);
         } else {
             Log.e(TAG, "VideoGroup is null or empty. Can't restart playlist.");
             stopPlayback();

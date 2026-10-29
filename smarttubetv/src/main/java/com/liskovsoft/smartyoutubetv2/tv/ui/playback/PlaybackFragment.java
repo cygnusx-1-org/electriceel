@@ -54,6 +54,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.ChatReceiver
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.SeekBarSegment;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.PlaybackPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.PlaybackView;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStart;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.controller.ExoPlayerController;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.other.CensoredWords.Range;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.other.DebugInfoManager;
@@ -86,6 +87,7 @@ import com.liskovsoft.smartyoutubetv2.tv.ui.playback.other.VideoPlayerGlue;
 import com.liskovsoft.smartyoutubetv2.tv.ui.playback.other.VideoPlayerGlue.OnActionClickedListener;
 import com.liskovsoft.smartyoutubetv2.tv.ui.playback.previewtimebar.StoryboardSeekDataProvider;
 import com.liskovsoft.smartyoutubetv2.tv.ui.widgets.chat.LiveChatView;
+import com.liskovsoft.smartyoutubetv2.tv.ui.widgets.startgraph.StartGraphView;
 import com.liskovsoft.smartyoutubetv2.tv.ui.widgets.time.DateTimeView;
 import com.liskovsoft.smartyoutubetv2.tv.ui.widgets.time.EndingTimeView;
 import com.liskovsoft.smartyoutubetv2.tv.util.RowContinuation;
@@ -1385,6 +1387,15 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
     }
 
     @Override
+    public void showStartGraph(@Nullable VideoStart start) {
+        StartGraphView graph = getView() != null ? getView().findViewById(R.id.start_graph_view) : null;
+
+        if (graph != null) {
+            graph.setStart(start);
+        }
+    }
+
+    @Override
     public void showSubtitles(boolean show) {
         createSubtitleManager();
         if (mSubtitleManager != null) {
@@ -1657,6 +1668,11 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
 
             if (liveChat != null) {
                 liveChat.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+
+            if (!show) {
+                // Shown again by the bug button
+                showStartGraph(null);
             }
         }
     }

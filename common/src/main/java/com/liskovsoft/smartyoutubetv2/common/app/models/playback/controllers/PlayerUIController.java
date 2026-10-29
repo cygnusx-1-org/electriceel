@@ -32,6 +32,8 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.SearchPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.VideoMenuPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.VideoMenuPresenter.VideoMenuCallback;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.AutoFrameRateSettingsPresenter;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStart;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStarts;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.track.SubtitleTrack;
 import com.liskovsoft.smartyoutubetv2.common.misc.ChildModeManager;
@@ -626,7 +628,10 @@ public class PlayerUIController extends BasePlayerController {
         } else if (buttonId == R.id.action_channel) {
             openChannel();
         } else if (buttonId == R.id.action_playback_queue) {
-            AppDialogUtil.showPlaybackQueueDialog(getContext(), item -> getMainController().onNewVideo(item));
+            AppDialogUtil.showPlaybackQueueDialog(getContext(), item -> {
+                VideoStarts.start(item.videoId, VideoStart.TRIGGER_QUEUE);
+                getMainController().onNewVideo(item);
+            });
         } else if (buttonId == R.id.action_video_zoom) {
             onVideoZoom();
         } else if (buttonId == R.id.action_seek_interval) {

@@ -12,6 +12,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.autoframerate.AutoFrameRateHelper;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStarts;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
 import com.liskovsoft.smartyoutubetv2.common.autoframerate.ModeSyncManager;
 import com.liskovsoft.smartyoutubetv2.common.autoframerate.internal.DisplayHolder.Mode;
@@ -252,6 +253,7 @@ public class AutoFrameRateController extends BasePlayerController implements Aut
         }
 
         if (!mIsHeld) {
+            VideoStarts.onModeSwitchStart(); // a video starting waits for it
             mIsHeld = true;
             mIsHeldPlay = mStateController.isPlayEnabled(); // the pause below clears it
             mStateController.blockPlay(true);
@@ -271,6 +273,7 @@ public class AutoFrameRateController extends BasePlayerController implements Aut
 
         mIsHeld = false;
         mStateController.blockPlay(false);
+        VideoStarts.onModeSwitchEnd();
 
         if (getPlayer() != null) {
             getPlayer().setPlayWhenReady(mIsHeldPlay);

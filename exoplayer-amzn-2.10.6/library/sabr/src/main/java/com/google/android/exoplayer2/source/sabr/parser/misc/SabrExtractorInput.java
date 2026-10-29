@@ -7,6 +7,7 @@ import com.google.android.exoplayer2.source.sabr.parser.exceptions.PoTokenError;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrReloadPlayerError;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrBackoffError;
 import com.google.android.exoplayer2.source.sabr.parser.parts.MediaSegmentDataSabrPart;
+import com.google.android.exoplayer2.source.sabr.parser.parts.MediaSegmentEndSabrPart;
 import com.google.android.exoplayer2.source.sabr.parser.parts.PoTokenStatusSabrPart;
 import com.google.android.exoplayer2.source.sabr.parser.parts.PoTokenStatusSabrPart.PoTokenStatus;
 import com.google.android.exoplayer2.source.sabr.parser.parts.RefreshPlayerResponseSabrPart;
@@ -26,6 +27,10 @@ public final class SabrExtractorInput implements ExtractorInput {
     private long startPosition;
     private int remaining;
     private MediaSegmentDataSabrPart data;
+    /**
+     * The init chunk's response was read up to the end of its init segment: the rest isn't
+     */
+    private boolean isInitEnded;
 
     public SabrExtractorInput(SabrStream sabrStream) {
         this.sabrStream = sabrStream;
@@ -46,6 +51,7 @@ public final class SabrExtractorInput implements ExtractorInput {
         position = input.getPosition();
         startPosition = position;
         remaining = C.LENGTH_UNSET;
+        isInitEnded = false;
     }
 
     public void dispose() {
@@ -59,6 +65,7 @@ public final class SabrExtractorInput implements ExtractorInput {
         startPosition = 0;
         input = null;
         data = null;
+        isInitEnded = false;
         position = C.POSITION_UNSET;
         remaining = C.LENGTH_UNSET;
     }
@@ -173,17 +180,25 @@ public final class SabrExtractorInput implements ExtractorInput {
                 }
             }
 
+            if (isInitEnded) {
+                break;
+            }
+
             SabrPart sabrPart = sabrStream.parse(input);
 
+            // FIX: the init chunk's request is answered with the init segment, then a whole media segment (several MB in 4K).
+            // Read to the end, it was thrown away and only then asked for again by the first media chunk: the video started
+            // seconds later. Everything the next request needs (the cookie, the formats) comes before the init segment.
+            if (sabrPart instanceof MediaSegmentEndSabrPart && ((MediaSegmentEndSabrPart) sabrPart).isInitSegment
+                    && sabrStream.isInitRequest()) {
+                Log.d(TAG, "Init segment read: the rest of the init chunk's response is skipped");
+                isInitEnded = true;
+                maybeThrowBackoffRequested(); // its policy came before the init segment
+                break;
+            }
+
             if (sabrPart == null) {
-                // The stream ended. If the server told us to back off, honor it instead of
-                // re-requesting immediately - otherwise we burn exactly the waiting period the server asked for.
-                int backoffMs = sabrStream.getBackoffTimeMs();
-
-                if (backoffMs > MIN_SWALLOW_BACKOFF_MS) {
-                    throwBackoffRequested(backoffMs);
-                }
-
+                maybeThrowBackoffRequested();
                 break;
             }
 
@@ -348,6 +363,18 @@ public final class SabrExtractorInput implements ExtractorInput {
 
     private static void throwPlayerResponseReloadRequested(RefreshPlayerResponseSabrPart sabrPart) {
         throw new SabrReloadPlayerError(sabrPart.reloadPlaybackToken);
+    }
+
+    /**
+     * The stream ended. If the server told us to back off, honor it instead of re-requesting immediately - otherwise we burn exactly
+     * the waiting period the server asked for.
+     */
+    private void maybeThrowBackoffRequested() {
+        int backoffMs = sabrStream.getBackoffTimeMs();
+
+        if (backoffMs > MIN_SWALLOW_BACKOFF_MS) {
+            throwBackoffRequested(backoffMs);
+        }
     }
 
     private static void throwBackoffRequested(int backoffMs) {

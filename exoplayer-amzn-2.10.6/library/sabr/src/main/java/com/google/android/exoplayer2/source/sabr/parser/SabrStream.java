@@ -89,6 +89,11 @@ public class SabrStream {
     private List<? extends  SabrPart> multiResult = null;
     private int segmentItag = -1;
     private long segmentSequenceNumber = -1;
+    /**
+     * The request being read is the init chunk's (see DefaultSabrChunkSource#newInitializationChunk): its response ends with the
+     * init segment (see SabrExtractorInput)
+     */
+    private volatile boolean isInitRequest;
     @Nullable private volatile IOException responseError;
 
     private static class NoSegmentsTracker {
@@ -258,6 +263,14 @@ public class SabrStream {
 
     public long getSegmentDurationMs(int iTag) {
         return processor.getSegmentDurationMs(iTag);
+    }
+
+    public void setInitRequest(boolean isInitRequest) {
+        this.isInitRequest = isInitRequest;
+    }
+
+    public boolean isInitRequest() {
+        return isInitRequest;
     }
 
     public int getBackoffTimeMs() {

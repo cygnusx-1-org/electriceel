@@ -33,6 +33,7 @@ public class DebuggingData extends DataSaverBase {
     private static final int LAST_SUBMISSION_ID = 4;
     private static final int LAST_SUBMISSION_TIME = 5;
     private static final int LAST_APP_EXIT_TS = 6;
+    private static final int START_GRAPH = 7;
     private static final String KEYS_DELIM = ",";
     private static DebuggingData sInstance;
 
@@ -72,6 +73,17 @@ public class DebuggingData extends DataSaverBase {
 
     public synchronized void setAutoSubmitEnabled(boolean enable) {
         setBoolean(AUTO_SUBMIT, enable);
+    }
+
+    /**
+     * The bug button in the player shows where the time of the video's start went, with its stats (see VideoStartController)
+     */
+    public synchronized boolean isStartGraphShown() {
+        return getBoolean(START_GRAPH, false);
+    }
+
+    public synchronized void setStartGraphShown(boolean show) {
+        setBoolean(START_GRAPH, show);
     }
 
     /**

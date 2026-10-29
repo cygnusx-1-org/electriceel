@@ -101,6 +101,16 @@
                  android:layout_gravity="top|right"
                  android:background="#70000000"/>
 
+    <!-- Settings → Debugging → Show video starts: where the time of the video's start went -->
+    <com.liskovsoft.smartyoutubetv2.tv.ui.widgets.startgraph.StartGraphView
+        android:id="@+id/start_graph_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10sp"
+        android:layout_gravity="top|left"
+        android:visibility="gone"
+        android:background="@color/start_graph_background"/>
+
     <ViewStub
         android:id="@+id/youtube_overlay_stub"
         android:layout_width="match_parent"

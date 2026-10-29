@@ -50,11 +50,13 @@ public class DiagnosticsContractTest {
     @Rule
     public TemporaryFolder mFolder = new TemporaryFolder();
     private PlayerFailureLog mLog;
+    private VideoStartLog mVideoStarts;
     private int mSavedEngine;
 
     @Before
     public void setUp() {
         mLog = PlayerFailureLog.useForTesting(mFolder.getRoot());
+        mVideoStarts = VideoStartLog.useForTesting(mFolder.getRoot());
         FormatAttempts.resetForTesting();
         // Cronet can't load under Robolectric
         mSavedEngine = PlayerTweaksData.instance(getContext()).getPlayerDataSource();
@@ -66,6 +68,8 @@ public class DiagnosticsContractTest {
         FormatAttempts.sClock = System::currentTimeMillis;
         FormatAttempts.resetForTesting();
         PlayerFailureLog.useForTesting(null);
+        VideoStartLog.useForTesting(null);
+        VideoStarts.resetForTesting();
         PlayerTweaksData.instance(getContext()).setPlayerDataSource(mSavedEngine);
     }
 
@@ -76,13 +80,15 @@ public class DiagnosticsContractTest {
     public void theAppsReportIsTheContract() throws Exception {
         JsonSchemaValidator validator = new JsonSchemaValidator(readSchema());
         recordEveryKind();
+        recordVideoStarts();
 
         JSONObject report = DiagnosticsReport.build(getContext(), account(), 2, mLog.readAll(), System.currentTimeMillis());
 
         assertEquals(Collections.emptyList(), validator.validate(report));
 
         // It's all there: a part missing would pass unchecked
-        for (String part : Arrays.asList("schema", "submittedAt", "app", "system", "device", "playbackStats", "playerFailures")) {
+        for (String part : Arrays.asList("schema", "submittedAt", "app", "system", "device", "playbackStats", "playerFailures",
+                "videoStarts")) {
             assertTrue(part, report.has(part));
         }
 
@@ -100,6 +106,25 @@ public class DiagnosticsContractTest {
                 AppExits.KIND_APP_EXIT)), kinds);
         // The E-AC3 that failed and the AAC that played
         assertEquals(2, report.getJSONObject("playbackStats").getJSONArray("formats").length());
+        assertEquals(3, report.getJSONArray("videoStarts").length());
+    }
+
+    /**
+     * Each way of starting a video in the schema is one the app records, and the other way round
+     */
+    @Test
+    public void theSchemasTriggersAreTheAppsTriggers() throws Exception {
+        JSONArray triggers = readSchema().getJSONObject("$defs").getJSONObject("VideoStart").getJSONObject("properties")
+                .getJSONObject("trigger").getJSONArray("enum");
+        Set<String> schemaTriggers = new HashSet<>();
+
+        for (int i = 0; i < triggers.length(); i++) {
+            schemaTriggers.add(triggers.getString(i));
+        }
+
+        assertEquals(new HashSet<>(Arrays.asList(VideoStart.TRIGGER_OPEN, VideoStart.TRIGGER_INTENT, VideoStart.TRIGGER_COLD_INTENT,
+                VideoStart.TRIGGER_REMOTE, VideoStart.TRIGGER_NEXT, VideoStart.TRIGGER_PREVIOUS, VideoStart.TRIGGER_SUGGESTION,
+                VideoStart.TRIGGER_AUTOPLAY, VideoStart.TRIGGER_QUEUE)), schemaTriggers);
     }
 
     /**
@@ -148,6 +173,51 @@ public class DiagnosticsContractTest {
 
         assertTrue(errors.toString(), errors.contains("$.app.somethingNew: not in the schema"));
         assertTrue(errors.toString(), errors.stream().anyMatch(error -> error.startsWith("$.system.sdkInt:")));
+    }
+
+    /**
+     * As the player records them: one with every kind of stage, one with as little as there can be (no client, protocol or
+     * frame), and one that never played
+     */
+    private void recordVideoStarts() {
+        VideoStartFixture fixture = new VideoStartFixture();
+        VideoStarts.sRecorder = start -> {
+            fixture.recorded.add(start);
+            mVideoStarts.record(start);
+        };
+        fixture.slowStart();
+
+        fixture.at(20_000);
+        VideoStarts.start("bare", VideoStart.TRIGGER_REMOTE);
+        VideoStarts.onFetch("bare");
+        fixture.at(23_000);
+        VideoStarts.onFormats("bare", null);
+        VideoStarts.onPrepare();
+        VideoStarts.onPlaying(false);
+
+        fixture.at(30_000);
+        VideoStarts.start("stuck", VideoStart.TRIGGER_NEXT);
+        VideoStarts.onFetch("stuck");
+        fixture.at(45_000);
+        fixture.fireGiveUp();
+    }
+
+    /**
+     * Each outcome of a start the schema has is one the app records, and the other way round
+     */
+    @Test
+    public void theSchemasOutcomesAreTheAppsOutcomes() throws Exception {
+        JSONArray outcomes = readSchema().getJSONObject("$defs").getJSONObject("VideoStart").getJSONObject("properties")
+                .getJSONObject("outcome").getJSONArray("enum");
+        Set<String> schemaOutcomes = new HashSet<>();
+
+        for (int i = 0; i < outcomes.length(); i++) {
+            schemaOutcomes.add(outcomes.getString(i));
+        }
+
+        // Waiting is a look at a start going on: never recorded
+        assertEquals(new HashSet<>(Arrays.asList(VideoStart.OUTCOME_PLAYED, VideoStart.OUTCOME_GAVE_UP, VideoStart.OUTCOME_LEFT,
+                VideoStart.OUTCOME_REPLACED, VideoStart.OUTCOME_UNPLAYABLE)), schemaOutcomes);
     }
 
     private void recordEveryKind() throws Exception {

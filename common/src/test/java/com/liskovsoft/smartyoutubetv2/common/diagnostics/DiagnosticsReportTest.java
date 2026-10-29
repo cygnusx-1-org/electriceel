@@ -19,7 +19,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
@@ -50,8 +52,12 @@ public class DiagnosticsReportTest {
     private String mSavedLanguage;
     private String mSavedCountry;
 
+    @Rule
+    public TemporaryFolder mFolder = new TemporaryFolder();
+
     @Before
     public void setUp() {
+        VideoStartLog.useForTesting(mFolder.getRoot());
         PlayerTweaksData tweaks = getTweaks();
         mSavedEngine = tweaks.getPlayerDataSource();
         mSavedDns = tweaks.getPreferredDnsType();
@@ -69,6 +75,7 @@ public class DiagnosticsReportTest {
 
     @After
     public void tearDown() {
+        VideoStartLog.useForTesting(null);
         PlayerTweaksData tweaks = getTweaks();
         tweaks.setPlayerDataSource(mSavedEngine);
         tweaks.setPreferredDnsType(mSavedDns);
@@ -187,12 +194,16 @@ public class DiagnosticsReportTest {
 
     @Test
     public void videoIdsAreLeftOutWhenNotIncluded() throws Exception {
+        VideoStartLog.useForTesting(mFolder.getRoot()).record(new VideoStart(NOW, "slow", VideoStart.TRIGGER_OPEN, true, 5_000,
+                "TV", "sabr", false, 2_500, Collections.singletonList(new VideoStart.Stage("buffering", null, 0, 0, 2_500))));
         getDebuggingData().setVideoIdsIncluded(true);
-        JSONArray failures = build(null, 0, failures("first", "second")).getJSONArray("playerFailures");
+        JSONObject included = build(null, 0, failures("first", "second"));
+        JSONArray failures = included.getJSONArray("playerFailures");
 
         assertEquals(2, failures.length());
         assertEquals("first", failures.getJSONObject(0).getString("videoId"));
         assertEquals("second", failures.getJSONObject(1).getString("videoId"));
+        assertEquals("slow", included.getJSONArray("videoStarts").getJSONObject(0).getString("videoId"));
 
         getDebuggingData().setVideoIdsIncluded(false);
         JSONObject report = build(null, 0, failures("first", "second"));
@@ -200,8 +211,9 @@ public class DiagnosticsReportTest {
 
         assertEquals(2, failures.length());
         assertFalse(report.toString(), report.toString().contains("videoId"));
-        // The rest of each failure stays
+        // The rest of each failure stays, and of each start
         assertEquals("format_error", failures.getJSONObject(0).getString("kind"));
+        assertEquals(2_500, report.getJSONArray("videoStarts").getJSONObject(0).getLong("totalMs"));
     }
 
     @Test

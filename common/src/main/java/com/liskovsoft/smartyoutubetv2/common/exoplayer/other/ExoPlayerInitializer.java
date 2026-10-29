@@ -54,8 +54,9 @@ public class ExoPlayerInitializer {
         // HDR fix?
         //trackSelector.setParameters(trackSelector.buildUponParameters().setTunnelingAudioSessionId(C.generateAudioSessionIdV21(context)));
 
-        // Old initializer
-        SimpleExoPlayer player = ExoPlayerFactory.newSimpleInstance(context, renderersFactory, trackSelector, loadControl);
+        // Old initializer. Its decisions not to load are timed in video starts (see VideoStarts).
+        SimpleExoPlayer player = ExoPlayerFactory.newSimpleInstance(context, renderersFactory, trackSelector,
+                new TimedLoadControl(loadControl));
 
         // New initializer
         //SimpleExoPlayer player = ExoPlayerFactory.newSimpleInstance(

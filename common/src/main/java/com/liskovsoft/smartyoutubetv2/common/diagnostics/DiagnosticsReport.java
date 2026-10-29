@@ -108,6 +108,24 @@ public final class DiagnosticsReport {
             // Sent without them
         }
 
+        try {
+            // Every video started, and where the time went (see VideoStarts)
+            boolean includeVideoIds = debuggingData.isVideoIdsIncluded();
+            JSONArray videoStartsJson = new JSONArray();
+
+            for (JSONObject start : VideoStartLog.instance(context).readAll()) {
+                if (!includeVideoIds) {
+                    start.remove("videoId");
+                }
+
+                videoStartsJson.put(start);
+            }
+
+            result.put("videoStarts", videoStartsJson);
+        } catch (JSONException | RuntimeException e) {
+            // Sent without them
+        }
+
         return result;
     }
 

@@ -38,4 +38,19 @@
     <color name="json_string">#CE9178</color>
     <color name="json_number">#B5CEA8</color>
     <color name="json_literal">#569CD6</color>
+    <!-- Settings → Debugging → Show video starts: a color per kind of stage, on the graph's near black (see StartGraphView).
+         Adjacent rows checked with the dataviz validator for color blindness. The text is in the text colors, not the stages'. -->
+    <color name="start_graph_background">#E6101010</color>
+    <color name="start_graph_text">#F0EFEC</color>
+    <color name="start_graph_text_secondary">#C3C2B7</color>
+    <color name="start_graph_grid">#383835</color>
+    <color name="start_graph_app">#C98500</color>
+    <color name="start_graph_wait">#8A8985</color>
+    <color name="start_graph_formats">#D55181</color>
+    <color name="start_graph_network">#008300</color>
+    <color name="start_graph_potoken">#E66767</color>
+    <color name="start_graph_player_js">#9085E9</color>
+    <color name="start_graph_buffer">#3987E5</color>
+    <color name="start_graph_decoder">#D95926</color>
+    <color name="start_graph_mode_switch">#199E70</color>
 </resources>

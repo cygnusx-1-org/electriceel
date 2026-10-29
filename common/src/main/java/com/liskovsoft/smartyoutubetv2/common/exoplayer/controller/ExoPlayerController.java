@@ -33,6 +33,7 @@ import com.liskovsoft.smartyoutubetv2.common.diagnostics.FormatAttempts;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlaybackHealth;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailure;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.SilenceDetector;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStarts;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.listener.PlayerEventListener;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.ExoMediaSourceFactory;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.errors.TrackErrorFixer;
@@ -92,6 +93,7 @@ public class ExoPlayerController implements Player.EventListener {
         @Override
         public void onRenderedFirstFrame(EventTime eventTime, @Nullable Surface surface) {
             FormatAttempts.onVideoRendered();
+            VideoStarts.onFirstFrame();
         }
 
         @Override
@@ -104,6 +106,7 @@ public class ExoPlayerController implements Player.EventListener {
         public void onDecoderInitialized(EventTime eventTime, int trackType, String decoderName, long initializationDurationMs) {
             if (trackType == C.TRACK_TYPE_VIDEO || trackType == C.TRACK_TYPE_AUDIO) {
                 FormatAttempts.onDecoder(trackType == C.TRACK_TYPE_VIDEO, decoderName);
+                VideoStarts.onDecoder(trackType == C.TRACK_TYPE_VIDEO, decoderName, initializationDurationMs);
             }
         }
 
@@ -113,10 +116,38 @@ public class ExoPlayerController implements Player.EventListener {
         }
 
         @Override
+        public void onLoadStarted(EventTime eventTime, LoadEventInfo loadEventInfo, MediaLoadData mediaLoadData) {
+            if (isTimedLoad(mediaLoadData)) {
+                VideoStarts.onLoadStarted(mediaLoadData.dataType == C.DATA_TYPE_MEDIA_INITIALIZATION, isVideoLoad(mediaLoadData),
+                        mediaLoadData.trackType == C.TRACK_TYPE_AUDIO, loadEventInfo.elapsedRealtimeMs);
+            }
+        }
+
+        @Override
         public void onLoadCompleted(EventTime eventTime, LoadEventInfo loadEventInfo, MediaLoadData mediaLoadData) {
             if (mediaLoadData.dataType == C.DATA_TYPE_MEDIA) {
                 FormatAttempts.onLoad(loadEventInfo.bytesLoaded, loadEventInfo.loadDurationMs);
             }
+
+            if (isTimedLoad(mediaLoadData)) {
+                VideoStarts.onLoad(mediaLoadData.dataType == C.DATA_TYPE_MEDIA_INITIALIZATION, isVideoLoad(mediaLoadData),
+                        mediaLoadData.trackType == C.TRACK_TYPE_AUDIO, loadEventInfo.elapsedRealtimeMs - loadEventInfo.loadDurationMs,
+                        loadEventInfo.elapsedRealtimeMs, loadEventInfo.bytesLoaded);
+            }
+        }
+
+        /**
+         * A segment of the media or its initialization (see VideoStarts)
+         */
+        private boolean isTimedLoad(MediaLoadData mediaLoadData) {
+            return mediaLoadData.dataType == C.DATA_TYPE_MEDIA || mediaLoadData.dataType == C.DATA_TYPE_MEDIA_INITIALIZATION;
+        }
+
+        /**
+         * Muxed (e.g. the URL list's) is video too
+         */
+        private boolean isVideoLoad(MediaLoadData mediaLoadData) {
+            return mediaLoadData.trackType == C.TRACK_TYPE_VIDEO || mediaLoadData.trackType == C.TRACK_TYPE_DEFAULT;
         }
     };
 
@@ -294,6 +325,7 @@ public class ExoPlayerController implements Player.EventListener {
         mTrackSelectorManager.invalidate();
         mOnSourceChanged = true;
         mEventListener.onSourceChanged(getVideo());
+        VideoStarts.onPrepare();
         mPlayer.prepare(mediaSource);
     }
 
@@ -544,6 +576,7 @@ public class ExoPlayerController implements Player.EventListener {
         }
 
         if (isPlayPressed) {
+            VideoStarts.onPlaying(mHasSurface);
             mEventListener.onPlay();
         } else if (isPausePressed) {
             mEventListener.onPause();

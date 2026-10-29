@@ -19,12 +19,15 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers.Pla
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers.RemoteController;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers.SuggestionsController;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers.VideoLoaderController;
+import com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers.VideoStartController;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers.VideoStateController;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.listener.PlayerEventListener;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.listener.ViewEventListener;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.VideoMenuPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.PlaybackView;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStart;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStarts;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils.ChainProcessor;
@@ -68,6 +71,7 @@ public class PlaybackPresenter extends BasePresenter<PlaybackView> implements Pl
         mEventListeners.add(new HQDialogController());
         mEventListeners.add(new ChatController());
         mEventListeners.add(new CommentsController());
+        mEventListeners.add(new VideoStartController());
     }
 
     public static PlaybackPresenter instance(Context context) {
@@ -93,13 +97,15 @@ public class PlaybackPresenter extends BasePresenter<PlaybackView> implements Pl
     }
 
     public void openVideo(String videoId) {
-        openVideo(videoId, false, -1, false);
+        openVideo(videoId, false, -1, false, VideoStart.TRIGGER_OPEN);
     }
 
     /**
      * Opens video item from splash view
+     *
+     * @param trigger of the start of the video, e.g. VideoStart#TRIGGER_INTENT (see VideoStarts)
      */
-    public void openVideo(String videoId, boolean finishOnEnded, long timeMs, boolean incognito) {
+    public void openVideo(String videoId, boolean finishOnEnded, long timeMs, boolean incognito, String trigger) {
         if (videoId == null) {
             return;
         }
@@ -108,12 +114,24 @@ public class PlaybackPresenter extends BasePresenter<PlaybackView> implements Pl
         video.finishOnEnded = finishOnEnded;
         video.pendingPosMs = timeMs;
         video.incognito = incognito;
-        openVideo(video);
+        openVideo(video, trigger);
     }
 
     public void openVideo(Video video) {
+        if (video != null) {
+            openVideo(video, video.isRemote ? VideoStart.TRIGGER_REMOTE : VideoStart.TRIGGER_OPEN);
+        }
+    }
+
+    private void openVideo(Video video, String trigger) {
         if (video == null) {
             return;
+        }
+
+        if (video.fromCrashRestorer) {
+            VideoStarts.cancel(); // Not the user's
+        } else {
+            VideoStarts.start(video.videoId, trigger);
         }
 
         if (getView() != null && getView().isEmbed()) { // switching from the embed player to the fullscreen one

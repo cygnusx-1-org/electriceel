@@ -52,6 +52,25 @@ public class DebuggingDataTest {
     }
 
     @Test
+    public void theStartGraphIsOffByDefault() {
+        assertFalse(getData().isStartGraphShown());
+
+        // Not after the other values are set either (see DataSaverBase#checkCapacity)
+        getData().setLastAppExitTs(123);
+        ShadowLooper.shadowMainLooper().idle();
+        DebuggingData.resetInstanceForTesting();
+
+        assertFalse(getData().isStartGraphShown());
+
+        getData().setStartGraphShown(true);
+        ShadowLooper.shadowMainLooper().idle();
+        DebuggingData.resetInstanceForTesting();
+
+        assertTrue(getData().isStartGraphShown());
+        getData().setStartGraphShown(false);
+    }
+
+    @Test
     public void theLastSubmissionIsKept() {
         assertNull(getData().getLastSubmissionId());
         assertEquals(0, getData().getLastSubmittedFailureTs());

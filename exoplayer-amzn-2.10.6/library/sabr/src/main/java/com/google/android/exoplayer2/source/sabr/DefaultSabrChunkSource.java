@@ -108,6 +108,10 @@ public class DefaultSabrChunkSource implements SabrChunkSource {
     private static final String TAG = DefaultSabrChunkSource.class.getSimpleName();
     private static final long END_OF_STREAM_SEEK_TOLERANCE_US = 500_000L; // 0.5 seconds
     private static final long NEAR_END_TOLERANCE_US = 700_000L; // 0.7 seconds
+    /**
+     * Of a media segment, about: the first media chunk's length, before any segment of its format is received
+     */
+    private static final long DEFAULT_SEGMENT_DURATION_MS = 5_000;
     private final LoaderErrorThrower manifestLoaderErrorThrower;
     private final int[] adaptationSetIndices;
     private final int trackType;
@@ -657,6 +661,11 @@ public class DefaultSabrChunkSource implements SabrChunkSource {
                 0,
                 sabrHeaders);
         Log.e(TAG, "Load init chunk: track=" + trackType + ", rn=" + manifest.getSabrRequestNumber());
+
+        if (sabrStream != null) {
+            sabrStream.setInitRequest(true); // read up to the init segment only (see SabrExtractorInput)
+        }
+
         return new InitializationChunk(dataSource, dataSpec, trackFormat,
                 trackSelectionReason, trackSelectionData, representationHolder.extractorWrapper);
     }
@@ -685,6 +694,7 @@ public class DefaultSabrChunkSource implements SabrChunkSource {
         }
 
         SabrStream sabrStream = Assertions.checkNotNull(this.sabrStream);
+        sabrStream.setInitRequest(false);
         boolean isInit = nexChunkIdx == -1;
         FormatId formatId = formatSelector.getSelectedFormatId();
         int iTag = formatId != null ? formatId.getItag() : -1;
@@ -707,6 +717,14 @@ public class DefaultSabrChunkSource implements SabrChunkSource {
         //long durationMs = sabrStream.getSegmentDurationMs(trackType);
         long startTimeMs = sabrStream.getSegmentStartTimeMs(iTag);
         long durationMs = sabrStream.getSegmentDurationMs(iTag);
+
+        // FIX: no media segment of the format received yet (the init chunk stops at its init segment, see SabrExtractorInput):
+        // the first media chunk is given a segment's length. Unset times overflow the buffered duration the player computes from
+        // them, and it never loads the video again.
+        if (durationMs <= 0) {
+            durationMs = DEFAULT_SEGMENT_DURATION_MS;
+        }
+
         boolean isSabrTimeSet = startTimeMs >= 0 && durationMs > 0;
 
         long startTimeUs = isSabrTimeSet ? startTimeMs * 1_000L : C.TIME_UNSET;

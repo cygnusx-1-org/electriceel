@@ -211,7 +211,7 @@
     <string name="settings_debugging">Debugging</string>
     <string name="submit_data">Submit data</string>
     <string name="submit_data_desc">Sends app settings, device info and the recorded player failures to %s</string>
-    <string name="submit_data_failures">Recorded player failures: %d</string>
+    <string name="submit_data_recorded">Recorded failures: %1$d, video starts: %2$d</string>
     <string name="submit_data_include_video_ids">Include video IDs</string>
     <string name="submit_data_include_video_ids_desc">Video IDs are always recorded on the device. This only decides whether they\'re sent.</string>
     <string name="submit_data_sending">Sending…</string>
@@ -230,6 +230,24 @@
     </plurals>
     <string name="submit_data_on_startup">Submit data on startup</string>
     <string name="submit_data_on_startup_desc">When the app starts, sends the data in the background if player failures were recorded since the last submission</string>
+    <string name="start_graph">Show video starts</string>
+    <string name="start_graph_desc">The bug button in the player shows a graph of where the time went while the video started</string>
+    <string name="start_graph_title">%1$d ms to start · %2$s</string>
+    <string name="start_graph_title_waiting">%1$d ms and not playing yet · %2$s</string>
+    <string name="start_graph_title_never">Not playing after %1$d ms · %2$s</string>
+    <plurals name="start_graph_more">
+        <item quantity="one">… and %d more stage</item>
+        <item quantity="other">… and %d more stages</item>
+    </plurals>
+    <string name="start_graph_legend_app">app</string>
+    <string name="start_graph_legend_wait">waiting</string>
+    <string name="start_graph_legend_formats">formats</string>
+    <string name="start_graph_legend_network">network</string>
+    <string name="start_graph_legend_potoken">poToken</string>
+    <string name="start_graph_legend_player_js">player JS</string>
+    <string name="start_graph_legend_buffer">buffering</string>
+    <string name="start_graph_legend_decoder">decoder</string>
+    <string name="start_graph_legend_mode_switch">mode switch</string>
     <string name="settings_audio">Audio</string>
     <string name="settings_show_options">Show options</string>
     <string name="settings_places">Place to the left</string>

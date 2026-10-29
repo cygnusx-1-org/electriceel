@@ -22,6 +22,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.views.SplashView;
 import com.liskovsoft.smartyoutubetv2.common.app.views.ViewManager;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.AppExits;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.DataSubmitter;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStart;
 import com.liskovsoft.smartyoutubetv2.common.misc.AiSListManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.GDriveBackupWorker;
 import com.liskovsoft.smartyoutubetv2.common.misc.LocalDriveBackupWorker;
@@ -45,7 +46,15 @@ public class SplashPresenter extends BasePresenter<SplashView> {
     @SuppressLint("StaticFieldLeak")
     private static SplashPresenter sInstance;
     private static boolean sRunOnce;
+    /**
+     * The process has had an intent: the next one didn't start it
+     */
+    private static boolean sIsIntentApplied;
     private boolean mRunPerInstance;
+    /**
+     * The intent processed is the one the process was started with
+     */
+    private boolean mIsLaunchIntent;
     private final List<IntentProcessor> mIntentChain = new ArrayList<>();
     private String mBridgePackageName;
     private final Runnable mRunBackgroundTasks = this::runBackgroundTasks;
@@ -290,7 +299,9 @@ public class SplashPresenter extends BasePresenter<SplashView> {
                 PlaybackPresenter playbackPresenter = PlaybackPresenter.instance(getContext());
                 boolean finishOnEnded = IntentExtractor.hasFinishOnEndedFlag(intent);
                 boolean incognito = IntentExtractor.isIncognitoIntent(intent);
-                playbackPresenter.openVideo(videoId, finishOnEnded, timeMs, incognito);
+                // The intent the app was started with: the video's start is timed from the start of the process (see VideoStarts)
+                playbackPresenter.openVideo(videoId, finishOnEnded, timeMs, incognito,
+                        mIsLaunchIntent ? VideoStart.TRIGGER_COLD_INTENT : VideoStart.TRIGGER_INTENT);
 
                 enablePlayerOnlyModeIfNeeded(intent);
 
@@ -352,11 +363,16 @@ public class SplashPresenter extends BasePresenter<SplashView> {
             }
         }
 
+        mIsLaunchIntent = !sIsIntentApplied;
+        sIsIntentApplied = true;
+
         for (IntentProcessor processor : mIntentChain) {
             if (processor.process(intent)) {
                 break;
             }
         }
+
+        mIsLaunchIntent = false;
     }
 
     private void checkMasterPassword(Runnable onSuccess) {
