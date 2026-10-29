@@ -1,4 +1,9 @@
 # Electric Eel
+
+<p align="center" style="margin-top: -2em;">
+<a href="https://discord.gg/vDuSpJEDrW"><picture><source height="24px" media="(prefers-color-scheme: dark)" srcset="/assets/icons/Discord.png" /><img height="24px" src="/assets/icons/Discord.png" /></picture></a>
+
+<hr style="display: inline-block; width: 100%; border: 1px dotted #ff00cc;">
   
 <!-- <img width="100" src="https://github.com/cygnusx-1-org/electriceel/blob/master/smarttubetv/src/ststable/res/mipmap-nodpi/app_icon.png" alt="logo"/> -->
 
@@ -127,8 +132,6 @@ You can select which categories you want to skip in the settings. Unlike the bro
 ## Support
 
 You can report in our Telegram group or via [issue tracker on Github](https://github.com/cygnusx-1-org/electriceel/issues) (account required).
-
-- **Discord group**: [CygnusX-1.org](https://discord.gg/vDuSpJEDrW)  
 
 ## Donations
 [<img src="./assets/badges/buymeacoffee_badge.png"
