@@ -1,6 +1,6 @@
 name: Feature Request
-description: Create a feature request for SmartTube
-title: '[Feature Request]: '
+description: Create a feature request for ElectricEel
+title: ''
 labels: ['enhancement']
 body:
   - type: markdown
