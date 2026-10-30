@@ -80,3 +80,5 @@ __pycache__/
 changelog_override.txt
 
 .env
+
+.settings/
