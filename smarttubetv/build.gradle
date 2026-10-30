@@ -52,7 +52,7 @@ android {
     compileSdkVersion project.properties.compileSdkVersion
     buildToolsVersion project.properties.buildToolsVersion
     testOptions.unitTests.includeAndroidResources = true
-    ndkVersion "21.0.6113669" // reduce size of the *.so files (stripping debug symbols)
+    ndkVersion "30.0.16248370" // reduce size of the *.so files (stripping debug symbols)
     
     defaultConfig {
         // values linked with applicationId: searchable.searchSuggestAuthority, searchable.searchSuggestIntentData, VideoContract.CONTENT_AUTHORITY
