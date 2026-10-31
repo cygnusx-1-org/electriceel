@@ -1,6 +1,5 @@
 name: Bug Report
 description: Create a bug report to help us improve
-title: '' 
 labels: ['bug']
 
 body:
@@ -43,7 +42,7 @@ body:
         - "Smart TV"
         - "Box"
         - "Phone"
-        - "Tablet" 
+        - "Tablet"
     validations:
       required: true
 
