@@ -33,6 +33,7 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
     private CharSequence mTitlePrefix;
     private boolean mIsNestedTitlesEnabled;
     private OptionItem mFocusedItem;
+    private boolean mIsReplace;
 
     private CharSequence mBackupTitle;
     private List<OptionCategory> mBackupCategories;
@@ -43,6 +44,7 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
     private CharSequence mBackupTitlePrefix;
     private boolean mBackupIsNestedTitlesEnabled;
     private OptionItem mBackupFocusedItem;
+    private boolean mBackupIsReplace;
 
     public AppDialogPresenter(Context context) {
         super(context);
@@ -93,6 +95,7 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
         mBackupTitlePrefix = mTitlePrefix;
         mBackupIsNestedTitlesEnabled = mIsNestedTitlesEnabled;
         mBackupFocusedItem = mFocusedItem;
+        mBackupIsReplace = mIsReplace;
     }
 
     private void resetData() {
@@ -103,6 +106,7 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
         mId = 0;
         mTitle = null;
         mFocusedItem = null;
+        mIsReplace = false;
     }
 
     @Override
@@ -177,6 +181,21 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
      */
     public OptionItem getFocusedItem() {
         return mBackupFocusedItem;
+    }
+
+    /**
+     * The next dialog takes the place of the lists shown, the ones Back goes to included, instead of opening over them:
+     * e.g. a list built again after a change in it. Of a list (not of a single category opened right away).
+     */
+    public void enableReplace(boolean enable) {
+        mIsReplace = enable;
+    }
+
+    /**
+     * Of the dialog shown
+     */
+    public boolean isReplaceEnabled() {
+        return mBackupIsReplace;
     }
 
     /**

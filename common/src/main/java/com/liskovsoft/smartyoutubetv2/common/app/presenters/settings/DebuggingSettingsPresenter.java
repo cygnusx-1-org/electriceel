@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
@@ -35,6 +36,10 @@ public class DebuggingSettingsPresenter extends BasePresenter<Void> {
     private static Disposable sPreviewAction;
     private static final String TAG = DebuggingSettingsPresenter.class.getSimpleName();
     private static final int MAX_PREVIEW_CHARS = 20_000;
+    /**
+     * Of the panel and of the dialogs opened over it
+     */
+    private static final int DEBUGGING_ID = 151;
     private final DebuggingData mDebuggingData;
 
     private DebuggingSettingsPresenter(Context context) {
@@ -47,10 +52,17 @@ public class DebuggingSettingsPresenter extends BasePresenter<Void> {
         return new DebuggingSettingsPresenter(context);
     }
 
+    public void show() {
+        show(null);
+    }
+
     /**
      * Once the failures and the video starts are counted (the logs are read in the background)
+     *
+     * @param submittedId of the submission just sent: the panel takes the place of the one shown, so Back from the QR code
+     *                    over it shows the submission too
      */
-    public void show() {
+    private void show(@Nullable String submittedId) {
         Context context = getContext();
 
         if (context == null) {
@@ -61,10 +73,10 @@ public class DebuggingSettingsPresenter extends BasePresenter<Void> {
         VideoStartLog videoStarts = VideoStartLog.instance(context);
 
         RxHelper.execute(RxHelper.fromCallable(() -> new int[] {log.readAll().size(), videoStarts.readAll().size()}),
-                counts -> showPanel(counts[0], counts[1]), error -> showPanel(0, 0));
+                counts -> showPanel(counts[0], counts[1], submittedId), error -> showPanel(0, 0, submittedId));
     }
 
-    private void showPanel(int failureCount, int videoStartCount) {
+    private void showPanel(int failureCount, int videoStartCount, @Nullable String submittedId) {
         Context context = getContext();
 
         if (context == null) {
@@ -116,7 +128,13 @@ public class DebuggingSettingsPresenter extends BasePresenter<Void> {
                 },
                 mDebuggingData.isAutoSubmitEnabled()));
 
+        settingsPresenter.enableReplace(submittedId != null);
+        settingsPresenter.setId(DEBUGGING_ID);
         settingsPresenter.showDialog(context.getString(R.string.settings_debugging));
+
+        if (submittedId != null) {
+            showSubmitted(submittedId);
+        }
     }
 
     private void submit() {
@@ -132,7 +150,7 @@ public class DebuggingSettingsPresenter extends BasePresenter<Void> {
 
         MessageHelpers.showMessage(context, R.string.submit_data_sending);
 
-        sSubmitAction = RxHelper.execute(DataSubmitter.submitObserve(context), this::showSubmitted,
+        sSubmitAction = RxHelper.execute(DataSubmitter.submitObserve(context), this::onSubmitted,
                 error -> {
                     Context current = getContext();
 
@@ -142,6 +160,23 @@ public class DebuggingSettingsPresenter extends BasePresenter<Void> {
                         MessageHelpers.showLongMessage(current, current.getString(R.string.submit_data_failed, reason));
                     }
                 });
+    }
+
+    private void onSubmitted(String id) {
+        Context context = getContext();
+
+        if (context == null) {
+            return;
+        }
+
+        AppDialogPresenter dialogPresenter = AppDialogPresenter.instance(context);
+
+        // Back from the QR code goes to the panel: it's built again with the submission. Closed, it's built when opened.
+        if (dialogPresenter.isDialogShown() && dialogPresenter.getId() == DEBUGGING_ID) {
+            show(id);
+        } else {
+            showSubmitted(id);
+        }
     }
 
     private void preview() {
@@ -179,6 +214,7 @@ public class DebuggingSettingsPresenter extends BasePresenter<Void> {
         AppDialogPresenter dialogPresenter = AppDialogPresenter.instance(context);
         // No links: JSON is full of names that read as addresses (e.g. the decoder OMX.google.vp9.decoder)
         dialogPresenter.appendLongTextCategory(context.getString(R.string.submit_data_preview), UiOptionItem.from(text), false);
+        dialogPresenter.setId(DEBUGGING_ID);
         dialogPresenter.showDialog(context.getString(R.string.submit_data_preview));
     }
 
@@ -196,6 +232,7 @@ public class DebuggingSettingsPresenter extends BasePresenter<Void> {
         dialogPresenter.appendQrCode(title, getIssueUrl(context, id));
         // A single item would be opened right away instead of showing the panel with the picture
         dialogPresenter.enableExpandable(false);
+        dialogPresenter.setId(DEBUGGING_ID);
         dialogPresenter.showDialog(context.getString(R.string.submit_data));
     }
 
