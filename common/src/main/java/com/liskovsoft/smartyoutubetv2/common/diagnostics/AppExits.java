@@ -12,6 +12,7 @@ import androidx.annotation.RequiresApi;
 import com.liskovsoft.smartyoutubetv2.common.prefs.DebuggingData;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -97,6 +98,12 @@ public final class AppExits {
                 continue;
             }
 
+            // Android closing a cached app to make room: nobody was using it. With the low memory killer's reports, its kills are
+            // low_memory ones.
+            if (isReclaimed(exit)) {
+                continue;
+            }
+
             PlayerFailure failure = PlayerFailure.create(context, KIND_APP_EXIT)
                     .at(exit.getTimestamp())
                     .withoutState()
@@ -117,12 +124,28 @@ public final class AppExits {
                 failure.detail("mainThread", readMainThread(exit));
             }
 
+            // What it was doing (e.g. the remote control's service running, a video playing): Android doesn't say
+            JSONObject lastState = LastState.find(context, exit.getPid(), exit.getTimestamp());
+
+            if (lastState != null) {
+                failure.detail("lastState", lastState);
+            }
+
             failure.record();
         }
 
         if (newest > lastSeen) {
             debuggingData.setLastAppExitTs(newest);
         }
+    }
+
+    /**
+     * Android took it back while it was cached: killed by a signal, or by the low memory killer where it reports its kills
+     */
+    @RequiresApi(30)
+    private static boolean isReclaimed(ApplicationExitInfo exit) {
+        return (exit.getReason() == ApplicationExitInfo.REASON_SIGNALED || exit.getReason() == ApplicationExitInfo.REASON_LOW_MEMORY)
+                && exit.getImportance() >= RunningAppProcessInfo.IMPORTANCE_CACHED;
     }
 
     @Nullable

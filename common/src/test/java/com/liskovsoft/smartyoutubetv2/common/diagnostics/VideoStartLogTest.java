@@ -32,6 +32,23 @@ public class VideoStartLogTest {
     }
 
     @Test
+    public void framesAreAddedToTheirStart() throws Exception {
+        VideoStartLog log = new VideoStartLog(mFolder.getRoot());
+        VideoStart first = start("first", 2500);
+        log.record(first);
+        JSONObject frames = new JSONObject().put("rendered", 90);
+        log.addFrames(first.ts, frames);
+        log.addFrames(first.ts + 1, new JSONObject().put("rendered", 5));
+        assertEquals(1, log.readAll().size()); // written
+
+        List<JSONObject> starts = new VideoStartLog(mFolder.getRoot()).readAll();
+
+        assertEquals(1, starts.size());
+        assertEquals(90, starts.get(0).getJSONObject("frames").getInt("rendered"));
+        assertEquals("first", starts.get(0).getString("videoId"));
+    }
+
+    @Test
     public void keepsTheStartsOverRestarts() throws Exception {
         VideoStartLog log = new VideoStartLog(mFolder.getRoot());
         log.record(start("first", 2500));
@@ -46,7 +63,19 @@ public class VideoStartLogTest {
         assertEquals("first", starts.get(0).getString("videoId"));
         assertEquals(2500, starts.get(0).getLong("totalMs"));
         assertEquals("second", starts.get(1).getString("videoId"));
-        assertEquals(start("second", 3100).toJson().toString(), starts.get(1).toString());
+        // Stamped with the account when recorded
+        assertEquals(start("second", 3100).toJson().put("account", 1).toString(), starts.get(1).toString());
+    }
+
+    /**
+     * Of the account in use when it was recorded, as a failure is
+     */
+    @Test
+    public void aStartHasTheAccountInUse() throws Exception {
+        VideoStartLog log = new VideoStartLog(mFolder.getRoot(), () -> 3);
+        log.record(start("first", 2500));
+
+        assertEquals(3, log.readAll().get(0).getInt("account"));
     }
 
     @Test

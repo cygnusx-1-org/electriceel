@@ -1,8 +1,10 @@
 package com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers;
 
 import android.net.Uri;
+import android.os.SystemClock;
 
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.PoTokenError;
+import com.google.android.exoplayer2.source.sabr.parser.exceptions.UnknownPartError;
 import com.google.android.exoplayer2.source.sabr.parser.parts.PoTokenStatusSabrPart.PoTokenStatus;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.HttpDataSource.HttpDataSourceException;
@@ -11,7 +13,10 @@ import com.google.android.exoplayer2.upstream.Loader.UnexpectedLoaderException;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.listener.PlayerEventListener;
 import com.liskovsoft.smartyoutubetv2.common.app.views.PlaybackView;
+import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailureLog;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStarts;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.app.PoTokenGate;
@@ -47,6 +52,8 @@ public class ErrorFixerControllerTest {
     public TemporaryFolder mFolder = new TemporaryFolder();
     private PlayerFailureLog mLog;
     private int mSavedEngine;
+    private int mSavedDns;
+    private boolean mSavedIpv6Test;
 
     @Before
     public void setUp() throws Exception {
@@ -54,15 +61,24 @@ public class ErrorFixerControllerTest {
         // Cronet can't load under Robolectric
         mSavedEngine = getTweaks().getPlayerDataSource();
         getTweaks().setPlayerDataSource(PlayerTweaksData.PLAYER_DATA_SOURCE_OKHTTP);
+        mSavedDns = getTweaks().getPreferredDnsType();
+        mSavedIpv6Test = getGlobalPrefs().isIpv6TestEnabled();
         setTvPotRejected(false);
+        setIpv6Working(null);
+        // No segment loaded or loading
+        VideoStarts.onPrepare();
     }
 
     @After
     public void tearDown() throws Exception {
         PlayerFailureLog.useForTesting(null);
         getTweaks().setPlayerDataSource(mSavedEngine);
+        getTweaks().setPreferredDnsType(mSavedDns);
+        getGlobalPrefs().setIpv6TestEnabled(mSavedIpv6Test);
         Utils.sHandler.removeCallbacksAndMessages(null);
         setTvPotRejected(false);
+        setIpv6Working(null);
+        VideoStarts.onPrepare();
     }
 
     /**
@@ -115,6 +131,77 @@ public class ErrorFixerControllerTest {
         assertEquals(2, events.size());
         assertEquals(Arrays.asList("network_reload 1/3", "reload_video"), getActions(events.get(0)));
         assertEquals(Arrays.asList("switch_next_client", "reload_video"), getActions(events.get(1)));
+    }
+
+    /**
+     * SABR's response had bytes no part starts with while it played: broken on the way, not the client's, so the same client
+     * again, as for a broken connection
+     */
+    @Test
+    public void aBrokenSabrResponseWhilePlayingReloadsWithTheSameClient() throws Exception {
+        TestController controller = new TestController(video("-GLlqOV-qm0"));
+        controller.onPlay();
+
+        controller.onEngineError(PlayerEventListener.ERROR_TYPE_SOURCE, PlayerEventListener.RENDERER_INDEX_UNKNOWN,
+                new UnexpectedLoaderException(new UnknownPartError("Unknown part encountered: id=1459, size=1131850, position=5")));
+
+        assertEquals(Arrays.asList("network_reload 1/3", "reload_video"), getActions(mLog.readAll().get(0)));
+    }
+
+    /**
+     * The start hangs 20 s on the video's first segment while the audio's came: the request is stuck, not the client or the DNS.
+     * Reloaded once; stuck again, the client is switched (the DNS is Google's already).
+     */
+    @Test
+    public void aStartStuckOnOneTracksFirstSegmentIsReloadedOnce() throws Exception {
+        getTweaks().setPreferredDnsType(PlayerTweaksData.DNS_TYPE_GOOGLE);
+        TestController controller = new TestController(video("p5miU3x4Sr8"));
+        loadAudioOnly();
+
+        controller.onLongBuffering();
+        loadAudioOnly();
+        controller.onLongBuffering();
+
+        List<JSONObject> events = mLog.readAll();
+
+        assertEquals(2, events.size());
+        assertEquals(Arrays.asList("stuck_load_reload", "reload_video"), getActions(events.get(0)));
+        assertEquals(Arrays.asList("switch_next_client_now", "reload_video"), getActions(events.get(1)));
+    }
+
+    /**
+     * Nothing came at all: no track to tell the request is stuck, the fixes as before
+     */
+    @Test
+    public void aStartWithNothingLoadedSwitchesTheClient() throws Exception {
+        getTweaks().setPreferredDnsType(PlayerTweaksData.DNS_TYPE_GOOGLE);
+        TestController controller = new TestController(video("g_jLBnnQuwE"));
+        VideoStarts.onLoadStarted(true, true, false, SystemClock.elapsedRealtime());
+        VideoStarts.onLoadStarted(true, false, true, SystemClock.elapsedRealtime());
+
+        controller.onLongBuffering();
+
+        assertEquals(Arrays.asList("switch_next_client_now", "reload_video"), getActions(mLog.readAll().get(0)));
+    }
+
+    /**
+     * IPv6 doesn't connect: the player uses OkHttp whatever is chosen. The DNS is switched, the engine chosen isn't.
+     */
+    @Test
+    public void theDnsFixKeepsTheEngineChosenWhenOkHttpIsInUse() throws Exception {
+        getTweaks().setPlayerDataSource(PlayerTweaksData.PLAYER_DATA_SOURCE_CRONET);
+        getTweaks().setPreferredDnsType(PlayerTweaksData.DNS_TYPE_IPV4);
+        getGlobalPrefs().setIpv6TestEnabled(true);
+        setIpv6Working(false);
+        TestController controller = new TestController(video("p5miU3x4Sr8"));
+
+        controller.onLongBuffering();
+
+        JSONObject event = mLog.readAll().get(0);
+        assertEquals("okhttp_no_ipv6", event.getJSONObject("player").getString("engineEffective"));
+        assertEquals(Arrays.asList("dns_google", "restart_engine"), getActions(event));
+        assertEquals(PlayerTweaksData.PLAYER_DATA_SOURCE_CRONET, getTweaks().getPlayerDataSource());
+        assertEquals(PlayerTweaksData.DNS_TYPE_GOOGLE, getTweaks().getPreferredDnsType());
     }
 
     /**
@@ -215,6 +302,19 @@ public class ErrorFixerControllerTest {
         assertEquals("format_error", mLog.readAll().get(0).getString("kind"));
     }
 
+    /**
+     * Prepared again (e.g. reloaded): the audio's first segments came, the video's init is still loading
+     */
+    private static void loadAudioOnly() {
+        VideoStarts.onPrepare();
+        long now = SystemClock.elapsedRealtime();
+        VideoStarts.onLoadStarted(true, true, false, now);
+        VideoStarts.onLoadStarted(true, false, true, now);
+        VideoStarts.onLoad(true, false, true, now, now + 300, 2_000);
+        VideoStarts.onLoadStarted(false, false, true, now + 300);
+        VideoStarts.onLoad(false, false, true, now + 300, now + 500, 145_000);
+    }
+
     private static DataSpec dataSpec() {
         return new DataSpec(Uri.parse("https://rr1---sn-test.googlevideo.com/videoplayback"));
     }
@@ -245,19 +345,35 @@ public class ErrorFixerControllerTest {
         field.setBoolean(null, rejected);
     }
 
+    /**
+     * As the IPv6 test found it (see Ipv6CheckDns): null not tested
+     */
+    private static void setIpv6Working(Boolean isWorking) throws Exception {
+        Field field = Class.forName("com.liskovsoft.sharedutils.okhttp.Ipv6CheckDns").getDeclaredField("sIsIpv6Working");
+        field.setAccessible(true);
+        field.set(null, isWorking);
+    }
+
     private static PlayerTweaksData getTweaks() {
         return PlayerTweaksData.instance(RuntimeEnvironment.getApplication());
     }
 
+    private static GlobalPreferences getGlobalPrefs() {
+        return GlobalPreferences.instance(RuntimeEnvironment.getApplication());
+    }
+
     /**
-     * Returns the defaults (false, 0, null) for every call
+     * Returns the defaults (false, 0, null) for every call, and the subtitles off
      */
     private static PlaybackView playerStub() {
         return (PlaybackView) Proxy.newProxyInstance(PlaybackView.class.getClassLoader(), new Class<?>[]{PlaybackView.class},
                 (proxy, method, args) -> {
                     Class<?> type = method.getReturnType();
 
-                    if (type == boolean.class) {
+                    if ("getSubtitleFormat".equals(method.getName())) {
+                        // Off: long loading subtitles have a fix of their own
+                        return FormatItem.SUBTITLE_NONE;
+                    } else if (type == boolean.class) {
                         return false;
                     } else if (type == int.class) {
                         return 0;

@@ -40,6 +40,7 @@ import com.liskovsoft.sharedutils.cronet.CronetManager;
 import com.liskovsoft.sharedutils.helpers.FileHelpers;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.sharedutils.okhttp.OkHttpManager;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.Connections;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.errors.DashDefaultLoadErrorHandlingPolicy;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.errors.SabrDefaultLoadErrorHandlingPolicy;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.errors.TrackErrorFixer;
@@ -61,6 +62,11 @@ public class ExoMediaSourceFactory {
     //private static ExoMediaSourceFactory sInstance;
     private static final int MAX_SEGMENTS_PER_LOAD = 1; // default - 1 (1-5)
     private static final int SABR_READ_TIMEOUT_MS = 4_000;
+    /**
+     * Of the segments of a video's formats: as SABR's. The default's 20 s is the long buffering's (see BufferingDetector), so a
+     * request that hangs at the start was never retried before the error fixer changed the client or the DNS.
+     */
+    private static final int DASH_READ_TIMEOUT_MS = SABR_READ_TIMEOUT_MS;
     private static final String USER_AGENT = DefaultHeaders.APP_USER_AGENT;
     @SuppressLint("StaticFieldLeak")
     private static final DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
@@ -72,6 +78,7 @@ public class ExoMediaSourceFactory {
     private TrackErrorFixer mTrackErrorFixer;
     private DataSource.Factory mMediaDataSourceFactory;
     private DataSource.Factory mSabrMediaDataSourceFactory;
+    private DataSource.Factory mDashMediaDataSourceFactory;
 
     public ExoMediaSourceFactory(Context context) {
         mContext = context;
@@ -206,7 +213,7 @@ public class ExoMediaSourceFactory {
     private MediaSource buildDashMediaSource(MediaItemFormatInfo formatInfo) {
         // Are you using FrameworkSampleSource or ExtractorSampleSource when you build your player?
         DashMediaSource dashSource = new DashMediaSource.Factory(
-                getDashChunkSourceFactory(),
+                getDashFormatsChunkSourceFactory(),
                 null
         )
                 .setLoadErrorHandlingPolicy(new DashDefaultLoadErrorHandlingPolicy())
@@ -285,10 +292,11 @@ public class ExoMediaSourceFactory {
      * Use OkHttp for networking
      */
     private HttpDataSource.Factory buildOkHttpDataSourceFactory(DefaultBandwidthMeter bandwidthMeter, int readTimeoutMs) {
-        OkHttpClient client = OkHttpManager.instance().getClient();
-        if (readTimeoutMs != client.readTimeoutMillis()) {
-            client = client.newBuilder().readTimeout(readTimeoutMs, TimeUnit.MILLISECONDS).build(); // shares the connection pool
-        }
+        // Shares the connection pool
+        OkHttpClient client = OkHttpManager.instance().getClient().newBuilder()
+                .readTimeout(readTimeoutMs, TimeUnit.MILLISECONDS)
+                .eventListenerFactory(Connections.LISTENER)
+                .build();
         OkHttpDataSourceFactory dataSourceFactory = new OkHttpDataSourceFactory(client, USER_AGENT,
                 bandwidthMeter);
         addCommonHeaders(dataSourceFactory);
@@ -367,6 +375,7 @@ public class ExoMediaSourceFactory {
     public void release() {
         mMediaDataSourceFactory = null;
         mSabrMediaDataSourceFactory = null;
+        mDashMediaDataSourceFactory = null;
     }
 
     @NonNull
@@ -395,6 +404,21 @@ public class ExoMediaSourceFactory {
         }
 
         return mSabrMediaDataSourceFactory;
+    }
+
+    /**
+     * Of a video's formats (see #fromDashFormatInfo): a live stream's manifest isn't these, its segments may be answered late
+     */
+    private DashChunkSource.Factory getDashFormatsChunkSourceFactory() {
+        return new DefaultDashChunkSource.Factory(getDashMediaDataSourceFactory(), MAX_SEGMENTS_PER_LOAD);
+    }
+
+    private DataSource.Factory getDashMediaDataSourceFactory() {
+        if (mDashMediaDataSourceFactory == null) {
+            mDashMediaDataSourceFactory = buildDataSourceFactory(USE_BANDWIDTH_METER, DASH_READ_TIMEOUT_MS);
+        }
+
+        return mDashMediaDataSourceFactory;
     }
 
     private DataSource.Factory getMediaDataSourceFactory() {

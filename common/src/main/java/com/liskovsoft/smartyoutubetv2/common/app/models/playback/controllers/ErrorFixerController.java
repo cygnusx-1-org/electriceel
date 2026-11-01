@@ -13,6 +13,7 @@ import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer.DecoderInitia
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.PoTokenError;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrBackoffError;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrReloadPlayerError;
+import com.google.android.exoplayer2.source.sabr.parser.exceptions.UnknownPartError;
 import com.google.android.exoplayer2.source.sabr.parser.parts.PoTokenStatusSabrPart.PoTokenStatus;
 import com.google.android.exoplayer2.upstream.HttpDataSource.HttpDataSourceException;
 import com.google.android.exoplayer2.util.MimeTypes;
@@ -27,6 +28,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.listener.Player
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.FormatAttempts;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailure;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailureLog;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStarts;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.errors.DecoderErrorFallback;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
 import com.liskovsoft.smartyoutubetv2.common.misc.BufferingDetector;
@@ -68,6 +70,10 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
      */
     private String mNetworkErrorVideoId;
     private int mNetworkErrorReloads;
+    /**
+     * The video reloaded once for a first segment that never came (see runLongBufferingAction)
+     */
+    private String mStuckLoadVideoId;
     /**
      * Where the playback started (see onPlay)
      */
@@ -127,17 +133,28 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
             failure.action("disable_subtitles").action("reload_video");
             disableSubtitles();
             mVideoLoaderController.reloadVideo();
+        } else if (isOfflineVideo() && !mBufferingDetector.isPlayable() && isFirstStuckLoad()) {
+            // One track's first segment came and the other's request hangs: the name resolved and the client's formats load, so
+            // neither the DNS nor the client is to blame. Reloaded once for the video, then the fixes below.
+            failure.action("stuck_load_reload").action("reload_video");
+            mVideoLoaderController.reloadVideo();
         } else if (isOfflineVideo() && !mBufferingDetector.isPlayable()) {
             int requiredEngine = PlayerTweaksData.PLAYER_DATA_SOURCE_OKHTTP;
             int customDns = PlayerTweaksData.DNS_TYPE_GOOGLE;
-            boolean isCustomDnsActive = getPlayerTweaksData().getPlayerDataSource() == requiredEngine
-                    && getPlayerTweaksData().getPreferredDnsType() == customDns;
+            // The one the player uses: OkHttp while IPv6 doesn't connect, whatever is chosen (see ExoMediaSourceFactory)
+            boolean isRequiredEngineInUse = getPlayerTweaksData().getPlayerDataSource() == requiredEngine || OkHttpManager.isIpv6Disabled();
+            boolean isCustomDnsActive = isRequiredEngineInUse && getPlayerTweaksData().getPreferredDnsType() == customDns;
             if (!isCustomDnsActive && !getPlayerTweaksData().isNetworkErrorFixingDisabled()) {
                 // Wrong DNS resolving could cause hanging at start
                 // Do switch to only engine that respects custom DNS settings
                 MessageHelpers.showLongMessage(getContext(), "Fixing incorrect DNS resolution. App restart needed...");
-                failure.action("switch_engine:" + Utils.getNetworkEngineId(requiredEngine)).action("dns_google").action("restart_engine");
-                getPlayerTweaksData().setPlayerDataSource(requiredEngine);
+
+                if (!isRequiredEngineInUse) {
+                    failure.action("switch_engine:" + Utils.getNetworkEngineId(requiredEngine));
+                    getPlayerTweaksData().setPlayerDataSource(requiredEngine);
+                }
+
+                failure.action("dns_google").action("restart_engine");
                 getPlayerTweaksData().setPreferredDnsType(customDns);
                 mVideoLoaderController.restartEngine();
             } else {
@@ -190,6 +207,8 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
     public void onPlay() {
         mBufferingDetector.onStopBuffering();
         mSabrErrorFixAttempts = 0;
+        // It came: stuck again another time (e.g. opened again), it's reloaded again
+        mStuckLoadVideoId = null;
         FormatAttempts.onPlaying(true);
 
         if (getPlayer() != null) {
@@ -439,13 +458,29 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
     }
 
     /**
-     * The connection to the server broke, not its answer (e.g. a read timeout, not a 403): another client would stream from the
-     * same servers. Up to MAX_NETWORK_ERROR_RELOADS reloads a video, then the client is switched.
+     * The start hangs on a first segment that never came while the other track's did (see VideoStarts#isOneTrackStuck), the first
+     * time for this video
+     */
+    private boolean isFirstStuckLoad() {
+        Video video = getVideo();
+
+        if (video == null || Helpers.equals(video.videoId, mStuckLoadVideoId) || !VideoStarts.isOneTrackStuck()) {
+            return false;
+        }
+
+        mStuckLoadVideoId = video.videoId;
+
+        return true;
+    }
+
+    /**
+     * The connection to the server broke, or the response it sent did, not its answer (e.g. a read timeout, not a 403): another
+     * client would stream from the same servers. Up to MAX_NETWORK_ERROR_RELOADS reloads a video, then the client is switched.
      */
     private boolean applyNetworkErrorReload(Throwable error, PlayerFailure failure) {
         Video video = getVideo();
 
-        if (video == null || !isConnectionError(error)) {
+        if (video == null || !(isConnectionError(error) || isBrokenSabrResponse(error))) {
             return false;
         }
 
@@ -461,6 +496,20 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
         failure.action("network_reload " + mNetworkErrorReloads + "/" + MAX_NETWORK_ERROR_RELOADS);
 
         return true;
+    }
+
+    /**
+     * The SABR response read had bytes no part starts with (see SabrStream#nextKnownUMPPart): broken on the way or read out of
+     * step, not the client's formats
+     */
+    private static boolean isBrokenSabrResponse(Throwable error) {
+        for (Throwable cause = error; cause != null; cause = cause.getCause()) {
+            if (cause instanceof UnknownPartError) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -544,7 +593,7 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
                 YouTubeServiceManager.instance().switchNextClientNow();
                 showMessage = true;
             } else if (!applyNetworkErrorReload(error, failure)) {
-                // A broken connection (e.g. a read timeout) is only reloaded, with the same client
+                // A broken connection (e.g. a read timeout) or SABR response is only reloaded, with the same client
                 failure.action("switch_next_client");
                 YouTubeServiceManager.instance().switchNextClient(); // Response code: 403
             }

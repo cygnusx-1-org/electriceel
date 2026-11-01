@@ -12,6 +12,7 @@ import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.smartyoutubetv2.common.R;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.PlaybackPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.ViewManager;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.LastState;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
 public class RemoteControlService extends Service {
@@ -35,11 +36,18 @@ public class RemoteControlService extends Service {
         // https://stackoverflow.com/questions/10962418/how-to-startforeground-without-showing-notification
         try {
             startForeground(NOTIFICATION_ID, createNotification());
+            LastState.onServiceStarted(getApplicationContext(), LastState.SERVICE_REMOTE_CONTROL);
         } catch (Exception e) {
             // NullPointerException: Attempt to read from field 'int com.android.server.am.UidRecord.curProcState' on a null object reference
             // ForegroundServiceStartNotAllowedException: Service.startForeground() not allowed due to mAllowStartForeground false (Android 14)
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        LastState.onServiceStopped(getApplicationContext(), LastState.SERVICE_REMOTE_CONTROL);
+        super.onDestroy();
     }
 
     @Override

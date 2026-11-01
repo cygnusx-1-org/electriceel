@@ -56,6 +56,8 @@ public final class FormatAttempts {
      */
     private static final Pattern VIDEO = Pattern.compile("^(\\d+)x(\\d+) (\\S+)(?: (\\d+)fps)?$");
     private static String sVideoId;
+    private static String sClient;
+    private static String sProtocol;
     private static long sSessionStart;
     /**
      * The application's (no activity kept), for the counts of how the formats played (see #count)
@@ -105,6 +107,10 @@ public final class FormatAttempts {
     private static final class Attempt {
         final String video;
         final String audio;
+        /**
+         * Of the video format, as the stream gives it: -1 when it doesn't. What the throughput is to keep up with.
+         */
+        int videoBitrateKbps = -1;
         String videoStatus = STATUS_UNKNOWN;
         String audioStatus = STATUS_UNKNOWN;
         String videoDecoder;
@@ -158,6 +164,7 @@ public final class FormatAttempts {
         }
 
         Attempt attempt = new Attempt(PlayerFailure.describeVideo(video), PlayerFailure.describeAudio(audio));
+        attempt.videoBitrateKbps = getBitrateKbps(video);
         Attempt last = getLast();
 
         if (last != null && last.isSameFormats(attempt) && !sIsLastFailed) {
@@ -329,6 +336,42 @@ public final class FormatAttempts {
     }
 
     /**
+     * Of the one tried last, up to now
+     */
+    public static long getStallMs() {
+        Attempt last = getLast();
+
+        return last != null ? last.stallMs + (last.stallSince >= 0 ? sClock.now() - last.stallSince : 0) : 0;
+    }
+
+    /**
+     * Of the one tried last, up to now
+     */
+    public static long getPlayedMs() {
+        Attempt last = getLast();
+
+        return last != null ? last.playedMs + (last.playingSince >= 0 ? sClock.now() - last.playingSince : 0) : 0;
+    }
+
+    /**
+     * Where the formats of the video are from, and how they're played (see PlayerFailure#source)
+     */
+    public static void onSource(@Nullable String client, @Nullable String protocol) {
+        sClient = client;
+        sProtocol = protocol;
+    }
+
+    @Nullable
+    public static String getClient() {
+        return sClient;
+    }
+
+    @Nullable
+    public static String getProtocol() {
+        return sProtocol;
+    }
+
+    /**
      * The audio's clock moved on while it played (it's the player's clock): its sound is output
      */
     public static void onAudioPlayed() {
@@ -405,6 +448,8 @@ public final class FormatAttempts {
         sLastSeekMs = -1;
         sAttemptId++;
         sVideoId = null;
+        sClient = null;
+        sProtocol = null;
         sAttempts.clear();
         sHasFailed = false;
         sIsChangedSinceFailure = false;
@@ -566,6 +611,12 @@ public final class FormatAttempts {
         return result;
     }
 
+    private static int getBitrateKbps(@Nullable FormatItem item) {
+        int bitrate = item != null && item.getTrack() != null && item.getTrack().format != null ? item.getTrack().format.bitrate : -1;
+
+        return bitrate > 0 ? bitrate / 1000 : -1;
+    }
+
     private static JSONObject toJson(Attempt attempt) throws JSONException {
         JSONObject result = new JSONObject();
         long now = sClock.now();
@@ -585,6 +636,7 @@ public final class FormatAttempts {
         result.put("stallMs", stallMs);
         // Bits per millisecond are kilobits per second
         result.put("throughputKbps", attempt.loadMs > 0 ? attempt.loadedBytes * 8 / attempt.loadMs : JSONObject.NULL);
+        result.put("videoBitrateKbps", attempt.videoBitrateKbps > 0 ? attempt.videoBitrateKbps : JSONObject.NULL);
 
         return result;
     }

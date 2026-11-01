@@ -48,6 +48,7 @@ public class AppExitsTest {
 
     @After
     public void tearDown() {
+        LastState.resetForTesting(getContext());
         FormatAttempts.resetForTesting();
         PlayerFailureLog.useForTesting(null);
         PlayerTweaksData.instance(getContext()).setPlayerDataSource(mSavedEngine);
@@ -87,7 +88,7 @@ public class AppExitsTest {
                 .setTimestamp(System.currentTimeMillis())
                 .setReason(ApplicationExitInfo.REASON_SIGNALED)
                 .setStatus(9)
-                .setImportance(RunningAppProcessInfo.IMPORTANCE_CACHED)
+                .setImportance(RunningAppProcessInfo.IMPORTANCE_SERVICE)
                 .setProcessName(getContext().getPackageName())
                 .build());
 
@@ -96,9 +97,94 @@ public class AppExitsTest {
         JSONObject details = mLog.readAll().get(0).getJSONObject("details");
         assertEquals("signaled", details.getString("reason"));
         assertFalse(details.getBoolean("foreground"));
-        assertEquals(RunningAppProcessInfo.IMPORTANCE_CACHED, details.getInt("importance"));
+        assertEquals(RunningAppProcessInfo.IMPORTANCE_SERVICE, details.getInt("importance"));
         assertEquals(9, details.getInt("status"));
         assertEquals(ActivityManager.isLowMemoryKillReportSupported(), details.getBoolean("lowMemoryKillReport"));
+    }
+
+    /**
+     * Android closing it to make room: not a failure
+     */
+    @Test
+    @Config(sdk = 30)
+    public void aCachedAppKilledIsNotRecorded() throws Exception {
+        ActivityManager activityManager = (ActivityManager) getContext().getSystemService(Context.ACTIVITY_SERVICE);
+        shadowOf(activityManager).addApplicationExitInfo(ApplicationExitInfoBuilder.newBuilder()
+                .setTimestamp(System.currentTimeMillis())
+                .setReason(ApplicationExitInfo.REASON_SIGNALED)
+                .setStatus(9)
+                .setImportance(RunningAppProcessInfo.IMPORTANCE_CACHED)
+                .setProcessName(getContext().getPackageName())
+                .build());
+
+        AppExits.recordNew(getContext());
+
+        assertTrue(mLog.readAll().isEmpty());
+    }
+
+    /**
+     * Where the low memory killer reports its kills, they're low_memory ones: of a cached app, the same as a signaled one
+     */
+    @Test
+    @Config(sdk = 30)
+    public void aCachedAppTheLowMemoryKillerKilledIsNotRecorded() throws Exception {
+        ActivityManager activityManager = (ActivityManager) getContext().getSystemService(Context.ACTIVITY_SERVICE);
+        shadowOf(activityManager).addApplicationExitInfo(ApplicationExitInfoBuilder.newBuilder()
+                .setTimestamp(System.currentTimeMillis())
+                .setReason(ApplicationExitInfo.REASON_LOW_MEMORY)
+                .setImportance(RunningAppProcessInfo.IMPORTANCE_CACHED)
+                .setProcessName(getContext().getPackageName())
+                .build());
+
+        AppExits.recordNew(getContext());
+
+        assertTrue(mLog.readAll().isEmpty());
+    }
+
+    /**
+     * Killed for memory while it was used (e.g. playing in the background): a failure
+     */
+    @Test
+    @Config(sdk = 30)
+    public void aLowMemoryKillWhileUsedIsRecorded() throws Exception {
+        ActivityManager activityManager = (ActivityManager) getContext().getSystemService(Context.ACTIVITY_SERVICE);
+        shadowOf(activityManager).addApplicationExitInfo(ApplicationExitInfoBuilder.newBuilder()
+                .setTimestamp(System.currentTimeMillis())
+                .setReason(ApplicationExitInfo.REASON_LOW_MEMORY)
+                .setImportance(RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE)
+                .setProcessName(getContext().getPackageName())
+                .build());
+
+        AppExits.recordNew(getContext());
+
+        assertEquals("low_memory", mLog.readAll().get(0).getJSONObject("details").getString("reason"));
+    }
+
+    /**
+     * Killed while the remote control's service ran: what it was doing comes with it, Android doesn't say
+     */
+    @Test
+    @Config(sdk = 30)
+    public void anExitHasWhatItsProcessWasDoing() throws Exception {
+        long now = System.currentTimeMillis();
+        LastState.sPid = () -> 4242;
+        LastState.sWallClock = () -> now - 5_000;
+        LastState.onServiceStarted(getContext(), LastState.SERVICE_REMOTE_CONTROL);
+        ActivityManager activityManager = (ActivityManager) getContext().getSystemService(Context.ACTIVITY_SERVICE);
+        shadowOf(activityManager).addApplicationExitInfo(ApplicationExitInfoBuilder.newBuilder()
+                .setTimestamp(now)
+                .setPid(4242)
+                .setReason(ApplicationExitInfo.REASON_SIGNALED)
+                .setStatus(9)
+                .setImportance(RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE)
+                .setProcessName(getContext().getPackageName())
+                .build());
+
+        AppExits.recordNew(getContext());
+
+        JSONObject lastState = mLog.readAll().get(0).getJSONObject("details").getJSONObject("lastState");
+        assertEquals(LastState.SERVICE_REMOTE_CONTROL, lastState.getJSONArray("services").getString(0));
+        assertEquals(5_000, lastState.getLong("agoMs"));
     }
 
     private static Context getContext() {

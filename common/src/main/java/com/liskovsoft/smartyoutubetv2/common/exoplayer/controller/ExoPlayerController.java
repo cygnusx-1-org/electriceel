@@ -30,6 +30,7 @@ import com.liskovsoft.smartyoutubetv2.common.BuildConfig;
 import com.liskovsoft.smartyoutubetv2.common.R;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.FormatAttempts;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.LastState;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlaybackHealth;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailure;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.SilenceDetector;
@@ -53,6 +54,8 @@ import com.liskovsoft.smartyoutubetv2.common.exoplayer.versions.renderer.DebugIn
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
+
+import org.json.JSONArray;
 
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
@@ -78,7 +81,6 @@ public class ExoPlayerController implements Player.EventListener {
     // The volume set, kept while the range muter has the sound off
     private float mVolume = 1f;
     private boolean mIsMuted;
-    private static final long HEALTH_CHECK_MS = 2_000;
     private final PlaybackHealth mHealth = new PlaybackHealth();
     private final Runnable mHealthCheck = this::checkHealth;
     /**
@@ -209,6 +211,7 @@ public class ExoPlayerController implements Player.EventListener {
             PlaybackHealth.Sample sample = new PlaybackHealth.Sample();
             sample.nowMs = SystemClock.elapsedRealtime();
             sample.attempt = FormatAttempts.getAttemptId();
+            sample.videoId = FormatAttempts.getVideoId();
             sample.isPlaying = mPlayer.getPlayWhenReady() && mPlayer.getPlaybackState() == Player.STATE_READY;
             sample.positionMs = mPlayer.getCurrentPosition();
             // Not shown, the video isn't checked
@@ -217,6 +220,8 @@ public class ExoPlayerController implements Player.EventListener {
             sample.isMuted = mIsMuted || mPlayer.getVolume() == 0;
             sample.silentMs = SilenceDetector.getSilentMs();
             sample.stalls = FormatAttempts.getStalls();
+            sample.stallMs = FormatAttempts.getStallMs();
+            sample.playedMs = FormatAttempts.getPlayedMs();
 
             DecoderCounters counters = mPlayer.getVideoDecoderCounters();
 
@@ -224,6 +229,8 @@ public class ExoPlayerController implements Player.EventListener {
                 counters.ensureUpdated();
                 sample.renderedFrames = counters.renderedOutputBufferCount;
                 sample.droppedFrames = counters.droppedBufferCount;
+                sample.droppedToKeyframes = counters.droppedToKeyframeCount;
+                sample.inputBuffers = counters.inputBufferCount;
             }
 
             // The renderer goes on with the same video when only the audio is switched: its first frame isn't rendered again.
@@ -237,11 +244,15 @@ public class ExoPlayerController implements Player.EventListener {
             for (String kind : mHealth.onSample(sample)) {
                 recordHealthFailure(kind, sample);
             }
+
+            onStartFrames(mHealth.takeStartFrames());
+            // For an app exit to tell (see AppExits)
+            LastState.onPlayer(mContext, true, sample.isPlaying);
         } catch (RuntimeException e) {
             Log.e(TAG, "Can't check the playback: " + e.getMessage());
         } finally {
             if (mPlayer != null) {
-                Utils.postDelayed(mHealthCheck, HEALTH_CHECK_MS);
+                Utils.postDelayed(mHealthCheck, mHealth.getTickMs());
             }
         }
     }
@@ -251,19 +262,59 @@ public class ExoPlayerController implements Player.EventListener {
                 .video(getVideo())
                 .position(sample.positionMs, mPlayer.getDuration())
                 .formats(getVideoFormat(), getAudioFormat())
+                .source(FormatAttempts.getClient(), FormatAttempts.getProtocol())
                 .detail("renderedFrames", sample.renderedFrames)
                 .detail("droppedFrames", sample.droppedFrames)
+                .detail("droppedToKeyframes", sample.droppedToKeyframes)
+                .detail("inputBuffers", sample.inputBuffers)
+                .detail("bufferedMs", mPlayer.getBufferedPosition() - sample.positionMs)
                 .detail("silentMs", sample.silentMs)
-                .detail("stalls", sample.stalls);
+                .detail("stalls", sample.stalls)
+                .detail("stallMs", sample.stallMs)
+                .detail("playedMs", sample.playedMs);
+
+        if (PlaybackHealth.KIND_START_FROZEN.equals(kind)) {
+            failure.detail("frozenMs", mHealth.getStartFrozenMs());
+        }
+
+        if (PlaybackHealth.KIND_START_FROZEN.equals(kind) || PlaybackHealth.KIND_FRAME_DROPS.equals(kind)) {
+            JSONArray trail = toJson(mHealth.getStartTrail());
+
+            if (trail.length() > 0) {
+                failure.detail("startTrail", trail);
+            }
+        }
 
         // The stream that didn't work: frame drops and stalls play, worse
         if (PlaybackHealth.KIND_NO_VIDEO.equals(kind) || PlaybackHealth.KIND_VIDEO_FROZEN.equals(kind)) {
             FormatAttempts.onStreamFailed(true);
-        } else if (PlaybackHealth.KIND_AUDIO_SILENT.equals(kind)) {
+        } else if (PlaybackHealth.KIND_AUDIO_SILENT.equals(kind) && PlaybackHealth.isSilentFromStart(sample)) {
             FormatAttempts.onStreamFailed(false);
         }
 
         failure.record();
+    }
+
+    private static void onStartFrames(@Nullable PlaybackHealth.StartFrames frames) {
+        if (frames != null) {
+            VideoStarts.onFrames(frames);
+        }
+    }
+
+    private static JSONArray toJson(List<long[]> rows) {
+        JSONArray result = new JSONArray();
+
+        for (long[] row : rows) {
+            JSONArray item = new JSONArray();
+
+            for (long value : row) {
+                item.put(value);
+            }
+
+            result.put(item);
+        }
+
+        return result;
     }
 
     private void applyShield720pFix() {
@@ -327,6 +378,9 @@ public class ExoPlayerController implements Player.EventListener {
         mEventListener.onSourceChanged(getVideo());
         VideoStarts.onPrepare();
         mPlayer.prepare(mediaSource);
+        // Its first seconds are looked at closely: the check may be 2 s away, past its first frame
+        Utils.removeCallbacks(mHealthCheck);
+        Utils.postDelayed(mHealthCheck, PlaybackHealth.START_TICK_MS);
     }
 
     public long getPositionMs() {
@@ -408,7 +462,7 @@ public class ExoPlayerController implements Player.EventListener {
         // Set by the view after this (see onSurfaceSizeChanged)
         mHasSurface = false;
         player.addAnalyticsListener(mDiagnosticsListener);
-        Utils.postDelayed(mHealthCheck, HEALTH_CHECK_MS);
+        Utils.postDelayed(mHealthCheck, mHealth.getTickMs());
         mRangeMuter.setPlayer(player);
     }
 
@@ -751,6 +805,9 @@ public class ExoPlayerController implements Player.EventListener {
 
     private void releasePlayer() {
         Utils.removeCallbacks(mHealthCheck);
+        // Left before its start played: what it played of it
+        onStartFrames(mHealth.endStart());
+        LastState.onPlayer(mContext, false, false);
         mFrameStepper.setPlayer(null, null);
         mRangeMuter.setPlayer(null);
 

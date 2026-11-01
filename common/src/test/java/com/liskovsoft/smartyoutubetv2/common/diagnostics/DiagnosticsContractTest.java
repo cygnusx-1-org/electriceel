@@ -79,6 +79,9 @@ public class DiagnosticsContractTest {
     @Test
     public void theAppsReportIsTheContract() throws Exception {
         JsonSchemaValidator validator = new JsonSchemaValidator(readSchema());
+        // The failures have their process's age
+        VideoStarts.sProcessStart = () -> 4_000;
+        VideoStarts.sClock = () -> 94_000;
         recordEveryKind();
         recordVideoStarts();
 
@@ -101,7 +104,7 @@ public class DiagnosticsContractTest {
 
         assertEquals(new HashSet<>(Arrays.asList(PlayerFailure.KIND_ENGINE_ERROR, PlayerFailure.KIND_FORMAT_ERROR,
                 PlayerFailure.KIND_UNPLAYABLE, PlayerFailure.KIND_EMPTY_FORMATS, PlayerFailure.KIND_STALL,
-                PlayerFailure.KIND_TRACK_LOAD_ERROR, PlaybackHealth.KIND_NO_VIDEO, PlaybackHealth.KIND_VIDEO_FROZEN,
+                PlayerFailure.KIND_TRACK_LOAD_ERROR, PlaybackHealth.KIND_NO_VIDEO, PlaybackHealth.KIND_VIDEO_FROZEN, PlaybackHealth.KIND_START_FROZEN,
                 PlaybackHealth.KIND_FRAME_DROPS, PlaybackHealth.KIND_STALLS, PlaybackHealth.KIND_AUDIO_SILENT, AppExits.KIND_CRASH,
                 AppExits.KIND_APP_EXIT)), kinds);
         // The E-AC3 that failed and the AAC that played
@@ -141,7 +144,7 @@ public class DiagnosticsContractTest {
 
         assertEquals(new HashSet<>(Arrays.asList(PlayerFailure.KIND_ENGINE_ERROR, PlayerFailure.KIND_FORMAT_ERROR,
                 PlayerFailure.KIND_UNPLAYABLE, PlayerFailure.KIND_EMPTY_FORMATS, PlayerFailure.KIND_STALL,
-                PlayerFailure.KIND_TRACK_LOAD_ERROR, PlaybackHealth.KIND_NO_VIDEO, PlaybackHealth.KIND_VIDEO_FROZEN,
+                PlayerFailure.KIND_TRACK_LOAD_ERROR, PlaybackHealth.KIND_NO_VIDEO, PlaybackHealth.KIND_VIDEO_FROZEN, PlaybackHealth.KIND_START_FROZEN,
                 PlaybackHealth.KIND_FRAME_DROPS, PlaybackHealth.KIND_STALLS, PlaybackHealth.KIND_AUDIO_SILENT, AppExits.KIND_CRASH,
                 AppExits.KIND_APP_EXIT)), schemaKinds);
     }
@@ -185,7 +188,9 @@ public class DiagnosticsContractTest {
             fixture.recorded.add(start);
             mVideoStarts.record(start);
         };
+        VideoStarts.sFramesRecorder = mVideoStarts::addFrames;
         fixture.slowStart();
+        VideoStarts.onFrames(new PlaybackHealth.StartFrames(VideoStartFixture.VIDEO_ID, 10_000, 40, 120, 1, 4_500));
 
         fixture.at(20_000);
         VideoStarts.start("bare", VideoStart.TRIGGER_REMOTE);
@@ -266,7 +271,7 @@ public class DiagnosticsContractTest {
         PlayerFailure.create(getContext(), PlayerFailure.KIND_STALL).video(video).playback(40_000, 212_000, true)
                 .action("reload_video").record();
 
-        for (String kind : Arrays.asList(PlaybackHealth.KIND_NO_VIDEO, PlaybackHealth.KIND_VIDEO_FROZEN, PlaybackHealth.KIND_FRAME_DROPS,
+        for (String kind : Arrays.asList(PlaybackHealth.KIND_NO_VIDEO, PlaybackHealth.KIND_VIDEO_FROZEN, PlaybackHealth.KIND_START_FROZEN, PlaybackHealth.KIND_FRAME_DROPS,
                 PlaybackHealth.KIND_STALLS, PlaybackHealth.KIND_AUDIO_SILENT)) {
             PlayerFailure.create(getContext(), kind).video(video).position(50_000, 212_000).formats(VP9_4K, FormatItem.AUDIO_HQ_MP4A)
                     .detail("renderedFrames", 1_200L).detail("droppedFrames", 40L).detail("silentMs", 15_000L).detail("stalls", 3)

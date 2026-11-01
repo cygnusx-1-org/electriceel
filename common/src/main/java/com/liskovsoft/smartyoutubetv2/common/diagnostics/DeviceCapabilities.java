@@ -15,6 +15,9 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.os.Build.VERSION;
+import android.os.PowerManager;
+import android.os.Process;
+import android.os.SystemClock;
 import android.view.Display;
 
 import androidx.annotation.Nullable;
@@ -110,6 +113,22 @@ public final class DeviceCapabilities {
             result.put("displayMode", display != null ? describeMode(display.getMode()) : JSONObject.NULL);
             // Auto frame rate switched the display mode this long ago (a switch can blank the picture or drop the sound)
             result.put("displayModeSwitchMsAgo", afrSwitchTimeMs > 0 ? System.currentTimeMillis() - afrSwitchTimeMs : JSONObject.NULL);
+            result.put("deviceUpMs", SystemClock.elapsedRealtime());
+
+            result.put("processUpMs", SystemClock.elapsedRealtime() - Process.getStartElapsedRealtime());
+
+            PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+
+            if (VERSION.SDK_INT >= 29 && powerManager != null) {
+                result.put("thermalStatus", getThermalStatusName(powerManager.getCurrentThermalStatus()));
+            }
+
+            AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+
+            if (audioManager != null) {
+                // E.g. the HDMI's channels change with the receiver or TV behind it
+                result.put("audioOutputs", buildAudioOutputs(audioManager));
+            }
         } catch (JSONException | RuntimeException e) {
             putError(result, e);
         }
@@ -225,13 +244,7 @@ public final class DeviceCapabilities {
             return result;
         }
 
-        JSONArray outputs = new JSONArray();
-
-        for (AudioDeviceInfo device : audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)) {
-            outputs.put(describeDevice(device));
-        }
-
-        result.put("outputs", outputs);
+        result.put("outputs", buildAudioOutputs(audioManager));
 
         // Where the sound of a video goes now, by kind (not its name)
         MediaRouter mediaRouter = (MediaRouter) context.getSystemService(Context.MEDIA_ROUTER_SERVICE);
@@ -239,6 +252,37 @@ public final class DeviceCapabilities {
         result.put("currentRoute", route != null ? getRouteTypeName(route.getDeviceType()) : JSONObject.NULL);
 
         return result;
+    }
+
+    private static JSONArray buildAudioOutputs(AudioManager audioManager) throws JSONException {
+        JSONArray outputs = new JSONArray();
+
+        for (AudioDeviceInfo device : audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)) {
+            outputs.put(describeDevice(device));
+        }
+
+        return outputs;
+    }
+
+    private static String getThermalStatusName(int status) {
+        switch (status) {
+            case PowerManager.THERMAL_STATUS_NONE:
+                return "none";
+            case PowerManager.THERMAL_STATUS_LIGHT:
+                return "light";
+            case PowerManager.THERMAL_STATUS_MODERATE:
+                return "moderate";
+            case PowerManager.THERMAL_STATUS_SEVERE:
+                return "severe";
+            case PowerManager.THERMAL_STATUS_CRITICAL:
+                return "critical";
+            case PowerManager.THERMAL_STATUS_EMERGENCY:
+                return "emergency";
+            case PowerManager.THERMAL_STATUS_SHUTDOWN:
+                return "shutdown";
+            default:
+                return "unknown";
+        }
     }
 
     private static String getRouteTypeName(int deviceType) {

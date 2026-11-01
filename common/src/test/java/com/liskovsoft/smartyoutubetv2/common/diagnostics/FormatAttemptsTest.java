@@ -2,9 +2,13 @@ package com.liskovsoft.smartyoutubetv2.common.diagnostics;
 
 import android.content.Context;
 
+import com.google.android.exoplayer2.Format;
+import com.google.android.exoplayer2.util.MimeTypes;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.ExoFormatItem;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.TrackSelectorManager;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.track.MediaTrack;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
 
@@ -340,6 +344,35 @@ public class FormatAttemptsTest {
         assertFalse(FormatAttempts.isSameVideo("3840x2160 vp9 60fps", "1920x1080 vp09 60fps"));
         assertTrue(FormatAttempts.isSameAudio("mp4a", "mp4a 128k"));
         assertFalse(FormatAttempts.isSameAudio("ec-3", "opus 160k"));
+    }
+
+    /**
+     * The video's bitrate next to the throughput it loaded at: whether the network kept up with the format. Null when the stream
+     * doesn't give it.
+     */
+    @Test
+    public void anAttemptHasItsVideosBitrate() throws Exception {
+        MediaTrack track = MediaTrack.forRendererIndex(TrackSelectorManager.RENDERER_INDEX_VIDEO);
+        track.format = Format.createVideoSampleFormat("313", MimeTypes.VIDEO_VP9, "vp9", 18_000_000, Format.NO_VALUE, 3840, 2160, 30f,
+                null, null);
+        FormatAttempts.onNewVideo(getContext(), "video");
+        FormatAttempts.onTracks(ExoFormatItem.from(track), FormatItem.AUDIO_HQ_MP4A);
+
+        failure("video").record();
+
+        JSONObject attempt = mLog.readAll().get(0).getJSONObject("formats").getJSONObject("final");
+        assertEquals(18_000, attempt.getInt("videoBitrateKbps"));
+    }
+
+    @Test
+    public void anAttemptWithoutTheVideosBitrateHasNone() throws Exception {
+        FormatAttempts.onNewVideo(getContext(), "video");
+        FormatAttempts.onTracks(null, FormatItem.AUDIO_HQ_MP4A);
+
+        failure("video").record();
+
+        JSONObject attempt = mLog.readAll().get(0).getJSONObject("formats").getJSONObject("final");
+        assertTrue(attempt.isNull("videoBitrateKbps"));
     }
 
     private static PlayerFailure failure(String videoId) {

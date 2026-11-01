@@ -11,12 +11,18 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.liskovsoft.sharedutils.mylogger.Log;
+import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.videoinfo.V2.FetchStages;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -38,7 +44,7 @@ public final class VideoStarts {
     static final long MAX_START_MS = 15_000;
     /**
      * A start that never played is recorded when it ran this long: one left sooner was skipped by the user (e.g. pressing next
-     * twice), not stuck
+     * twice), not stuck. One found unplayable is recorded however soon.
      */
     static final long MIN_ABANDONED_MS = 2_000;
     /**
@@ -58,6 +64,7 @@ public final class VideoStarts {
     static final String STAGE_VIDEO_INIT_CHUNK = "video init chunk";
     static final String STAGE_AUDIO_INIT_CHUNK = "audio init chunk";
     static final String STAGE_LOADING_HELD = "loading held";
+    static final String STAGE_CONNECT = "connect";
     /**
      * The first segments of a start, by kind: each its own row
      */
@@ -110,10 +117,19 @@ public final class VideoStarts {
      * A start not playing 15 s after the user's action is given up, even when nothing happens any more (e.g. a request hangs)
      */
     private static final Runnable sGiveUp = () -> abandon(VideoStart.OUTCOME_GAVE_UP);
+    /**
+     * The network engine the player uses (see Utils#getEffectiveNetworkEngine)
+     */
+    @VisibleForTesting
+    static EngineSource sEngine = VideoStarts::getEffectiveEngine;
     @VisibleForTesting
     static LoadHoldSource sLoadHolds = LoadHolds::take;
     @VisibleForTesting
+    static LoadHoldSource sConnections = Connections::take;
+    @VisibleForTesting
     static Recorder sRecorder = VideoStarts::save;
+    @VisibleForTesting
+    static FramesRecorder sFramesRecorder = VideoStarts::saveFrames;
     /**
      * The application's (no activity kept), for the log of the starts
      */
@@ -124,9 +140,30 @@ public final class VideoStarts {
     private static boolean sHasStarted;
     @Nullable
     private static Timer sTimer;
+    /**
+     * The last ones that played, by video, till their first seconds are measured (see #onFrames): when a video starts before the
+     * one before is measured, the one before still is. Their time, see VideoStart#ts.
+     */
+    private static final LinkedHashMap<String, Long> sPlayed = new LinkedHashMap<>();
+    private static final int MAX_PLAYED = 4;
+    /**
+     * Of each kind of first segment (see CHUNK_STAGES) since the player was prepared, timed or not (a start is given up after 15 s):
+     * it started to load, and it loaded (see #isOneTrackStuck)
+     */
+    private static final boolean[] sIsChunkStarted = new boolean[CHUNK_STAGES.length];
+    private static final boolean[] sIsChunkDone = new boolean[CHUNK_STAGES.length];
+    /**
+     * When the player was prepared, in the clock's time: a load of the source before is told after it
+     */
+    private static long sPreparedMs = -1;
 
     interface Clock {
         long now();
+    }
+
+    interface EngineSource {
+        @Nullable
+        String get();
     }
 
     interface LoadHoldSource {
@@ -174,6 +211,10 @@ public final class VideoStarts {
         void record(VideoStart start);
     }
 
+    interface FramesRecorder {
+        void record(long ts, JSONObject frames);
+    }
+
     public interface Listener {
         /**
          * The user started a video
@@ -213,6 +254,11 @@ public final class VideoStarts {
         boolean isCached;
         String client;
         String protocol;
+        /**
+         * Of the player, when it was prepared
+         */
+        @Nullable
+        String engine;
 
         Timer(String videoId, String trigger, long t0, long ts, boolean isFirstOfRun, long sinceProcessStartMs) {
             Arrays.fill(chunkLoadMs, -1);
@@ -462,12 +508,16 @@ public final class VideoStarts {
      * The player buffers the formats
      */
     public static void onPrepare() {
+        Arrays.fill(sIsChunkStarted, false);
+        Arrays.fill(sIsChunkDone, false);
+        sPreparedMs = sClock.now();
         Timer timer = getTimer();
 
         if (timer == null) {
             return;
         }
 
+        timer.engine = sEngine.get();
         long now = sClock.now();
         timer.close(STAGE_OPEN, now);
         Group replaced = timer.findOpen(STAGE_BUFFERING);
@@ -497,6 +547,10 @@ public final class VideoStarts {
         Timer timer = getTimer();
         int chunk = chunkOf(isInit, isVideo, isAudio);
 
+        if (chunk >= 0 && startMs >= sPreparedMs) {
+            sIsChunkStarted[chunk] = true;
+        }
+
         if (timer == null || chunk < 0 || timer.prepareMs < 0 || startMs < timer.prepareMs) {
             return;
         }
@@ -515,12 +569,32 @@ public final class VideoStarts {
         Timer timer = getTimer();
         int chunk = chunkOf(isInit, isVideo, isAudio);
 
+        if (chunk >= 0 && startMs >= sPreparedMs) {
+            sIsChunkDone[chunk] = true;
+        }
+
         if (timer == null || chunk < 0 || timer.prepareMs < 0 || startMs < timer.prepareMs || timer.isChunkLoaded[chunk]) {
             return;
         }
 
         timer.isChunkLoaded[chunk] = true;
         addToBuffering(timer, CHUNK_STAGES[chunk], formatBytes(bytes), startMs, endMs);
+    }
+
+    /**
+     * Since the player was prepared, one track's first segment came and the other's started to load and never did: a request that
+     * hangs, not formats that can't be played (see ErrorFixerController#onLongBuffering)
+     */
+    public static boolean isOneTrackStuck() {
+        return isTrackStuck(true) && sIsChunkDone[chunkOf(false, false, true)]
+                || isTrackStuck(false) && sIsChunkDone[chunkOf(false, true, false)];
+    }
+
+    private static boolean isTrackStuck(boolean isVideo) {
+        int init = chunkOf(true, isVideo, !isVideo);
+        int media = chunkOf(false, isVideo, !isVideo);
+
+        return sIsChunkStarted[init] && !sIsChunkDone[init] || sIsChunkStarted[media] && !sIsChunkDone[media];
     }
 
     /**
@@ -606,6 +680,32 @@ public final class VideoStarts {
     }
 
     /**
+     * How the first seconds of a video that played went, or what it played of them when it was left sooner: added to its start, which
+     * says nothing of them (it ends at the first frame)
+     */
+    public static void onFrames(PlaybackHealth.StartFrames frames) {
+        Long ts = frames.videoId != null ? sPlayed.remove(frames.videoId) : null;
+
+        if (ts == null) {
+            return;
+        }
+
+        JSONObject result = new JSONObject();
+
+        try {
+            result.put("playedMs", frames.playedMs);
+            result.put("rendered", frames.renderedFrames);
+            result.put("dropped", frames.droppedFrames);
+            result.put("droppedToKeyframes", frames.droppedToKeyframes);
+            result.put("longestFrozenMs", frames.longestFrozenMs);
+        } catch (JSONException e) {
+            throw new IllegalStateException(e);
+        }
+
+        sFramesRecorder.record(ts, result);
+    }
+
+    /**
      * Forgotten, not recorded: it wasn't the user's (e.g. a crash's restore)
      */
     public static void cancel() {
@@ -631,7 +731,8 @@ public final class VideoStarts {
         sScheduler.cancel(sGiveUp);
         long now = sClock.now();
 
-        if (now - timer.t0 < MIN_ABANDONED_MS) {
+        // Unplayable is the app's own outcome, not the user skipping it
+        if (now - timer.t0 < MIN_ABANDONED_MS && !VideoStart.OUTCOME_UNPLAYABLE.equals(outcome)) {
             Log.d(TAG, "Video start %s after %d ms: %s", outcome, now - timer.t0, timer.videoId);
             return;
         }
@@ -656,6 +757,14 @@ public final class VideoStarts {
 
         sTimer = null;
         sScheduler.cancel(sGiveUp);
+        // The same video again: its new start
+        sPlayed.remove(timer.videoId);
+        sPlayed.put(timer.videoId, timer.ts);
+
+        for (Iterator<String> oldest = sPlayed.keySet().iterator(); sPlayed.size() > MAX_PLAYED; ) {
+            oldest.next();
+            oldest.remove();
+        }
         record(build(timer, Math.max(timer.playingMs, timer.firstFrameMs), VideoStart.OUTCOME_PLAYED));
     }
 
@@ -758,7 +867,7 @@ public final class VideoStarts {
         }
 
         return new VideoStart(timer.ts, timer.videoId, timer.trigger, timer.isFirstOfRun, timer.sinceProcessStartMs, timer.client,
-                timer.protocol, timer.isCached, outcome, endMs - timer.t0, stages);
+                timer.protocol, timer.engine, timer.isCached, outcome, endMs - timer.t0, stages);
     }
 
     /**
@@ -782,6 +891,8 @@ public final class VideoStarts {
         if (timer.prepareMs >= 0) {
             // The player didn't load (e.g. its buffer was full): what a segment asked for late waited for
             result.addAll(sLoadHolds.take(timer.prepareMs, endMs));
+            // A new connection to the server: without one, a slow segment is the server's answer
+            result.addAll(sConnections.take(timer.prepareMs, endMs));
         }
 
         return result;
@@ -872,9 +983,47 @@ public final class VideoStarts {
         }
     }
 
+    private static void saveFrames(long ts, JSONObject frames) {
+        if (sContext != null) {
+            VideoStartLog.instance(sContext).addFrames(ts, frames);
+        }
+    }
+
+    /**
+     * Prepared, the player has its engine: Cronet's is made by then
+     */
+    @Nullable
+    private static String getEffectiveEngine() {
+        if (sContext == null) {
+            return null;
+        }
+
+        try {
+            return Utils.getEffectiveNetworkEngine(sContext);
+        } catch (RuntimeException e) {
+            // Cronet couldn't be checked: recorded without it
+            return null;
+        }
+    }
+
+    /**
+     * Of the app's process, now. -1 when not known.
+     */
+    static long getSinceProcessStartMs() {
+        long processStart = sProcessStart.now();
+        long now = sClock.now();
+
+        return processStart > 0 && now >= processStart ? now - processStart : -1;
+    }
+
     @VisibleForTesting
     static void resetForTesting() {
         sTimer = null;
+        sPlayed.clear();
+        Arrays.fill(sIsChunkStarted, false);
+        Arrays.fill(sIsChunkDone, false);
+        sPreparedMs = -1;
+        sEngine = VideoStarts::getEffectiveEngine;
         sHasStarted = false;
         sListener = null;
         sClock = SystemClock::elapsedRealtime;
@@ -893,6 +1042,8 @@ public final class VideoStarts {
         };
         sScheduler = new HandlerScheduler();
         sLoadHolds = LoadHolds::take;
+        sConnections = Connections::take;
         sRecorder = VideoStarts::save;
+        sFramesRecorder = VideoStarts::saveFrames;
     }
 }

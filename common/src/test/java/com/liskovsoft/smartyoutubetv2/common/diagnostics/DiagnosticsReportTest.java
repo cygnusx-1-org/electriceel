@@ -6,6 +6,7 @@ import com.liskovsoft.googlecommon.common.locale.LocaleManager;
 import com.liskovsoft.mediaserviceinterfaces.oauth.Account;
 import com.liskovsoft.sharedutils.locale.LocaleUpdater;
 import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
+import com.liskovsoft.smartyoutubetv2.common.BuildConfig;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs;
 import com.liskovsoft.smartyoutubetv2.common.prefs.DebuggingData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
@@ -86,6 +87,32 @@ public class DiagnosticsReportTest {
         AppPrefs.instance(getContext()).setWebProxyUri(mSavedProxyUri);
         setLocale(mSavedLanguage, mSavedCountry);
         Utils.sHandler.removeCallbacksAndMessages(null);
+    }
+
+    /**
+     * Which code it is: the app's commit, a build id that tells two builds of a checkout with changes apart, and the checkouts it's
+     * built with. Built from a git checkout, as the tests are.
+     */
+    @Test
+    public void theBuildAndTheCheckoutsItsBuiltWithAreGiven() throws Exception {
+        JSONObject app = build(null, 0, Collections.emptyList()).getJSONObject("app");
+
+        if (BuildConfig.GIT_COMMIT == null) {
+            assertFalse(app.has("build"));
+            assertFalse(app.has("modules"));
+            return;
+        }
+
+        assertEquals(BuildConfig.GIT_COMMIT, app.getString("commit"));
+        assertEquals(12, app.getString("build").length());
+
+        JSONObject modules = app.getJSONObject("modules");
+        assertEquals(BuildConfig.MEDIA_SERVICE_CORE_COMMIT != null, modules.has("MediaServiceCore"));
+        assertEquals(BuildConfig.SHARED_MODULES_COMMIT != null, modules.has("SharedModules"));
+
+        if (BuildConfig.MEDIA_SERVICE_CORE_COMMIT != null) {
+            assertEquals(BuildConfig.MEDIA_SERVICE_CORE_DIRTY, modules.getJSONObject("MediaServiceCore").getBoolean("dirty"));
+        }
     }
 
     @Test

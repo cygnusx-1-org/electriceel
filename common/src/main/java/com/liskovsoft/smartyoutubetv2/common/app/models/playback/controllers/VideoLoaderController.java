@@ -21,6 +21,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.manager.PlayerC
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.VideoActionPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.PlaybackView;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.FormatAttempts;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailure;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStart;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStarts;
@@ -41,6 +42,12 @@ import io.reactivex.disposables.Disposable;
 public class VideoLoaderController extends BasePlayerController {
     private static final String TAG = VideoLoaderController.class.getSimpleName();
     private static final int MIN_SHUFFLE_SIZE = 30;
+    /**
+     * A live stream a client answered OK for with nothing to play it from: the clients tried for it, one after another, before it's
+     * only reloaded (see processFormatInfo)
+     */
+    private static final int MAX_LIVE_CLIENT_SWITCHES = 3;
+    private static final int EMPTY_FORMATS_RELOAD_MS = 30_000;
     private final Playlist mPlaylist;
     private Video mPendingVideo;
     private SuggestionsController mSuggestionsController;
@@ -59,6 +66,11 @@ public class VideoLoaderController extends BasePlayerController {
     private String mFormatVideoId;
     private String mFormatClient;
     private String mFormatProtocol;
+    /**
+     * The live stream the clients are switched for, and how many times (see MAX_LIVE_CLIENT_SWITCHES)
+     */
+    private String mLiveSwitchVideoId;
+    private int mLiveClientSwitches;
     private final Runnable mReloadVideo = () -> {
         getMainController().onNewVideo(getVideo());
     };
@@ -285,6 +297,7 @@ public class VideoLoaderController extends BasePlayerController {
             return;
         }
 
+        resetLiveClientSwitch(video);
         // Fix no progress on next video (the engine may still buffering a bit)
         //getPlayer().showProgressBar(true);
         Utils.post(mShowProgressBar);
@@ -312,6 +325,7 @@ public class VideoLoaderController extends BasePlayerController {
             return;
         }
 
+        resetLiveClientSwitch(video);
         VideoStarts.onFetch(video.videoId);
         // Cached: its fetch isn't disposed with the load, which waits for it rather than fetching again
         mPrefetchedFormatInfo = getFormatInfoObserve(video.videoId).cache();
@@ -354,6 +368,8 @@ public class VideoLoaderController extends BasePlayerController {
         mFormatVideoId = getVideo().videoId;
         mFormatClient = getClientName(formatInfo);
         mFormatProtocol = null;
+        // Fetched again from another client: the start goes on (see VideoStarts#onFetch)
+        boolean isRefetched = false;
 
         mCensoredWordsController.onFormatInfo(getVideo(), formatInfo);
 
@@ -417,16 +433,35 @@ public class VideoLoaderController extends BasePlayerController {
             player.openUrlList(formatInfo.createUrlList());
         } else {
             Log.d(TAG, "Empty format info received. Seems future live translation. No video data to pass to the player.");
-            newFailure(PlayerFailure.KIND_EMPTY_FORMATS, formatInfo).action("reload_video").record();
-            player.setTitle(formatInfo.getPlayabilityReason());
-            player.showProgressBar(false);
-            mSuggestionsController.loadSuggestions(getVideo());
-            bgImageUrl = getVideo().getBackgroundUrl();
-            player.showOverlay(true);
-            reloadVideo(30 * 1_000);
+            PlayerFailure failure = newFailure(PlayerFailure.KIND_EMPTY_FORMATS, formatInfo);
+            addMediaDetails(failure, formatInfo);
+
+            if (isLiveClientToSwitch(formatInfo)) {
+                // The client says the live stream plays and has nothing to play it from (e.g. TV for some music channels): the same
+                // client again would say the same
+                failure.action("switch_next_client_now").action("reload_video").record();
+                MessageHelpers.showLongMessage(getContext(), getContext().getString(R.string.msg_live_no_media,
+                        mFormatClient != null ? mFormatClient : "YouTube"));
+                YouTubeServiceManager.instance().switchNextClientNow();
+                reloadVideo(0);
+                isRefetched = true;
+            } else {
+                failure.action("reload_video").record();
+                String reason = formatInfo.getPlayabilityReason();
+                player.setTitle(reason != null ? reason : getContext().getString(R.string.msg_no_media_retry));
+                player.showProgressBar(false);
+                mSuggestionsController.loadSuggestions(getVideo());
+                bgImageUrl = getVideo().getBackgroundUrl();
+                player.showOverlay(true);
+                reloadVideo(EMPTY_FORMATS_RELOAD_MS);
+            }
         }
 
-        VideoStarts.onProtocol(mFormatProtocol); // none: the video isn't played
+        if (!isRefetched) {
+            VideoStarts.onProtocol(mFormatProtocol); // none: the video isn't played
+        }
+
+        FormatAttempts.onSource(mFormatClient, mFormatProtocol);
         player.showBackground(bgImageUrl); // remove bg (if video playing) or set another bg
     }
 
@@ -459,6 +494,51 @@ public class VideoLoaderController extends BasePlayerController {
         }
 
         return client instanceof Enum ? ((Enum<?>) client).name() : client.getClientName();
+    }
+
+    /**
+     * A live stream the client says plays (not one that's yet to start), for the first few times: another client may have it
+     */
+    private boolean isLiveClientToSwitch(MediaItemFormatInfo formatInfo) {
+        Video video = getVideo();
+
+        if (video == null || !formatInfo.isLive() || !"OK".equals(formatInfo.getPlayabilityStatus())) {
+            return false;
+        }
+
+        if (!Helpers.equals(video.videoId, mLiveSwitchVideoId)) {
+            mLiveSwitchVideoId = video.videoId;
+            mLiveClientSwitches = 0;
+        }
+
+        return ++mLiveClientSwitches <= MAX_LIVE_CLIENT_SWITCHES;
+    }
+
+    /**
+     * What the formats had, of the ones the player plays from: a live stream's answer may have none of them
+     */
+    private static void addMediaDetails(PlayerFailure failure, MediaItemFormatInfo formatInfo) {
+        failure.detail("live", formatInfo.isLive())
+                .detail("liveContent", formatInfo.isLiveContent())
+                .detail("startTimeMs", formatInfo.getStartTimeMs())
+                .detail("sabrFormats", formatInfo.containsSabrFormats())
+                .detail("dashFormats", formatInfo.containsDashFormats())
+                .detail("hlsManifest", formatInfo.containsHlsUrl())
+                .detail("dashManifest", formatInfo.containsDashUrl())
+                .detail("urlFormats", formatInfo.containsUrlFormats())
+                .detail("serverAbrUrl", formatInfo.getServerAbrStreamingUrl() != null);
+    }
+
+    /**
+     * Another video than the live stream the client was switched for: the first client again, or the switch would stay for all that's
+     * played till the app restarts, without what that client has (e.g. being signed in)
+     */
+    private void resetLiveClientSwitch(Video video) {
+        if (mLiveSwitchVideoId != null && !Helpers.equals(video.videoId, mLiveSwitchVideoId)) {
+            mLiveSwitchVideoId = null;
+            mLiveClientSwitches = 0;
+            YouTubeServiceManager.instance().resetClient();
+        }
     }
 
     /**

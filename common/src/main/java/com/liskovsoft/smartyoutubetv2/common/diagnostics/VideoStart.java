@@ -2,6 +2,8 @@ package com.liskovsoft.smartyoutubetv2.common.diagnostics;
 
 import androidx.annotation.Nullable;
 
+import com.liskovsoft.smartyoutubetv2.common.BuildConfig;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -168,6 +170,11 @@ public final class VideoStart {
     @Nullable
     public final String protocol;
     /**
+     * The network engine the player used (see Utils#getEffectiveNetworkEngine), null when not known
+     */
+    @Nullable
+    public final String engine;
+    /**
      * The formats were cached (fetched before, e.g. for the same video)
      */
     public final boolean isCached;
@@ -194,6 +201,12 @@ public final class VideoStart {
 
     public VideoStart(long ts, String videoId, String trigger, boolean isFirstOfRun, long sinceProcessStartMs, @Nullable String client,
                       @Nullable String protocol, boolean isCached, String outcome, long totalMs, List<Stage> stages) {
+        this(ts, videoId, trigger, isFirstOfRun, sinceProcessStartMs, client, protocol, null, isCached, outcome, totalMs, stages);
+    }
+
+    public VideoStart(long ts, String videoId, String trigger, boolean isFirstOfRun, long sinceProcessStartMs, @Nullable String client,
+                      @Nullable String protocol, @Nullable String engine, boolean isCached, String outcome, long totalMs,
+                      List<Stage> stages) {
         this.ts = ts;
         this.videoId = videoId;
         this.trigger = trigger;
@@ -201,6 +214,7 @@ public final class VideoStart {
         this.sinceProcessStartMs = sinceProcessStartMs;
         this.client = client;
         this.protocol = protocol;
+        this.engine = engine;
         this.isCached = isCached;
         this.outcome = outcome;
         this.totalMs = totalMs;
@@ -261,6 +275,15 @@ public final class VideoStart {
                 result.put("protocol", protocol);
             }
 
+            if (engine != null) {
+                result.put("engine", engine);
+            }
+
+            // Of the app that recorded it
+            if (BuildConfig.BUILD_ID != null) {
+                result.put("build", BuildConfig.BUILD_ID);
+            }
+
             result.put("cached", isCached);
             result.put("outcome", outcome);
             result.put("totalMs", totalMs);
@@ -296,6 +319,8 @@ public final class VideoStart {
             case "poToken":
                 return Category.POTOKEN;
             case "player JS":
+            case "player JS load":
+            case "player JS check":
             case "decipher":
                 return Category.PLAYER_JS;
             case VideoStarts.STAGE_BUFFERING:

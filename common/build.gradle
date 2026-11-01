@@ -2,6 +2,58 @@ apply from: gradle.ext.sharedModulesConstants
 apply plugin: 'com.android.built-in-kotlin'
 apply plugin: 'com.android.library'
 
+/**
+ * Which code a build is of, for Submit data (see DiagnosticsReport): a build of a checkout with changes has the version of the commit
+ * it's made from. Empty without git (e.g. a source archive).
+ */
+def gitOutput = { File repo, List<String> args ->
+    try {
+        return providers.exec {
+            commandLine(['git', '-C', repo.path] + args)
+            ignoreExitValue = true
+        }.standardOutput.asText.get().trim()
+    } catch (Exception e) {
+        return ''
+    }
+}
+def gitCommitOf = { File repo -> gitOutput(repo, ['rev-parse', '--short=12', 'HEAD']) }
+def gitDirtyOf = { File repo, String commit -> !commit.isEmpty() && !gitOutput(repo, ['status', '--porcelain', '--untracked-files=no']).isEmpty() }
+def gitCommit = gitCommitOf(rootDir)
+def gitDirty = gitDirtyOf(rootDir, gitCommit)
+// Built with the app from the checkouts next to it (see settings.gradle)
+File mediaServiceCoreDir = gradle.ext.mediaServiceCoreRoot
+File sharedModulesDir = gradle.ext.sharedModulesRoot
+def mediaServiceCoreCommit = gitCommitOf(mediaServiceCoreDir)
+def mediaServiceCoreDirty = gitDirtyOf(mediaServiceCoreDir, mediaServiceCoreCommit)
+def sharedModulesCommit = gitCommitOf(sharedModulesDir)
+def sharedModulesDirty = gitDirtyOf(sharedModulesDir, sharedModulesCommit)
+/**
+ * The same for two builds of the same code and not otherwise, of the app and the checkouts next to it: two builds of a checkout with
+ * changes have the same commit and dirty, not the same id. Of each checkout, its commit, its changes and the files git doesn't
+ * ignore but doesn't have yet (e.g. a new class). Empty without git.
+ */
+def gitBuildId = {
+    if (gitCommit.isEmpty()) {
+        return ''
+    }
+
+    def digest = java.security.MessageDigest.getInstance('SHA-256')
+
+    [(rootDir): gitCommit, (mediaServiceCoreDir): mediaServiceCoreCommit, (sharedModulesDir): sharedModulesCommit].each { File repo, String commit ->
+        digest.update("${repo.name} ${commit}\n".getBytes('UTF-8'))
+        digest.update(gitOutput(repo, ['diff', 'HEAD']).getBytes('UTF-8'))
+        def untracked = gitOutput(repo, ['ls-files', '--others', '--exclude-standard']).readLines().findAll { !it.isEmpty() }
+
+        if (!untracked.isEmpty()) {
+            digest.update("${untracked.join('\n')}\n".getBytes('UTF-8'))
+            digest.update(gitOutput(repo, ['hash-object', '--'] + untracked).getBytes('UTF-8'))
+        }
+    }
+
+    return digest.digest().encodeHex().toString().substring(0, 12)
+}()
+def asJavaString = { String value -> value.isEmpty() ? 'null' : "\"${value}\"" }
+
 android {
     namespace 'com.liskovsoft.smartyoutubetv2.common'
     // FIX: Default interface methods are only supported starting with Android N (--min-api 24)
@@ -26,6 +78,14 @@ android {
         // More info: http://myhexaville.com/2017/03/10/android-multidex/
         // Additionally, you should extend your application from MultiDexApplication
         multiDexEnabled = true
+
+        buildConfigField 'String', 'GIT_COMMIT', asJavaString(gitCommit)
+        buildConfigField 'boolean', 'GIT_DIRTY', "${gitDirty}"
+        buildConfigField 'String', 'BUILD_ID', asJavaString(gitBuildId)
+        buildConfigField 'String', 'MEDIA_SERVICE_CORE_COMMIT', asJavaString(mediaServiceCoreCommit)
+        buildConfigField 'boolean', 'MEDIA_SERVICE_CORE_DIRTY', "${mediaServiceCoreDirty}"
+        buildConfigField 'String', 'SHARED_MODULES_COMMIT', asJavaString(sharedModulesCommit)
+        buildConfigField 'boolean', 'SHARED_MODULES_DIRTY', "${sharedModulesDirty}"
     }
 
     buildTypes {

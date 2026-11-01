@@ -74,6 +74,19 @@ public final class DiagnosticsReport {
             app.put("versionCode", AppInfoHelpers.getAppVersionCode(context));
             app.put("flavor", BuildConfig.FLAVOR);
             app.put("buildType", BuildConfig.BUILD_TYPE);
+
+            // A build of a checkout with changes has the version of the commit it's made from
+            if (BuildConfig.GIT_COMMIT != null) {
+                app.put("commit", BuildConfig.GIT_COMMIT);
+                app.put("dirty", BuildConfig.GIT_DIRTY);
+                app.put("build", BuildConfig.BUILD_ID);
+                // Built with it from the checkouts next to it: their changes aren't the app's
+                JSONObject modules = new JSONObject();
+                putModule(modules, "MediaServiceCore", BuildConfig.MEDIA_SERVICE_CORE_COMMIT, BuildConfig.MEDIA_SERVICE_CORE_DIRTY);
+                putModule(modules, "SharedModules", BuildConfig.SHARED_MODULES_COMMIT, BuildConfig.SHARED_MODULES_DIRTY);
+                app.put("modules", modules);
+            }
+
             app.put("settings", buildSettings(context));
 
             JSONObject accountsJson = new JSONObject();
@@ -127,6 +140,20 @@ public final class DiagnosticsReport {
         }
 
         return result;
+    }
+
+    /**
+     * Left out when it wasn't built with git
+     */
+    private static void putModule(JSONObject modules, String name, @Nullable String commit, boolean dirty) throws JSONException {
+        if (commit == null) {
+            return;
+        }
+
+        JSONObject module = new JSONObject();
+        module.put("commit", commit);
+        module.put("dirty", dirty);
+        modules.put(name, module);
     }
 
     /**

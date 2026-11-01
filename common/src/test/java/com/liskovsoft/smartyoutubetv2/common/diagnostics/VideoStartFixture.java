@@ -33,13 +33,14 @@ final class VideoStartFixture {
     final List<long[]> loadHolds = new ArrayList<>();
 
     /**
-     * VideoStarts reset to it: its clock, fetch stages, recorder and listener
+     * VideoStarts reset to it: its clock, the player's engine, fetch stages, recorder and listener
      */
     VideoStartFixture() {
         VideoStarts.resetForTesting();
         VideoStarts.sClock = () -> now;
         VideoStarts.sWallClock = () -> 1_792_100_000_000L + now;
         VideoStarts.sProcessStart = () -> 4_000;
+        VideoStarts.sEngine = () -> "okhttp";
         VideoStarts.sFetchStages = new VideoStarts.FetchStageSource() {
             @Override
             public List<FetchStages.Stage> take(String videoId) {

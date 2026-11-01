@@ -1,5 +1,6 @@
 package com.liskovsoft.smartyoutubetv2.common.diagnostics;
 
+import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -7,6 +8,8 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStartFixture.T0;
@@ -32,6 +35,176 @@ public class VideoStartsTest {
     @After
     public void tearDown() {
         VideoStarts.resetForTesting();
+    }
+
+    /**
+     * The engine the player was prepared with: a start's network time is that engine's
+     */
+    @Test
+    public void aStartHasTheEngineItWasPreparedWith() throws Exception {
+        VideoStart start = mFixture.slowStart();
+
+        assertEquals("okhttp", start.engine);
+        assertEquals("okhttp", start.toJson().getString("engine"));
+    }
+
+    /**
+     * Unknown (e.g. Cronet couldn't be checked): left out
+     */
+    @Test
+    public void aStartWithoutAnEngineHasNone() {
+        VideoStarts.sEngine = () -> null;
+
+        assertFalse(mFixture.slowStart().toJson().has("engine"));
+    }
+
+    /**
+     * The audio's first segments came, the video's init never did: that request hangs. Told after the start was given up too.
+     */
+    @Test
+    public void oneTrackLoadedAndTheOtherNotIsStuck() {
+        VideoStarts.onPrepare();
+        VideoStarts.onLoadStarted(true, true, false, T0);
+        VideoStarts.onLoadStarted(true, false, true, T0);
+        VideoStarts.onLoad(true, false, true, T0, T0 + 300, 2_000);
+        assertFalse(VideoStarts.isOneTrackStuck());
+
+        VideoStarts.onLoadStarted(false, false, true, T0 + 300);
+        VideoStarts.onLoad(false, false, true, T0 + 300, T0 + 500, 145_000);
+        assertTrue(VideoStarts.isOneTrackStuck());
+
+        // Prepared again (e.g. reloaded): nothing loading
+        mFixture.at(1_000);
+        VideoStarts.onPrepare();
+        assertFalse(VideoStarts.isOneTrackStuck());
+    }
+
+    /**
+     * The video's first segment came, the audio's is still loading: stuck the other way round
+     */
+    @Test
+    public void theAudioStuckIsStuckToo() {
+        VideoStarts.onPrepare();
+        VideoStarts.onLoadStarted(true, true, false, T0);
+        VideoStarts.onLoad(true, true, false, T0, T0 + 300, 2_000);
+        VideoStarts.onLoadStarted(false, true, false, T0 + 300);
+        VideoStarts.onLoad(false, true, false, T0 + 300, T0 + 500, 900_000);
+        VideoStarts.onLoadStarted(true, false, true, T0);
+
+        assertTrue(VideoStarts.isOneTrackStuck());
+    }
+
+    /**
+     * No audio track loaded at all (e.g. a muxed URL list's): nothing waits on it
+     */
+    @Test
+    public void aTrackNeverLoadedIsntStuck() {
+        VideoStarts.onPrepare();
+        VideoStarts.onLoadStarted(true, true, false, T0);
+        VideoStarts.onLoad(true, true, false, T0, T0 + 300, 2_000);
+        VideoStarts.onLoadStarted(false, true, false, T0 + 300);
+        VideoStarts.onLoad(false, true, false, T0 + 300, T0 + 500, 900_000);
+
+        assertFalse(VideoStarts.isOneTrackStuck());
+    }
+
+    /**
+     * A load of the source before, told after the player was prepared again: not this source's
+     */
+    @Test
+    public void aLoadOfTheSourceBeforeIsntStuck() {
+        mFixture.at(1_000);
+        VideoStarts.onPrepare();
+        VideoStarts.onLoadStarted(true, true, false, T0 + 500);
+        VideoStarts.onLoadStarted(true, false, true, T0 + 1_000);
+        VideoStarts.onLoad(true, false, true, T0 + 1_000, T0 + 1_300, 2_000);
+        VideoStarts.onLoadStarted(false, false, true, T0 + 1_300);
+        VideoStarts.onLoad(false, false, true, T0 + 1_300, T0 + 1_500, 145_000);
+
+        assertFalse(VideoStarts.isOneTrackStuck());
+    }
+
+    @Test
+    public void theProcessAgeIsSinceItStarted() {
+        mFixture.at(5_000);
+        assertEquals(T0 + 5_000 - 4_000, VideoStarts.getSinceProcessStartMs());
+
+        VideoStarts.sProcessStart = () -> 0;
+        assertEquals(-1, VideoStarts.getSinceProcessStartMs());
+    }
+
+    /**
+     * Its first seconds go to the start that played, once: the start itself ends at the first frame
+     */
+    @Test
+    public void theFramesOfTheFirstSecondsGoToTheStart() {
+        List<JSONObject> frames = new ArrayList<>();
+        List<Long> times = new ArrayList<>();
+        VideoStarts.sFramesRecorder = (ts, result) -> {
+            times.add(ts);
+            frames.add(result);
+        };
+        VideoStart start = mFixture.slowStart();
+        PlaybackHealth.StartFrames measured = new PlaybackHealth.StartFrames(VIDEO_ID, 10_000, 40, 120, 1, 4_500);
+
+        VideoStarts.onFrames(new PlaybackHealth.StartFrames("another", 10_000, 40, 120, 1, 4_500));
+        assertTrue(frames.isEmpty());
+
+        VideoStarts.onFrames(measured);
+        VideoStarts.onFrames(measured);
+
+        assertEquals(1, frames.size());
+        assertEquals(Long.valueOf(start.ts), times.get(0));
+        assertEquals(40, frames.get(0).optInt("rendered"));
+        assertEquals(120, frames.get(0).optInt("dropped"));
+        assertEquals(1, frames.get(0).optInt("droppedToKeyframes"));
+        assertEquals(4_500, frames.get(0).optInt("longestFrozenMs"));
+        assertEquals(10_000, frames.get(0).optInt("playedMs"));
+    }
+
+    /**
+     * The next video played before the one before was measured (it's measured when its format ends): each goes to its own start
+     */
+    @Test
+    public void framesOfAStartLeftEarlyGoToItEvenAfterTheNextOnePlayed() {
+        List<Long> times = new ArrayList<>();
+        List<JSONObject> frames = new ArrayList<>();
+        VideoStarts.sFramesRecorder = (ts, result) -> {
+            times.add(ts);
+            frames.add(result);
+        };
+        VideoStart first = mFixture.slowStart();
+        mFixture.at(30_000);
+        VideoStarts.start("next", VideoStart.TRIGGER_NEXT);
+        VideoStarts.onFetch("next");
+        VideoStarts.onFormats("next", "TV");
+        VideoStarts.onPrepare();
+        VideoStarts.onPlaying(false);
+
+        VideoStarts.onFrames(new PlaybackHealth.StartFrames(VIDEO_ID, 4_000, 90, 0, 0, 0));
+        VideoStarts.onFrames(new PlaybackHealth.StartFrames("next", 10_000, 240, 0, 0, 0));
+
+        assertEquals(2, frames.size());
+        assertEquals(Long.valueOf(first.ts), times.get(0));
+        assertEquals(4_000, frames.get(0).optInt("playedMs"));
+        assertEquals(240, frames.get(1).optInt("rendered"));
+    }
+
+    /**
+     * A new connection shows in the buffering: a slow segment without one is the server's answer
+     */
+    @Test
+    public void connectionsAreInTheBuffering() {
+        VideoStarts.sConnections = (fromMs, toMs) -> Collections.singletonList(
+                new VideoStart.Stage(VideoStarts.STAGE_CONNECT, null, 1, fromMs, fromMs + 40));
+        VideoStart start = mFixture.slowStart();
+        boolean isFound = false;
+
+        for (VideoStart.Stage stage : start.stages) {
+            isFound |= VideoStarts.STAGE_CONNECT.equals(stage.name) && stage.depth == 1 && stage.getDurationMs() == 40;
+        }
+
+        assertTrue(isFound);
     }
 
     /**
@@ -183,6 +356,22 @@ public class VideoStartsTest {
         assertTrue(mFixture.recorded.isEmpty());
         // Nothing to give up any more
         assertNull(mFixture.giveUp);
+    }
+
+    /**
+     * Found unplayable at once (e.g. a live stream's answer with nothing to play from): the app's outcome, not a skip, so recorded
+     */
+    @Test
+    public void anUnplayableStartIsRecordedHoweverSoon() {
+        VideoStarts.start(VIDEO_ID, VideoStart.TRIGGER_OPEN);
+        VideoStarts.onFetch(VIDEO_ID);
+        mFixture.at(600);
+        VideoStarts.onFormats(VIDEO_ID, "TV");
+        VideoStarts.onProtocol(null);
+
+        assertEquals(1, mFixture.recorded.size());
+        assertEquals(VideoStart.OUTCOME_UNPLAYABLE, last().outcome);
+        assertEquals(600, last().totalMs);
     }
 
     /**

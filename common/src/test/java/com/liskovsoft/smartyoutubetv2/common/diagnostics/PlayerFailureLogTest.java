@@ -1,5 +1,6 @@
 package com.liskovsoft.smartyoutubetv2.common.diagnostics;
 
+import com.liskovsoft.smartyoutubetv2.common.BuildConfig;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
 
@@ -44,6 +45,41 @@ public class PlayerFailureLogTest {
     @After
     public void tearDown() {
         getTweaks().setPlayerDataSource(mSavedEngine);
+        VideoStarts.resetForTesting();
+    }
+
+    /**
+     * How long its process had run, and the build that recorded it: what tells failures of one process or build from another's
+     */
+    @Test
+    public void aFailureHasItsProcessAgeAndBuild() throws Exception {
+        VideoStarts.sProcessStart = () -> 4_000;
+        VideoStarts.sClock = () -> 94_000;
+        PlayerFailureLog log = newLog("1.0", 10);
+
+        log.record(failure(PlayerFailure.KIND_ENGINE_ERROR, "video"));
+
+        JSONObject event = log.readAll().get(0);
+        assertEquals(90_000, event.getLong("sinceProcessStartMs"));
+        assertEquals(BuildConfig.BUILD_ID != null, event.has("build"));
+
+        if (BuildConfig.BUILD_ID != null) {
+            assertEquals(BuildConfig.BUILD_ID, event.getString("build"));
+        }
+    }
+
+    /**
+     * An app exit found on the next start happened in a process before this one: its age isn't this one's
+     */
+    @Test
+    public void aFailureOfAProcessBeforeHasNoProcessAge() {
+        VideoStarts.sProcessStart = () -> 4_000;
+        VideoStarts.sClock = () -> 94_000;
+        PlayerFailureLog log = newLog("1.0", 10);
+
+        log.record(PlayerFailure.create(RuntimeEnvironment.getApplication(), AppExits.KIND_APP_EXIT).at(500_000).withoutState());
+
+        assertFalse(log.readAll().get(0).has("sinceProcessStartMs"));
     }
 
     @Test

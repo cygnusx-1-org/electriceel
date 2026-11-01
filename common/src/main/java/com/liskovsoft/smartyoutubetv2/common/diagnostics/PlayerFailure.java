@@ -5,6 +5,7 @@ import android.content.Context;
 import androidx.annotation.Nullable;
 
 import com.google.android.exoplayer2.Format;
+import com.liskovsoft.smartyoutubetv2.common.BuildConfig;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.listener.PlayerEventListener;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
@@ -67,6 +68,10 @@ public final class PlayerFailure {
     private JSONObject mSettings;
     private JSONObject mDetails;
     private long mTs;
+    /**
+     * Of the process it happened in, -1 when not known (see #withoutState)
+     */
+    private long mSinceProcessStartMs = -1;
     private boolean mIsStateIncluded = true;
     /**
      * Once: a handler may record it early (e.g. before the app restarts), then in its finally
@@ -83,6 +88,7 @@ public final class PlayerFailure {
      */
     public static PlayerFailure create(Context context, String kind) {
         PlayerFailure failure = new PlayerFailure(context, kind);
+        failure.mSinceProcessStartMs = VideoStarts.getSinceProcessStartMs();
         failure.mEngineSelected = Utils.getNetworkEngineId(PlayerTweaksData.instance(context).getPlayerDataSource());
         Scrubber.update(context);
 
@@ -332,6 +338,8 @@ public final class PlayerFailure {
      */
     public PlayerFailure withoutState() {
         mIsStateIncluded = false;
+        // It happened in a process before this one
+        mSinceProcessStartMs = -1;
 
         return this;
     }
@@ -367,6 +375,12 @@ public final class PlayerFailure {
             result.put("appVersion", appVersion);
             result.put("appVersionCode", appVersionCode);
             result.put("account", account);
+            putOpt(result, "build", BuildConfig.BUILD_ID);
+
+            if (mSinceProcessStartMs >= 0) {
+                result.put("sinceProcessStartMs", mSinceProcessStartMs);
+            }
+
             result.put("kind", mKind);
             putOpt(result, "videoId", mVideoId);
             putOpt(result, "live", mIsLive);

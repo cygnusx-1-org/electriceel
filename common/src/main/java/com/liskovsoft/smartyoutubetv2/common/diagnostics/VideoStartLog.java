@@ -5,6 +5,8 @@ import android.content.Context;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.liskovsoft.smartyoutubetv2.common.prefs.DebuggingData;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -41,6 +43,7 @@ public final class VideoStartLog {
     @SuppressLint("StaticFieldLeak")
     private static VideoStartLog sInstance;
     private final File mFile;
+    private final PlayerFailureLog.AccountSource mAccountSource;
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor(runnable -> {
         Thread thread = new Thread(runnable, "VideoStartLog");
         thread.setDaemon(true);
@@ -53,19 +56,27 @@ public final class VideoStartLog {
 
     @VisibleForTesting
     VideoStartLog(File dir) {
+        this(dir, () -> 1);
+    }
+
+    @VisibleForTesting
+    VideoStartLog(File dir, PlayerFailureLog.AccountSource accountSource) {
         mFile = new File(dir, FILE);
+        mAccountSource = accountSource;
     }
 
     public static synchronized VideoStartLog instance(Context context) {
         if (sInstance == null) {
-            sInstance = new VideoStartLog(new File(context.getApplicationContext().getFilesDir(), PlayerFailureLog.DIR));
+            Context appContext = context.getApplicationContext();
+            sInstance = new VideoStartLog(new File(appContext.getFilesDir(), PlayerFailureLog.DIR),
+                    () -> DebuggingData.instance(appContext).getAccountNumber());
         }
 
         return sInstance;
     }
 
     /**
-     * The one {@link #instance} returns: in the directory, null for the app's own again
+     * The one {@link #instance} returns: in the directory, of the account 1, null for the app's own again
      */
     @VisibleForTesting
     public static VideoStartLog useForTesting(File dir) {
@@ -75,12 +86,27 @@ public final class VideoStartLog {
     }
 
     /**
-     * Written in the background
+     * Stamped with the account in use (see DebuggingData#getAccountNumber), then written in the background
      */
     public void record(VideoStart start) {
-        String line = start.toJson().toString();
+        JSONObject json = start.toJson();
+
+        try {
+            json.put("account", mAccountSource.getAccountNumber());
+        } catch (JSONException e) {
+            throw new IllegalStateException(e);
+        }
+
+        String line = json.toString();
 
         mExecutor.execute(() -> append(line));
+    }
+
+    /**
+     * To the start of that time, recorded before. Written in the background.
+     */
+    public void addFrames(long ts, JSONObject frames) {
+        mExecutor.execute(() -> writeFrames(ts, frames));
     }
 
     /**
@@ -123,6 +149,25 @@ public final class VideoStartLog {
         if (mLines > MAX_LINES) {
             List<String> lines = readLines();
             rewrite(lines.subList(Math.max(0, lines.size() - MAX_STARTS), lines.size()));
+        }
+    }
+
+    private void writeFrames(long ts, JSONObject frames) {
+        List<String> lines = readLines();
+
+        for (int i = lines.size() - 1; i >= 0; i--) {
+            try {
+                JSONObject start = new JSONObject(lines.get(i));
+
+                if (start.optLong("ts") == ts) {
+                    start.put("frames", frames);
+                    lines.set(i, start.toString());
+                    rewrite(lines);
+                    return;
+                }
+            } catch (JSONException e) {
+                // A line cut by a kill while writing
+            }
         }
     }
 
