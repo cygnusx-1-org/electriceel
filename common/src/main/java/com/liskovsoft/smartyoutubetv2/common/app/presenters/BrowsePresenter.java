@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 
 import com.liskovsoft.mediaserviceinterfaces.oauth.Account;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
+import com.liskovsoft.mediaserviceinterfaces.data.ItemGroup;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.locale.LocaleUtility;
 import com.liskovsoft.sharedutils.mylogger.Log;
@@ -287,6 +288,11 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
     private Observable<MediaGroup> createAddedHomeRowObserve(Row row) {
         if (row.type == Row.TYPE_SUBSCRIPTIONS) {
             return getContentService().getSubscriptionsObserve();
+        }
+
+        // The uploads of its channels, as the grid of the group in the sidebar. Nothing when the group's gone.
+        if (row.type == Row.TYPE_CHANNEL_GROUP) {
+            return getContentService().getRssFeedObserve(ChannelGroupServiceWrapper.instance(getContext()).findChannelIdsForGroup(row.channelGroupId));
         }
 
         // Its uploads, as the grid of the channel
@@ -990,10 +996,10 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
 
             VideoGroup videoGroup = VideoGroup.from(mediaGroup, section, groupIndex.get() + 1, duplicateFilter);
 
-            // Named after the channel, or Subscriptions
+            // Named after the channel, the subscription group, or Subscriptions
             Row addedRow = mAddedHomeRows.get(mediaGroup);
             if (addedRow != null) {
-                String title = addedRow.type == Row.TYPE_SUBSCRIPTIONS ? getContext().getString(R.string.header_subscriptions) : addedRow.title;
+                String title = getAddedHomeRowTitle(addedRow);
 
                 if (title != null) {
                     videoGroup.setTitle(title);
@@ -1020,6 +1026,26 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         }
 
         return result;
+    }
+
+    /**
+     * A subscription group under its title of now: it can be renamed
+     */
+    @Nullable
+    private String getAddedHomeRowTitle(Row row) {
+        if (row.type == Row.TYPE_SUBSCRIPTIONS) {
+            return getContext().getString(R.string.header_subscriptions);
+        }
+
+        if (row.type == Row.TYPE_CHANNEL_GROUP) {
+            ItemGroup group = ChannelGroupServiceWrapper.instance(getContext()).findChannelGroupById(row.channelGroupId);
+
+            if (group != null) {
+                return group.getTitle();
+            }
+        }
+
+        return row.title;
     }
 
     private void updateVideoGrid(BrowseSection section, Observable<MediaGroup> group, int column) {

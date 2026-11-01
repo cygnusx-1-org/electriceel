@@ -347,6 +347,8 @@
     <string name="home_rows">Home rows</string>
     <string name="home_rows_youtube">YouTube\'s rows</string>
     <string name="home_rows_other">Other YouTube rows</string>
+    <string name="home_rows_section_rows">Rows</string>
+    <string name="subscription_groups">Subscription groups</string>
     <string name="recently_uploaded">Recently uploaded</string>
     <string name="continue_watching">Continue watching</string>
     <string name="add_remove_from_home_rows">Add/Remove from Home</string>

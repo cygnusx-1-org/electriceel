@@ -19,6 +19,7 @@ public class UiOptionItem implements OptionItem {
     private boolean mIsEnabled = true;
     private boolean mIsNote;
     private boolean mIsSeparator;
+    private boolean mIsLabel;
     private boolean mIsMenu;
     private boolean mIsToggle;
     private OptionItem[] mSelectAllItems;
@@ -222,6 +223,16 @@ public class UiOptionItem implements OptionItem {
     @Override
     public boolean isSeparator() {
         return mIsSeparator;
+    }
+
+    @Override
+    public void setLabel(boolean isLabel) {
+        mIsLabel = isLabel;
+    }
+
+    @Override
+    public boolean isLabel() {
+        return mIsLabel;
     }
 
     @Override

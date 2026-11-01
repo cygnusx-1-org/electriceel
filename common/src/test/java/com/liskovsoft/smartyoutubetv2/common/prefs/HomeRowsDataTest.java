@@ -116,6 +116,33 @@ public class HomeRowsDataTest {
     }
 
     /**
+     * A subscription group is a row of its own: not a channel with the same id
+     */
+    @Test
+    public void channelGroupsAreAddedAndRemoved() {
+        HomeRowsData data = getData();
+
+        data.addChannel("UCfirst", "First");
+        data.addChannelGroup("group1", "Music");
+        data.addChannelGroup("group1", "Music again");
+        data.addChannelGroup(null, "No id");
+
+        assertEquals(Arrays.asList(Row.channel("UCfirst", null), Row.channelGroup("group1", null), Row.youTube()), data.getRows());
+        assertEquals("Music", data.getRows().get(1).title);
+        assertTrue(data.isChannelGroupAdded("group1"));
+        assertFalse(data.isChannelGroupAdded("UCfirst"));
+        assertFalse(data.isChannelAdded("group1"));
+        assertFalse(data.isChannelGroupAdded(null));
+
+        data.removeChannel("group1");
+        assertTrue(data.isChannelGroupAdded("group1"));
+
+        data.removeChannelGroup("group1");
+        data.removeChannelGroup(null);
+        assertEquals(Arrays.asList(Row.channel("UCfirst", null), Row.youTube()), data.getRows());
+    }
+
+    /**
      * YouTube's rows aren't removed, they can only be moved
      */
     @Test
@@ -259,6 +286,7 @@ public class HomeRowsDataTest {
 
         data.addChannel("UCfirst", "First | of all");
         data.setSubscriptionsAdded(true);
+        data.addChannelGroup("group1", "Music | live");
         data.orderYouTubeRows();
         data.moveRow(Row.youTube(), 0);
         List<Row> rows = data.getRows();
@@ -267,6 +295,8 @@ public class HomeRowsDataTest {
 
         assertEquals(rows, getData().getRows());
         assertEquals("First | of all", getData().getRows().get(1).title);
+        assertEquals("Music | live", getData().getRows().get(3).title);
+        assertEquals("group1", getData().getRows().get(3).channelGroupId);
     }
 
     @Test
@@ -294,11 +324,25 @@ public class HomeRowsDataTest {
     @Test
     public void unreadableRowsAreLeftOut() {
         getPrefs().setProfileData(HomeRowsData.HOME_ROWS_DATA, Helpers.mergeData(Helpers.mergeList(Arrays.asList(
-                Row.subscriptions().toString(), Helpers.mergeObj(9, 0, null, null), Helpers.mergeObj(3, 0, null, "No id"), "broken",
+                Row.subscriptions().toString(), Helpers.mergeObj(9, 0, null, null), Helpers.mergeObj(3, 0, null, "No id"),
+                Helpers.mergeObj(4, 0, null, "No group id", null), Helpers.mergeObj(4, 0, null, "Saved before groups"), "broken",
                 Row.subscriptions().toString()))));
         HomeRowsData.resetInstanceForTesting();
 
         assertEquals(Arrays.asList(Row.subscriptions(), Row.youTube()), getData().getRows());
+    }
+
+    /**
+     * Saved before subscription groups could be added: without the group id
+     */
+    @Test
+    public void rowsSavedBeforeChannelGroupsAreRead() {
+        getPrefs().setProfileData(HomeRowsData.HOME_ROWS_DATA, Helpers.mergeData(Helpers.mergeList(Arrays.asList(
+                Helpers.mergeObj(3, 0, "UCfirst", "First"), Helpers.mergeObj(2, 0, null, null), Helpers.mergeObj(0, 0, null, null)))));
+        HomeRowsData.resetInstanceForTesting();
+
+        assertEquals(Arrays.asList(Row.channel("UCfirst", null), Row.subscriptions(), Row.youTube()), getData().getRows());
+        assertEquals("First", getData().getRows().get(0).title);
     }
 
     private static AppPrefs getPrefs() {

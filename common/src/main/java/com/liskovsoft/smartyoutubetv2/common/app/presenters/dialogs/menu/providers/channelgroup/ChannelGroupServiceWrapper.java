@@ -9,6 +9,7 @@ import com.liskovsoft.mediaserviceinterfaces.data.ItemGroup;
 import com.liskovsoft.mediaserviceinterfaces.data.ItemGroup.Item;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs.ProfileChangeListener;
+import com.liskovsoft.smartyoutubetv2.common.prefs.HomeRowsData;
 import com.liskovsoft.youtubeapi.service.YouTubeServiceManager;
 
 import java.io.File;
@@ -19,10 +20,12 @@ import io.reactivex.Observable;
 public class ChannelGroupServiceWrapper implements ProfileChangeListener {
     @SuppressLint("StaticFieldLeak")
     private static ChannelGroupServiceWrapper sInstance;
+    private final Context mContext;
     private final AppPrefs mPrefs;
     private ChannelGroupService mService;
 
     private ChannelGroupServiceWrapper(Context context) {
+        mContext = context;
         mPrefs = AppPrefs.instance(context);
         mPrefs.addListener(this);
         restoreState();
@@ -44,8 +47,15 @@ public class ChannelGroupServiceWrapper implements ProfileChangeListener {
         getService().addChannelGroup(group);
     }
 
+    /**
+     * Its row of Home goes with it
+     */
     public void removeChannelGroup(ItemGroup group) {
         getService().removeChannelGroup(group);
+
+        if (group != null) {
+            HomeRowsData.instance(mContext).removeChannelGroup(group.getId());
+        }
     }
 
     public String[] findChannelIdsForGroup(String channelGroupId) {

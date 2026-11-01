@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- A checked list entry that's only the title of the entries below it (e.g. Subscription groups in Home rows). The
+     leanback_preference_category row of the settings, in the dimmed text color of the other rows: the accent color of some
+     themes is close to the dialog background. Starts where the checkboxes do.
+     Never focused: the D-pad goes past it. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/lb_preference_category_height"
+    android:focusable="false"
+    android:descendantFocusability="blocksDescendants"
+    android:paddingStart="@dimen/lb_preference_item_padding_start"
+    android:paddingEnd="@dimen/lb_preference_item_padding_end" >
+
+    <TextView
+        android:id="@android:id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|center_vertical"
+        android:fontFamily="sans-serif-medium"
+        android:textColor="@color/lb_preference_item_secondary_text_color_default"
+        android:textSize="@dimen/lb_preference_category_text_size" />
+
+</FrameLayout>

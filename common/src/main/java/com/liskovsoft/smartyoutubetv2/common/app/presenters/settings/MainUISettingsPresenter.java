@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Build;
 
 import com.liskovsoft.leanbackassistant.media.ClipService;
+import com.liskovsoft.mediaserviceinterfaces.data.ItemGroup;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItem;
 import com.liskovsoft.sharedutils.helpers.Helpers;
@@ -18,6 +19,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.BrowsePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.providers.ContextMenuManager;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.providers.ContextMenuProvider;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.providers.channelgroup.ChannelGroupServiceWrapper;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.SidebarService;
 import com.liskovsoft.smartyoutubetv2.common.prefs.DeArrowData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
@@ -306,49 +308,87 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
     }
 
     /**
-     * YouTube's rows that are on every load and the rest of them, but the ones Hide content takes out of Home anyway. Then
-     * Subscriptions and the subscribed channels by name. The channels added that aren't subscribed (e.g. from a video of
-     * Recommended) come after them.
+     * Rows: YouTube's rows that are on every load and the rest of them, but the ones Hide content takes out of Home anyway, then
+     * Subscriptions. Subscription groups, as in "Add/Remove from subscription group". Channels: the subscribed ones by name, then the ones added
+     * that aren't subscribed (e.g. from a video of Recommended).<br/>
+     * Each under its label, set apart by a line. One with nothing in it is left out.
      */
     private void showHomeRows(MediaGroup subscribedChannels) {
         HomeRowsData data = HomeRowsData.instance(getContext());
-        List<OptionItem> options = new ArrayList<>();
+        List<OptionItem> rowOptions = new ArrayList<>();
+        List<OptionItem> groupOptions = new ArrayList<>();
+        List<OptionItem> channelOptions = new ArrayList<>();
         Set<String> listedIds = new HashSet<>();
+        Set<String> listedGroupIds = new HashSet<>();
         List<MediaItem> channels = subscribedChannels != null ? subscribedChannels.getMediaItems() : null;
         List<Integer> kinds = new ArrayList<>(HomeRowsData.getYouTubeKinds());
         kinds.add(MediaGroup.ROW_KIND_NONE); // the rest of them
 
         for (int kind : kinds) {
             if (!isHiddenByHideContent(kind)) {
-                options.add(UiOptionItem.from(getContext().getString(getHomeRowKindTitle(kind)),
+                rowOptions.add(UiOptionItem.from(getContext().getString(getHomeRowKindTitle(kind)),
                         option -> data.setYouTubeRowShown(kind, option.isSelected()), data.isYouTubeRowShown(kind)));
             }
         }
 
-        options.add(UiOptionItem.from(getContext().getString(R.string.header_subscriptions),
+        rowOptions.add(UiOptionItem.from(getContext().getString(R.string.header_subscriptions),
                 option -> data.setSubscriptionsAdded(option.isSelected()), data.isSubscriptionsAdded()));
+
+        for (ItemGroup group : ChannelGroupServiceWrapper.instance(getContext()).getChannelGroups()) {
+            if (group != null && group.getId() != null && listedGroupIds.add(group.getId())) {
+                groupOptions.add(createHomeRowChannelGroupOption(data, group.getId(), group.getTitle()));
+            }
+        }
 
         if (channels != null) {
             for (MediaItem channel : channels) {
                 String channelId = channel != null ? channel.getChannelId() : null;
 
                 if (channelId != null && listedIds.add(channelId)) {
-                    options.add(createHomeRowChannelOption(data, channelId, channel.getTitle() != null ? channel.getTitle() : channelId));
+                    channelOptions.add(createHomeRowChannelOption(data, channelId, channel.getTitle() != null ? channel.getTitle() : channelId));
                 }
             }
         }
 
+        // The added ones not listed above, they still can be removed: a group that's gone, a channel that isn't subscribed
         for (Row row : data.getRows()) {
-            if (row.type == Row.TYPE_CHANNEL && listedIds.add(row.channelId)) {
-                options.add(createHomeRowChannelOption(data, row.channelId, getHomeRowTitle(row, data)));
+            if (row.type == Row.TYPE_CHANNEL_GROUP && listedGroupIds.add(row.channelGroupId)) {
+                groupOptions.add(createHomeRowChannelGroupOption(data, row.channelGroupId, getHomeRowTitle(row, data)));
+            } else if (row.type == Row.TYPE_CHANNEL && listedIds.add(row.channelId)) {
+                channelOptions.add(createHomeRowChannelOption(data, row.channelId, getHomeRowTitle(row, data)));
             }
         }
+
+        List<OptionItem> options = new ArrayList<>();
+        appendHomeRowsSection(options, R.string.home_rows_section_rows, rowOptions);
+        appendHomeRowsSection(options, R.string.subscription_groups, groupOptions);
+        appendHomeRowsSection(options, R.string.header_channels, channelOptions);
 
         MessageHelpers.cancelToasts();
 
         AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
         dialog.appendCheckedCategory(getContext().getString(R.string.home_rows), options);
         dialog.showDialog();
+    }
+
+    /**
+     * Under its label, after a line when there's a section above it
+     */
+    private void appendHomeRowsSection(List<OptionItem> options, int labelResId, List<OptionItem> sectionOptions) {
+        if (sectionOptions.isEmpty()) {
+            return;
+        }
+
+        if (!options.isEmpty()) {
+            OptionItem separator = UiOptionItem.from("");
+            separator.setSeparator(true);
+            options.add(separator);
+        }
+
+        OptionItem label = UiOptionItem.from(getContext().getString(labelResId));
+        label.setLabel(true);
+        options.add(label);
+        options.addAll(sectionOptions);
     }
 
     /**
@@ -415,6 +455,19 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
     }
 
     /**
+     * Checked, it's added at the top
+     */
+    private OptionItem createHomeRowChannelGroupOption(HomeRowsData data, String channelGroupId, String title) {
+        return UiOptionItem.from(title, option -> {
+            if (option.isSelected()) {
+                data.addChannelGroup(channelGroupId, title);
+            } else {
+                data.removeChannelGroup(channelGroupId);
+            }
+        }, data.isChannelGroupAdded(channelGroupId));
+    }
+
+    /**
      * The rows put in order with the remote (see OptionCategory.reorderList). Read again each time it's opened.
      */
     private void showHomeRowsOrder() {
@@ -449,6 +502,10 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
                 return getContext().getString(R.string.header_subscriptions);
             case Row.TYPE_CHANNEL:
                 return row.title != null ? row.title : row.channelId;
+            case Row.TYPE_CHANNEL_GROUP:
+                // It can be renamed
+                ItemGroup group = ChannelGroupServiceWrapper.instance(getContext()).findChannelGroupById(row.channelGroupId);
+                return group != null ? group.getTitle() : row.title != null ? row.title : row.channelGroupId;
             default:
                 return getContext().getString(getHomeRowKindTitle(row.kind));
         }

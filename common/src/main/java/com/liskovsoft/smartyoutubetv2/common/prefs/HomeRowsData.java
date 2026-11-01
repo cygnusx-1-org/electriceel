@@ -17,7 +17,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * The order of the rows of Home and the rows added to it: the Subscriptions feed and channels (each a row of its uploads).<br/>
+ * The order of the rows of Home and the rows added to it: the Subscriptions feed, subscription groups (each a row of the uploads
+ * of its channels) and channels (each a row of its uploads).<br/>
  * YouTube's rows come in YouTube's order as one entry, until the ones it shows on every load are put in an order of their own
  * (see {@link #orderYouTubeRows}). The rest of them stay in YouTube's order, where that entry is.<br/>
  * Each account has its own, as it has its own sidebar.
@@ -56,41 +57,55 @@ public class HomeRowsData implements ProfileChangeListener {
          * The uploads of a channel
          */
         public static final int TYPE_CHANNEL = 3;
+        /**
+         * The uploads of the channels of a subscription group (see ChannelGroupServiceWrapper)
+         */
+        public static final int TYPE_CHANNEL_GROUP = 4;
         public final int type;
         public final int kind;
         @Nullable
         public final String channelId;
+        /**
+         * The title when it was added. A subscription group has its own, it can be renamed.
+         */
         @Nullable
         public final String title;
+        @Nullable
+        public final String channelGroupId;
 
-        private Row(int type, int kind, @Nullable String channelId, @Nullable String title) {
+        private Row(int type, int kind, @Nullable String channelId, @Nullable String title, @Nullable String channelGroupId) {
             this.type = type;
             this.kind = kind;
             this.channelId = channelId;
             this.title = title;
+            this.channelGroupId = channelGroupId;
         }
 
         public static Row youTube() {
-            return new Row(TYPE_YOUTUBE, MediaGroup.ROW_KIND_NONE, null, null);
+            return new Row(TYPE_YOUTUBE, MediaGroup.ROW_KIND_NONE, null, null, null);
         }
 
         public static Row kind(int kind) {
-            return new Row(TYPE_KIND, kind, null, null);
+            return new Row(TYPE_KIND, kind, null, null, null);
         }
 
         public static Row subscriptions() {
-            return new Row(TYPE_SUBSCRIPTIONS, MediaGroup.ROW_KIND_NONE, null, null);
+            return new Row(TYPE_SUBSCRIPTIONS, MediaGroup.ROW_KIND_NONE, null, null, null);
         }
 
         public static Row channel(@NonNull String channelId, @Nullable String title) {
-            return new Row(TYPE_CHANNEL, MediaGroup.ROW_KIND_NONE, channelId, title);
+            return new Row(TYPE_CHANNEL, MediaGroup.ROW_KIND_NONE, channelId, title, null);
+        }
+
+        public static Row channelGroup(@NonNull String channelGroupId, @Nullable String title) {
+            return new Row(TYPE_CHANNEL_GROUP, MediaGroup.ROW_KIND_NONE, null, title, channelGroupId);
         }
 
         /**
          * Added to Home: not one of YouTube's rows
          */
         public boolean isAdded() {
-            return type == TYPE_SUBSCRIPTIONS || type == TYPE_CHANNEL;
+            return type == TYPE_SUBSCRIPTIONS || type == TYPE_CHANNEL || type == TYPE_CHANNEL_GROUP;
         }
 
         @Nullable
@@ -103,16 +118,19 @@ public class HomeRowsData implements ProfileChangeListener {
 
             int type = Helpers.parseInt(split[0]);
             String channelId = Helpers.parseStr(split[2]);
+            // Not in the rows saved before subscription groups could be added
+            String channelGroupId = split.length > 4 ? Helpers.parseStr(split[4]) : null;
 
-            if (type < TYPE_YOUTUBE || type > TYPE_CHANNEL || (type == TYPE_CHANNEL && channelId == null)) {
+            if (type < TYPE_YOUTUBE || type > TYPE_CHANNEL_GROUP || (type == TYPE_CHANNEL && channelId == null)
+                    || (type == TYPE_CHANNEL_GROUP && channelGroupId == null)) {
                 return null;
             }
 
-            return new Row(type, Helpers.parseInt(split[1]), channelId, Helpers.parseStr(split[3]));
+            return new Row(type, Helpers.parseInt(split[1]), channelId, Helpers.parseStr(split[3]), channelGroupId);
         }
 
         /**
-         * The same row: a channel under another title too
+         * The same row: a channel or a subscription group under another title too
          */
         @Override
         public boolean equals(@Nullable Object obj) {
@@ -122,18 +140,21 @@ public class HomeRowsData implements ProfileChangeListener {
 
             Row row = (Row) obj;
 
-            return type == row.type && kind == row.kind && Helpers.equals(channelId, row.channelId);
+            return type == row.type && kind == row.kind && Helpers.equals(channelId, row.channelId)
+                    && Helpers.equals(channelGroupId, row.channelGroupId);
         }
 
         @Override
         public int hashCode() {
-            return 31 * (31 * type + kind) + (channelId != null ? channelId.hashCode() : 0);
+            int result = 31 * (31 * type + kind) + (channelId != null ? channelId.hashCode() : 0);
+
+            return 31 * result + (channelGroupId != null ? channelGroupId.hashCode() : 0);
         }
 
         @NonNull
         @Override
         public String toString() {
-            return Helpers.mergeObj(type, kind, channelId, title);
+            return Helpers.mergeObj(type, kind, channelId, title, channelGroupId);
         }
     }
 
@@ -331,6 +352,25 @@ public class HomeRowsData implements ProfileChangeListener {
     public synchronized void removeChannel(String channelId) {
         if (channelId != null) {
             remove(Row.channel(channelId, null));
+        }
+    }
+
+    public synchronized boolean isChannelGroupAdded(String channelGroupId) {
+        return channelGroupId != null && mRows.contains(Row.channelGroup(channelGroupId, null));
+    }
+
+    /**
+     * After the rows added before it at the top
+     */
+    public synchronized void addChannelGroup(String channelGroupId, String title) {
+        if (channelGroupId != null) {
+            add(Row.channelGroup(channelGroupId, title));
+        }
+    }
+
+    public synchronized void removeChannelGroup(String channelGroupId) {
+        if (channelGroupId != null) {
+            remove(Row.channelGroup(channelGroupId, null));
         }
     }
 
