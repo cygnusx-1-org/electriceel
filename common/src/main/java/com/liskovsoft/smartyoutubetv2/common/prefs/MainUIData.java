@@ -78,6 +78,8 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
     public static final long MENU_ITEM_ADD_TO_HOME_ROWS = 1L << 44;
     public static final long MENU_ITEM_LIKE = 1L << 45;
     public static final long MENU_ITEM_EXCLUDE_CHANNEL_FROM_HIDING = 1L << 46;
+    // The id of ChannelGroupMenuProvider (see ContextMenuManager), not an item of its own
+    public static final long MENU_ITEM_SUBSCRIPTION_GROUP = 1L << 50;
     public static final int TOP_BUTTON_BROWSE_ACCOUNTS = 1;
     public static final int TOP_BUTTON_CHANGE_LANGUAGE = 1 << 1;
     public static final int TOP_BUTTON_SEARCH = 1 << 2;
@@ -90,14 +92,14 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
             | MENU_ITEM_OPEN_CHANNEL | MENU_ITEM_REMOVE_FROM_SUBSCRIPTIONS | MENU_ITEM_PLAY_NEXT | MENU_ITEM_OPEN_PLAYLIST
             | MENU_ITEM_SUBSCRIBE | MENU_ITEM_CLEAR_HISTORY | MENU_ITEM_HIDE_KEYWORDS | MENU_ITEM_COPY_PLAYLIST_TO_YOUTUBE
             | MENU_ITEM_CREATE_LOCAL_PLAYLIST | MENU_ITEM_ADD_TO_HOME_SCREEN | MENU_ITEM_REPORT_AI_CHANNEL | MENU_ITEM_ADD_TO_HOME_ROWS
-            | MENU_ITEM_SHARE_QR_LINK | MENU_ITEM_MARK_AS_WATCHED | MENU_ITEM_EXCLUDE_CHANNEL_FROM_HIDING;
+            | MENU_ITEM_SHARE_QR_LINK | MENU_ITEM_MARK_AS_WATCHED | MENU_ITEM_EXCLUDE_CHANNEL_FROM_HIDING | MENU_ITEM_SUBSCRIPTION_GROUP;
     private static final Long[] MENU_ITEM_DEFAULT_ORDER = {
             MENU_ITEM_EXIT_FROM_PIP, MENU_ITEM_PLAY_VIDEO, MENU_ITEM_PLAY_VIDEO_INCOGNITO, MENU_ITEM_PLAY_FROM_START, MENU_ITEM_REMOVE_FROM_HISTORY,
             MENU_ITEM_STREAM_REMINDER, MENU_ITEM_RECENT_PLAYLIST, MENU_ITEM_ADD_TO_WATCH_LATER, MENU_ITEM_LIKE, MENU_ITEM_ADD_TO_PLAYLIST, MENU_ITEM_CREATE_PLAYLIST,
             MENU_ITEM_CREATE_LOCAL_PLAYLIST, MENU_ITEM_RENAME_PLAYLIST, MENU_ITEM_COPY_PLAYLIST_TO_YOUTUBE, MENU_ITEM_ADD_TO_NEW_PLAYLIST, MENU_ITEM_NOT_INTERESTED, MENU_ITEM_NOT_RECOMMEND_CHANNEL, MENU_ITEM_BLOCK_CHANNEL, MENU_ITEM_REPORT_AI_CHANNEL, MENU_ITEM_HIDE_KEYWORDS,
             MENU_ITEM_EXCLUDE_CHANNEL_FROM_HIDING, MENU_ITEM_REMOVE_FROM_SUBSCRIPTIONS, MENU_ITEM_MARK_AS_WATCHED, MENU_ITEM_PLAYLIST_ORDER, MENU_ITEM_PLAY_NEXT, MENU_ITEM_ADD_TO_QUEUE,
             MENU_ITEM_SHOW_QUEUE, MENU_ITEM_OPEN_CHANNEL, MENU_ITEM_OPEN_PLAYLIST, MENU_ITEM_SUBSCRIBE, MENU_ITEM_EXCLUDE_FROM_CONTENT_BLOCK,
-            MENU_ITEM_PIN_TO_SIDEBAR, MENU_ITEM_ADD_TO_HOME_ROWS, MENU_ITEM_ADD_TO_HOME_SCREEN, MENU_ITEM_SAVE_REMOVE_PLAYLIST, MENU_ITEM_OPEN_DESCRIPTION, MENU_ITEM_OPEN_COMMENTS, MENU_ITEM_SHARE_LINK,
+            MENU_ITEM_SUBSCRIPTION_GROUP, MENU_ITEM_PIN_TO_SIDEBAR, MENU_ITEM_ADD_TO_HOME_ROWS, MENU_ITEM_ADD_TO_HOME_SCREEN, MENU_ITEM_SAVE_REMOVE_PLAYLIST, MENU_ITEM_OPEN_DESCRIPTION, MENU_ITEM_OPEN_COMMENTS, MENU_ITEM_SHARE_LINK,
             MENU_ITEM_SHARE_EMBED_LINK, MENU_ITEM_SHARE_QR_LINK, MENU_ITEM_SELECT_ACCOUNT, MENU_ITEM_TOGGLE_HISTORY, MENU_ITEM_CLEAR_HISTORY,
             MENU_ITEM_MOVE_SECTION_UP, MENU_ITEM_MOVE_SECTION_DOWN, MENU_ITEM_RENAME_SECTION, MENU_ITEM_UPDATE_CHECK
     };
@@ -113,8 +115,8 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
             | MENU_ITEM_STREAM_REMINDER | MENU_ITEM_RECENT_PLAYLIST | MENU_ITEM_ADD_TO_WATCH_LATER | MENU_ITEM_LIKE | MENU_ITEM_ADD_TO_PLAYLIST
             | MENU_ITEM_ADD_TO_NEW_PLAYLIST | MENU_ITEM_BLOCK_CHANNEL | MENU_ITEM_REPORT_AI_CHANNEL | MENU_ITEM_HIDE_KEYWORDS
             | MENU_ITEM_EXCLUDE_CHANNEL_FROM_HIDING | MENU_ITEM_MARK_AS_WATCHED | MENU_ITEM_PLAY_NEXT | MENU_ITEM_ADD_TO_QUEUE | MENU_ITEM_SHOW_QUEUE | MENU_ITEM_OPEN_CHANNEL
-            | MENU_ITEM_OPEN_PLAYLIST | MENU_ITEM_SUBSCRIBE | MENU_ITEM_EXCLUDE_FROM_CONTENT_BLOCK | MENU_ITEM_PIN_TO_SIDEBAR
-            | MENU_ITEM_ADD_TO_HOME_ROWS | MENU_ITEM_ADD_TO_HOME_SCREEN | MENU_ITEM_SAVE_REMOVE_PLAYLIST | MENU_ITEM_OPEN_DESCRIPTION
+            | MENU_ITEM_OPEN_PLAYLIST | MENU_ITEM_SUBSCRIBE | MENU_ITEM_EXCLUDE_FROM_CONTENT_BLOCK | MENU_ITEM_SUBSCRIPTION_GROUP
+            | MENU_ITEM_PIN_TO_SIDEBAR | MENU_ITEM_ADD_TO_HOME_ROWS | MENU_ITEM_ADD_TO_HOME_SCREEN | MENU_ITEM_SAVE_REMOVE_PLAYLIST | MENU_ITEM_OPEN_DESCRIPTION
             | MENU_ITEM_OPEN_COMMENTS | MENU_ITEM_SHARE_LINK | MENU_ITEM_SHARE_EMBED_LINK | MENU_ITEM_SHARE_QR_LINK
             | MENU_ITEM_SELECT_ACCOUNT | MENU_ITEM_TOGGLE_HISTORY;
     // In the order the menu of a section had before it followed one
@@ -375,6 +377,13 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
     }
 
     /**
+     * Every item of each menu, e.g. for Child mode. The ones past the int bits too (see MENU_ITEM_SUBSCRIPTION_GROUP).
+     */
+    public void setAllMenuItemsDisabled() {
+        setMenuItemsDisabled(~0L);
+    }
+
+    /**
      * The ones each menu has on by default (see getDefaultMenuItems)
      */
     public void setDefaultMenuItemsEnabled() {
@@ -624,9 +633,11 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
     /**
      * The items of each menu and their order. Saved before each menu had its own: the ones of all of them, as far as the menu
      * has them, in their order. The sidebar one had a fixed order: it keeps it. Not interested is new to Subscriptions: it's off there.
+     * The subscription group one was last and off: it's put above the sidebar one and on, once, where it's still like that.
      */
     private void restoreMenus(String[] split) {
         List<Long> menuItems = Helpers.parseLongList(split, 25);
+        boolean isSubscriptionGroupPlaced = Helpers.parseBoolean(split, 31, false);
         List<ContextMenuProvider> providers = new ContextMenuManager(mContext).getProviders();
 
         mMenuItemsOrderedByMenu.clear();
@@ -646,12 +657,16 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
             List<Long> items = new ArrayList<>(defaultOrder);
 
             for (ContextMenuProvider provider : providers) {
-                if (provider.getMenuType() == getProviderMenuType(menu)) {
+                if (provider.getMenuType() == getProviderMenuType(menu) && !items.contains(provider.getId())) {
                     items.add(provider.getId());
                 }
             }
 
             order.retainAll(items);
+
+            boolean isSubscriptionGroupMoved = !isSubscriptionGroupPlaced && !order.isEmpty()
+                    && order.get(order.size() - 1) == MENU_ITEM_SUBSCRIPTION_GROUP
+                    && (mMenuItemsByMenu[menu] & MENU_ITEM_SUBSCRIPTION_GROUP) == 0;
 
             // The ones new to the menu
             int idx = -1;
@@ -672,6 +687,12 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
                 if (!order.contains(menuItem)) {
                     order.add(menuItem);
                 }
+            }
+
+            if (isSubscriptionGroupMoved) {
+                order.remove((Long) MENU_ITEM_SUBSCRIPTION_GROUP);
+                order.add(order.indexOf(MENU_ITEM_PIN_TO_SIDEBAR), MENU_ITEM_SUBSCRIPTION_GROUP);
+                mMenuItemsByMenu[menu] |= MENU_ITEM_SUBSCRIPTION_GROUP;
             }
 
             mMenuItemsOrderedByMenu.add(order);
@@ -753,7 +774,8 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
                 Helpers.mergeList(mMenuItemsOrderedByMenu.get(MENU_SUBSCRIPTIONS)),
                 Helpers.mergeList(mMenuItemsOrderedByMenu.get(MENU_HISTORY)),
                 Helpers.mergeList(mMenuItemsOrderedByMenu.get(MENU_PLAYLISTS)),
-                Helpers.mergeList(mMenuItemsOrderedByMenu.get(MENU_SIDEBAR))));
+                Helpers.mergeList(mMenuItemsOrderedByMenu.get(MENU_SIDEBAR)),
+                true)); // the subscription group item placed (see restoreMenus)
     }
 
     public static class ColorScheme {

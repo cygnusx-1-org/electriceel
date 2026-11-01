@@ -655,7 +655,7 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
         // Remove all
         mMainUIData.setTopButtonDisabled(Integer.MAX_VALUE);
         tweaksData.setPlayerButtonDisabled(Integer.MAX_VALUE);
-        mMainUIData.setMenuItemsDisabled(Integer.MAX_VALUE);
+        mMainUIData.setAllMenuItemsDisabled();
         BrowsePresenter.instance(getContext()).enableAllSections(false);
         searchData.setPopularSearchesDisabled(true);
 

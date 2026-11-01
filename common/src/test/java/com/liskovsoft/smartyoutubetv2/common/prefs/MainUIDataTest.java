@@ -4,6 +4,7 @@ import com.liskovsoft.mediaserviceinterfaces.oauth.Account;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.providers.ContextMenuManager;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.providers.ContextMenuProvider;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.providers.channelgroup.ChannelGroupMenuProvider;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData.ColorScheme;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
@@ -30,6 +31,8 @@ public class MainUIDataTest {
     private static final String DATA_KEY = "main_ui_data2";
     private static final Account FIRST_ACCOUNT = TestAccounts.FIRST;
     private static final Account SECOND_ACCOUNT = TestAccounts.SECOND;
+    private static final int[] CARD_MENUS = {MainUIData.MENU_VIDEOS, MainUIData.MENU_SUBSCRIPTIONS, MainUIData.MENU_HISTORY,
+            MainUIData.MENU_PLAYLISTS};
 
     @Before
     public void setUp() {
@@ -305,6 +308,119 @@ public class MainUIDataTest {
         assertFalse(getData().isMenuItemEnabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_EXCLUDE_CHANNEL_FROM_HIDING));
     }
 
+    @Test
+    public void subscriptionGroupIsTheItemOfItsProvider() {
+        for (ContextMenuProvider provider : new ContextMenuManager(RuntimeEnvironment.getApplication()).getProviders()) {
+            if (provider instanceof ChannelGroupMenuProvider) {
+                assertEquals(MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP, provider.getId());
+                return;
+            }
+        }
+
+        throw new AssertionError("No ChannelGroupMenuProvider");
+    }
+
+    @Test
+    public void subscriptionGroupIsAboveTheSidebarOneInEveryCardMenuByDefault() {
+        MainUIData data = getData();
+
+        for (int menu : CARD_MENUS) {
+            assertTrue("menu " + menu, data.isMenuItemEnabled(menu, MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP));
+            assertAboveTheSidebarOne(data, menu);
+        }
+    }
+
+    /**
+     * It was last and off by default: put above the sidebar one and on, wherever that one is
+     */
+    @Test
+    public void subscriptionGroupLastAndOffIsMovedAboveTheSidebarOne() {
+        SavedMenus saved = SavedMenus.oldDefaults();
+        List<Long> videos = saved.orders.get(MainUIData.MENU_VIDEOS);
+        videos.remove((Long) MainUIData.MENU_ITEM_PIN_TO_SIDEBAR);
+        videos.add(0, MainUIData.MENU_ITEM_PIN_TO_SIDEBAR);
+        saved.save();
+
+        MainUIData data = getData();
+
+        for (int menu : CARD_MENUS) {
+            assertTrue("menu " + menu, data.isMenuItemEnabled(menu, MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP));
+            assertAboveTheSidebarOne(data, menu);
+        }
+
+        assertEquals(0, data.getMenuItemIndex(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP));
+    }
+
+    /**
+     * Turned on, or moved, it isn't like it was by default: left as it is
+     */
+    @Test
+    public void subscriptionGroupChangedFromItsOldDefaultStaysAsItIs() {
+        SavedMenus saved = SavedMenus.oldDefaults();
+        saved.items[MainUIData.MENU_VIDEOS] |= MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP;
+        List<Long> history = saved.orders.get(MainUIData.MENU_HISTORY);
+        history.remove((Long) MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP);
+        history.add(0, MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP);
+        saved.save();
+
+        MainUIData data = getData();
+
+        assertTrue(data.isMenuItemEnabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP));
+        assertEquals(data.getMenuItemsOrdered(MainUIData.MENU_VIDEOS).size() - 1,
+                data.getMenuItemIndex(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP));
+        assertFalse(data.isMenuItemEnabled(MainUIData.MENU_HISTORY, MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP));
+        assertEquals(0, data.getMenuItemIndex(MainUIData.MENU_HISTORY, MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP));
+        assertTrue(data.isMenuItemEnabled(MainUIData.MENU_SUBSCRIPTIONS, MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP));
+        assertAboveTheSidebarOne(data, MainUIData.MENU_SUBSCRIPTIONS);
+    }
+
+    /**
+     * Once: last and off again after it was moved, it stays like that
+     */
+    @Test
+    public void subscriptionGroupIsMovedOnce() {
+        SavedMenus.oldDefaults().save();
+        MainUIData data = getData();
+        List<Long> order = new ArrayList<>(data.getMenuItemsOrdered(MainUIData.MENU_VIDEOS));
+        order.remove((Long) MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP);
+
+        data.setMenuItemDisabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP);
+        data.setMenuItemsOrder(MainUIData.MENU_VIDEOS, order); // the others first: it comes after them
+        ShadowLooper.shadowMainLooper().idle();
+        MainUIData.resetInstanceForTesting();
+
+        data = getData();
+
+        assertFalse(data.isMenuItemEnabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP));
+        assertEquals(data.getMenuItemsOrdered(MainUIData.MENU_VIDEOS).size() - 1,
+                data.getMenuItemIndex(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP));
+    }
+
+    /**
+     * Saved before each menu had its own: last and off there too
+     */
+    @Test
+    public void subscriptionGroupLastAndOffInTheSettingsOfAllMenusIsMoved() {
+        List<Long> order = new ArrayList<>();
+        for (int menu = 0; menu < MainUIData.MENU_COUNT; menu++) {
+            for (Long menuItem : getData().getMenuItemsOrdered(menu)) {
+                if (!order.contains(menuItem) && menuItem != MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP) {
+                    order.add(menuItem);
+                }
+            }
+        }
+        order.add(MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP);
+        getPrefs().setProfileData(DATA_KEY, oldMenuSettings(MainUIData.MENU_ITEM_DEFAULT & ~MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP, order));
+        MainUIData.resetInstanceForTesting();
+
+        MainUIData data = getData();
+
+        for (int menu : CARD_MENUS) {
+            assertTrue("menu " + menu, data.isMenuItemEnabled(menu, MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP));
+            assertAboveTheSidebarOne(data, menu);
+        }
+    }
+
     /**
      * The enabled ones put in order: the others come after them, in their order
      */
@@ -510,18 +626,32 @@ public class MainUIDataTest {
     public void allMenusAtOnce() {
         MainUIData data = getData();
 
-        data.setMenuItemsDisabled(Integer.MAX_VALUE);
+        data.setAllMenuItemsDisabled();
         data.setMenuItemsEnabled(MainUIData.MENU_ITEM_PLAY_NEXT);
 
         assertTrue(data.isMenuItemEnabled(MainUIData.MENU_HISTORY, MainUIData.MENU_ITEM_PLAY_NEXT));
         assertFalse(data.isMenuItemEnabled(MainUIData.MENU_HISTORY, MainUIData.MENU_ITEM_REMOVE_FROM_HISTORY));
         assertFalse(data.isMenuItemEnabled(MainUIData.MENU_SIDEBAR, MainUIData.MENU_ITEM_PLAY_NEXT));
 
+        // None but its own, the ones past the int bits too
+        for (int menu = 0; menu < MainUIData.MENU_COUNT; menu++) {
+            for (Long menuItem : data.getMenuItemsOrdered(menu)) {
+                assertEquals("menu " + menu + " item " + menuItem, menuItem == MainUIData.MENU_ITEM_PLAY_NEXT,
+                        data.isMenuItemEnabled(menu, menuItem));
+            }
+        }
+
         data.setDefaultMenuItemsEnabled();
 
         assertTrue(data.isMenuItemEnabled(MainUIData.MENU_HISTORY, MainUIData.MENU_ITEM_REMOVE_FROM_HISTORY));
+        assertTrue(data.isMenuItemEnabled(MainUIData.MENU_HISTORY, MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP));
         assertTrue(data.isMenuItemEnabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_NOT_INTERESTED));
         assertFalse(data.isMenuItemEnabled(MainUIData.MENU_SUBSCRIPTIONS, MainUIData.MENU_ITEM_NOT_INTERESTED));
+    }
+
+    private static void assertAboveTheSidebarOne(MainUIData data, int menu) {
+        assertEquals("menu " + menu, data.getMenuItemIndex(menu, MainUIData.MENU_ITEM_PIN_TO_SIDEBAR) - 1,
+                data.getMenuItemIndex(menu, MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP));
     }
 
     private static void assertMenus(long menuItem, int... menus) {
@@ -539,6 +669,62 @@ public class MainUIDataTest {
         data[12] = menuItems;
         data[17] = Helpers.mergeList(menuItemsOrdered);
         return Helpers.mergeData(data);
+    }
+
+    /**
+     * Each menu's items on and their order, saved like MainUIData did before the subscription group item was on by default
+     */
+    private static class SavedMenus {
+        final long[] items = new long[MainUIData.MENU_COUNT];
+        final List<List<Long>> orders = new ArrayList<>();
+
+        /**
+         * The defaults then: the subscription group item last and off in each card menu
+         */
+        static SavedMenus oldDefaults() {
+            MainUIData data = getData();
+            SavedMenus result = new SavedMenus();
+
+            for (int menu = 0; menu < MainUIData.MENU_COUNT; menu++) {
+                List<Long> order = new ArrayList<>(data.getMenuItemsOrdered(menu));
+
+                for (Long menuItem : order) {
+                    if (data.isMenuItemEnabled(menu, menuItem)) {
+                        result.items[menu] |= menuItem;
+                    }
+                }
+
+                if (order.remove((Long) MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP)) {
+                    order.add(MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP);
+                    result.items[menu] &= ~MainUIData.MENU_ITEM_SUBSCRIPTION_GROUP;
+                }
+
+                result.orders.add(order);
+            }
+
+            return result;
+        }
+
+        /**
+         * Without the value after the menus (31): that it was moved
+         */
+        void save() {
+            Object[] data = new Object[31];
+            List<Long> menuItems = new ArrayList<>();
+
+            for (long menuItem : items) {
+                menuItems.add(menuItem);
+            }
+
+            data[25] = Helpers.mergeList(menuItems);
+
+            for (int menu = 0; menu < MainUIData.MENU_COUNT; menu++) {
+                data[26 + menu] = Helpers.mergeList(orders.get(menu));
+            }
+
+            getPrefs().setProfileData(DATA_KEY, Helpers.mergeData(data));
+            MainUIData.resetInstanceForTesting();
+        }
     }
 
     /**
