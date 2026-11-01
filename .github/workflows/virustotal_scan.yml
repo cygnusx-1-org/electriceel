@@ -61,7 +61,7 @@ jobs:
 
           echo "| Build Variant | VirusTotal Status | Detailed Report |" >> vt_report.txt
           echo "| :--- | :--- | :--- |" >> vt_report.txt
-          
+
           for file in release_assets/*.apk; do
             [ -e "$file" ] || continue
             filename=$(basename "$file")
@@ -72,9 +72,9 @@ jobs:
 
             echo "Purging badge cache for $filename..."
             curl -s -X POST $badge_url
-            
+
             asset_link="https://github.com/${{ github.repository }}/releases/download/${{ env.TAG_NAME }}/$filename"
-            
+
             echo "| [$filename]($asset_link) | [![]($badge_url&v=$(date +%s))]($vt_link) | [View Report]($vt_link) |" >> vt_report.txt
           done
 
@@ -89,10 +89,10 @@ jobs:
             echo "Previous report found. Cleaning up..."
             sed -i "/$MARKER/,\$d" current_notes.txt
           fi
-          
+
           {
             cat current_notes.txt
             cat vt_report.txt
           } > final_notes.txt
-          
+
           gh release edit "$TAG_NAME" --notes-file final_notes.txt

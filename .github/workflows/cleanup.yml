@@ -52,5 +52,5 @@ jobs:
                 } catch (e) {
                   core.info(`Skip run ${run.id}: ${e.message}`);
                 }
-              } 
+              }
             }
