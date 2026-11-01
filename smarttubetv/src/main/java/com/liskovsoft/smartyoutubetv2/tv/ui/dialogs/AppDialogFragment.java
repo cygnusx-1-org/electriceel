@@ -1,6 +1,7 @@
 package com.liskovsoft.smartyoutubetv2.tv.ui.dialogs;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.os.Bundle;
@@ -140,20 +141,34 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
             return;
         }
 
+        boolean isSingleCategory = isExpandable && categories != null && categories.size() == 1;
+        // Popping the back stack throws once the state is saved (after onPause): then it opens over the lists shown
+        boolean isReplace = !isSingleCategory && !mIsPaused && mPresenter.isReplaceEnabled();
+
+        if (isReplace) {
+            popBackStackAll();
+        }
+
         // Only root fragment could make other fragments in the stack transparent
-        boolean stackIsEmpty = getChildFragmentManager() != null && getChildFragmentManager().getBackStackEntryCount() == 0;
+        boolean stackIsEmpty = isReplace || getChildFragmentManager() != null && getChildFragmentManager().getBackStackEntryCount() == 0;
         mIsTransparent = stackIsEmpty ? isTransparent : mIsTransparent;
         mIsOverlay = isOverlay;
         mId = id;
 
-        if (isExpandable && categories != null && categories.size() == 1) {
+        if (isSingleCategory) {
             OptionCategory category = categories.get(0);
             if (category.options != null) {
                 onPreferenceDisplayDialog(null, mManager.createPreference(category));
             }
         } else {
             AppPreferenceFragment fragment = buildPreferenceFragment(categories, createTitle(title));
-            startPreferenceFragment(fragment);
+
+            if (isReplace) {
+                replacePreferenceFragment(fragment);
+            } else {
+                startPreferenceFragment(fragment);
+            }
+
             mBaseTitles.add(title);
         }
     }
@@ -301,6 +316,25 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
         }
         // Fix possible state loss!!!
         transaction.commitAllowingStateLoss();
+    }
+
+    /**
+     * In place of the list shown: Back doesn't go to it (see AppDialogPresenter#enableReplace)
+     */
+    private void replacePreferenceFragment(@NonNull Fragment fragment) {
+        getChildFragmentManager().beginTransaction()
+                .replace(R.id.settings_preference_fragment_container, fragment, PREFERENCE_FRAGMENT_TAG)
+                // Fix possible state loss!!!
+                .commitAllowingStateLoss();
+    }
+
+    /**
+     * Down to the first list. Before the next one is committed: the transactions run in order.
+     * Even with nothing on the back stack yet: a list still being added (e.g. a row opened just before) is popped too.
+     */
+    private void popBackStackAll() {
+        getChildFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        mBaseTitles.clear();
     }
 
     @Override

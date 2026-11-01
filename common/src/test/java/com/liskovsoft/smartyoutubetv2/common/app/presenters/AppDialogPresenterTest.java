@@ -10,8 +10,10 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 28)
@@ -77,5 +79,40 @@ public class AppDialogPresenterTest {
         mPresenter.showDialog("Updates");
 
         assertNull(mPresenter.getFocusedItem());
+    }
+
+    /**
+     * The Debugging panel built again after a submission: in place of the one shown
+     */
+    @Test
+    public void replace_ofTheDialogShown() {
+        mPresenter.appendSingleButton(UiOptionItem.from("Submit data", option -> {}));
+        mPresenter.enableReplace(true);
+        mPresenter.showDialog("Debugging");
+
+        assertTrue(mPresenter.isReplaceEnabled());
+    }
+
+    /**
+     * Of one dialog only: the QR code opened next is over the panel
+     */
+    @Test
+    public void replace_notKeptForTheNextDialog() {
+        mPresenter.appendSingleButton(UiOptionItem.from("Submit data", option -> {}));
+        mPresenter.enableReplace(true);
+        mPresenter.showDialog("Debugging");
+
+        mPresenter.appendQrCode("Submitted", "https://github.com");
+        mPresenter.showDialog("Submit data");
+
+        assertFalse(mPresenter.isReplaceEnabled());
+    }
+
+    @Test
+    public void replace_offByDefault() {
+        mPresenter.appendSingleButton(UiOptionItem.from("Check for updates", option -> {}));
+        mPresenter.showDialog("Updates");
+
+        assertFalse(mPresenter.isReplaceEnabled());
     }
 }
