@@ -29,7 +29,7 @@ public class SimpleEditDialog {
     }
 
     public static void show(Context context, String dialogTitle, String dialogHint, String defaultValue, OnChange onChange, Runnable onDismiss) {
-        show(context, dialogTitle, dialogHint, defaultValue, onChange, onDismiss, false);
+        show(context, dialogTitle, dialogHint, defaultValue, onChange, onDismiss, InputType.TYPE_NULL);
     }
 
     public static void showPassword(Context context, String dialogTitle, String defaultValue, OnChange onChange) {
@@ -37,17 +37,27 @@ public class SimpleEditDialog {
     }
 
     public static void showPassword(Context context, String dialogTitle, String defaultValue, OnChange onChange, Runnable onDismiss) {
-        show(context, dialogTitle, dialogTitle, defaultValue, onChange, onDismiss, true);
+        show(context, dialogTitle, dialogTitle, defaultValue, onChange, onDismiss, InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
     }
 
-    private static void show(Context context, String dialogTitle, String dialogHint, String defaultValue, OnChange onChange, Runnable onDismiss, boolean isPassword) {
+    /**
+     * A name, e.g. of a subscription group: the keyboard starts with a capital letter
+     */
+    public static void showName(Context context, String dialogTitle, String defaultValue, OnChange onChange) {
+        show(context, dialogTitle, dialogTitle, defaultValue, onChange, null, InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+    }
+
+    /**
+     * @param inputType the InputType.TYPE_* of the field, or {@link InputType#TYPE_NULL} for the one of the layout
+     */
+    private static void show(Context context, String dialogTitle, String dialogHint, String defaultValue, OnChange onChange, Runnable onDismiss, int inputType) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppDialog);
         LayoutInflater inflater = LayoutInflater.from(context);
         View contentView = inflater.inflate(R.layout.simple_edit_dialog, null);
 
         EditText editField = contentView.findViewById(R.id.simple_edit_value);
-        if (isPassword) {
-            editField.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        if (inputType != InputType.TYPE_NULL) {
+            editField.setInputType(inputType);
         }
         KeyHelpers.fixShowKeyboard(editField);
 

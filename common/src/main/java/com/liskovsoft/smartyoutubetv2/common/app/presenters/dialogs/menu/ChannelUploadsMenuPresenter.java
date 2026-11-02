@@ -14,7 +14,11 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.ChannelPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.ChannelUploadsPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.VideoMenuPresenter.VideoMenuCallback;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.providers.ContextMenuManager;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.providers.ContextMenuProvider;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.providers.channelgroup.ChannelGroupMenuProvider;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
+import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.youtubeapi.service.YouTubeServiceManager;
 import io.reactivex.disposables.Disposable;
 
@@ -78,6 +82,7 @@ public class ChannelUploadsMenuPresenter extends BaseMenuPresenter {
         appendOpenChannelButton();
         appendUnsubscribeButton();
         appendMarkAsWatched();
+        appendSubscriptionGroupButton();
         appendTogglePinVideoToSidebarButton();
         appendToggleHomeRowButton();
 
@@ -156,6 +161,22 @@ public class ChannelUploadsMenuPresenter extends BaseMenuPresenter {
                     mServiceManager.loadChannelUploads(mVideo, (group) -> {});
                     MessageHelpers.showMessage(getContext(), R.string.channel_marked_as_watched);
                 }));
+    }
+
+    /**
+     * Add/Remove from subscription group, as in the menu of a video. On while it's on in that menu.
+     */
+    private void appendSubscriptionGroupButton() {
+        if (mVideo == null || mVideo.title == null) {
+            return;
+        }
+
+        for (ContextMenuProvider provider : new ContextMenuManager(getContext()).getProviders()) {
+            if (provider instanceof ChannelGroupMenuProvider && MainUIData.instance(getContext()).isMenuItemEnabled(getMenu(), provider.getId())) {
+                mDialogPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(provider.getTitleResId()),
+                        optionItem -> ((ChannelGroupMenuProvider) provider).showGroupDialogForChannelsCard(mVideo)));
+            }
+        }
     }
 
     private void unsubscribe(String channelId) {

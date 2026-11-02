@@ -145,6 +145,52 @@ public class AiSListFilterDataTest {
         assertTrue(data.isSetToHide());
     }
 
+    /**
+     * The subscription groups section came after the values saved by index: it moves none of them
+     */
+    @Test
+    public void eachSectionOfEachListHasItsOwnSwitch() {
+        AiSListFilterData data = getData();
+        int[] lists = {AiSListFilterData.LIST_BLOCKLIST, AiSListFilterData.LIST_WARNLIST};
+
+        for (int list : lists) {
+            for (int section = 0; section < AiSListFilterData.SECTION_COUNT; section++) {
+                data.setHideEnabled(list, section, true);
+
+                for (int otherList : lists) {
+                    for (int other = 0; other < AiSListFilterData.SECTION_COUNT; other++) {
+                        assertEquals(otherList == list && other == section, data.isSectionChecked(otherList, other));
+                    }
+                }
+
+                assertFalse(data.isEverythingEnabled(AiSListFilterData.LIST_BLOCKLIST));
+                assertFalse(data.isEverythingEnabled(AiSListFilterData.LIST_WARNLIST));
+                assertFalse(data.isQuickToggleEnabled());
+                assertTrue(data.isQuickToggleHiding());
+                assertFalse(data.isBlockOnReportEnabled());
+
+                data.setHideEnabled(list, section, false);
+            }
+        }
+    }
+
+    @Test
+    public void subscriptionGroupsSectionIsMarkOnly() {
+        AiSListFilterData data = getData();
+
+        assertTrue(AiSListFilterData.isMarkOnly(AiSListFilterData.SECTION_CHANNEL_GROUPS));
+
+        data.setHideEnabled(AiSListFilterData.LIST_BLOCKLIST, AiSListFilterData.SECTION_CHANNEL_GROUPS, true);
+        assertFalse(data.isSetToHide());
+        assertTrue(data.isHideEnabled(AiSListFilterData.LIST_BLOCKLIST, AiSListFilterData.SECTION_CHANNEL_GROUPS));
+
+        ShadowLooper.shadowMainLooper().idle(); // saved right away
+        AiSListFilterData.resetInstanceForTesting();
+
+        assertTrue(getData().isSectionChecked(AiSListFilterData.LIST_BLOCKLIST, AiSListFilterData.SECTION_CHANNEL_GROUPS));
+        assertFalse(getData().isSectionChecked(AiSListFilterData.LIST_WARNLIST, AiSListFilterData.SECTION_CHANNEL_GROUPS));
+    }
+
     private static void clearSaved() {
         TestAccounts.clearSaved(getPrefs(), AiSListFilterData.class.getSimpleName());
         AiSListFilterData.resetInstanceForTesting();

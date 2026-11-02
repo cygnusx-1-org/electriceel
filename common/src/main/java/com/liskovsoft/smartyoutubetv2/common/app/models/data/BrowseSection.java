@@ -113,6 +113,13 @@ public class BrowseSection {
     }
 
     /**
+     * The section of a subscription group pinned to the sidebar (see ChannelGroupMenuProvider). Its id is a hash, as the other pinned ones.
+     */
+    public boolean isChannelGroup() {
+        return mData instanceof Video && ((Video) mData).channelGroupId != null;
+    }
+
+    /**
      * Check reserved ids range for default (built-in) sections
      */
     public boolean isDefault() {

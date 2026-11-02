@@ -8,7 +8,7 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.common.DataSaverBase;
 /**
  * The areas the channels of the subscription groups are hidden from, a channel of any group (see ChannelGroupFilter):
  * YouTube's rows of Home, the Subscriptions row added to Home (see HomeRowsData) and the sections of the feeds. None by default.<br/>
- * Each account has its own values.
+ * And whether the watched videos are hidden from the groups (see VideoGroup). Each account has its own values.
  */
 public class ChannelGroupFilterData extends DataSaverBase {
     /**
@@ -18,6 +18,7 @@ public class ChannelGroupFilterData extends DataSaverBase {
     public static final int AREA_HOME_SUBSCRIPTIONS_ROW = 30;
     // Storage layout. Don't change: the values are saved by index.
     private static final int AREAS_INDEX = 0; // a bit per area, by the section id or AREA_HOME_SUBSCRIPTIONS_ROW
+    private static final int HIDE_WATCHED_INDEX = 1;
     private static final int DEFAULT_AREAS = 0;
     private static ChannelGroupFilterData sInstance;
 
@@ -61,7 +62,7 @@ public class ChannelGroupFilterData extends DataSaverBase {
      * The videos of the channels of the groups are left out of the area (see isSupportedArea)
      */
     public boolean isHidden(int area) {
-        return isSupportedArea(area) && (getInt(AREAS_INDEX, DEFAULT_AREAS) & (1 << area)) != 0;
+        return isSupportedArea(area) && (getAreas() & (1 << area)) != 0;
     }
 
     public void setHidden(int area, boolean hide) {
@@ -69,8 +70,26 @@ public class ChannelGroupFilterData extends DataSaverBase {
             return;
         }
 
-        int areas = getInt(AREAS_INDEX, DEFAULT_AREAS);
+        int areas = getAreas();
         setInt(AREAS_INDEX, hide ? areas | (1 << area) : areas & ~(1 << area));
+    }
+
+    private int getAreas() {
+        // A value never set is saved as "null" when a later one is set, and comes back as -1 (a real value has no bit 31)
+        int areas = getInt(AREAS_INDEX, DEFAULT_AREAS);
+
+        return areas == -1 ? DEFAULT_AREAS : areas;
+    }
+
+    /**
+     * The watched videos are left out of the subscription groups: their sections and their rows of Home. Off by default.
+     */
+    public boolean isWatchedHidden() {
+        return getBoolean(HIDE_WATCHED_INDEX);
+    }
+
+    public void setWatchedHidden(boolean hide) {
+        setBoolean(HIDE_WATCHED_INDEX, hide);
     }
 
     /**

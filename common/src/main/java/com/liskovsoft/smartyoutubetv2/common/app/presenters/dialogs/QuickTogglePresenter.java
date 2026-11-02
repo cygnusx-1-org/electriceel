@@ -6,6 +6,7 @@ import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.smartyoutubetv2.common.R;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.BrowseSection;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.VideoGroup;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.BrowsePresenter;
@@ -229,7 +230,7 @@ public class QuickTogglePresenter extends BasePresenter<Void> {
         }
 
         for (int toggle : changed) {
-            if (appliesTo(toggle, section.getId())) {
+            if (appliesTo(toggle, section)) {
                 presenter.refresh(false);
                 return;
             }
@@ -239,7 +240,9 @@ public class QuickTogglePresenter extends BasePresenter<Void> {
     /**
      * The filter of the toggle changes what the section shows
      */
-    private boolean appliesTo(int toggle, int sectionId) {
+    private boolean appliesTo(int toggle, BrowseSection section) {
+        int sectionId = section.getId();
+
         switch (toggle) {
             case TOGGLE_OLD_VIDEOS:
                 return OldVideosData.instance(getContext()).isSectionEnabled(sectionId);
@@ -248,7 +251,8 @@ public class QuickTogglePresenter extends BasePresenter<Void> {
             case TOGGLE_AI:
                 return AiSListManager.instance(getContext()).isSetToHide(AiSListManager.getSection(sectionId, true));
             default:
-                return getFilterData(toggle).isSetToHide(sectionId);
+                // The sections of the subscription groups are one (see SectionFilterData.SECTION_CHANNEL_GROUPS)
+                return getFilterData(toggle).isSetToHide(VideoGroup.getFilterSectionId(section, -1));
         }
     }
 

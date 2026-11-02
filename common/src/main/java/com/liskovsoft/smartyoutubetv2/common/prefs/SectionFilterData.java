@@ -15,6 +15,11 @@ public abstract class SectionFilterData extends DataSaverBase {
     public static final int MODE_SHOW = 0;
     public static final int MODE_MARK = 1;
     public static final int MODE_HIDE = 2;
+    /**
+     * The sections of the subscription groups, all of them: their ids are hashes (see BrowseSection.isChannelGroup).
+     * Not a section id (MediaGroup.TYPE_*), they're below it. Saved as a bit, as they are: don't change it.
+     */
+    public static final int SECTION_CHANNEL_GROUPS = 29;
     private static final int DEFAULT_MODE = MODE_MARK;
     // Storage layout. Don't change: the values are saved by index.
     private static final int MODE_INDEX = 0;
@@ -22,7 +27,7 @@ public abstract class SectionFilterData extends DataSaverBase {
     private static final int MARK_COLOR_INDEX = 2;
     private static final int QUICK_TOGGLE_INDEX = 3;
     private static final int QUICK_TOGGLE_SHOWING_INDEX = 4; // saved the other way round: a value never set comes back as false
-    private static final int MAX_SECTION_ID = 30; // the bits of an int. Pinned items use hash ids, they're never filtered.
+    private static final int MAX_SECTION_ID = 30; // the bits of an int. Pinned items use hash ids: only the groups are filtered (SECTION_CHANNEL_GROUPS).
     private static final int DEFAULT_SECTIONS = Integer.MAX_VALUE; // every section (bits 0-30), the ones added later too
 
     protected SectionFilterData(Context context) {

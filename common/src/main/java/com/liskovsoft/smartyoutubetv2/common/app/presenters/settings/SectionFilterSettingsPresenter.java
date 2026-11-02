@@ -156,6 +156,7 @@ public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
 
     /**
      * The same sections as Hide videos older than, then Search and Channel pages for a filter of videos found there too.
+     * Such a filter has the sections of the subscription groups too, after Subscriptions.
      * All is first: it checks or unchecks the others, and it's checked while they all are.
      */
     private void appendSectionsCategory(AppDialogPresenter presenter) {
@@ -164,6 +165,10 @@ public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
         for (Entry<Integer, Integer> section : mSidebarService.getDefaultSections().entrySet()) {
             if (mData.isFilteredSection(section.getValue())) {
                 titledSections.add(new int[] {section.getKey(), section.getValue()});
+            }
+
+            if (mHasPageSections && section.getValue() == MediaGroup.TYPE_SUBSCRIPTIONS) {
+                titledSections.add(new int[] {R.string.subscription_groups, SectionFilterData.SECTION_CHANNEL_GROUPS});
             }
         }
 

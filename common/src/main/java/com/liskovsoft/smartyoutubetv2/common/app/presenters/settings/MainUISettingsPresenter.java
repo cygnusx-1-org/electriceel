@@ -372,7 +372,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
     }
 
     /**
-     * Under its label, after a line when there's a section above it
+     * Under its label, after a line when there's a section above it (also the subscription groups of Set-up sections)
      */
     private void appendHomeRowsSection(List<OptionItem> options, int labelResId, List<OptionItem> sectionOptions) {
         if (sectionOptions.isEmpty()) {
@@ -712,6 +712,9 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.showDialog(getContext().getString(titleResId), mOnFinish);
     }
 
+    /**
+     * The sections, then the subscription groups: unchecked, a group is out of the sidebar but kept
+     */
     private void appendEnabledSections(AppDialogPresenter settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
@@ -729,6 +732,25 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
                 BrowsePresenter.instance(getContext()).enableSection(sectionId, optionItem.isSelected());
             }, mSidebarService.isSectionPinned(sectionId)));
         }
+
+        List<OptionItem> groupOptions = new ArrayList<>();
+
+        for (ItemGroup group : ChannelGroupServiceWrapper.instance(getContext()).getChannelGroups()) {
+            if (group == null || group.getId() == null) {
+                continue;
+            }
+
+            Video item = Video.from(group);
+            groupOptions.add(UiOptionItem.from(group.getTitle(), optionItem -> {
+                if (optionItem.isSelected()) {
+                    BrowsePresenter.instance(getContext()).pinItem(item);
+                } else {
+                    BrowsePresenter.instance(getContext()).unpinItem(item);
+                }
+            }, mSidebarService.isPinned(item)));
+        }
+
+        appendHomeRowsSection(options, R.string.subscription_groups, groupOptions);
 
         settingsPresenter.appendCheckedCategory(getContext().getString(R.string.side_panel_sections), options);
     }

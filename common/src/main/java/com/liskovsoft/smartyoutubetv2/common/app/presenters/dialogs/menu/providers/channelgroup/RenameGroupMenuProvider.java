@@ -29,7 +29,7 @@ public class RenameGroupMenuProvider extends ContextMenuProvider {
     @Override
     public void onClicked(Video item, VideoMenuCallback callback) {
         AppDialogPresenter.instance(getContext()).closeDialog();
-        SimpleEditDialog.show(
+        SimpleEditDialog.showName(
                 getContext(),
                 getContext().getString(R.string.rename_group),
                 item.title,

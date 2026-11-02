@@ -77,7 +77,7 @@ public class HiddenVideoResolver {
             }
 
             // The sections VideoGroup finds for the group
-            int aiSListSection = AiSListManager.getSection(mediaGroup.getType(), section != null, mediaGroup.getChannelId());
+            int aiSListSection = VideoGroup.getAiSListSection(mediaGroup.getType(), section, mediaGroup.getChannelId());
             int filterSectionId = VideoGroup.getFilterSectionId(section, aiSListSection);
             boolean isAiSListEnabled = aiSListManager.isSectionEnabled(aiSListSection);
             boolean isCollaborationEnabled = filterSectionId != -1 && collaborationManager.isEnabled(filterSectionId);

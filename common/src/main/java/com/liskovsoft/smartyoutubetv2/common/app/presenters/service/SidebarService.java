@@ -150,6 +150,13 @@ public class SidebarService implements ProfileChangeListener {
     }
 
     /**
+     * The pinned item is in the sidebar (e.g. a subscription group, see Video.from(ItemGroup))
+     */
+    public boolean isPinned(Video item) {
+        return mPinnedItems.contains(item);
+    }
+
+    /**
      * Contains sections and pinned items!
      */
     public boolean isSectionPinned(int sectionId) {

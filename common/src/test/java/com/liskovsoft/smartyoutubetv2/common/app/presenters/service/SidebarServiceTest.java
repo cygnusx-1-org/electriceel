@@ -18,6 +18,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 28)
@@ -99,6 +101,28 @@ public class SidebarServiceTest {
     private static Video section(int sectionId) {
         Video item = new Video();
         item.sectionId = sectionId;
+        return item;
+    }
+
+    /**
+     * A subscription group is known by its id, whatever its title (it can be renamed): out of the sidebar once unpinned
+     */
+    @Test
+    public void groupIsPinnedByItsId() {
+        getService().addPinnedItem(group("group1", "Climbing"));
+
+        assertTrue(getService().isPinned(group("group1", "Bouldering")));
+        assertFalse(getService().isPinned(group("group2", "Climbing")));
+
+        getService().removePinnedItem(group("group1", "Climbing"));
+
+        assertFalse(getService().isPinned(group("group1", "Climbing")));
+    }
+
+    private static Video group(String channelGroupId, String title) {
+        Video item = new Video();
+        item.channelGroupId = channelGroupId;
+        item.title = title;
         return item;
     }
 

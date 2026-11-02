@@ -20,13 +20,15 @@ public class AiSListFilterData extends DataSaverBase {
     public static final int SECTION_HISTORY = 5;
     public static final int SECTION_PLAYLISTS = 6;
     public static final int SECTION_WATCH_LATER = 7;
-    public static final int SECTION_COUNT = 8;
+    public static final int SECTION_CHANNEL_GROUPS = 8; // the sidebar sections of the subscription groups
+    public static final int SECTION_COUNT = 9;
     // Storage layout. Don't change: the values are saved by index.
     private static final int FIRST_SECTION_COUNT = 5; // sections 0-4 of both lists
+    private static final int MORE_SECTION_COUNT = 3; // sections 5-7 of both lists
     private static final int MARK_INDEX = 2 * FIRST_SECTION_COUNT; // the blocklist (was one switch for both lists)
     private static final int MARK_COLOR_INDEX = MARK_INDEX + 1;
-    private static final int MORE_SECTIONS_INDEX = MARK_COLOR_INDEX + 1; // sections 5+ of both lists
-    private static final int EVERYTHING_INDEX = MORE_SECTIONS_INDEX + 2 * (SECTION_COUNT - FIRST_SECTION_COUNT); // one per list
+    private static final int MORE_SECTIONS_INDEX = MARK_COLOR_INDEX + 1; // sections 5-7 of both lists
+    private static final int EVERYTHING_INDEX = MORE_SECTIONS_INDEX + 2 * MORE_SECTION_COUNT; // one per list
     private static final int WARNLIST_MARK_COLOR_INDEX = EVERYTHING_INDEX + 2; // the blocklist uses MARK_COLOR_INDEX
     private static final int WARNLIST_MARK_INDEX = WARNLIST_MARK_COLOR_INDEX + 1; // the blocklist uses MARK_INDEX
     private static final int MARK_MODE_INDEX = WARNLIST_MARK_INDEX + 1; // one per list, replaces the mark switches
@@ -34,6 +36,7 @@ public class AiSListFilterData extends DataSaverBase {
     private static final int BLOCK_ON_REPORT_INDEX = REPORT_AS_INDEX + 1;
     private static final int QUICK_TOGGLE_INDEX = BLOCK_ON_REPORT_INDEX + 1; // one for both lists
     private static final int QUICK_TOGGLE_SHOWING_INDEX = QUICK_TOGGLE_INDEX + 1; // saved the other way round: a value never set comes back as false
+    private static final int CHANNEL_GROUPS_INDEX = QUICK_TOGGLE_SHOWING_INDEX + 1; // section 8 of both lists
     public static final int MARK_MODE_OFF = 0; // hide, mark only sections are left alone
     public static final int MARK_MODE_MARK_ONLY_SECTIONS = 1; // hide, mark in the mark only sections
     public static final int MARK_MODE_ALL = 2; // mark everywhere, never hide
@@ -242,7 +245,11 @@ public class AiSListFilterData extends DataSaverBase {
             return list * FIRST_SECTION_COUNT + section;
         }
 
-        return MORE_SECTIONS_INDEX + list * (SECTION_COUNT - FIRST_SECTION_COUNT) + section - FIRST_SECTION_COUNT;
+        if (section == SECTION_CHANNEL_GROUPS) {
+            return CHANNEL_GROUPS_INDEX + list;
+        }
+
+        return MORE_SECTIONS_INDEX + list * MORE_SECTION_COUNT + section - FIRST_SECTION_COUNT;
     }
 
     /**

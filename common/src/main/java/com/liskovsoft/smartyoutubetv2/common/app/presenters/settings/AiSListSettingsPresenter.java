@@ -23,7 +23,8 @@ public class AiSListSettingsPresenter extends BasePresenter<Void> {
             {AiSListFilterData.SECTION_CHANNELS, R.string.header_channels},
             {AiSListFilterData.SECTION_HISTORY, R.string.header_history},
             {AiSListFilterData.SECTION_PLAYLISTS, R.string.header_playlists},
-            {AiSListFilterData.SECTION_WATCH_LATER, R.string.aislist_watch_later}
+            {AiSListFilterData.SECTION_WATCH_LATER, R.string.aislist_watch_later},
+            {AiSListFilterData.SECTION_CHANNEL_GROUPS, R.string.subscription_groups}
     };
     private static final int[][] MARK_MODES = {
             {R.string.aislist_mark_off, AiSListFilterData.MARK_MODE_OFF},

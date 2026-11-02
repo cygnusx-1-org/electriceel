@@ -15,6 +15,7 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.ChannelGroupFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.DuplicatesData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.HideContentData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.OpenedVideosData;
 import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
 
 import java.util.ArrayList;
@@ -129,6 +130,15 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
         options.add(UiOptionItem.from(getContext().getString(R.string.hide_watched_from_notifications),
                 option -> mGeneralData.setHideWatchedFromNotificationsEnabled(option.isSelected()),
                 mGeneralData.isHideWatchedFromNotificationsEnabled()));
+        ChannelGroupFilterData channelGroups = ChannelGroupFilterData.instance(getContext());
+        options.add(UiOptionItem.from(getContext().getString(R.string.hide_watched_from_subscription_groups),
+                option -> channelGroups.setWatchedHidden(option.isSelected()),
+                channelGroups.isWatchedHidden()));
+        OpenedVideosData openedVideos = OpenedVideosData.instance(getContext());
+        options.add(UiOptionItem.from(getContext().getString(R.string.hide_opened_videos),
+                getContext().getString(R.string.hide_opened_videos_desc),
+                option -> openedVideos.setHidden(option.isSelected()),
+                openedVideos.isHidden()));
 
         showSubmenu(R.string.hide_content_watched, options);
     }

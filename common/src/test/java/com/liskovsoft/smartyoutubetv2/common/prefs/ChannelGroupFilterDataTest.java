@@ -106,6 +106,37 @@ public class ChannelGroupFilterDataTest {
     }
 
     @Test
+    public void watchedVideosAreShownByDefault() {
+        assertFalse(getData().isWatchedHidden());
+    }
+
+    /**
+     * The areas were never set: they're saved as "null" and come back as none
+     */
+    @Test
+    public void hidingWatchedVideosSurvivesRestartAndHidesNoArea() {
+        ChannelGroupFilterData data = getData();
+
+        data.setWatchedHidden(true);
+        data.persistNow();
+        ShadowLooper.shadowMainLooper().idle();
+        ChannelGroupFilterData.resetInstanceForTesting();
+
+        ChannelGroupFilterData restored = getData();
+
+        assertTrue(restored.isWatchedHidden());
+
+        for (int area : SUPPORTED_AREAS) {
+            assertFalse(restored.isHidden(area));
+        }
+
+        restored.setHidden(MediaGroup.TYPE_GAMING, true);
+
+        assertTrue(restored.isHidden(MediaGroup.TYPE_GAMING));
+        assertFalse(restored.isHidden(MediaGroup.TYPE_HOME));
+    }
+
+    @Test
     public void eachAccountHasItsOwnValues() {
         AppPrefs prefs = getPrefs();
         ChannelGroupFilterData data = getData();

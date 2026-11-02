@@ -27,6 +27,7 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.ExploreTopicsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.FilterExclusionData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.HomeRowsData.Row;
 import com.liskovsoft.smartyoutubetv2.common.prefs.KeywordFilterData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.OpenedVideosData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.SectionFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.ShowsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.StreamedData;
@@ -55,6 +56,7 @@ public class VideoGroup {
      */
     public static final int ACTION_PREPEND = 5;
     private static final String TAG = VideoGroup.class.getSimpleName();
+    private static final float WATCHED_PERCENT = 80; // as Hide watched videos from Subscriptions (see MediaGroupOptions of MediaServiceCore)
     private int mId;
     private String mTitle;
     private List<Video> mVideos;
@@ -544,7 +546,7 @@ public class VideoGroup {
         if (isChannelBlocked(video) || isNotInterested(video) || isAiListed(video) || isHiddenCategory(video) || isOld(video) || isHiddenCollaboration(video)
                 || isHiddenWatchLater(video) || isHiddenShow(video) || isHiddenStreamed(video) || isHiddenTopChannel(video) || isHiddenExploreTopic(video)
                 || hasHiddenKeyword(video) || isWatchedSuggestion(video) || isUnsubscribedChannel(video) || isHiddenChannelGroupChannel(video)
-                || isDuplicate(video)) {
+                || isWatchedInChannelGroup(video) || isHiddenOpened(video) || isDuplicate(video)) {
             if (video.videoId != null) {
                 mHiddenVideoCount++;
             }
@@ -715,6 +717,85 @@ public class VideoGroup {
         }
 
         return getSection().getId();
+    }
+
+    /**
+     * Watched, in the section of a subscription group or its row of Home, while the watched videos are hidden from the groups.
+     * Watched as YouTube's card has it or as the app played it (see VideoStateService). A live stream is left alone.
+     */
+    private boolean isWatchedInChannelGroup(Video video) {
+        // No context before the app is initialized (GlobalPreferences)
+        if (video.isChapter || video.videoId == null || video.isLive || !isChannelGroup() || GlobalPreferences.context() == null
+                || !ChannelGroupFilterData.instance(GlobalPreferences.context()).isWatchedHidden()) {
+            return false;
+        }
+
+        return video.percentWatched > WATCHED_PERCENT || getPercentWatchedInApp(video) > WATCHED_PERCENT;
+    }
+
+    /**
+     * Has progress on it, however little, as YouTube's card has it or as the app played it (see VideoStateService), while the
+     * opened videos are hidden (see OpenedVideosData). Only in the feeds (see isOpenedVideoSection). A live stream is left alone.
+     */
+    private boolean isHiddenOpened(Video video) {
+        // No context before the app is initialized (GlobalPreferences)
+        if (video.isChapter || video.videoId == null || video.isLive || GlobalPreferences.context() == null
+                || !OpenedVideosData.instance(GlobalPreferences.context()).isHidden() || !isOpenedVideoSection()) {
+            return false;
+        }
+
+        State state = getStateInApp(video);
+
+        return video.percentWatched > 0 || (state != null && state.positionMs > 0);
+    }
+
+    /**
+     * The feeds: Home and the sections like it, Subscriptions, Channels, the subscription groups and Notifications, then search
+     * and the channel pages. Not History, Watch later, the playlists, My videos or the player's suggestions.
+     */
+    private boolean isOpenedVideoSection() {
+        switch (getAiSListSection()) {
+            case AiSListFilterData.SECTION_HOME:
+            case AiSListFilterData.SECTION_SEARCH:
+            case AiSListFilterData.SECTION_SUBSCRIPTIONS:
+            case AiSListFilterData.SECTION_CHANNELS:
+            case AiSListFilterData.SECTION_CHANNEL_GROUPS:
+            case AiSListManager.SECTION_CHANNEL_PAGE:
+                return true;
+            default:
+                return getType() == MediaGroup.TYPE_NOTIFICATIONS;
+        }
+    }
+
+    /**
+     * The section of a subscription group (see BrowseSection.isChannelGroup) or its row added to Home
+     */
+    private boolean isChannelGroup() {
+        return mAddedHomeRowType == Row.TYPE_CHANNEL_GROUP || (getSection() != null && getSection().isChannelGroup());
+    }
+
+    /**
+     * As the card gets it below (see Video.sync), or -1 when the app hasn't played it
+     */
+    private static float getPercentWatchedInApp(Video video) {
+        State state = getStateInApp(video);
+
+        if (state == null) {
+            return -1;
+        }
+
+        long durationMs = state.durationMs != -1 ? state.durationMs : video.getDurationMs();
+
+        return durationMs > 0 ? state.positionMs / (durationMs / 100f) : -1;
+    }
+
+    /**
+     * Where the app left the video when it played it, or null
+     */
+    private static State getStateInApp(Video video) {
+        VideoStateService stateService = VideoStateService.instance(null);
+
+        return stateService != null ? stateService.getByVideoId(video.videoId) : null;
     }
 
     /**
@@ -983,7 +1064,24 @@ public class VideoGroup {
     }
 
     public int getAiSListSection() {
-        return AiSListManager.getSection(getType(), getSection() != null, getMediaGroup() != null ? getMediaGroup().getChannelId() : null);
+        return getAiSListSection(getType(), getSection(), getMediaGroup() != null ? getMediaGroup().getChannelId() : null);
+    }
+
+    /**
+     * The section AiSListManager knows a group by. The feed of a subscription group has no type: in its own section it's one of
+     * its own, as a row added to Home (see HomeRowsData) it's Home's.
+     * @param section the sidebar section of the group or null (e.g. search, a channel)
+     */
+    public static int getAiSListSection(int groupType, BrowseSection section, String groupChannelId) {
+        if (section != null && section.isChannelGroup()) {
+            return AiSListFilterData.SECTION_CHANNEL_GROUPS;
+        }
+
+        if (groupType == MediaGroup.TYPE_UNDEFINED && section != null && section.getId() == MediaGroup.TYPE_HOME) {
+            return AiSListFilterData.SECTION_HOME;
+        }
+
+        return AiSListManager.getSection(groupType, section != null, groupChannelId);
     }
 
     /**
@@ -995,13 +1093,13 @@ public class VideoGroup {
 
     /**
      * The section id the Collaborations, Watch later and Shows settings know a group by (see SectionFilterData):
-     * its sidebar section, MediaGroup.TYPE_SEARCH in search or MediaGroup.TYPE_CHANNEL on a channel page, otherwise -1
-     * (e.g. a playlist page or the player's suggestions)
-     * @param aiSListSection the section AiSListManager finds for the group
+     * its sidebar section (SectionFilterData.SECTION_CHANNEL_GROUPS for the one of a subscription group), MediaGroup.TYPE_SEARCH
+     * in search or MediaGroup.TYPE_CHANNEL on a channel page, otherwise -1 (e.g. a playlist page or the player's suggestions)
+     * @param aiSListSection the section AiSListManager finds for the group, only needed without a sidebar section
      */
     public static int getFilterSectionId(BrowseSection section, int aiSListSection) {
         if (section != null) {
-            return section.getId();
+            return section.isChannelGroup() ? SectionFilterData.SECTION_CHANNEL_GROUPS : section.getId();
         }
 
         if (aiSListSection == AiSListFilterData.SECTION_SEARCH) {
