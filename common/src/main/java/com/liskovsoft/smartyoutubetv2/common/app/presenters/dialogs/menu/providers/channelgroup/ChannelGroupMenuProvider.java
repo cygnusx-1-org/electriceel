@@ -137,9 +137,9 @@ public class ChannelGroupMenuProvider extends ContextMenuProvider {
 
         List<OptionItem> options = new ArrayList<>();
 
-        // Create new group or enter url
+        // Create new group or enter url. A button, the groups below it are checked.
         String editDialogTitle = getContext().getString(R.string.new_subscriptions_group);
-        options.add(UiOptionItem.from(editDialogTitle, optionItem -> {
+        OptionItem newGroup = UiOptionItem.from(editDialogTitle, optionItem -> {
             dialogPresenter.closeDialog();
             SimpleEditDialog.showName(getContext(), editDialogTitle,
                     null,
@@ -165,7 +165,9 @@ public class ChannelGroupMenuProvider extends ContextMenuProvider {
                         }
                         return true;
                     });
-        }, false));
+        });
+        newGroup.setMenu(true);
+        options.add(newGroup);
 
         for (ItemGroup group : groups) {
             options.add(UiOptionItem.from(group.getTitle(), optionItem -> {
