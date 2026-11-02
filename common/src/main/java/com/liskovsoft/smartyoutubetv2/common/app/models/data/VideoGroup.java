@@ -9,6 +9,7 @@ import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.service.VideoStateService;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.service.VideoStateService.State;
 import com.liskovsoft.smartyoutubetv2.common.misc.AiSListManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.ChannelGroupFilter;
 import com.liskovsoft.smartyoutubetv2.common.misc.ChildModeManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.DuplicateFilter;
 import com.liskovsoft.smartyoutubetv2.common.misc.KeywordFilter;
@@ -21,8 +22,10 @@ import com.liskovsoft.smartyoutubetv2.common.misc.StreamedManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.WatchLaterManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AiSListFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.ChannelGroupFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.ExploreTopicsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.FilterExclusionData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.HomeRowsData.Row;
 import com.liskovsoft.smartyoutubetv2.common.prefs.KeywordFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.SectionFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.ShowsData;
@@ -65,6 +68,7 @@ public class VideoGroup {
     private DuplicateFilter mDuplicateFilter; // the videos of the rows above, also for the pages added later
     private boolean mIsChannelRow; // every item is a channel (see MediaGroup.isChannelRow), kept by the pages added later
     private boolean mIsSearchTopicRow; // every item is a topic that opens a search (see MediaGroup.isSearchTopicRow), kept by the pages added later
+    private int mAddedHomeRowType = -1; // a row added to Home (see HomeRowsData.Row.type), kept by the pages added later
     public boolean isQueue;
 
     public static VideoGroup from(BrowseSection section) {
@@ -129,6 +133,15 @@ public class VideoGroup {
      * @param duplicateFilter the videos of the rows above, left out of the row and of its next pages, or null to keep them
      */
     public static VideoGroup from(MediaGroup mediaGroup, BrowseSection section, int groupPosition, DuplicateFilter duplicateFilter) {
+        return from(mediaGroup, section, groupPosition, duplicateFilter, null);
+    }
+
+    /**
+     * @param duplicateFilter the videos of the rows above, left out of the row and of its next pages, or null to keep them
+     * @param addedHomeRow the row of Home it is when it's one added to Home (see HomeRowsData), or null
+     */
+    public static VideoGroup from(MediaGroup mediaGroup, BrowseSection section, int groupPosition, DuplicateFilter duplicateFilter,
+                                  Row addedHomeRow) {
         VideoGroup videoGroup = new VideoGroup();
         videoGroup.mSection = section;
         videoGroup.mPosition = groupPosition;
@@ -148,6 +161,7 @@ public class VideoGroup {
         // Before the items: they're marked or hidden by it
         videoGroup.mIsChannelRow = mediaGroup.isChannelRow();
         videoGroup.mIsSearchTopicRow = mediaGroup.isSearchTopicRow();
+        videoGroup.mAddedHomeRowType = addedHomeRow != null ? addedHomeRow.type : -1;
         // E.g. the watched videos of Hide watched videos from Home
         videoGroup.mHiddenVideoCount = mediaGroup.getFilteredVideoCount();
 
@@ -529,7 +543,8 @@ public class VideoGroup {
 
         if (isChannelBlocked(video) || isNotInterested(video) || isAiListed(video) || isHiddenCategory(video) || isOld(video) || isHiddenCollaboration(video)
                 || isHiddenWatchLater(video) || isHiddenShow(video) || isHiddenStreamed(video) || isHiddenTopChannel(video) || isHiddenExploreTopic(video)
-                || hasHiddenKeyword(video) || isWatchedSuggestion(video) || isUnsubscribedChannel(video) || isDuplicate(video)) {
+                || hasHiddenKeyword(video) || isWatchedSuggestion(video) || isUnsubscribedChannel(video) || isHiddenChannelGroupChannel(video)
+                || isDuplicate(video)) {
             if (video.videoId != null) {
                 mHiddenVideoCount++;
             }
@@ -670,6 +685,36 @@ public class VideoGroup {
         }
 
         ShortsDateManager.instance(GlobalPreferences.context()).addDate(video);
+    }
+
+    /**
+     * A channel in a subscription group, in the areas picked for them (see ChannelGroupFilter). A channel card is left alone.
+     */
+    private boolean isHiddenChannelGroupChannel(Video video) {
+        int area = getChannelGroupFilterArea();
+
+        // No context before the app is initialized (GlobalPreferences)
+        if (video.isChapter || video.videoId == null || area == -1 || GlobalPreferences.context() == null) {
+            return false;
+        }
+
+        return ChannelGroupFilter.isHidden(GlobalPreferences.context(), area, video.channelId, video.getAuthor());
+    }
+
+    /**
+     * Where the group is for ChannelGroupFilterData: the Subscriptions row added to Home, otherwise the section.
+     * None for the other rows added to Home (e.g. the row of a group would hide its own channels) or out of the sections.
+     */
+    private int getChannelGroupFilterArea() {
+        if (mAddedHomeRowType == Row.TYPE_SUBSCRIPTIONS) {
+            return ChannelGroupFilterData.AREA_HOME_SUBSCRIPTIONS_ROW;
+        }
+
+        if (mAddedHomeRowType != -1 || getSection() == null) {
+            return -1;
+        }
+
+        return getSection().getId();
     }
 
     /**

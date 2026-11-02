@@ -11,6 +11,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.BrowsePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.SidebarService;
 import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
+import com.liskovsoft.smartyoutubetv2.common.prefs.ChannelGroupFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.DuplicatesData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.HideContentData;
@@ -52,6 +53,7 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
         options.add(createMenuItem(R.string.hide_content_streams, this::showStreamsMenu));
         options.add(createMenuItem(R.string.hide_content_upcoming, this::showUpcomingMenu));
         options.add(createMenuItem(R.string.hide_content_duplicates, this::showDuplicatesMenu));
+        options.add(createMenuItem(R.string.subscription_groups, this::showChannelGroupsMenu));
         options.add(createMenuItem(R.string.hide_old_videos, () -> OldVideosSettingsPresenter.instance(getContext()).show()));
         options.add(createMenuItem(R.string.keyword_filtering, () -> KeywordFilterSettingsPresenter.instance(getContext()).show()));
 
@@ -173,6 +175,42 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
         options.add(note);
 
         showSubmenu(R.string.hide_content_duplicates, options);
+    }
+
+    /**
+     * The areas the channels of the subscription groups are hidden from (see ChannelGroupFilterData), in the sidebar's order,
+     * the Subscriptions row of Home after Home
+     */
+    private void showChannelGroupsMenu() {
+        ChannelGroupFilterData data = ChannelGroupFilterData.instance(getContext());
+        List<OptionItem> options = new ArrayList<>();
+
+        for (Entry<Integer, Integer> section : SidebarService.instance(getContext()).getDefaultSections().entrySet()) {
+            int sectionId = section.getValue();
+
+            if (!ChannelGroupFilterData.isSupportedArea(sectionId)) {
+                continue;
+            }
+
+            options.add(createChannelGroupAreaItem(data, section.getKey(), sectionId));
+
+            if (sectionId == MediaGroup.TYPE_HOME) {
+                options.add(createChannelGroupAreaItem(data, R.string.hide_content_channel_groups_subscriptions_row,
+                        ChannelGroupFilterData.AREA_HOME_SUBSCRIPTIONS_ROW));
+            }
+        }
+
+        OptionItem note = UiOptionItem.from(getContext().getString(R.string.hide_content_channel_groups_desc));
+        note.setNote(true);
+        options.add(note);
+
+        showSubmenu(R.string.subscription_groups, options);
+    }
+
+    private OptionItem createChannelGroupAreaItem(ChannelGroupFilterData data, int titleResId, int area) {
+        return UiOptionItem.from(getContext().getString(titleResId),
+                option -> data.setHidden(area, option.isSelected()),
+                data.isHidden(area));
     }
 
     /**

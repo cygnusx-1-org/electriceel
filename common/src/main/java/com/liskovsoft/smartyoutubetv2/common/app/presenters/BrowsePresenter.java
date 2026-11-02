@@ -994,10 +994,11 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
                 continue;
             }
 
-            VideoGroup videoGroup = VideoGroup.from(mediaGroup, section, groupIndex.get() + 1, duplicateFilter);
+            // Before its videos: a subscription group may hide its channels from the Subscriptions row (see ChannelGroupFilter)
+            Row addedRow = mAddedHomeRows.get(mediaGroup);
+            VideoGroup videoGroup = VideoGroup.from(mediaGroup, section, groupIndex.get() + 1, duplicateFilter, addedRow);
 
             // Named after the channel, the subscription group, or Subscriptions
-            Row addedRow = mAddedHomeRows.get(mediaGroup);
             if (addedRow != null) {
                 String title = getAddedHomeRowTitle(addedRow);
 
