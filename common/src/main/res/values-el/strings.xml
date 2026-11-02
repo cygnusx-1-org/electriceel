@@ -516,7 +516,6 @@
   <string name="sort_by_date">Ημερομηνία μεταμόρφωσης</string>
   <string name="sort_by_rating">Βαθμολογία </string>
   <string name="clear_search_history">Εκκαθάριση ιστορικού αναζήτησης</string>
-  <string name="remove_from_subscriptions">Απόκρυψη</string>
   <string name="player_long_speed_list">Λίστα υψηλής ταχύτητας</string>
   <string name="alt_app_icon">Εναλλακτικό εικονίδιο εφαρμογής (απαιτείται επανεκκίνηση)</string>
   <string name="network_stack">Προτίμηση στοίβας δικτύου %s</string>

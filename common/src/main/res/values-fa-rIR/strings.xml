@@ -515,7 +515,6 @@
   <string name="sort_by_date">تاریخ آپلود</string>
   <string name="sort_by_rating">امتیاز</string>
   <string name="clear_search_history">پاک کردن تاریخچه جستجو</string>
-  <string name="remove_from_subscriptions">پنهان کردن</string>
   <string name="player_long_speed_list">فهرست سرعت طولانی</string>
   <string name="disable_ok_long_press_desc">مخصوص کنترل‌هایی که دارای اشکال هستند و دکمه OK به درستی کار نمی‌کند</string>
   <string name="pressing_back">با فشار دادن \"BACK\"</string>

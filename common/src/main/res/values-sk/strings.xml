@@ -563,7 +563,6 @@
     <string name="sort_by_date">Dátum nahratia</string>
     <string name="sort_by_rating">Hodnotenie</string>
     <string name="clear_search_history">Zmazať históriu vyhľadávania</string>
-    <string name="remove_from_subscriptions">Skryť</string>
     <string name="player_long_speed_list">Dlhý zoznam rýchlostí videa</string>
     <string name="player_extra_long_speed_list">Extra dlhý zoznam rýchlostí videa</string>
     <string name="alt_app_icon">Alternatívna ikonka aplikácie (potrebný reštart)</string>

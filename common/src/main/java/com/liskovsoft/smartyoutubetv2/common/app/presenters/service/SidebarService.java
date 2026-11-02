@@ -318,6 +318,7 @@ public class SidebarService implements ProfileChangeListener {
         mDefaultSections.put(R.string.header_notifications, MediaGroup.TYPE_NOTIFICATIONS);
         mDefaultSections.put(R.string.header_blocked_channels, MediaGroup.TYPE_BLOCKED_CHANNELS);
         mDefaultSections.put(R.string.header_blocked_ai_channels, MediaGroup.TYPE_BLOCKED_AI_CHANNELS);
+        mDefaultSections.put(R.string.unhide, MediaGroup.TYPE_HIDDEN_VIDEOS);
         mDefaultSections.put(R.string.header_playlists, MediaGroup.TYPE_USER_PLAYLISTS);
         mDefaultSections.put(R.string.my_videos, MediaGroup.TYPE_MY_VIDEOS);
         mDefaultSections.put(R.string.playback_queue_category_title, MediaGroup.TYPE_PLAYBACK_QUEUE);
@@ -330,7 +331,8 @@ public class SidebarService implements ProfileChangeListener {
             enableSection(sectionId, !Helpers.equalsAny(sectionId, new int[] {
                     MediaGroup.TYPE_PLAYBACK_QUEUE,
                     MediaGroup.TYPE_BLOCKED_CHANNELS,
-                    MediaGroup.TYPE_BLOCKED_AI_CHANNELS
+                    MediaGroup.TYPE_BLOCKED_AI_CHANNELS,
+                    MediaGroup.TYPE_HIDDEN_VIDEOS
             }));
         }
     }

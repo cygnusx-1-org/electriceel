@@ -759,6 +759,13 @@ public final class Video {
     }
 
     /**
+     * A card of the Unhide section (see HiddenVideosData)
+     */
+    public boolean belongsToHiddenVideos() {
+        return belongsToGroup(MediaGroup.TYPE_HIDDEN_VIDEOS);
+    }
+
+    /**
      * Get the appropriate channel ID for blocking.
      * Tries channelId first, then falls back to author name.
      *

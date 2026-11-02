@@ -565,7 +565,6 @@
     <string name="sort_by_rating">Reytinqə görə</string>
     <string name="clear_search_history">Axtarış tarixçəsini təmizlə</string>
     <string name="remove_from_search_history">Axtarış tarixçəsindən sil</string>
-    <string name="remove_from_subscriptions">Gizlət</string>
     <string name="player_long_speed_list">Uzun sürət siyahısı</string>
     <string name="player_extra_long_speed_list">Çox uzun sürət siyahısı</string>
     <string name="alt_app_icon">Alternativ tətbiq işarəsi (yenidən başlamaq tələb olunur)</string>

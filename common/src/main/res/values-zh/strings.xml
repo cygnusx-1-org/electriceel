@@ -549,7 +549,6 @@
   <string name="sort_by_date">上传日期</string>
   <string name="sort_by_rating">评分</string>
   <string name="clear_search_history">清除搜索历史记录</string>
-  <string name="remove_from_subscriptions">隐藏</string>
   <string name="player_long_speed_list">长播放速度列表</string>
   <string name="alt_app_icon">备用应用图标（需重启）</string>
   <string name="network_stack">首选 %s 网络协议栈</string>

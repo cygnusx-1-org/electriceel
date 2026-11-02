@@ -565,7 +565,6 @@
   <string name="sort_by_rating">Betyg</string>
   <string name="clear_search_history">Rensa sökhistorik</string>
   <string name="remove_from_search_history">Ta bort från sökhistoriken</string>
-  <string name="remove_from_subscriptions">Dölj</string>
   <string name="player_long_speed_list">Lång hastighetslista</string>
   <string name="player_extra_long_speed_list">Extra lång hastighetslista</string>
   <string name="alt_app_icon">Alternativ appikon (kräver omstart)</string>

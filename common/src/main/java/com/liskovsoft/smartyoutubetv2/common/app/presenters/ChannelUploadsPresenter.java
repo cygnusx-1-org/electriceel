@@ -97,7 +97,7 @@ public class ChannelUploadsPresenter extends BasePresenter<ChannelUploadsView> i
     @Override
     public void onVideoItemLongClicked(Video item) {
         VideoMenuPresenter.instance(getContext()).showMenu(item, (videoItem, action) -> {
-            if (action == VideoMenuCallback.ACTION_REMOVE_FROM_PLAYLIST) {
+            if (action == VideoMenuCallback.ACTION_REMOVE_FROM_PLAYLIST || action == VideoMenuCallback.ACTION_HIDE) {
                 removeItem(videoItem);
             } else if (action == VideoMenuCallback.ACTION_UNSUBSCRIBE) {
                 MessageHelpers.showMessage(getContext(), R.string.unsubscribed_from_channel);

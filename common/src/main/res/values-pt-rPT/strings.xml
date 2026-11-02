@@ -563,7 +563,6 @@
     <string name="sort_by_date">Data de carregamento</string>
     <string name="sort_by_rating">Avaliação</string>
     <string name="clear_search_history">Limpar histórico de pesquisa</string>
-    <string name="remove_from_subscriptions">Ocultar</string>
     <string name="player_long_speed_list">Mais velocidades na lista de velocidades</string>
     <string name="player_extra_long_speed_list">Lista de velocidades muito longa</string>
     <string name="alt_app_icon">Ícone alternativo (tem que reiniciar)</string>

@@ -536,7 +536,6 @@
   <string name="sort_by_date">Дата на качване</string>
   <string name="sort_by_rating">Рейтинг</string>
   <string name="clear_search_history">Изчистване на историята на търсене</string>
-  <string name="remove_from_subscriptions">Скрий</string>
   <string name="player_long_speed_list">Повече скорости в списъка със скорости</string>
   <string name="alt_app_icon">Алтернативна икона на приложение (необходимо е рестартиране)</string>
   <string name="network_stack">Предпочитане на мрежовия стек %s</string>

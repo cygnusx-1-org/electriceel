@@ -51,9 +51,11 @@ import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.WatchLaterManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.DuplicatesData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.HiddenVideosData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.HomeRowsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.HomeRowsData.Row;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.SectionFilterData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
 import java.util.ArrayList;
@@ -64,6 +66,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -239,6 +242,8 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         // Easily taken for the whole AiSList
         blockedAiChannels.setMessage(getContext().getString(R.string.blocked_ai_channels_message));
         mSectionsMapping.put(MediaGroup.TYPE_BLOCKED_AI_CHANNELS, blockedAiChannels);
+        mSectionsMapping.put(MediaGroup.TYPE_HIDDEN_VIDEOS,
+                new BrowseSection(MediaGroup.TYPE_HIDDEN_VIDEOS, getContext().getString(R.string.unhide), BrowseSection.TYPE_ROW, R.drawable.icon_unhide, false));
         mSectionsMapping.put(MediaGroup.TYPE_USER_PLAYLISTS, new BrowseSection(MediaGroup.TYPE_USER_PLAYLISTS, getContext().getString(R.string.header_playlists), BrowseSection.TYPE_ROW, R.drawable.icon_playlist, false));
         mSectionsMapping.put(MediaGroup.TYPE_NOTIFICATIONS, new BrowseSection(MediaGroup.TYPE_NOTIFICATIONS, getContext().getString(R.string.header_notifications), BrowseSection.TYPE_GRID, R.drawable.icon_notification, false));
         mSectionsMapping.put(MediaGroup.TYPE_PLAYBACK_QUEUE, new BrowseSection(MediaGroup.TYPE_PLAYBACK_QUEUE, getContext().getString(R.string.playback_queue_category_title), BrowseSection.TYPE_GRID, R.drawable.icon_queue, false));
@@ -555,7 +560,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
             });
         } else {
             VideoMenuPresenter.instance(getContext()).showMenu(item, (videoItem, action) -> {
-                if (action == VideoMenuCallback.ACTION_REMOVE ||
+                if (action == VideoMenuCallback.ACTION_REMOVE || action == VideoMenuCallback.ACTION_HIDE ||
                     action == VideoMenuCallback.ACTION_REMOVE_FROM_PLAYLIST ||
                     (action == VideoMenuCallback.ACTION_REMOVE_FROM_QUEUE && isPlaybackQueueSection())) {
                     removeItem(videoItem);
@@ -867,6 +872,11 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
                 }
                 break;
             case BrowseSection.TYPE_ROW:
+                if (section.getId() == MediaGroup.TYPE_HIDDEN_VIDEOS) {
+                    updateHiddenVideoRows(section);
+                    break;
+                }
+
                 Observable<List<MediaGroup>> groups = mRowMapping.get(section.getId());
                 updateVideoRows(section, groups, section.isAuthOnly());
                 break;
@@ -898,6 +908,56 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         videoGroup.setTitle(section.getTitle());
         getView().updateSection(videoGroup);
         getView().showProgressBar(false);
+    }
+
+    /**
+     * A row per section the videos were hidden from (see HiddenVideosData.sortForRows), the newest hidden first. Kept on the device:
+     * signed out too, and nothing to load or continue.
+     */
+    private void updateHiddenVideoRows(BrowseSection section) {
+        VideoGroup clear = VideoGroup.from(section);
+        clear.setAction(VideoGroup.ACTION_REPLACE);
+        getView().updateSection(clear);
+
+        List<HiddenVideosData.Section> hiddenSections = HiddenVideosData.sortForRows(HiddenVideosData.instance(getContext()).getSections(),
+                getSidebarService().getDefaultSections().values());
+
+        for (HiddenVideosData.Section hidden : hiddenSections) {
+            // A list of its own: the row's cards are removed from it (see VideoGroup.remove)
+            VideoGroup row = VideoGroup.from(new ArrayList<>(hidden.videos), section, -1);
+            row.setId(row.hashCode());
+            row.setTitle(getHiddenVideosRowTitle(hidden));
+            row.setHiddenFromSection(hidden.sectionId);
+            getView().updateSection(row);
+        }
+
+        getView().showProgressBar(false);
+    }
+
+    /**
+     * The section's title of now: a pinned one (e.g. a channel) can be renamed, otherwise the one it had when a video was hidden there
+     */
+    private String getHiddenVideosRowTitle(HiddenVideosData.Section hidden) {
+        switch (hidden.sectionId) {
+            case SectionFilterData.SECTION_CHANNEL_GROUPS:
+                return getContext().getString(R.string.subscription_groups);
+            case MediaGroup.TYPE_SEARCH:
+                return getContext().getString(R.string.action_search);
+            case MediaGroup.TYPE_CHANNEL:
+                return getContext().getString(R.string.unhide_channel_pages);
+            case MediaGroup.TYPE_SUGGESTIONS:
+                return getContext().getString(R.string.suggestions);
+        }
+
+        for (Entry<Integer, Integer> defaultSection : getSidebarService().getDefaultSections().entrySet()) {
+            if (defaultSection.getValue() == hidden.sectionId) {
+                return getContext().getString(defaultSection.getKey());
+            }
+        }
+
+        BrowseSection pinned = findSectionById(hidden.sectionId);
+
+        return pinned != null ? pinned.getTitle() : hidden.title;
     }
 
     private void updateVideoRows(BrowseSection section, Observable<List<MediaGroup>> groups, boolean authCheck) {
@@ -1122,8 +1182,9 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
             return;
         }
 
-        if (getCurrentSection() != null && mLocalGridMappings.containsKey(getCurrentSection().getId())) {
-            Log.d(TAG, "Local grid section doesn't assume a continuation...");
+        if (getCurrentSection() != null && (mLocalGridMappings.containsKey(getCurrentSection().getId())
+                || getCurrentSection().getId() == MediaGroup.TYPE_HIDDEN_VIDEOS)) {
+            Log.d(TAG, "Local section doesn't assume a continuation...");
             return;
         }
 

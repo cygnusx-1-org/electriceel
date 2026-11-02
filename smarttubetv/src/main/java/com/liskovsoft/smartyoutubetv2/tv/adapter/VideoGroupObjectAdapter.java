@@ -193,7 +193,8 @@ public class VideoGroupObjectAdapter extends ObjectAdapter {
     }
 
     /**
-     * Removes the videos their rows hide as "Not interested" (see VideoGroup#isNotInterested), e.g. the same video or channel in another row.
+     * Removes the videos their rows hide as "Not interested" or hidden with Hide (see VideoGroup#isRemovedWithMenu), e.g. the same
+     * video or channel in another row.
      * By position, not by Video#equals: a playlist card equals its first video.
      */
     public void removeNotInterested() {
@@ -201,7 +202,7 @@ public class VideoGroupObjectAdapter extends ObjectAdapter {
             Video video = mVideoItems.get(i);
             VideoGroup group = video.getGroup();
 
-            if (group != null && group.isNotInterested(video)) {
+            if (group != null && group.isRemovedWithMenu(video)) {
                 mVideoItems.remove(i);
                 notifyItemRangeRemoved(i, 1);
                 // The row continues from its size (see append)

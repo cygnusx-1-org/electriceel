@@ -25,6 +25,7 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.ChannelGroupFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.ExploreTopicsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.FilterExclusionData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.HiddenVideosData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.HomeRowsData.Row;
 import com.liskovsoft.smartyoutubetv2.common.prefs.KeywordFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.OpenedVideosData;
@@ -71,6 +72,7 @@ public class VideoGroup {
     private boolean mIsChannelRow; // every item is a channel (see MediaGroup.isChannelRow), kept by the pages added later
     private boolean mIsSearchTopicRow; // every item is a topic that opens a search (see MediaGroup.isSearchTopicRow), kept by the pages added later
     private int mAddedHomeRowType = -1; // a row added to Home (see HomeRowsData.Row.type), kept by the pages added later
+    private int mHiddenFromSection = MediaGroup.TYPE_UNDEFINED; // a row of the Unhide section: where its videos were hidden from
     public boolean isQueue;
 
     public static VideoGroup from(BrowseSection section) {
@@ -543,7 +545,7 @@ public class VideoGroup {
 
         addShortsDate(video);
 
-        if (isChannelBlocked(video) || isNotInterested(video) || isAiListed(video) || isHiddenCategory(video) || isOld(video) || isHiddenCollaboration(video)
+        if (isChannelBlocked(video) || isNotInterested(video) || isHiddenWithMenu(video) || isAiListed(video) || isHiddenCategory(video) || isOld(video) || isHiddenCollaboration(video)
                 || isHiddenWatchLater(video) || isHiddenShow(video) || isHiddenStreamed(video) || isHiddenTopChannel(video) || isHiddenExploreTopic(video)
                 || hasHiddenKeyword(video) || isWatchedSuggestion(video) || isUnsubscribedChannel(video) || isHiddenChannelGroupChannel(video)
                 || isWatchedInChannelGroup(video) || isHiddenOpened(video) || isDuplicate(video)) {
@@ -605,6 +607,74 @@ public class VideoGroup {
         }
 
         return NotInterestedManager.instance().isHidden(video);
+    }
+
+    /**
+     * Hidden from the section with the Hide of the context menu (see HiddenVideosData)
+     */
+    private boolean isHiddenWithMenu(Video video) {
+        // No context before the app is initialized (GlobalPreferences)
+        if (!isHideableCard(video) || GlobalPreferences.context() == null) {
+            return false;
+        }
+
+        HiddenVideosData data = HiddenVideosData.instance(GlobalPreferences.context());
+
+        return !data.isEmpty() && data.isHidden(getHiddenVideosSection(), video.videoId);
+    }
+
+    /**
+     * Gone from the menu after it was added: marked "Not interested" or hidden with Hide. The other rows that have it let it go
+     * too (see VideoGroupObjectAdapter.removeNotInterested).
+     */
+    public boolean isRemovedWithMenu(Video video) {
+        return isNotInterested(video) || isHiddenWithMenu(video);
+    }
+
+    /**
+     * A card the Hide of the context menu hides: a video. Not a playlist (its video id is the first video's), a show, a channel
+     * or a chapter.
+     */
+    public static boolean isHideableCard(Video video) {
+        return video != null && video.videoId != null && !video.isChapter && !video.isShow && !video.isPlaylistAsChannel()
+                && video.itemType != MediaItem.TYPE_PLAYLIST && video.itemType != MediaItem.TYPE_CHANNEL;
+    }
+
+    /**
+     * The section a video is hidden from with the context menu (see HiddenVideosData): the sidebar section, all the subscription
+     * groups as one (their sections and their rows of Home), Subscriptions for its row of Home too, then search, the channel pages
+     * or the player's suggestions. MediaGroup.TYPE_UNDEFINED elsewhere (e.g. a playlist page).
+     */
+    public int getHiddenVideosSection() {
+        if (isChannelGroup()) {
+            return SectionFilterData.SECTION_CHANNEL_GROUPS;
+        }
+
+        if (mAddedHomeRowType == Row.TYPE_SUBSCRIPTIONS) {
+            return MediaGroup.TYPE_SUBSCRIPTIONS;
+        }
+
+        if (getSection() != null) {
+            return getSection().getId();
+        }
+
+        if (getType() == MediaGroup.TYPE_SUGGESTIONS) {
+            return MediaGroup.TYPE_SUGGESTIONS;
+        }
+
+        // Search, a channel page, otherwise none
+        return getFilterSectionId();
+    }
+
+    /**
+     * A row of the Unhide section: the section its videos were hidden from (see HiddenVideosData), otherwise MediaGroup.TYPE_UNDEFINED
+     */
+    public int getHiddenFromSection() {
+        return mHiddenFromSection;
+    }
+
+    public void setHiddenFromSection(int sectionId) {
+        mHiddenFromSection = sectionId;
     }
 
     /**

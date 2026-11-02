@@ -531,7 +531,6 @@
   <string name="sort_by_date">अपलोड दिनांक</string>
   <string name="sort_by_rating">रेटिंग</string>
   <string name="clear_search_history">खोज इतिहास मिटाए</string>
-  <string name="remove_from_subscriptions">छुपाये</string>
   <string name="player_long_speed_list">ज्यादा गति दिखाए</string>
   <string name="alt_app_icon">वैकल्पिक ऐप आइकन</string>
   <string name="network_stack">%s नेटवर्क स्टैक को प्राथमिकता दें</string>

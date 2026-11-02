@@ -541,7 +541,6 @@
   <string name="sort_by_date">Üleslaadimise aeg</string>
   <string name="sort_by_rating">Hinnang</string>
   <string name="clear_search_history">Puhasta otsingu ajalugu</string>
-  <string name="remove_from_subscriptions">Peida video</string>
   <string name="player_long_speed_list">Suurem kiirustevalik</string>
   <string name="alt_app_icon">Alternatiivse rakenduse ikoon (vajab taaskäivitamist)</string>
   <string name="network_stack">Eelista %s võrgutarkvara</string>

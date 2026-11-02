@@ -549,7 +549,6 @@
   <string name="sort_by_date">Datës së ngarkimit</string>
   <string name="sort_by_rating">Vlerësimit</string>
   <string name="clear_search_history">Pastro historikun tënd të kërkimit</string>
-  <string name="remove_from_subscriptions">Fshih</string>
   <string name="player_long_speed_list">Më shumë shpejtësi në listën e shpejtësive</string>
   <string name="player_extra_long_speed_list">Edhe më shumë shpejtësi në listën e shpejtësive</string>
   <string name="alt_app_icon">Ikona alternative e aplikacionit (kërkon rinisje)</string>

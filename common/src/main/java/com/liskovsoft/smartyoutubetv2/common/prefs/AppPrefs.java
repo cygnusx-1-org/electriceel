@@ -247,6 +247,7 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
         result.add(STATE_UPDATER_DATA);
         result.add(SIDEBAR_DATA);
         result.add(CHANNEL_GROUP_DATA);
+        result.add(HiddenVideosData.HIDDEN_VIDEOS_DATA);
         result.add(HOME_SCREEN_PLAYLISTS_DATA);
         result.add(HOME_SCREEN_CHANNELS_DATA);
         Collections.addAll(result, PROFILE_DATA_KEYS);
@@ -381,7 +382,7 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
 
     /**
      * Replaces the settings of the current account with the ones the given account has in use (see getProfileData).
-     * The history, channel groups, sidebar, Home rows and home screen channels stay the current account's.
+     * The history, channel groups, hidden videos, sidebar, Home rows and home screen channels stay the current account's.
      */
     public void copyProfileData(Account from) {
         String fromName = getProfileName(from);

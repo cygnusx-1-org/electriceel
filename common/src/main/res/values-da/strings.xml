@@ -582,7 +582,6 @@
   <string name="sort_by_date">Dato for upload</string>
   <string name="sort_by_rating">Bedømmelse</string>
   <string name="clear_search_history">Ryd søgehistorik</string>
-  <string name="remove_from_subscriptions">Skjul</string>
   <string name="player_long_speed_list">Lang hastighedsliste</string>
   <string name="alt_app_icon">Alternativt appikon (kræver genstart)</string>
   <string name="network_stack">Foretræk %s netværksstak</string>

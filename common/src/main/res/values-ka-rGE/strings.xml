@@ -555,7 +555,6 @@
   <string name="sort_by_rating">რეიტინგი</string>
   <string name="clear_search_history">ძებნის ისტორიის გასუფთავება</string>
   <string name="remove_from_search_history">ძებნის ისტორიიდან წაშლა</string>
-  <string name="remove_from_subscriptions">დამალვა</string>
   <string name="player_long_speed_list">გრძელი სიჩქარის სია</string>
   <string name="player_extra_long_speed_list">ძალიან გრძელი სიჩქარის სია</string>
   <string name="alt_app_icon">ალტერნატიული აპლიკაციის ხატულა (საჭიროა გადატვირთვა)</string>

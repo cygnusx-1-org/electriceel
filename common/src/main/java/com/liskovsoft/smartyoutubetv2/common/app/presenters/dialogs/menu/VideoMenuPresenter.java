@@ -14,6 +14,7 @@ import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.sharedutils.rx.RxHelper;
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.BrowseSection;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Playlist;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.VideoGroup;
@@ -41,6 +42,7 @@ import com.liskovsoft.smartyoutubetv2.common.misc.StreamReminderService;
 import com.liskovsoft.smartyoutubetv2.common.misc.WatchLaterManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.HiddenVideosData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.utils.AppDialogUtil;
 import com.liskovsoft.youtubeapi.service.YouTubeServiceManager;
@@ -70,7 +72,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
     private boolean mIsHideKeywordsEnabled;
     private boolean mIsExcludeChannelFromHidingEnabled;
     private boolean mIsRemoveFromHistoryButtonEnabled;
-    private boolean mIsRemoveFromSubscriptionsButtonEnabled;
+    private boolean mIsHideButtonEnabled;
     private boolean mIsOpenChannelButtonEnabled;
     private boolean mIsOpenChannelUploadsButtonEnabled;
     private boolean mIsSubscribeButtonEnabled;
@@ -109,6 +111,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
         int ACTION_ADD_TO_QUEUE = 5;
         int ACTION_PLAY_NEXT = 6;
         int ACTION_REMOVE_AUTHOR = 7;
+        int ACTION_HIDE = 8; // hidden with Hide (see HiddenVideosData): it goes from where it's shown
         void onItemAction(Video videoItem, int action);
     }
 
@@ -476,7 +479,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
     }
 
     /**
-     * Marked "Not interested" in Subscriptions: it goes from there too, as with Remove from subscriptions
+     * Marked "Not interested" in Subscriptions: YouTube takes it out of the feed too, with the card's own feedback (YouTube's Hide)
      */
     private void removeFromSubscriptionsFeed() {
         if (mVideo == null || !mVideo.belongsToSubscriptions() || mVideo.mediaItem == null || mVideo.mediaItem.getFeedbackToken() == null) {
@@ -488,7 +491,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
 
     /**
      * The sections loaded like Home (e.g. Gaming) don't send the feedback, so their videos get the one of the Home context menu.
-     * So do the videos of Subscriptions: their own feedback is the removal from there (see appendRemoveFromSubscriptionsButton).
+     * So do the videos of Subscriptions: their own feedback is the removal from there (see removeFromSubscriptionsFeed).
      * Not the playlists: their video id is the first video's, so the feedback would be about it.
      */
     private FeedbackEndpoint getFeedbackEndpoint() {
@@ -732,50 +735,57 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
         stateService.removeByVideoId(mVideo.videoId);
     }
 
-    private void appendRemoveFromSubscriptionsButton() {
-        if (mVideo == null || mVideo.mediaItem == null || mVideo.mediaItem.getFeedbackToken() == null) {
+    /**
+     * The app's own, kept on the device (see HiddenVideosData): hidden from the section it's in, shown again from the Unhide section.
+     * There it's Unhide, whatever the menu has: that's what the section is for.
+     */
+    private void appendHideButton() {
+        VideoGroup group = mVideo != null ? mVideo.getGroup() : null; // read once: a weak reference
+
+        if (group == null || !VideoGroup.isHideableCard(mVideo)) {
             return;
         }
 
-        if (!mVideo.belongsToSubscriptions() || !mIsRemoveFromSubscriptionsButtonEnabled) {
+        HiddenVideosData data = HiddenVideosData.instance(getContext());
+
+        if (mVideo.belongsToHiddenVideos()) {
+            int sectionId = group.getHiddenFromSection();
+
+            mDialogPresenter.appendSingleButton(
+                    UiOptionItem.from(getContext().getString(R.string.unhide), optionItem -> {
+                        data.unhide(sectionId, mVideo.videoId);
+                        if (mCallback != null) {
+                            mCallback.onItemAction(mVideo, VideoMenuCallback.ACTION_REMOVE);
+                        }
+                        mDialogPresenter.closeDialog();
+                    }));
             return;
         }
 
-        RxHelper.disposeActions(mNotInterestedAction);
+        int sectionId = group.getHiddenVideosSection();
+
+        if (!mIsHideButtonEnabled || !HiddenVideosData.isSupportedSection(sectionId)) {
+            return;
+        }
 
         mDialogPresenter.appendSingleButton(
-                UiOptionItem.from(getContext().getString(R.string.remove_from_subscriptions), optionItem -> {
-                    mNotInterestedAction = mMediaItemService.markAsNotInterestedObserve(mVideo.mediaItem.getFeedbackToken())
-                            .subscribe(
-                                    var -> {},
-                                    error -> Log.e(TAG, "Remove from subscriptions error: %s", error.getMessage()),
-                                    () -> {
-                                        if (mCallback != null) {
-                                            mCallback.onItemAction(mVideo, VideoMenuCallback.ACTION_REMOVE);
-                                        }
-                                    }
-                            );
+                UiOptionItem.from(getContext().getString(R.string.hide_local), optionItem -> {
+                    data.hide(sectionId, getHiddenVideosSectionTitle(group), mVideo);
+                    if (mCallback != null) {
+                        mCallback.onItemAction(mVideo, VideoMenuCallback.ACTION_HIDE);
+                    }
                     mDialogPresenter.closeDialog();
                 }));
     }
 
-    private void appendRemoveFromNotificationsButton() {
-        if (mVideo == null || mVideo.mediaItem == null) {
-            return;
-        }
+    /**
+     * For the row of the Unhide section of a pinned section (e.g. a channel) that's gone from the sidebar. The section's title, but
+     * for the subscription groups, which are one row. Not BrowseSection.isDefault: the hash id of a pinned one can be negative.
+     */
+    private static String getHiddenVideosSectionTitle(VideoGroup group) {
+        BrowseSection section = group.getSection();
 
-        if (!mVideo.belongsToNotifications() || !mIsRemoveFromSubscriptionsButtonEnabled) {
-            return;
-        }
-
-        mDialogPresenter.appendSingleButton(
-                UiOptionItem.from(getContext().getString(R.string.remove_from_subscriptions), optionItem -> {
-                    MediaServiceManager.instance().hideNotification(mVideo);
-                    if (mCallback != null) {
-                        mCallback.onItemAction(mVideo, VideoMenuCallback.ACTION_REMOVE);
-                    }
-                    mDialogPresenter.closeDialog();
-                }));
+        return section != null && !section.isChannelGroup() ? section.getTitle() : null;
     }
 
     private void appendMarkAsWatchedButton() {
@@ -1228,7 +1238,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
         mIsHideKeywordsEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_HIDE_KEYWORDS);
         mIsExcludeChannelFromHidingEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_EXCLUDE_CHANNEL_FROM_HIDING);
         mIsRemoveFromHistoryButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_REMOVE_FROM_HISTORY);
-        mIsRemoveFromSubscriptionsButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_REMOVE_FROM_SUBSCRIPTIONS);
+        mIsHideButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_HIDE);
         mIsOpenDescriptionButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_OPEN_DESCRIPTION);
         mIsPlayVideoButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_PLAY_VIDEO);
         mIsPlayVideoIncognitoButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_PLAY_VIDEO_INCOGNITO);
@@ -1260,7 +1270,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
         mMenuMapping.put(MainUIData.MENU_ITEM_ADD_TO_NEW_PLAYLIST, new MenuAction(this::appendAddToNewPlaylistButton, false));
         mMenuMapping.put(MainUIData.MENU_ITEM_NOT_INTERESTED, new MenuAction(this::appendNotInterestedButton, true));
         mMenuMapping.put(MainUIData.MENU_ITEM_NOT_RECOMMEND_CHANNEL, new MenuAction(this::appendNotRecommendChannelButton, true));
-        mMenuMapping.put(MainUIData.MENU_ITEM_REMOVE_FROM_SUBSCRIPTIONS, new MenuAction(() -> { appendRemoveFromSubscriptionsButton(); appendRemoveFromNotificationsButton(); }, true));
+        mMenuMapping.put(MainUIData.MENU_ITEM_HIDE, new MenuAction(this::appendHideButton, false));
         mMenuMapping.put(MainUIData.MENU_ITEM_BLOCK_CHANNEL, new MenuAction(this::appendBlockChannelButton, false));
         mMenuMapping.put(MainUIData.MENU_ITEM_REPORT_AI_CHANNEL, new MenuAction(this::appendReportAiChannelButton, false));
         mMenuMapping.put(MainUIData.MENU_ITEM_HIDE_KEYWORDS, new MenuAction(this::appendHideKeywordsButton, false));

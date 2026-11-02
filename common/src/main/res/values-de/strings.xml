@@ -563,7 +563,6 @@
     <string name="sort_by_date">Upload-Datum</string>
     <string name="sort_by_rating">Bewertung</string>
     <string name="clear_search_history">Suchverlauf löschen</string>
-    <string name="remove_from_subscriptions">Ausblenden</string>
     <string name="player_long_speed_list">Lange Geschwindigkeitsliste</string>
     <string name="player_extra_long_speed_list">Extra lange Geschwindigkeitsliste</string>
     <string name="alt_app_icon">Alternatives App-Symbol (Neustart erforderlich)</string>

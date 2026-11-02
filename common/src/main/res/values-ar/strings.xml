@@ -516,7 +516,6 @@
   <string name="sort_by_date">تاريخ التحميل</string>
   <string name="sort_by_rating">التقييم</string>
   <string name="clear_search_history">محو سجل البحث</string>
-  <string name="remove_from_subscriptions">إخفاء</string>
   <string name="player_long_speed_list">قائمة السرعة الطويلة</string>
   <string name="disable_ok_long_press_desc">مخصص لأجهزة التحكم التي تعاني من مشاكل حيث لا يعمل زر OK بشكل صحيح</string>
   <string name="pressing_back">بالضغط على زر الرجوع</string>

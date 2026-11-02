@@ -522,7 +522,6 @@
   <string name="sort_by_date">Fecha de subida</string>
   <string name="sort_by_rating">Clasificación</string>
   <string name="clear_search_history">Limpiar historial de búsqueda</string>
-  <string name="remove_from_subscriptions">Ocultar</string>
   <string name="player_long_speed_list">Lista de velocidad larga</string>
   <string name="alt_app_icon">Ícono de aplicación alternativa (se necesita reiniciar)</string>
   <string name="network_stack">Preferir pila de red %s</string>

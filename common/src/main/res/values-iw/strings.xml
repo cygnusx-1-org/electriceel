@@ -567,7 +567,6 @@ So, make a copy of values-he and name it values-iw. Keep both in your structure.
     <string name="sort_by_date">תאריך העלאה</string>
     <string name="sort_by_rating">דירוג</string>
     <string name="clear_search_history">ניקוי היסטוריית חיפוש</string>
-    <string name="remove_from_subscriptions">הסתרה</string>
     <string name="player_long_speed_list">רשימת מהירויות ארוכה</string>
     <string name="player_extra_long_speed_list">רשימת מהירויות ארוכה במיוחד</string>
     <string name="alt_app_icon">סמל יישום חלופי (נדרש אתחול מחדש)</string>

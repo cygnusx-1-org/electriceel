@@ -516,7 +516,6 @@
   <string name="sort_by_date">Feltöltés dátuma szerint</string>
   <string name="sort_by_rating">Értékelés szerint</string>
   <string name="clear_search_history">Keresési előzmények törlése</string>
-  <string name="remove_from_subscriptions">Eltávolítás a feliratkozásokból</string>
   <string name="disable_ok_long_press_desc">Hibás vezérlőkhöz való, ahol az OK gomb nem működik megfelelően</string>
   <string name="live_stream_fix_4k_desc">Figyelem, ez a módosítás letiltja az adatfolyamok visszatekerését. Jelentősen javítja az élő közvetítés teljesítményét. A maximális felbontás 4K.</string>
   <string name="live_stream_fix_4k">Élő közvetítés javítása (4K)</string>

@@ -842,7 +842,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         menuNames.put(MainUIData.MENU_ITEM_NOT_INTERESTED, R.string.not_interested);
         menuNames.put(MainUIData.MENU_ITEM_NOT_RECOMMEND_CHANNEL, R.string.not_recommend_channel);
         menuNames.put(MainUIData.MENU_ITEM_REMOVE_FROM_HISTORY, R.string.remove_from_history);
-        menuNames.put(MainUIData.MENU_ITEM_REMOVE_FROM_SUBSCRIPTIONS, R.string.remove_from_subscriptions);
+        menuNames.put(MainUIData.MENU_ITEM_HIDE, R.string.hide_local);
         menuNames.put(MainUIData.MENU_ITEM_PIN_TO_SIDEBAR, R.string.pin_unpin_from_sidebar);
         menuNames.put(MainUIData.MENU_ITEM_ADD_TO_HOME_ROWS, R.string.add_remove_from_home_rows);
         menuNames.put(MainUIData.MENU_ITEM_ADD_TO_HOME_SCREEN, R.string.add_remove_from_home_screen);

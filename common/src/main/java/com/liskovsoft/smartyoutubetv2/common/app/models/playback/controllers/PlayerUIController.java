@@ -418,12 +418,14 @@ public class PlayerUIController extends BasePlayerController {
     @Override
     public void onSuggestionItemLongClicked(Video item) {
         VideoMenuPresenter.instance(getContext()).showMenu(item, (videoItem, action) -> {
-            if (getPlayer() == null || item.getGroup() == null)
+            VideoGroup itemGroup = item.getGroup(); // read once: a weak reference
+
+            if (getPlayer() == null || itemGroup == null)
                 return;
 
             if (action == VideoMenuCallback.ACTION_REMOVE_FROM_PLAYLIST
-                    || action == VideoMenuCallback.ACTION_REMOVE) {
-                int id = item.getGroup().getId();
+                    || action == VideoMenuCallback.ACTION_REMOVE || action == VideoMenuCallback.ACTION_HIDE) {
+                int id = itemGroup.getId();
                 VideoGroup group = VideoGroup.from(videoItem);
                 group.setId(id);
                 getPlayer().removeSuggestions(group);

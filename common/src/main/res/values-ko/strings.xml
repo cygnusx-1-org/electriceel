@@ -549,7 +549,6 @@
   <string name="sort_by_date">업로드 날짜</string>
   <string name="sort_by_rating">평점</string>
   <string name="clear_search_history">검색 기록 지우기</string>
-  <string name="remove_from_subscriptions">숨기기</string>
   <string name="player_long_speed_list">긴 속도 목록</string>
   <string name="player_extra_long_speed_list">매우 긴 속도 목록</string>
   <string name="alt_app_icon">대체 앱 아이콘 (재부팅 필요)</string>

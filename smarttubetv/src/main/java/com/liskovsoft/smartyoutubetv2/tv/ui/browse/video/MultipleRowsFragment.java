@@ -238,8 +238,13 @@ public abstract class MultipleRowsFragment extends RowsSupportFragment implement
             VideoGroupObjectAdapter adapter = mVideoGroupAdapters.get(group.getId());
             if (adapter != null) {
                 adapter.remove(group);
+
+                // Its last card (e.g. in the Unhide section): no empty row is left
+                if (adapter.isEmpty()) {
+                    removeById(group.getId());
+                }
             }
-            // Marked "Not interested" or "Don't recommend channel": the other rows might have it too
+            // Marked "Not interested" or "Don't recommend channel", or hidden: the other rows might have it too
             for (Map.Entry<Integer, VideoGroupObjectAdapter> entry : new ArrayList<>(mVideoGroupAdapters.entrySet())) {
                 VideoGroupObjectAdapter rowAdapter = entry.getValue();
 

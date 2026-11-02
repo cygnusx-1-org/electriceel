@@ -563,7 +563,6 @@
   <string name="sort_by_date">Data de carregamento (upload)</string>
   <string name="sort_by_rating">Classificação</string>
   <string name="clear_search_history">Limpar o histórico de pesquisa</string>
-  <string name="remove_from_subscriptions">Ocultar</string>
   <string name="player_long_speed_list">Lista estendida de velocidades de reprodução\n(30 velocidades - padrão 16 velocidades)\nNão é possível selecionar as duas listas ao mesmo tempo!</string>
   <string name="player_extra_long_speed_list">Lista ainda mais estendida de velocidades de reprodução\n(80 velocidades - padrão 16 velocidades)\nNão é possível selecionar as duas listas ao mesmo tempo!</string>
   <string name="alt_app_icon">Ícone de aplicativo alternativo (necessário reiniciar)</string>

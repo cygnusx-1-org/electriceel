@@ -17,6 +17,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.search.vineyard.Tag;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.VideoActionPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.VideoMenuPresenter;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.VideoMenuPresenter.VideoMenuCallback;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.interfaces.VideoGroupPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.SearchView;
 import com.liskovsoft.smartyoutubetv2.common.misc.BrowseProcessorManager;
@@ -116,7 +117,11 @@ public class SearchPresenter extends BasePresenter<SearchView> implements VideoG
             return;
         }
 
-        VideoMenuPresenter.instance(getContext()).showMenu(item);
+        VideoMenuPresenter.instance(getContext()).showMenu(item, (videoItem, action) -> {
+            if (action == VideoMenuCallback.ACTION_HIDE) {
+                removeItem(videoItem);
+            }
+        });
     }
 
     public void onTagLongClicked(Tag item) {

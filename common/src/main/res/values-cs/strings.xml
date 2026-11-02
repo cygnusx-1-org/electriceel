@@ -565,7 +565,6 @@
     <string name="sort_by_rating">Hodnocení</string>
     <string name="clear_search_history">Vymazat historii vyhledávání</string>
     <string name="remove_from_search_history">Odebrat z historie vyhledávání</string>
-    <string name="remove_from_subscriptions">Skrýt</string>
     <string name="player_long_speed_list">Dlouhý seznam rychlostí</string>
     <string name="player_extra_long_speed_list">Velmi dlouhý seznam rychlostí</string>
     <string name="alt_app_icon">Alternativní ikona aplikace (vyžaduje restart)</string>

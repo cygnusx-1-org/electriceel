@@ -561,7 +561,6 @@
     <string name="sort_by_date">Opplastingsdato</string>
     <string name="sort_by_rating">Vurdering</string>
     <string name="clear_search_history">Tøm søkehistorikk</string>
-    <string name="remove_from_subscriptions">Skjul</string>
     <string name="player_long_speed_list">Lang hastighetsliste</string>
     <string name="player_extra_long_speed_list">Ekstra lang hastighetsliste</string>
     <string name="alt_app_icon">Alternativt appikon (krever omstart)</string>

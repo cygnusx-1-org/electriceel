@@ -34,7 +34,8 @@ public class OldVideoFilter {
     }
 
     /**
-     * The section can be picked in the settings. History is left alone, and the local lists (e.g. the playback queue) are never filtered.
+     * The section can be picked in the settings. History is left alone, and the local lists (e.g. the playback queue, the Unhide
+     * section) are never filtered.
      */
     public static boolean isSupportedSection(int sectionId) {
         switch (sectionId) {
@@ -43,6 +44,7 @@ public class OldVideoFilter {
             case MediaGroup.TYPE_PLAYBACK_QUEUE:
             case MediaGroup.TYPE_BLOCKED_CHANNELS:
             case MediaGroup.TYPE_BLOCKED_AI_CHANNELS:
+            case MediaGroup.TYPE_HIDDEN_VIDEOS:
                 return false;
             default:
                 return true;

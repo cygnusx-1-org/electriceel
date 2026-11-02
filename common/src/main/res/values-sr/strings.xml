@@ -561,7 +561,6 @@
     <string name="sort_by_date">Датуму отпремања</string>
     <string name="sort_by_rating">Оцена</string>
     <string name="clear_search_history">Обриши историју гледања</string>
-    <string name="remove_from_subscriptions">Сакриј</string>
     <string name="player_long_speed_list">Дуга листа брзина</string>
     <string name="player_extra_long_speed_list">Екстра дуга листа брзина</string>
     <string name="alt_app_icon">Алтернативна икона апликације (потребно је поновно покретање)</string>

@@ -533,7 +533,6 @@
   <string name="sort_by_date">Date de mise en ligne</string>
   <string name="sort_by_rating">Notes</string>
   <string name="clear_search_history">Effacer l\'historique de recherche</string>
-  <string name="remove_from_subscriptions">Masquer</string>
   <string name="player_long_speed_list">Afficher plus d\'options intermédiaires de vitesse de lecture</string>
   <string name="alt_app_icon">Icône d\'application alternative (nécessite un redémarrage)</string>
   <string name="network_stack">Privilégier la pile réseau %s</string>

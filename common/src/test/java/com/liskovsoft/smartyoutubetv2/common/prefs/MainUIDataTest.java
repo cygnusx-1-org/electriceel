@@ -531,7 +531,8 @@ public class MainUIDataTest {
     public void menusHaveOnlyTheirItems() {
         assertMenus(MainUIData.MENU_ITEM_NOT_INTERESTED, MainUIData.MENU_VIDEOS, MainUIData.MENU_SUBSCRIPTIONS);
         assertMenus(MainUIData.MENU_ITEM_NOT_RECOMMEND_CHANNEL, MainUIData.MENU_VIDEOS);
-        assertMenus(MainUIData.MENU_ITEM_REMOVE_FROM_SUBSCRIPTIONS, MainUIData.MENU_SUBSCRIPTIONS);
+        assertMenus(MainUIData.MENU_ITEM_HIDE, MainUIData.MENU_VIDEOS, MainUIData.MENU_SUBSCRIPTIONS, MainUIData.MENU_HISTORY,
+                MainUIData.MENU_PLAYLISTS);
         assertMenus(MainUIData.MENU_ITEM_REMOVE_FROM_HISTORY, MainUIData.MENU_HISTORY);
         assertMenus(MainUIData.MENU_ITEM_CLEAR_HISTORY, MainUIData.MENU_HISTORY, MainUIData.MENU_SIDEBAR);
         assertMenus(MainUIData.MENU_ITEM_RENAME_PLAYLIST, MainUIData.MENU_PLAYLISTS);
@@ -543,6 +544,34 @@ public class MainUIDataTest {
         assertMenus(MainUIData.MENU_ITEM_SHARE_LINK, MainUIData.MENU_VIDEOS, MainUIData.MENU_SUBSCRIPTIONS,
                 MainUIData.MENU_HISTORY, MainUIData.MENU_PLAYLISTS);
         assertMenus(MainUIData.MENU_ITEM_EXIT_FROM_PIP); // always there, not in the settings
+    }
+
+    /**
+     * Saved when Hide was only in Subscriptions: it's new to the other card menus, on there. Subscriptions keeps it as it was.
+     */
+    @Test
+    public void hideIsAddedToTheOtherCardMenusOn() {
+        SavedMenus saved = SavedMenus.oldDefaults();
+
+        for (int menu : CARD_MENUS) {
+            saved.orders.get(menu).remove((Long) MainUIData.MENU_ITEM_HIDE);
+            saved.items[menu] &= ~MainUIData.MENU_ITEM_HIDE;
+        }
+
+        // Turned off in Subscriptions
+        saved.orders.get(MainUIData.MENU_SUBSCRIPTIONS).add(MainUIData.MENU_ITEM_HIDE);
+        saved.save();
+
+        MainUIData data = getData();
+
+        for (int menu : new int[] {MainUIData.MENU_VIDEOS, MainUIData.MENU_HISTORY, MainUIData.MENU_PLAYLISTS}) {
+            assertTrue("menu " + menu, data.isMenuItemEnabled(menu, MainUIData.MENU_ITEM_HIDE));
+            // Where it is by default: right above Mark as watched
+            assertEquals("menu " + menu, data.getMenuItemIndex(menu, MainUIData.MENU_ITEM_MARK_AS_WATCHED) - 1,
+                    data.getMenuItemIndex(menu, MainUIData.MENU_ITEM_HIDE));
+        }
+
+        assertFalse(data.isMenuItemEnabled(MainUIData.MENU_SUBSCRIPTIONS, MainUIData.MENU_ITEM_HIDE));
     }
 
     @Test
@@ -561,9 +590,9 @@ public class MainUIDataTest {
     public void anItemOfAnotherMenuIsNotTurnedOn() {
         MainUIData data = getData();
 
-        data.setMenuItemEnabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_REMOVE_FROM_SUBSCRIPTIONS);
+        data.setMenuItemEnabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_REMOVE_FROM_HISTORY);
 
-        assertFalse(data.isMenuItemEnabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_REMOVE_FROM_SUBSCRIPTIONS));
+        assertFalse(data.isMenuItemEnabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_REMOVE_FROM_HISTORY));
     }
 
     /**
