@@ -292,7 +292,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
 
         // The uploads of its channels, as the grid of the group in the sidebar. Nothing when the group's gone.
         if (row.type == Row.TYPE_CHANNEL_GROUP) {
-            return getContentService().getRssFeedObserve(ChannelGroupServiceWrapper.instance(getContext()).findChannelIdsForGroup(row.channelGroupId));
+            return getContentService().getChannelFeedObserve(ChannelGroupServiceWrapper.instance(getContext()).findChannelIdsForGroup(row.channelGroupId));
         }
 
         // Its uploads, as the grid of the channel
@@ -1390,7 +1390,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
 
     private Observable<MediaGroup> createPinnedGridAction(Video item) {
         if (item.channelGroupId != null) {
-            return getContentService().getRssFeedObserve(ChannelGroupServiceWrapper.instance(getContext()).findChannelIdsForGroup(item.channelGroupId));
+            return getContentService().getChannelFeedObserve(ChannelGroupServiceWrapper.instance(getContext()).findChannelIdsForGroup(item.channelGroupId));
         }
 
         return ChannelUploadsPresenter.instance(getContext()).obtainUploadsObservable(item);
