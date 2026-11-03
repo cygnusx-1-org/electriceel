@@ -17,6 +17,8 @@ import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailureLog;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStarts;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.ExoFormatItem;
+import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.app.PoTokenGate;
@@ -48,6 +50,11 @@ import static org.junit.Assert.assertEquals;
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 28)
 public class ErrorFixerControllerTest {
+    private static final List<FormatItem> QUALITIES = Arrays.asList(
+            ExoFormatItem.fromVideoSpec("3840,2160,30,vp9", false),
+            ExoFormatItem.fromVideoSpec("3840,2160,30,avc", false),
+            ExoFormatItem.fromVideoSpec("2560,1440,30,vp9", false),
+            ExoFormatItem.fromVideoSpec("1280,720,30,vp9", false));
     @Rule
     public TemporaryFolder mFolder = new TemporaryFolder();
     private PlayerFailureLog mLog;
@@ -65,6 +72,7 @@ public class ErrorFixerControllerTest {
         mSavedIpv6Test = getGlobalPrefs().isIpv6TestEnabled();
         setTvPotRejected(false);
         setIpv6Working(null);
+        getPlayerData().setTempVideoFormat(null);
         // No segment loaded or loading
         VideoStarts.onPrepare();
     }
@@ -305,6 +313,90 @@ public class ErrorFixerControllerTest {
     /**
      * Prepared again (e.g. reloaded): the audio's first segments came, the video's init is still loading
      */
+    /**
+     * Reloading once may clear it (a hung connection). Again soon after, the connection can't keep up: the next size down, for this video
+     */
+    @Test
+    public void aRepeatedStallLowersTheQualityAndRestartsTheEngine() throws Exception {
+        TestController controller = new TestController(video("g_jLBnnQuwE"), QUALITIES, QUALITIES.get(0));
+        controller.onPlay();
+
+        controller.onLongBuffering();
+        controller.onPlay();
+        assertEquals(null, getPlayerData().getTempVideoFormat());
+
+        controller.onLongBuffering();
+
+        List<JSONObject> events = mLog.readAll();
+        assertEquals(Arrays.asList("reload_video"), getActions(events.get(0)));
+        assertEquals(Arrays.asList("lower_quality", "restart_engine"), getActions(events.get(1)));
+        assertLowered(getPlayerData().getTempVideoFormat());
+    }
+
+    /**
+     * Kept when the video's reloaded (the reload clears temp formats), gone with another video
+     */
+    @Test
+    public void theLoweredQualityIsForThisVideoOnly() throws Exception {
+        Video video = video("g_jLBnnQuwE");
+        TestController controller = new TestController(video, QUALITIES, QUALITIES.get(0));
+        controller.onNewVideo(video);
+        controller.onPlay();
+        controller.onLongBuffering();
+        controller.onPlay();
+        controller.onLongBuffering();
+
+        getPlayerData().setTempVideoFormat(null);
+        controller.onNewVideo(video);
+        assertLowered(getPlayerData().getTempVideoFormat());
+
+        getPlayerData().setTempVideoFormat(null);
+        controller.onNewVideo(video("other"));
+        assertEquals(null, getPlayerData().getTempVideoFormat());
+    }
+
+    @Test
+    public void stallsFarApartOnlyReload() throws Exception {
+        TestController controller = new TestController(video("g_jLBnnQuwE"), QUALITIES, QUALITIES.get(0));
+        controller.onPlay();
+
+        controller.onLongBuffering();
+        org.robolectric.shadows.ShadowSystemClock.advanceBy(4, java.util.concurrent.TimeUnit.MINUTES);
+        controller.onPlay();
+        controller.onLongBuffering();
+
+        assertEquals(Arrays.asList("reload_video"), getActions(mLog.readAll().get(1)));
+    }
+
+    /**
+     * Not below 720p: reloaded as before
+     */
+    @Test
+    public void aRepeatedStallAt720pOnlyReloads() throws Exception {
+        TestController controller = new TestController(video("g_jLBnnQuwE"), QUALITIES, QUALITIES.get(3));
+        controller.onPlay();
+
+        controller.onLongBuffering();
+        controller.onPlay();
+        controller.onLongBuffering();
+
+        assertEquals(Arrays.asList("reload_video"), getActions(mLog.readAll().get(1)));
+    }
+
+    /**
+     * The next size down, 1440p, as a limit of the same codec: not the track of the stream played
+     */
+    private static void assertLowered(FormatItem format) {
+        assertEquals(2560, format.getWidth());
+        assertEquals(1440, format.getHeight());
+        assertEquals(null, format.getTrack().format.id);
+        assertEquals("vp9", com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.TrackSelectorUtil.codecNameShort(format.getTrack().format.codecs));
+    }
+
+    private static PlayerData getPlayerData() {
+        return PlayerData.instance(RuntimeEnvironment.getApplication());
+    }
+
     private static void loadAudioOnly() {
         VideoStarts.onPrepare();
         long now = SystemClock.elapsedRealtime();
@@ -366,11 +458,19 @@ public class ErrorFixerControllerTest {
      * Returns the defaults (false, 0, null) for every call, and the subtitles off
      */
     private static PlaybackView playerStub() {
+        return playerStub(null, null);
+    }
+
+    private static PlaybackView playerStub(List<FormatItem> videoFormats, FormatItem videoFormat) {
         return (PlaybackView) Proxy.newProxyInstance(PlaybackView.class.getClassLoader(), new Class<?>[]{PlaybackView.class},
                 (proxy, method, args) -> {
                     Class<?> type = method.getReturnType();
 
-                    if ("getSubtitleFormat".equals(method.getName())) {
+                    if ("getVideoFormats".equals(method.getName())) {
+                        return videoFormats;
+                    } else if ("getVideoFormat".equals(method.getName())) {
+                        return videoFormat;
+                    } else if ("getSubtitleFormat".equals(method.getName())) {
                         // Off: long loading subtitles have a fix of their own
                         return FormatItem.SUBTITLE_NONE;
                     } else if (type == boolean.class) {
@@ -390,18 +490,27 @@ public class ErrorFixerControllerTest {
     }
 
     private static class TestController extends ErrorFixerController {
-        private final PlaybackView mPlayer = playerStub();
+        private final PlaybackView mPlayer;
         private final Video mVideo;
 
         private TestController(Video video) throws Exception {
-            this(video, null);
+            this(video, (String) null);
+        }
+
+        private TestController(Video video, List<FormatItem> videoFormats, FormatItem videoFormat) throws Exception {
+            this(video, null, playerStub(videoFormats, videoFormat));
         }
 
         /**
          * @param formatClient of the video's formats, null when it has none
          */
         private TestController(Video video, String formatClient) throws Exception {
+            this(video, formatClient, playerStub());
+        }
+
+        private TestController(Video video, String formatClient, PlaybackView player) throws Exception {
             mVideo = video;
+            mPlayer = player;
             setAltContext(RuntimeEnvironment.getApplication());
 
             // Without a player: reloads and restarts do nothing

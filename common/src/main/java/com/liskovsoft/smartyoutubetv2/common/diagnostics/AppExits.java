@@ -30,6 +30,10 @@ public final class AppExits {
     public static final String KIND_APP_EXIT = "app_exit";
     private static final int MAX_EXITS = 16;
     /**
+     * Apart at most: processes that went together
+     */
+    private static final long SAME_EXIT_MS = 5_000;
+    /**
      * Of the main thread of an ANR's traces
      */
     private static final int MAX_TRACE_LINES = 30;
@@ -100,7 +104,7 @@ public final class AppExits {
 
             // Android closing a cached app to make room: nobody was using it. With the low memory killer's reports, its kills are
             // low_memory ones.
-            if (isReclaimed(exit)) {
+            if (isReclaimed(exit) || isOfMainExit(context, exit, exits)) {
                 continue;
             }
 
@@ -137,6 +141,26 @@ public final class AppExits {
         if (newest > lastSeen) {
             debuggingData.setLastAppExitTs(newest);
         }
+    }
+
+    /**
+     * A WebView's sandboxed process that went with the app's main one: one exit, recorded for the main one. Alone, its renderer failed.
+     */
+    @RequiresApi(30)
+    private static boolean isOfMainExit(Context context, ApplicationExitInfo exit, List<ApplicationExitInfo> exits) {
+        String process = exit.getProcessName();
+
+        if (process == null || !process.contains(":sandboxed_process")) {
+            return false;
+        }
+
+        for (ApplicationExitInfo other : exits) {
+            if (context.getPackageName().equals(other.getProcessName()) && Math.abs(other.getTimestamp() - exit.getTimestamp()) <= SAME_EXIT_MS) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

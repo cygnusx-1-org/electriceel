@@ -10,6 +10,7 @@ import android.os.SystemClock;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.google.android.exoplayer2.source.sabr.parser.SabrStream;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.videoinfo.V2.FetchStages;
@@ -65,6 +66,19 @@ public final class VideoStarts {
     static final String STAGE_AUDIO_INIT_CHUNK = "audio init chunk";
     static final String STAGE_LOADING_HELD = "loading held";
     static final String STAGE_CONNECT = "connect";
+    /**
+     * A request of the player, from being sent to the first byte of its answer (see Connections)
+     */
+    static final String STAGE_RESPONSE = "response";
+    /**
+     * A request of the player on an engine other than OkHttp, from being made to its answer's headers, connect included (see
+     * Connections#timeOpenings)
+     */
+    static final String STAGE_OPENING = "opening";
+    /**
+     * The wait SABR's server asked for, from when it said so (see ServerBackoffs)
+     */
+    static final String STAGE_SERVER_BACKOFF = "server backoff";
     /**
      * The first segments of a start, by kind: each its own row
      */
@@ -126,6 +140,8 @@ public final class VideoStarts {
     static LoadHoldSource sLoadHolds = LoadHolds::take;
     @VisibleForTesting
     static LoadHoldSource sConnections = Connections::take;
+    @VisibleForTesting
+    static LoadHoldSource sBackoffs = ServerBackoffs::take;
     @VisibleForTesting
     static Recorder sRecorder = VideoStarts::save;
     @VisibleForTesting
@@ -326,6 +342,8 @@ public final class VideoStarts {
         if (context != null) {
             sContext = context.getApplicationContext();
         }
+
+        SabrStream.setBackoffListener(ServerBackoffs::onBackoff);
     }
 
     public static void setListener(@Nullable Listener listener) {
@@ -891,8 +909,11 @@ public final class VideoStarts {
         if (timer.prepareMs >= 0) {
             // The player didn't load (e.g. its buffer was full): what a segment asked for late waited for
             result.addAll(sLoadHolds.take(timer.prepareMs, endMs));
-            // A new connection to the server: without one, a slow segment is the server's answer
+            // A new connection to the server, and each request's wait for the answer: without a long one, a slow segment is slow to
+            // come
             result.addAll(sConnections.take(timer.prepareMs, endMs));
+            // A wait asked for by the server and not waited: what's asked for in it may be answered late
+            result.addAll(sBackoffs.take(timer.prepareMs, endMs));
         }
 
         return result;
@@ -1043,6 +1064,7 @@ public final class VideoStarts {
         sScheduler = new HandlerScheduler();
         sLoadHolds = LoadHolds::take;
         sConnections = Connections::take;
+        sBackoffs = ServerBackoffs::take;
         sRecorder = VideoStarts::save;
         sFramesRecorder = VideoStarts::saveFrames;
     }

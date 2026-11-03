@@ -72,6 +72,20 @@ public final class LoadHolds {
     }
 
     /**
+     * The player was prepared with a source (see LoadControl#onPrepared): it let go of the buffer before, so the hold going on ends,
+     * and the ones before aren't of this source. Kept, the hold of the video before (e.g. its buffer full) showed in the next one's
+     * start, from its prepare till its first decision to load.
+     */
+    public static synchronized void onPrepared() {
+        if (sOpen != null) {
+            sOpen.endMs = sClock.now();
+            sOpen = null;
+        }
+
+        sHolds.clear();
+    }
+
+    /**
      * The ones between the times, cut to them, as stages of a start's buffering (in the clock's time)
      */
     static synchronized List<VideoStart.Stage> take(long fromMs, long toMs) {

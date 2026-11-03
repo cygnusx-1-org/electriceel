@@ -20,6 +20,7 @@ final class TimedLoadControl implements LoadControl {
     @Override
     public void onPrepared() {
         mLoadControl.onPrepared();
+        LoadHolds.onPrepared();
     }
 
     @Override

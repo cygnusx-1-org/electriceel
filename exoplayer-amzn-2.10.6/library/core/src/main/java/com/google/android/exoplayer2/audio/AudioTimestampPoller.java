@@ -203,6 +203,11 @@ import java.lang.annotation.RetentionPolicy;
    * position. If {@code true}, call {@link #getTimestampSystemTimeUs()} and {@link
    * #getTimestampSystemTimeUs()} to access the timestamp.
    */
+  /** For diagnostics: one of the states. */
+  public int getState() {
+    return state;
+  }
+
   public boolean hasTimestamp() {
     return state == STATE_TIMESTAMP || state == STATE_TIMESTAMP_ADVANCING;
   }

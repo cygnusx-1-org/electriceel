@@ -15,6 +15,7 @@ import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.analytics.AnalyticsListener;
+import com.google.android.exoplayer2.audio.AudioClockInfo;
 import com.google.android.exoplayer2.decoder.DecoderCounters;
 import com.google.android.exoplayer2.source.MediaSourceEventListener.LoadEventInfo;
 import com.google.android.exoplayer2.source.MediaSourceEventListener.MediaLoadData;
@@ -82,6 +83,8 @@ public class ExoPlayerController implements Player.EventListener {
     private float mVolume = 1f;
     private boolean mIsMuted;
     private final PlaybackHealth mHealth = new PlaybackHealth();
+    @Nullable
+    private AudioClockInfo mAudioClockInfo;
     private final Runnable mHealthCheck = this::checkHealth;
     /**
      * The video has a surface to be shown on. Without one (e.g. the sound plays on in the background) no frame is rendered.
@@ -119,6 +122,11 @@ public class ExoPlayerController implements Player.EventListener {
 
         @Override
         public void onLoadStarted(EventTime eventTime, LoadEventInfo loadEventInfo, MediaLoadData mediaLoadData) {
+            // Asked of, here: one that never answers has a server too. Not the subtitles': their server isn't the video's.
+            if (isTimedLoad(mediaLoadData) && (isVideoLoad(mediaLoadData) || mediaLoadData.trackType == C.TRACK_TYPE_AUDIO)) {
+                FormatAttempts.onRequest(loadEventInfo.uri != null ? loadEventInfo.uri.getHost() : null);
+            }
+
             if (isTimedLoad(mediaLoadData)) {
                 VideoStarts.onLoadStarted(mediaLoadData.dataType == C.DATA_TYPE_MEDIA_INITIALIZATION, isVideoLoad(mediaLoadData),
                         mediaLoadData.trackType == C.TRACK_TYPE_AUDIO, loadEventInfo.elapsedRealtimeMs);
@@ -128,7 +136,8 @@ public class ExoPlayerController implements Player.EventListener {
         @Override
         public void onLoadCompleted(EventTime eventTime, LoadEventInfo loadEventInfo, MediaLoadData mediaLoadData) {
             if (mediaLoadData.dataType == C.DATA_TYPE_MEDIA) {
-                FormatAttempts.onLoad(loadEventInfo.bytesLoaded, loadEventInfo.loadDurationMs);
+                FormatAttempts.onLoad(loadEventInfo.bytesLoaded, loadEventInfo.loadDurationMs, isVideoLoad(mediaLoadData),
+                        mediaLoadData.trackType == C.TRACK_TYPE_AUDIO, mediaLoadData.mediaEndTimeMs);
             }
 
             if (isTimedLoad(mediaLoadData)) {
@@ -223,6 +232,12 @@ public class ExoPlayerController implements Player.EventListener {
             sample.stallMs = FormatAttempts.getStallMs();
             sample.playedMs = FormatAttempts.getPlayedMs();
 
+            if (mAudioClockInfo != null) {
+                sample.audioTimestampState = mAudioClockInfo.timestampState;
+                sample.audioPlayheadMs = mAudioClockInfo.playheadMs;
+                sample.audioLatencyMs = mAudioClockInfo.latencyMs;
+            }
+
             DecoderCounters counters = mPlayer.getVideoDecoderCounters();
 
             if (counters != null) {
@@ -275,6 +290,7 @@ public class ExoPlayerController implements Player.EventListener {
 
         if (PlaybackHealth.KIND_START_FROZEN.equals(kind)) {
             failure.detail("frozenMs", mHealth.getStartFrozenMs());
+            failure.detail("clockStill", mHealth.isStartClockStill());
         }
 
         if (PlaybackHealth.KIND_START_FROZEN.equals(kind) || PlaybackHealth.KIND_FRAME_DROPS.equals(kind)) {
@@ -282,6 +298,12 @@ public class ExoPlayerController implements Player.EventListener {
 
             if (trail.length() > 0) {
                 failure.detail("startTrail", trail);
+            }
+
+            if (mAudioClockInfo != null) {
+                failure.detail("audioFramesMismatches", mAudioClockInfo.framesMismatches);
+                failure.detail("audioClockMismatches", mAudioClockInfo.clockMismatches);
+                failure.detail("audioBadLatencies", mAudioClockInfo.badLatencies);
             }
         }
 
@@ -377,6 +399,7 @@ public class ExoPlayerController implements Player.EventListener {
         mOnSourceChanged = true;
         mEventListener.onSourceChanged(getVideo());
         VideoStarts.onPrepare();
+        FormatAttempts.onPrepare();
         mPlayer.prepare(mediaSource);
         // Its first seconds are looked at closely: the check may be 2 s away, past its first frame
         Utils.removeCallbacks(mHealthCheck);
@@ -471,6 +494,13 @@ public class ExoPlayerController implements Player.EventListener {
      */
     public void setVideoRenderer(DebugInfoMediaCodecVideoRenderer renderer) {
         mFrameStepper.setPlayer(mPlayer, renderer);
+    }
+
+    /**
+     * For the diagnostics (see #checkHealth). Pass the one of the player set with {@link #setPlayer(SimpleExoPlayer)}.
+     */
+    public void setAudioClockInfo(@Nullable AudioClockInfo audioClockInfo) {
+        mAudioClockInfo = audioClockInfo;
     }
 
     /**

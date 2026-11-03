@@ -5,6 +5,7 @@ import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ApplicationExitInfo;
 import android.content.Context;
 
+import com.liskovsoft.smartyoutubetv2.common.prefs.DebuggingData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
 
 import org.json.JSONObject;
@@ -23,6 +24,7 @@ import org.robolectric.shadows.ShadowActivityManager.ApplicationExitInfoBuilder;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -36,6 +38,7 @@ public class AppExitsTest {
     public TemporaryFolder mFolder = new TemporaryFolder();
     private PlayerFailureLog mLog;
     private int mSavedEngine;
+    private long mSavedLastExitTs;
 
     @Before
     public void setUp() {
@@ -43,6 +46,9 @@ public class AppExitsTest {
         FormatAttempts.resetForTesting();
         // Cronet can't load under Robolectric
         mSavedEngine = PlayerTweaksData.instance(getContext()).getPlayerDataSource();
+        // The exits seen are kept between the tests: each sees its own
+        mSavedLastExitTs = DebuggingData.instance(getContext()).getLastAppExitTs();
+        DebuggingData.instance(getContext()).setLastAppExitTs(0);
         PlayerTweaksData.instance(getContext()).setPlayerDataSource(PlayerTweaksData.PLAYER_DATA_SOURCE_OKHTTP);
     }
 
@@ -52,6 +58,7 @@ public class AppExitsTest {
         FormatAttempts.resetForTesting();
         PlayerFailureLog.useForTesting(null);
         PlayerTweaksData.instance(getContext()).setPlayerDataSource(mSavedEngine);
+        DebuggingData.instance(getContext()).setLastAppExitTs(mSavedLastExitTs);
     }
 
     /**
@@ -100,6 +107,52 @@ public class AppExitsTest {
         assertEquals(RunningAppProcessInfo.IMPORTANCE_SERVICE, details.getInt("importance"));
         assertEquals(9, details.getInt("status"));
         assertEquals(ActivityManager.isLowMemoryKillReportSupported(), details.getBoolean("lowMemoryKillReport"));
+    }
+
+    /**
+     * The WebView's process, killed with the app's: one exit
+     */
+    @Test
+    @Config(sdk = 30)
+    public void aSandboxedProcessThatWentWithTheAppIsNotRecordedToo() throws Exception {
+        long now = System.currentTimeMillis() - 120_000;
+        addExit("com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0", now);
+        addExit(getContext().getPackageName(), now + 25);
+
+        AppExits.recordNew(getContext());
+
+        List<JSONObject> events = mLog.readAll();
+        assertEquals(1, events.size());
+        assertEquals(getContext().getPackageName(), events.get(0).getJSONObject("details").getString("process"));
+    }
+
+    /**
+     * Alone, the WebView's renderer failed
+     */
+    @Test
+    @Config(sdk = 30)
+    public void aSandboxedProcessThatWentAloneIsRecorded() throws Exception {
+        long now = System.currentTimeMillis() - 120_000;
+        String sandbox = "com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0";
+        addExit(sandbox, now);
+        addExit(getContext().getPackageName(), now + 60_000);
+
+        AppExits.recordNew(getContext());
+
+        List<JSONObject> events = mLog.readAll();
+        assertEquals(2, events.size());
+        assertEquals(sandbox, events.get(0).getJSONObject("details").getString("process"));
+    }
+
+    private void addExit(String process, long timestamp) {
+        ActivityManager activityManager = (ActivityManager) getContext().getSystemService(Context.ACTIVITY_SERVICE);
+        shadowOf(activityManager).addApplicationExitInfo(ApplicationExitInfoBuilder.newBuilder()
+                .setTimestamp(timestamp)
+                .setReason(ApplicationExitInfo.REASON_SIGNALED)
+                .setStatus(9)
+                .setImportance(RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE)
+                .setProcessName(process)
+                .build());
     }
 
     /**

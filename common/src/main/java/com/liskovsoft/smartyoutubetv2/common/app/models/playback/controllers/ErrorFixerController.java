@@ -1,5 +1,7 @@
 package com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers;
 
+import android.os.SystemClock;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 
@@ -30,7 +32,9 @@ import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailure;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailureLog;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStarts;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.errors.DecoderErrorFallback;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.ExoFormatItem;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.TrackSelectorUtil;
 import com.liskovsoft.smartyoutubetv2.common.misc.BufferingDetector;
 import com.liskovsoft.smartyoutubetv2.common.misc.BufferingDetector.OnLongBuffering;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
@@ -41,12 +45,17 @@ import com.liskovsoft.youtubeapi.videoinfo.V2.ClientAttempts;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 public class ErrorFixerController extends BasePlayerController implements OnLongBuffering {
     private static final String TAG = ErrorFixerController.class.getSimpleName();
     private static final long STREAM_END_THRESHOLD_MS = 180_000;
     private static final int MAX_SABR_ERROR_FIX_ATTEMPTS = 3;
     private static final int MAX_NETWORK_ERROR_RELOADS = 3;
+    /**
+     * Stalled long again within this: the quality is lowered rather than reloading again
+     */
+    private static final long REPEATED_STALL_MS = 3 * 60 * 1_000;
     private static final long AUDIO_PLAYED_MS = 1_000;
     private static final int UNPLAYABLE_RELOAD_MS = 30_000;
     private static final long AUDIO_PLAYED_CHECK_MS = 2_000;
@@ -74,6 +83,11 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
      * The video reloaded once for a first segment that never came (see runLongBufferingAction)
      */
     private String mStuckLoadVideoId;
+    /**
+     * The last long stall (see isRepeatedStall)
+     */
+    private String mStallVideoId;
+    private long mStallTimeMs;
     /**
      * Where the playback started (see onPlay)
      */
@@ -116,6 +130,7 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
         }
 
         PlayerFailure failure = newFailure(PlayerFailure.KIND_STALL);
+        FormatAttempts.addStallDetails(failure, getPlayer().getPositionMs());
 
         try {
             runLongBufferingAction(failure);
@@ -164,12 +179,11 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
                 YouTubeServiceManager.instance().switchNextClientNow();
                 mVideoLoaderController.reloadVideo();
             }
+        } else if (isOfflineVideo() && isRepeatedStall() && lowerVideoQuality()) {
+            // A reload didn't help: the connection can't keep up with this format right now. For this video only.
+            failure.action("lower_quality").action("restart_engine");
+            mVideoLoaderController.restartEngine();
         } else {
-            // NOTE: The bug. Avoid calling reloadVideo() after lowering the quality.
-            // This will change current format to 'Disabled'. Do restartEngine() instead.
-            //lowerVideoQuality();
-            //mVideoLoaderController.restartEngine();
-
             // SABR may hang if the server issues a high backoffTime
             failure.action("reload_video");
             mVideoLoaderController.reloadVideo();
@@ -999,31 +1013,76 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
      * NOTE: The bug. Avoid calling reloadVideo() after lowering the quality.<br/>
      * This will change current format to 'Disabled'. Do reloadEngine() instead.
      */
-    private void lowerVideoQuality() {
+    private boolean lowerVideoQuality() {
         if (getPlayer() == null) {
-            return;
+            return false;
         }
 
         List<FormatItem> videoFormats = getPlayer().getVideoFormats();
-
-        if (videoFormats == null) {
-            return;
-        }
-
         FormatItem videoFormat = getPlayer().getVideoFormat();
 
+        if (videoFormats == null || videoFormat == null) {
+            return false;
+        }
+
+        int size = Math.max(videoFormat.getWidth(), videoFormat.getHeight());
+
         // Limit by 720p
-        if (Math.max(videoFormat.getWidth(), videoFormat.getHeight()) <= 1280) {
-            return;
+        if (size <= 1280) {
+            return false;
         }
 
-        int idx = videoFormats.indexOf(videoFormat);
-        int nextIdx = idx + 1;
+        // The next size down: another codec of the same size wouldn't help. The first of it, as the list prefers.
+        FormatItem lower = null;
 
-        if (videoFormats.size() > nextIdx) {
-            FormatItem formatItem = videoFormats.get(nextIdx);
-            // This helps to persist the format between engine restart
-            getPlayerData().setTempVideoFormat(formatItem);
+        for (FormatItem format : videoFormats) {
+            int formatSize = Math.max(format.getWidth(), format.getHeight());
+
+            if (formatSize > 0 && formatSize < size && (lower == null || formatSize > Math.max(lower.getWidth(), lower.getHeight()))) {
+                lower = format;
+            }
         }
+
+        String codec = getCodecName(lower);
+
+        if (codec == null) {
+            return false;
+        }
+
+        // A limit, as the decoder error fallback's, not the track: the track list is the stream's, and a reload makes another one. The
+        // fps is a limit too, so 30 fps videos match.
+        FormatItem limit = ExoFormatItem.fromVideoSpec(String.format(Locale.US, "%d,%d,60,%s", lower.getWidth(), lower.getHeight(), codec),
+                false);
+
+        if (limit == null) {
+            return false;
+        }
+
+        // This helps to persist the format between engine restart
+        getPlayerData().setTempVideoFormat(limit);
+        // And a reload of the video (see onNewVideo). Till another video.
+        mVideoFallback = limit;
+
+        return true;
+    }
+
+    @Nullable
+    private static String getCodecName(FormatItem format) {
+        Format trackFormat = format.getTrack() != null ? format.getTrack().format : null;
+
+        return trackFormat != null && trackFormat.codecs != null ? TrackSelectorUtil.codecNameShort(trackFormat.codecs) : null;
+    }
+
+    /**
+     * The video stalled long not long after the last time
+     */
+    private boolean isRepeatedStall() {
+        String videoId = getVideo() != null ? getVideo().videoId : null;
+        long nowMs = SystemClock.elapsedRealtime();
+        boolean isRepeated = videoId != null && videoId.equals(mStallVideoId) && nowMs - mStallTimeMs <= REPEATED_STALL_MS;
+        mStallVideoId = videoId;
+        mStallTimeMs = nowMs;
+
+        return isRepeated;
     }
 }

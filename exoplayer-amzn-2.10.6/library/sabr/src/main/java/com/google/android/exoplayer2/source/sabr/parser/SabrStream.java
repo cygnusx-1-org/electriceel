@@ -96,6 +96,19 @@ public class SabrStream {
      */
     private volatile boolean isInitRequest;
     @Nullable private volatile IOException responseError;
+    @Nullable private static volatile BackoffListener backoffListener;
+
+    /**
+     * Told each wait the server asks for (see NextRequestPolicy#getBackoffTimeMs), e.g. for the app's timing of video starts: one
+     * under SabrExtractorInput's MIN_SWALLOW_BACKOFF_MS isn't waited. On the loader's thread.
+     */
+    public interface BackoffListener {
+        void onBackoff(int backoffMs);
+    }
+
+    public static void setBackoffListener(@Nullable BackoffListener listener) {
+        backoffListener = listener;
+    }
 
     private static class NoSegmentsTracker {
         public int consecutiveRequests = 0;
@@ -465,6 +478,11 @@ public class SabrStream {
 
         Log.d(TAG, "Process NextRequestPolicy: %s", nextRequestPolicy);
         processor.processNextRequestPolicy(nextRequestPolicy);
+        BackoffListener listener = backoffListener;
+
+        if (listener != null && nextRequestPolicy.getBackoffTimeMs() > 0) {
+            listener.onBackoff(nextRequestPolicy.getBackoffTimeMs());
+        }
     }
 
     private void processSabrError(UMPPart part) {

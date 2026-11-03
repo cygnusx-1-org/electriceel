@@ -232,6 +232,8 @@ public class DiagnosticsContractTest {
 
         // A video playing: formats tried, offered, decoders, frames, a stall, segments loaded
         FormatAttempts.onNewVideo(getContext(), "video");
+        FormatAttempts.onPrepare();
+        FormatAttempts.onRequest("rr1---sn-a.googlevideo.com");
         FormatAttempts.onTracks(VP9_4K, FormatItem.AUDIO_51_EC3);
         FormatAttempts.onOffered(Arrays.asList(VP9_4K, AVC_FHD), Collections.singletonList(FormatItem.AUDIO_HQ_MP4A));
         FormatAttempts.onDecoder(true, "OMX.vendor.vp9.decoder");

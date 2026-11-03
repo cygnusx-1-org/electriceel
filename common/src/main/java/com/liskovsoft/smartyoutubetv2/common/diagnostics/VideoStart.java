@@ -312,6 +312,7 @@ public final class VideoStart {
                 return Category.APP;
             case VideoStarts.STAGE_QUEUE:
             case VideoStarts.STAGE_LOADING_HELD:
+            case VideoStarts.STAGE_SERVER_BACKOFF:
             case "lock wait":
                 return Category.WAIT;
             case VideoStarts.STAGE_FORMATS:

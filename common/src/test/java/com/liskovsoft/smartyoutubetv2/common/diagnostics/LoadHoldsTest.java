@@ -68,6 +68,30 @@ public class LoadHoldsTest {
     }
 
     /**
+     * The video before's full buffer held its loading back: prepared with the next one's source, that hold isn't the next start's
+     */
+    @Test
+    public void aPrepareEndsTheHoldsOfTheSourceBefore() {
+        mNow.set(11_000);
+        LoadHolds.onDecision(false, 37_000_000, 41_000_000);
+        mNow.set(12_000);
+        LoadHolds.onPrepared();
+        mNow.set(12_039);
+        LoadHolds.onDecision(true, 0, 0); // the new source's first decision
+        mNow.set(12_500);
+        LoadHolds.onDecision(false, 0, 1_000_000);
+        mNow.set(12_600);
+        LoadHolds.onDecision(true, 0, 1_000_000);
+
+        List<VideoStart.Stage> holds = LoadHolds.take(11_990, 13_000);
+
+        assertEquals(1, holds.size());
+        assertEquals(12_500, holds.get(0).startMs);
+        assertEquals(12_600, holds.get(0).endMs);
+        assertEquals("buffered 0.0 s, 1 MB", holds.get(0).detail);
+    }
+
+    /**
      * Told the period ended, the player's buffered duration isn't a time
      */
     @Test

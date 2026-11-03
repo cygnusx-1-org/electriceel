@@ -208,6 +208,29 @@ public class VideoStartsTest {
     }
 
     /**
+     * The waits for the server's answers and the backoffs it asked for are in the buffering, with the connections
+     */
+    @Test
+    public void responsesAndBackoffsAreInTheBuffering() {
+        VideoStarts.sConnections = (fromMs, toMs) -> Collections.singletonList(
+                new VideoStart.Stage(VideoStarts.STAGE_RESPONSE, null, 1, fromMs, fromMs + 3_500));
+        VideoStarts.sBackoffs = (fromMs, toMs) -> Collections.singletonList(
+                new VideoStart.Stage(VideoStarts.STAGE_SERVER_BACKOFF, "3000 ms asked", 1, fromMs + 10, fromMs + 3_010));
+        VideoStart start = mFixture.slowStart();
+        boolean isResponseFound = false;
+        boolean isBackoffFound = false;
+
+        for (VideoStart.Stage stage : start.stages) {
+            isResponseFound |= VideoStarts.STAGE_RESPONSE.equals(stage.name) && stage.depth == 1 && stage.getDurationMs() == 3_500;
+            isBackoffFound |= VideoStarts.STAGE_SERVER_BACKOFF.equals(stage.name) && "3000 ms asked".equals(stage.detail)
+                    && stage.getCategory() == VideoStart.Category.WAIT;
+        }
+
+        assertTrue(isResponseFound);
+        assertTrue(isBackoffFound);
+    }
+
+    /**
      * The formats were fetched while the player started: both rows from the click, the fetch's stages in it
      */
     @Test

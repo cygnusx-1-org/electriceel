@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.multidex.MultiDexApplication;
 import androidx.work.Configuration;
 
+import com.bumptech.glide.Glide;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.BrowseSection;
@@ -44,6 +45,7 @@ import com.liskovsoft.smartyoutubetv2.tv.ui.search.tags.SearchTagsActivity;
 import com.liskovsoft.smartyoutubetv2.tv.ui.settingscards.SettingsCardsActivity;
 import com.liskovsoft.smartyoutubetv2.tv.ui.signin.SignInActivity;
 import com.liskovsoft.smartyoutubetv2.tv.ui.webbrowser.WebBrowserActivity;
+import com.liskovsoft.youtubeapi.service.YouTubeServiceManager;
 
 import org.conscrypt.Conscrypt;
 
@@ -98,6 +100,21 @@ public class MainApplication extends MultiDexApplication implements Configuratio
 
         // The channels can be updated with nothing else of the app running
         HomeScreenPlaylistsData.registerChannelsSource(this);
+    }
+
+    /**
+     * Hidden, the UI's images and the TV poToken's WebView only make the process a bigger target for the low memory killer: it kills
+     * one with a foreground service running too (e.g. the remote control's, see AppExits). The images shown stay: Glide keeps the
+     * ones in use, and by itself only halves its cache for a hidden UI.
+     */
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+
+        if (level >= TRIM_MEMORY_UI_HIDDEN) {
+            Glide.get(this).clearMemory();
+            YouTubeServiceManager.instance().trimMemory();
+        }
     }
 
     /**

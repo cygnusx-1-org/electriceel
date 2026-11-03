@@ -128,7 +128,15 @@ public class ExoMediaSourceFactory {
 
     private DataSource.Factory buildDataSourceFactory(boolean useBandwidthMeter, int readTimeoutMs) {
         DefaultBandwidthMeter bandwidthMeter = useBandwidthMeter ? BANDWIDTH_METER : null;
-        return new DefaultDataSourceFactory(mContext, bandwidthMeter, buildHttpDataSourceFactory(useBandwidthMeter, readTimeoutMs));
+        HttpDataSource.Factory httpFactory = buildHttpDataSourceFactory(useBandwidthMeter, readTimeoutMs);
+        DataSource.Factory factory = new DefaultDataSourceFactory(mContext, bandwidthMeter, httpFactory);
+
+        if (httpFactory instanceof OkHttpDataSourceFactory) {
+            return factory; // its client times connections and responses (see Connections#LISTENER)
+        }
+
+        // The video starts' timing of the other engines' requests
+        return () -> Connections.timeOpenings(factory.createDataSource());
     }
 
     /**

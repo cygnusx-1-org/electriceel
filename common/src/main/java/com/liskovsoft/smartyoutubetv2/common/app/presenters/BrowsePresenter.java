@@ -172,6 +172,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         super.onViewResumed();
 
         refreshIfNeeded();
+        MediaServiceManager.instance().warmUpPlaybackIfExpired();
     }
 
     private void refreshIfNeeded() {

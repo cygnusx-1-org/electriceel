@@ -61,6 +61,52 @@ public class FormatAttemptsTest {
     /**
      * The fix's fallback is tried after the failure is recorded: the failure still ends with it
      */
+    /**
+     * Which track ran out and how fast it loads lately, not over all the format played. Of the format tried.
+     */
+    @Test
+    public void aLongStallSaysWhatItCameFrom() throws Exception {
+        long[] now = {1_000_000};
+        FormatAttempts.sClock = () -> now[0];
+        FormatAttempts.onNewVideo(getContext(), "video");
+        FormatAttempts.onTracks(VP9_4K, FormatItem.AUDIO_HQ_MP4A);
+        FormatAttempts.onLoad(100_000_000, 1_000, true, false, 60_000); // fast, long ago
+        now[0] += 40_000;
+        FormatAttempts.onLoad(1_000_000, 4_000, false, true, 70_000); // 2,000 kbps
+        now[0] += 5_000;
+        FormatAttempts.onLoad(1_000_000, 4_000, true, false, 65_000);
+        now[0] += 7_000;
+
+        PlayerFailure failure = PlayerFailure.create(getContext(), PlayerFailure.KIND_STALL);
+        FormatAttempts.addStallDetails(failure, 64_000);
+        failure.record();
+
+        org.json.JSONObject details = mLog.readAll().get(0).getJSONObject("details");
+        assertEquals(1_000, details.getLong("videoBufferedMs"));
+        assertEquals(6_000, details.getLong("audioBufferedMs"));
+        assertEquals(7_000, details.getLong("videoLoadAgoMs"));
+        assertEquals(12_000, details.getLong("audioLoadAgoMs"));
+        assertEquals(2_000, details.getLong("recentThroughputKbps"));
+    }
+
+    /**
+     * Nothing known yet isn't a buffer of 0
+     */
+    @Test
+    public void aLongStallBeforeAnySegmentSaysNothingOfTheBuffers() throws Exception {
+        FormatAttempts.onNewVideo(getContext(), "video");
+        FormatAttempts.onTracks(VP9_4K, FormatItem.AUDIO_HQ_MP4A);
+
+        PlayerFailure failure = PlayerFailure.create(getContext(), PlayerFailure.KIND_STALL);
+        FormatAttempts.addStallDetails(failure, 64_000);
+        failure.record();
+
+        org.json.JSONObject details = mLog.readAll().get(0).getJSONObject("details");
+        assertTrue(details.isNull("videoBufferedMs"));
+        assertTrue(details.isNull("audioBufferedMs"));
+        assertTrue(details.isNull("recentThroughputKbps"));
+    }
+
     @Test
     public void aFailureEndsWithTheLastFormatTried() throws Exception {
         FormatAttempts.onNewVideo(getContext(), "first");
@@ -90,6 +136,57 @@ public class FormatAttemptsTest {
         assertTrue(state.has("heapMaxMb"));
         assertTrue(state.has("network"));
         assertTrue(state.has("displayMode"));
+    }
+
+    /**
+     * The same format reloaded after a stall: which servers each try's segments were asked of, by number. A try's first requests
+     * come before its tracks are known: they're its own, not the try's before.
+     */
+    @Test
+    public void eachAttemptSaysWhichServersItsSegmentsCameFrom() throws Exception {
+        FormatAttempts.onNewVideo(getContext(), "video");
+        FormatAttempts.onPrepare();
+        FormatAttempts.onRequest("rr1---sn-a.googlevideo.com"); // before the tracks are known
+        FormatAttempts.onTracks(VP9_4K, FormatItem.AUDIO_HQ_MP4A);
+        FormatAttempts.onRequest("rr1---sn-a.googlevideo.com");
+        failure("video").record();
+
+        // The reload's source, from another server
+        FormatAttempts.onPrepare();
+        FormatAttempts.onRequest("rr4---sn-b.googlevideo.com");
+        FormatAttempts.onTracks(VP9_4K, FormatItem.AUDIO_HQ_MP4A);
+        FormatAttempts.onRequest("rr1---sn-a.googlevideo.com"); // the first one again: its number again
+        FormatAttempts.end(getContext());
+
+        JSONObject event = mLog.readAll().get(0);
+        JSONArray attempted = event.getJSONObject("formats").getJSONArray("attempted");
+
+        assertEquals(2, attempted.length());
+        assertEquals("[1]", attempted.getJSONObject(0).getJSONArray("hosts").toString());
+        assertEquals("[2,1]", attempted.getJSONObject(1).getJSONArray("hosts").toString());
+        // Their numbers only
+        assertFalse(event.toString().contains("googlevideo"));
+    }
+
+    /**
+     * The engine restarted with the same format and nothing failed: the try goes on, with the new source's servers
+     */
+    @Test
+    public void anAttemptThatGoesOnTakesTheNewSourcesServers() throws Exception {
+        FormatAttempts.onNewVideo(getContext(), "video");
+        FormatAttempts.onPrepare();
+        FormatAttempts.onTracks(VP9_4K, FormatItem.AUDIO_HQ_MP4A);
+        FormatAttempts.onRequest("a.example");
+        FormatAttempts.onPrepare();
+        FormatAttempts.onRequest("b.example");
+        FormatAttempts.onTracks(VP9_4K, FormatItem.AUDIO_HQ_MP4A);
+        FormatAttempts.onRequest("c.example");
+        failure("video").record();
+
+        JSONArray attempted = mLog.readAll().get(0).getJSONObject("formats").getJSONArray("attempted");
+
+        assertEquals(1, attempted.length());
+        assertEquals("[1,2,3]", attempted.getJSONObject(0).getJSONArray("hosts").toString());
     }
 
     @Test

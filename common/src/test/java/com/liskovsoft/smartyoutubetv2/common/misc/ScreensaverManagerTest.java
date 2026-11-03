@@ -252,6 +252,9 @@ public class ScreensaverManagerTest {
         assertFalse(isRegistryLocked());
 
         playerController.destroy();
+        // Paused first, as Android does: resumed, it's still among AppPrefs' listeners, which only the GC lets go of, and a profile
+        // change of a later test recreated it destroyed
+        browseController.pause();
         browseController.destroy();
         drainImmediateTasks();
         assertFalse(isRegistryLocked());

@@ -431,6 +431,18 @@ public final class DefaultAudioSink implements AudioSink {
     }
   }
 
+  /** For diagnostics, of the AudioTrack in use. */
+  public AudioClockInfo getClockInfo() {
+    return audioTrackPositionTracker.getClockInfo();
+  }
+
+  /**
+   * @param disabled Whether the position goes by the playhead alone, not AudioTrack#getTimestamp, for all the tracks to come.
+   */
+  public void setAudioTimestampsDisabled(boolean disabled) {
+    audioTrackPositionTracker.setTimestampsDisabled(disabled);
+  }
+
   @Override
   public long getCurrentPositionUs(boolean sourceEnded) {
     if (!isInitialized() || startMediaTimeState == START_NOT_SET) {

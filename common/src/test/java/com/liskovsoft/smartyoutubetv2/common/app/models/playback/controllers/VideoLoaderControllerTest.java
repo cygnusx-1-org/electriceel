@@ -24,6 +24,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -66,6 +67,58 @@ public class VideoLoaderControllerTest {
 
         // Another live stream: its own tries
         assertTrue(isLiveClientToSwitch(new TestController(video("d8Oc90QevaI")), live));
+    }
+
+    /**
+     * Opened again, or another live stream of the channel: straight to the client that came after the first
+     */
+    @Test
+    public void aLiveStreamTheFirstClientHadNothingForStartsOnTheNextOne() throws Exception {
+        Map<String, Object> values = new HashMap<>();
+        values.put("isLive", true);
+        values.put("getPlayabilityStatus", "OK");
+        values.put("getChannelId", "channel");
+        TestController controller = new TestController(video("WsDyRAPFBC8"));
+        assertTrue(isLiveClientToSwitch(controller, formatInfo(values)));
+
+        // Left for another video: the switch is undone, and only that
+        Video other = video("regular");
+        resetLiveClientSwitch(controller, other);
+        assertNull(getField(controller, "mLiveSwitchVideoId"));
+
+        // The same stream, not known as live yet (e.g. a link)
+        resetLiveClientSwitch(controller, video("WsDyRAPFBC8"));
+        assertEquals("WsDyRAPFBC8", getField(controller, "mLiveSwitchVideoId"));
+        assertEquals(1, getField(controller, "mLiveClientSwitches"));
+
+        resetLiveClientSwitch(controller, other);
+
+        // The channel's: only when live, a regular video of it plays on the first client
+        Video channelVideo = video("channelVideo");
+        channelVideo.channelId = "channel";
+        resetLiveClientSwitch(controller, channelVideo);
+        assertNull(getField(controller, "mLiveSwitchVideoId"));
+
+        Video channelLive = video("channelLive");
+        channelLive.channelId = "channel";
+        channelLive.isLive = true;
+        resetLiveClientSwitch(controller, channelLive);
+        assertEquals("channelLive", getField(controller, "mLiveSwitchVideoId"));
+    }
+
+    /**
+     * None of them had it: nothing's known to work for the next time
+     */
+    @Test
+    public void aLiveStreamNoClientHadIsNotRemembered() throws Exception {
+        TestController controller = new TestController(video("WsDyRAPFBC8"));
+        MediaItemFormatInfo live = formatInfo(true, "OK");
+
+        for (int i = 0; i < 4; i++) {
+            isLiveClientToSwitch(controller, live);
+        }
+
+        assertTrue(((Map<?, ?>) getField(controller, "mLiveSwitches")).isEmpty());
     }
 
     /**
@@ -112,6 +165,19 @@ public class VideoLoaderControllerTest {
         method.setAccessible(true);
 
         return (boolean) method.invoke(controller, formatInfo);
+    }
+
+    private static void resetLiveClientSwitch(VideoLoaderController controller, Video video) throws Exception {
+        Method method = VideoLoaderController.class.getDeclaredMethod("resetLiveClientSwitch", Video.class);
+        method.setAccessible(true);
+        method.invoke(controller, video);
+    }
+
+    private static Object getField(VideoLoaderController controller, String name) throws Exception {
+        java.lang.reflect.Field field = VideoLoaderController.class.getDeclaredField(name);
+        field.setAccessible(true);
+
+        return field.get(controller);
     }
 
     private static MediaItemFormatInfo formatInfo(boolean isLive, String status) {

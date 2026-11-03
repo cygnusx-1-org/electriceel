@@ -183,6 +183,7 @@ public class PlaybackHealthTest {
     @Test
     public void framesDroppedAfterAFreezeOfTheStartAreStillReported() {
         aFreezeOfTheStartIsReportedWhenItEnds();
+        assertFalse(mHealth.isStartClockStill());
         mFound.clear();
 
         tick(500, 500, 21, 120);
@@ -190,6 +191,103 @@ public class PlaybackHealthTest {
 
         tick(500, 500, 22, 160);
         assertEquals(Collections.singletonList(PlaybackHealth.KIND_FRAME_DROPS), mFound);
+    }
+
+    /**
+     * As a SHIELD's: the audio clock holds the position and the picture about 5 s, then jumps, and the renderer drops what it's late for
+     */
+    @Test
+    public void aClockStillAtTheStartIsAFreezeNotFrameDrops() {
+        mSample.isVideoRendered = true;
+        tick(500, 0, 1, 0);
+
+        for (int i = 0; i < 8; i++) {
+            tick(500, 0, 1, 0);
+        }
+
+        assertTrue(mFound.isEmpty());
+
+        tick(500, 4_977, 2, 11);
+        assertEquals(Collections.singletonList(PlaybackHealth.KIND_START_FROZEN), mFound);
+        assertEquals(4_000, mHealth.getStartFrozenMs());
+        assertTrue(mHealth.isStartClockStill());
+
+        tick(500, 500, 7, 115);
+        tick(500, 500, 9, 132);
+        tick(500, 500, 21, 132);
+        assertEquals(1, mFound.size());
+    }
+
+    @Test
+    public void aClockStillAtTheStartIsThePicturesLongestStill() {
+        aClockStillAtTheStartIsAFreezeNotFrameDrops();
+
+        for (int i = 0; i < 12; i++) {
+            tick(500, 500, 21 + i * 12, 132);
+        }
+
+        PlaybackHealth.StartFrames frames = mHealth.takeStartFrames();
+
+        assertEquals(4_000, frames.longestFrozenMs);
+    }
+
+    @Test
+    public void framesDroppedAfterAClockStillAreStillReported() {
+        aClockStillAtTheStartIsAFreezeNotFrameDrops();
+        mFound.clear();
+
+        tick(500, 500, 33, 132);
+        tick(500, 500, 34, 172);
+        assertEquals(Collections.singletonList(PlaybackHealth.KIND_FRAME_DROPS), mFound);
+    }
+
+    /**
+     * The renderer dropping on and on past what it's late for is frame drops too
+     */
+    @Test
+    public void dropsThatGoOnPastTheCatchUpAreReported() {
+        mSample.isVideoRendered = true;
+        tick(500, 0, 1, 0);
+
+        for (int i = 0; i < 8; i++) {
+            tick(500, 0, 1, 0);
+        }
+
+        tick(500, 4_977, 2, 20);
+        mFound.clear();
+
+        // The catch up, all of it dropping
+        for (long playedMs = 500; playedMs <= PlaybackHealth.CATCH_UP_MS; playedMs += 500) {
+            tick(500, 500, 2 + playedMs / 500, 20 + playedMs / 500 * 20);
+        }
+
+        assertTrue(mFound.isEmpty());
+
+        tick(500, 500, 7, 120);
+        tick(500, 500, 8, 140);
+        assertEquals(Collections.singletonList(PlaybackHealth.KIND_FRAME_DROPS), mFound);
+    }
+
+    @Test
+    public void aClockStillPastTheStartIsNotAFreezeOfIt() {
+        mSample.isVideoRendered = true;
+        playPastTheStart();
+        tick(2_000, 0, 360, 0);
+        tick(2_000, 0, 360, 0);
+        tick(2_000, 6_000, 420, 0);
+
+        assertTrue(mFound.isEmpty());
+    }
+
+    @Test
+    public void aShortClockStillAtTheStartIsNothing() {
+        mSample.isVideoRendered = true;
+        tick(500, 0, 1, 0);
+        tick(500, 0, 1, 0);
+        tick(500, 0, 1, 0);
+        tick(500, 1_500, 13, 0);
+
+        assertTrue(mFound.isEmpty());
     }
 
     @Test
@@ -312,10 +410,13 @@ public class PlaybackHealthTest {
     public void theStartsTrailIsOnlyGivenDuringIt() {
         mSample.inputBuffers = 7;
         mSample.droppedToKeyframes = 1;
+        mSample.audioTimestampState = 2;
+        mSample.audioPlayheadMs = 480;
+        mSample.audioLatencyMs = 20;
         tick(500, 500, 3, 2);
 
         assertEquals(1, mHealth.getStartTrail().size());
-        assertArrayEquals(new long[]{0, 500, 3, 2, 7, 1}, mHealth.getStartTrail().get(0));
+        assertArrayEquals(new long[]{0, 500, 3, 2, 7, 1, 2, 480, 20}, mHealth.getStartTrail().get(0));
 
         playPastTheStart();
         assertTrue(mHealth.getStartTrail().isEmpty());

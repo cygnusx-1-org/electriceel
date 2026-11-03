@@ -52,6 +52,11 @@ public final class PlaybackHealth {
      */
     @VisibleForTesting
     static final long START_STUCK_MS = 8_000;
+    /**
+     * After the position stood still and jumped, the renderer drops what it's now late for: at most this long
+     */
+    @VisibleForTesting
+    static final long CATCH_UP_MS = 2_000;
     public static final long START_TICK_MS = 500;
     private static final long TICK_MS = 2_000;
     /**
@@ -92,6 +97,13 @@ public final class PlaybackHealth {
     private long mLastRendered = -1;
     private long mNoFrameMs;
     private long mFrozenMs;
+    /**
+     * The position and the frames stood still this long, while it's playing (the audio clock, see AudioClockInfo)
+     */
+    private long mClockStillMs;
+    private boolean mIsStartClockStill;
+    private long mCatchUpEndMs = -1;
+    private long mCatchUpDropped = -1;
     private final ArrayDeque<long[]> mFrames = new ArrayDeque<>(); // {time, rendered, dropped}
     /**
      * Of the format tried, by the ticks
@@ -148,6 +160,12 @@ public final class PlaybackHealth {
          */
         public long inputBuffers = -1;
         /**
+         * Of the audio clock (see AudioClockInfo), -1 when unknown
+         */
+        public int audioTimestampState = -1;
+        public long audioPlayheadMs = -1;
+        public long audioLatencyMs = -1;
+        /**
          * A frame of the format tried was shown
          */
         public boolean isVideoRendered;
@@ -177,7 +195,7 @@ public final class PlaybackHealth {
         public final long droppedFrames;
         public final long droppedToKeyframes;
         /**
-         * The picture stood still this long while the position moved
+         * The picture stood still this long, while the position moved or stood still too
          */
         public final long longestFrozenMs;
 
@@ -227,6 +245,7 @@ public final class PlaybackHealth {
             mLastTickMs = sample.nowMs;
             mLastPositionMs = -1;
             mFrozenMs = 0;
+            mClockStillMs = 0;
             return result;
         }
 
@@ -240,7 +259,7 @@ public final class PlaybackHealth {
 
         if (sample.hasVideo && sample.renderedFrames >= 0 && mPlayedMs <= START_MS && mStartTrail.size() < MAX_START_TRAIL) {
             mStartTrail.add(new long[]{mPlayedMs, sample.positionMs, sample.renderedFrames, sample.droppedFrames, sample.inputBuffers,
-                    sample.droppedToKeyframes});
+                    sample.droppedToKeyframes, sample.audioTimestampState, sample.audioPlayheadMs, sample.audioLatencyMs});
         }
 
         if (sample.hasVideo && !sample.isVideoRendered && wasPlaying) {
@@ -255,8 +274,10 @@ public final class PlaybackHealth {
             boolean hasMoved = sample.positionMs - mLastPositionMs >= elapsedMs / 2;
             boolean isStill = sample.renderedFrames == mLastRendered;
             long frozenMs = mFrozenMs;
+            long clockStillMs = mClockStillMs;
             mFrozenMs = hasMoved && isStill ? mFrozenMs + elapsedMs : 0;
-            mLongestFrozenMs = Math.max(mLongestFrozenMs, mFrozenMs);
+            mClockStillMs = !hasMoved && isStill ? mClockStillMs + elapsedMs : 0;
+            mLongestFrozenMs = Math.max(mLongestFrozenMs, Math.max(mFrozenMs, mClockStillMs));
             boolean isOfStart = isFreezeOfStart(Math.max(frozenMs, mFrozenMs));
 
             if (mFrozenMs >= (isOfStart ? START_STUCK_MS : FROZEN_MS)) {
@@ -266,6 +287,13 @@ public final class PlaybackHealth {
                 report(result, KIND_START_FROZEN);
                 // What it dropped to catch up is this freeze, not frames dropped on top of it
                 mFrames.clear();
+            } else if (hasMoved && clockStillMs >= START_FROZEN_MS && isFreezeOfStart(clockStillMs) && !mReported.contains(KIND_VIDEO_FROZEN)) {
+                // The clock stood still with the picture, then went on: what it's now late for is dropped from here on
+                mStartFrozenMs = clockStillMs;
+                mIsStartClockStill = true;
+                report(result, KIND_START_FROZEN);
+                mCatchUpEndMs = sample.nowMs + CATCH_UP_MS;
+                mCatchUpDropped = -1;
             }
         }
 
@@ -291,6 +319,16 @@ public final class PlaybackHealth {
     }
 
     private void checkDrops(Sample sample, List<String> result) {
+        if (mCatchUpEndMs >= 0) {
+            // Till a sample with no new drops: the ones to come are counted from there
+            boolean isDropping = sample.droppedFrames > mCatchUpDropped && sample.nowMs < mCatchUpEndMs;
+            mCatchUpDropped = sample.droppedFrames;
+            mCatchUpEndMs = isDropping ? mCatchUpEndMs : -1;
+            mFrames.clear();
+            mFrames.addLast(new long[]{sample.nowMs, sample.renderedFrames, sample.droppedFrames});
+            return;
+        }
+
         long[] last = mFrames.peekLast();
 
         // The decoder was reset (e.g. the engine restarted): counting starts over
@@ -336,8 +374,15 @@ public final class PlaybackHealth {
     }
 
     /**
-     * Each sample of the start, oldest first: {played, position, rendered, dropped, given to the decoder, dropped to a keyframe}. Empty
-     * past it: it doesn't tell about what happens later.
+     * The freeze just reported as KIND_START_FROZEN had the position stand still too: the clock's, not the renderer's
+     */
+    public boolean isStartClockStill() {
+        return mIsStartClockStill;
+    }
+
+    /**
+     * Each sample of the start, oldest first: {played, position, rendered, dropped, given to the decoder, dropped to a keyframe, audio
+     * timestamp state, audio playhead, audio latency}. Empty past it: it doesn't tell about what happens later.
      */
     public List<long[]> getStartTrail() {
         return mPlayedMs <= START_MS ? mStartTrail : new ArrayList<>();
@@ -383,6 +428,10 @@ public final class PlaybackHealth {
         mLastRendered = -1;
         mNoFrameMs = 0;
         mFrozenMs = 0;
+        mClockStillMs = 0;
+        mIsStartClockStill = false;
+        mCatchUpEndMs = -1;
+        mCatchUpDropped = -1;
         mFrames.clear();
         mPlayedMs = 0;
         mLongestFrozenMs = 0;

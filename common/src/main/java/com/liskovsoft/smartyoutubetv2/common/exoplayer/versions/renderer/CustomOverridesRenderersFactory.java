@@ -5,9 +5,11 @@ import android.os.Handler;
 import androidx.annotation.Nullable;
 import com.google.android.exoplayer2.Renderer;
 import com.google.android.exoplayer2.audio.AudioCapabilities;
+import com.google.android.exoplayer2.audio.AudioClockInfo;
 import com.google.android.exoplayer2.audio.AudioProcessor;
 import com.google.android.exoplayer2.audio.AudioRendererEventListener;
 import com.google.android.exoplayer2.audio.DefaultAudioSink;
+import com.google.android.exoplayer2.audio.MediaCodecAudioRenderer;
 import com.google.android.exoplayer2.drm.DrmSessionManager;
 import com.google.android.exoplayer2.drm.FrameworkMediaCrypto;
 import com.google.android.exoplayer2.mediacodec.MediaCodecSelector;
@@ -33,6 +35,7 @@ public class CustomOverridesRenderersFactory extends CustomRenderersFactoryBase 
     private final PlayerData mPlayerData;
     private final PlayerTweaksData mPlayerTweaksData;
     private DebugInfoMediaCodecVideoRenderer mVideoRenderer;
+    private AudioClockInfo mAudioClockInfo;
     // 2.12, 2.13
     //private int mOperationMode = MediaCodecRenderer.OPERATION_MODE_SYNCHRONOUS;
 
@@ -138,6 +141,7 @@ public class CustomOverridesRenderersFactory extends CustomRenderersFactoryBase 
 
         if ((mPlayerData.getAudioDelayMs() == 0 || !mPlayerData.isAudioDelayEnabled()) && !mPlayerTweaksData.isAudioSyncFixEnabled()) {
             // Improve performance a bit by eliminating calculations presented in custom renderer.
+            mAudioClockInfo = findAudioClockInfo(out);
 
             return;
         }
@@ -150,6 +154,18 @@ public class CustomOverridesRenderersFactory extends CustomRenderersFactoryBase 
         audioRenderer.enableAudioSyncFix(mPlayerTweaksData.isAudioSyncFixEnabled());
 
         replaceAudioRenderer(out, audioRenderer);
+        mAudioClockInfo = findAudioClockInfo(out);
+    }
+
+    @Nullable
+    private static AudioClockInfo findAudioClockInfo(ArrayList<Renderer> renderers) {
+        for (Renderer renderer : renderers) {
+            if (renderer instanceof MediaCodecAudioRenderer && ((MediaCodecAudioRenderer) renderer).getAudioSink() instanceof DefaultAudioSink) {
+                return ((DefaultAudioSink) ((MediaCodecAudioRenderer) renderer).getAudioSink()).getClockInfo();
+            }
+        }
+
+        return null;
     }
 
     // 2.10, 2.11
@@ -196,6 +212,14 @@ public class CustomOverridesRenderersFactory extends CustomRenderersFactoryBase 
     @Nullable
     public DebugInfoMediaCodecVideoRenderer getVideoRenderer() {
         return mVideoRenderer;
+    }
+
+    /**
+     * What the clock of the audio renderer built for the player goes by, once the player has been created with this factory.
+     */
+    @Nullable
+    public AudioClockInfo getAudioClockInfo() {
+        return mAudioClockInfo;
     }
 
     // Exo 2.12, 2.13

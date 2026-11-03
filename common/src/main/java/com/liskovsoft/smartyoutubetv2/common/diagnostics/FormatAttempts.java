@@ -14,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -92,6 +93,23 @@ public final class FormatAttempts {
     private static final long SEEK_BUFFERING_MS = 2_000;
     @VisibleForTesting
     static Clock sClock = System::currentTimeMillis;
+    private static final long RECENT_LOADS_MS = 30_000;
+    /**
+     * Of an attempt: a server more is a redirect or another reload
+     */
+    @VisibleForTesting
+    static final int MAX_HOSTS = 4;
+    /**
+     * The servers the video's segments were asked of, in the order first asked: a server's number is its place + 1. Of the video, not
+     * of an attempt: the reload's server is told apart from the one before's. Only their numbers are recorded, not their names.
+     */
+    private static final List<String> sHosts = new ArrayList<>();
+    /**
+     * The numbers of the servers asked since the player was prepared with its source (see #onPrepare), and that source's: an attempt
+     * is made when its tracks are known, after the first requests (see #onTracks)
+     */
+    private static List<Integer> sSourceHosts = new ArrayList<>();
+    private static long sSource;
     private static final Set<String> sOfferedVideo = new LinkedHashSet<>();
     private static final Set<String> sOfferedAudio = new LinkedHashSet<>();
     private static long sLastSeekMs = -1;
@@ -121,11 +139,27 @@ public final class FormatAttempts {
         long stallMs;
         long loadedBytes;
         long loadMs;
+        /**
+         * Finished in the last RECENT_LOADS_MS, oldest first: {when, bytes, load time}
+         */
+        final ArrayDeque<long[]> recentLoads = new ArrayDeque<>();
+        long videoLoadedAt = -1;
+        long audioLoadedAt = -1;
+        long videoLoadedToMs = -1;
+        long audioLoadedToMs = -1;
         boolean hasPlayed;
         boolean isVideoRendered;
         boolean isCounted;
         long playingSince = -1;
         long stallSince = -1;
+        /**
+         * The numbers of the servers its segments were asked of (see sHosts)
+         */
+        final List<Integer> hosts = new ArrayList<>();
+        /**
+         * Its requests are its source's (see sSource) from when its tracks were known
+         */
+        long source = -1;
 
         Attempt(@Nullable String video, @Nullable String audio) {
             this.video = video;
@@ -168,8 +202,12 @@ public final class FormatAttempts {
         Attempt last = getLast();
 
         if (last != null && last.isSameFormats(attempt) && !sIsLastFailed) {
+            // Goes on, in this source too (e.g. the engine restarted)
+            useSource(last);
             return;
         }
+
+        useSource(attempt);
 
         // Switched while playing (e.g. another quality): this one plays from now
         boolean isPlaying = last != null && last.playingSince >= 0;
@@ -190,6 +228,51 @@ public final class FormatAttempts {
 
         sIsLastFailed = false;
         sIsChangedSinceFailure = true;
+    }
+
+    /**
+     * The player was prepared with a source of the video (e.g. again, by a reload): its requests are of the attempt its tracks make
+     */
+    public static void onPrepare() {
+        sSource++;
+        sSourceHosts = new ArrayList<>();
+    }
+
+    /**
+     * A segment of the video is asked of the server (see Uri#getHost)
+     */
+    public static void onRequest(@Nullable String host) {
+        if (sVideoId == null || host == null) {
+            return;
+        }
+
+        int index = sHosts.indexOf(host);
+
+        if (index < 0) {
+            sHosts.add(host);
+            index = sHosts.size() - 1;
+        }
+
+        addHost(sSourceHosts, index + 1);
+        Attempt last = getLast();
+
+        if (last != null && last.source == sSource) {
+            addHost(last.hosts, index + 1);
+        }
+    }
+
+    private static void useSource(Attempt attempt) {
+        attempt.source = sSource;
+
+        for (int host : sSourceHosts) {
+            addHost(attempt.hosts, host);
+        }
+    }
+
+    private static void addHost(List<Integer> hosts, int host) {
+        if (!hosts.contains(host) && hosts.size() < MAX_HOSTS) {
+            hosts.add(host);
+        }
     }
 
     /**
@@ -238,7 +321,63 @@ public final class FormatAttempts {
         if (last != null && bytes > 0 && durationMs >= 0) {
             last.loadedBytes += bytes;
             last.loadMs += durationMs;
+            long now = sClock.now();
+            last.recentLoads.addLast(new long[]{now, bytes, durationMs});
+
+            while (now - last.recentLoads.peekFirst()[0] > RECENT_LOADS_MS) {
+                last.recentLoads.removeFirst();
+            }
         }
+    }
+
+    /**
+     * @param mediaEndMs where the segment ends in the video, negative when unknown
+     */
+    public static void onLoad(long bytes, long durationMs, boolean isVideo, boolean isAudio, long mediaEndMs) {
+        onLoad(bytes, durationMs);
+        Attempt last = getLast();
+
+        if (last == null) {
+            return;
+        }
+
+        if (isVideo) {
+            last.videoLoadedAt = sClock.now();
+            last.videoLoadedToMs = mediaEndMs;
+        } else if (isAudio) {
+            last.audioLoadedAt = sClock.now();
+            last.audioLoadedToMs = mediaEndMs;
+        }
+    }
+
+    /**
+     * What a long stall (see ErrorFixerController#onLongBuffering) came from: which track ran out, and whether the connection is too slow
+     * for the format or its request hangs. Of the format tried.
+     */
+    public static void addStallDetails(PlayerFailure failure, long positionMs) {
+        Attempt last = getLast();
+
+        if (last == null) {
+            return;
+        }
+
+        long now = sClock.now();
+        long bytes = 0;
+        long loadMs = 0;
+
+        for (long[] load : last.recentLoads) {
+            if (now - load[0] <= RECENT_LOADS_MS) {
+                bytes += load[1];
+                loadMs += load[2];
+            }
+        }
+
+        failure.detail("videoBufferedMs", last.videoLoadedToMs >= 0 ? last.videoLoadedToMs - positionMs : null)
+                .detail("audioBufferedMs", last.audioLoadedToMs >= 0 ? last.audioLoadedToMs - positionMs : null)
+                .detail("videoLoadAgoMs", last.videoLoadedAt >= 0 ? now - last.videoLoadedAt : null)
+                .detail("audioLoadAgoMs", last.audioLoadedAt >= 0 ? now - last.audioLoadedAt : null)
+                .detail("recentThroughputKbps", loadMs > 0 ? bytes * 8 / loadMs : null)
+                .detail("videoBitrateKbps", last.videoBitrateKbps > 0 ? last.videoBitrateKbps : null);
     }
 
     /**
@@ -451,6 +590,8 @@ public final class FormatAttempts {
         sClient = null;
         sProtocol = null;
         sAttempts.clear();
+        sHosts.clear();
+        sSourceHosts = new ArrayList<>();
         sHasFailed = false;
         sIsChangedSinceFailure = false;
         sIsLastFailed = false;
@@ -637,6 +778,7 @@ public final class FormatAttempts {
         // Bits per millisecond are kilobits per second
         result.put("throughputKbps", attempt.loadMs > 0 ? attempt.loadedBytes * 8 / attempt.loadMs : JSONObject.NULL);
         result.put("videoBitrateKbps", attempt.videoBitrateKbps > 0 ? attempt.videoBitrateKbps : JSONObject.NULL);
+        result.put("hosts", new JSONArray(attempt.hosts));
 
         return result;
     }

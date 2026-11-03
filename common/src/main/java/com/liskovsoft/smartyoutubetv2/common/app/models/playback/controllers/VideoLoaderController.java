@@ -1,6 +1,7 @@
 package com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers;
 
 import android.os.Build.VERSION;
+import androidx.annotation.Nullable;
 
 import com.liskovsoft.mediaserviceinterfaces.MediaItemService;
 import com.liskovsoft.mediaserviceinterfaces.ServiceManager;
@@ -34,6 +35,8 @@ import com.liskovsoft.youtubeapi.service.YouTubeServiceManager;
 import com.liskovsoft.youtubeapi.videoinfo.V2.ClientAttempts;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -71,6 +74,10 @@ public class VideoLoaderController extends BasePlayerController {
      */
     private String mLiveSwitchVideoId;
     private int mLiveClientSwitches;
+    /**
+     * By video and channel: the switches a live stream took in this run (see applyKnownLiveSwitches)
+     */
+    private final Map<String, Integer> mLiveSwitches = new HashMap<>();
     private final Runnable mReloadVideo = () -> {
         getMainController().onNewVideo(getVideo());
     };
@@ -326,6 +333,12 @@ public class VideoLoaderController extends BasePlayerController {
         }
 
         resetLiveClientSwitch(video);
+
+        // Its WebView runs on the main thread mostly: the player screen comes up first, the load of the video fetches them
+        if (YouTubeServiceManager.instance().isPoTokenToMake()) {
+            return;
+        }
+
         VideoStarts.onFetch(video.videoId);
         // Cached: its fetch isn't disposed with the load, which waits for it rather than fetching again
         mPrefetchedFormatInfo = getFormatInfoObserve(video.videoId).cache();
@@ -511,7 +524,23 @@ public class VideoLoaderController extends BasePlayerController {
             mLiveClientSwitches = 0;
         }
 
-        return ++mLiveClientSwitches <= MAX_LIVE_CLIENT_SWITCHES;
+        boolean isToSwitch = ++mLiveClientSwitches <= MAX_LIVE_CLIENT_SWITCHES;
+        rememberLiveSwitches(video.videoId, isToSwitch);
+        rememberLiveSwitches(formatInfo.getChannelId(), isToSwitch);
+
+        return isToSwitch;
+    }
+
+    private void rememberLiveSwitches(@Nullable String id, boolean isToSwitch) {
+        if (id == null) {
+            return;
+        }
+
+        if (isToSwitch) {
+            mLiveSwitches.put(id, mLiveClientSwitches);
+        } else {
+            mLiveSwitches.remove(id); // none of them had it
+        }
     }
 
     /**
@@ -538,6 +567,33 @@ public class VideoLoaderController extends BasePlayerController {
             mLiveSwitchVideoId = null;
             mLiveClientSwitches = 0;
             YouTubeServiceManager.instance().resetClient();
+        }
+
+        if (mLiveSwitchVideoId == null) {
+            applyKnownLiveSwitches(video);
+        }
+    }
+
+    /**
+     * A live stream, or one of a channel, the first client had nothing for in this run: straight to the client that came after, without
+     * the fetch and the message. Only for those: the first client has what others don't (e.g. being signed in).
+     */
+    private void applyKnownLiveSwitches(Video video) {
+        Integer switches = mLiveSwitches.get(video.videoId);
+
+        if (switches == null && video.isLive && video.channelId != null) {
+            switches = mLiveSwitches.get(video.channelId);
+        }
+
+        if (switches == null) {
+            return;
+        }
+
+        mLiveSwitchVideoId = video.videoId;
+        mLiveClientSwitches = switches;
+
+        for (int i = 0; i < switches; i++) {
+            YouTubeServiceManager.instance().switchNextClientNow();
         }
     }
 

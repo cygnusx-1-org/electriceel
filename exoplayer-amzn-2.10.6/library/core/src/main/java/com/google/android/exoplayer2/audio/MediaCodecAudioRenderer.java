@@ -899,6 +899,11 @@ public class MediaCodecAudioRenderer extends MediaCodecRenderer implements Media
     return mediaFormat;
   }
 
+  /** The sink audio is output to. */
+  public AudioSink getAudioSink() {
+    return audioSink;
+  }
+
   private void updateCurrentPosition() {
     long newCurrentPositionUs = audioSink.getCurrentPositionUs(isEnded());
     if (newCurrentPositionUs != AudioSink.CURRENT_POSITION_NOT_SET) {

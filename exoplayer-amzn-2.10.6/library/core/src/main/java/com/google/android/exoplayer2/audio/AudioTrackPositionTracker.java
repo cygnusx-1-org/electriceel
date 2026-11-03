@@ -126,6 +126,11 @@ import java.lang.reflect.Method;
    * <p>This is a fail safe that should not be required on correctly functioning devices.
    */
   private static final long MAX_LATENCY_US = 5 * C.MICROS_PER_SECOND;
+  /**
+   * The playhead this far past a timestamp that doesn't advance, the position goes by the playhead. On a SHIELD it may not advance till
+   * it's rejected for being {@link #MAX_AUDIO_TIMESTAMP_OFFSET_US} off: the position and the picture would stand still that long.
+   */
+  private static final long MAX_TIMESTAMP_HOLD_US = 500_000;
 
   private static final long FORCE_RESET_WORKAROUND_TIMEOUT_MS = 200;
 
@@ -159,6 +164,8 @@ import java.lang.reflect.Method;
 
   private @Nullable Method getLatencyMethod;
   private long latencyUs;
+  private final AudioClockInfo clockInfo = new AudioClockInfo();
+  private volatile boolean timestampsDisabled;
   private boolean hasData;
 
   private boolean isOutputPcm;
@@ -213,6 +220,7 @@ import java.lang.reflect.Method;
     this.bufferSize = bufferSize;
     this.applyDolbyPassThroughQuirk = applyDolbyPassThroughQuirk; // AMZN_CHANGE_ONELINE
     audioTimestampPoller = new AudioTimestampPoller(audioTrack);
+    clockInfo.reset();
     outputSampleRate = audioTrack.getSampleRate();
     needsPassthroughWorkarounds = needsPassthroughWorkarounds(outputEncoding);
     isOutputPcm = Util.isEncodingLinearPcm(outputEncoding);
@@ -224,6 +232,20 @@ import java.lang.reflect.Method;
     stopTimestampUs = C.TIME_UNSET;
     forceResetWorkaroundTimeMs = C.TIME_UNSET;
     latencyUs = 0;
+  }
+
+  /** For diagnostics, of the AudioTrack in use. */
+  public AudioClockInfo getClockInfo() {
+    return clockInfo;
+  }
+
+  /**
+   * Goes by the playhead alone: for the tracks to come too, each has its own poller.
+   *
+   * @param disabled Whether AudioTrack#getTimestamp isn't used. Set before the track is, it's not undone for a timestamp in use.
+   */
+  public void setTimestampsDisabled(boolean disabled) {
+    timestampsDisabled = disabled;
   }
 
   public long getCurrentPositionUs(boolean sourceEnded) {
@@ -252,16 +274,16 @@ import java.lang.reflect.Method;
         log.v("getCurrentPositionUs : applyDolbyPassThroughQuirk positionUs = "  + positionUs);
       }
       return positionUs;
-    } else if (audioTimestampPoller.hasTimestamp()) { // AMZN_CHANGE_END
+    } else if (audioTimestampPoller.hasTimestamp()
+        && !audioTimestampPoller.isTimestampAdvancing()
+        && getPlaybackHeadPositionUs() - framesToDurationUs(audioTimestampPoller.getTimestampPositionFrames())
+            < MAX_TIMESTAMP_HOLD_US) {
+      // The playhead may lead what's heard (no latency is known for passthrough): wait for the timestamp to advance, as it soon does
+      return framesToDurationUs(audioTimestampPoller.getTimestampPositionFrames());
+    } else if (audioTimestampPoller.isTimestampAdvancing()) { // AMZN_CHANGE_END
       // Calculate the speed-adjusted position using the timestamp (which may be in the future).
       long timestampPositionFrames = audioTimestampPoller.getTimestampPositionFrames();
       long timestampPositionUs = framesToDurationUs(timestampPositionFrames);
-      if (!audioTimestampPoller.isTimestampAdvancing()) {
-        if (VDBG) {
-          log.v("getCurrentPositionUs : hasTimestamp: not advancing: positionUs = "  + timestampPositionUs);
-        }
-        return timestampPositionUs;
-      }
       // AMZN_CHANGE_BEGIN
       long timestampSysTimeUs = audioTimestampPoller.getTimestampSystemTimeUs();
       long elapsedSinceTimestampUs = systemTimeUs - timestampSysTimeUs ;
@@ -445,6 +467,7 @@ import java.lang.reflect.Method;
 
   private void maybeSampleSyncParams() {
     long playbackPositionUs = getPlaybackHeadPositionUs();
+    clockInfo.playheadMs = playbackPositionUs / 1000;
     if (playbackPositionUs == 0) {
       // The AudioTrack hasn't output anything yet.
       return;
@@ -472,9 +495,15 @@ import java.lang.reflect.Method;
 
     maybePollAndCheckTimestamp(systemTimeUs, playbackPositionUs);
     maybeUpdateLatency(systemTimeUs);
+    clockInfo.timestampState = Assertions.checkNotNull(audioTimestampPoller).getState();
+    clockInfo.latencyMs = latencyUs / 1000;
   }
 
   private void maybePollAndCheckTimestamp(long systemTimeUs, long playbackPositionUs) {
+    if (timestampsDisabled) {
+      return;
+    }
+
     AudioTimestampPoller audioTimestampPoller = Assertions.checkNotNull(this.audioTimestampPoller);
     if (!audioTimestampPoller.maybePollTimestamp(systemTimeUs)) {
       return;
@@ -484,6 +513,7 @@ import java.lang.reflect.Method;
     long audioTimestampSystemTimeUs = audioTimestampPoller.getTimestampSystemTimeUs();
     long audioTimestampPositionFrames = audioTimestampPoller.getTimestampPositionFrames();
     if (Math.abs(audioTimestampSystemTimeUs - systemTimeUs) > MAX_AUDIO_TIMESTAMP_OFFSET_US) {
+      clockInfo.clockMismatches++;
       listener.onSystemTimeUsMismatch(
           audioTimestampPositionFrames,
           audioTimestampSystemTimeUs,
@@ -492,6 +522,7 @@ import java.lang.reflect.Method;
       audioTimestampPoller.rejectTimestamp();
     } else if (Math.abs(framesToDurationUs(audioTimestampPositionFrames) - playbackPositionUs)
         > MAX_AUDIO_TIMESTAMP_OFFSET_US) {
+      clockInfo.framesMismatches++;
       listener.onPositionFramesMismatch(
           audioTimestampPositionFrames,
           audioTimestampSystemTimeUs,
@@ -523,6 +554,7 @@ import java.lang.reflect.Method;
         latencyUs = Math.max(latencyUs, 0);
         // Sanity check that the latency isn't too large.
         if (latencyUs > MAX_LATENCY_US) {
+          clockInfo.badLatencies++;
           listener.onInvalidLatency(latencyUs);
           latencyUs = 0;
         }

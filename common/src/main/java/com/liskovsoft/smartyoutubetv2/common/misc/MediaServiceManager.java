@@ -7,6 +7,8 @@ import com.liskovsoft.mediaserviceinterfaces.MediaItemService;
 import com.liskovsoft.mediaserviceinterfaces.ServiceManager;
 import com.liskovsoft.mediaserviceinterfaces.NotificationsService;
 import com.liskovsoft.mediaserviceinterfaces.SignInService;
+import android.os.SystemClock;
+
 import com.liskovsoft.mediaserviceinterfaces.SignInService.OnAccountChange;
 import com.liskovsoft.mediaserviceinterfaces.oauth.Account;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
@@ -42,6 +44,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class MediaServiceManager implements OnAccountChange {
     private static final String TAG = MediaServiceManager.class.getSimpleName();
+    private static final long WARM_UP_AGAIN_MS = 10 * 60 * 1_000;
     private static MediaServiceManager sInstance;
     private final MediaItemService mItemService;
     private final ContentService mContentService;
@@ -62,6 +65,7 @@ public class MediaServiceManager implements OnAccountChange {
     private final GroupFiller mGroupFiller = new GroupFiller();
     private final List<AccountChangeListener> mAccountListeners = new CopyOnWriteArrayList<>();
     private boolean mIsPlaybackWarmedUp;
+    private long mWarmUpTimeMs;
 
     public interface OnMetadata {
         void onMetadata(MediaItemMetadata metadata);
@@ -247,7 +251,7 @@ public class MediaServiceManager implements OnAccountChange {
     }
 
     /**
-     * Once per run, when the first videos are shown: the first one opened needn't wait for what the formats of the run's first
+     * Once per run and account, when the first videos are shown: the first one opened needn't wait for what the formats of the run's first
      * video wait for (see ServiceManager#warmUpPlayback)
      */
     public void warmUpPlaybackIfNeeded(VideoGroup group) {
@@ -263,7 +267,23 @@ public class MediaServiceManager implements OnAccountChange {
         }
 
         mIsPlaybackWarmedUp = true;
+        mWarmUpTimeMs = SystemClock.elapsedRealtime();
         YouTubeServiceManager.instance().warmUpPlayback(video.videoId);
+    }
+
+    /**
+     * Back after a long time (the poToken lives some hours, and is only made again by a fetch): the next video needn't wait for it. Not
+     * sooner than WARM_UP_AGAIN_MS after the last time: it may fail again, and runs on the main thread mostly.
+     */
+    public void warmUpPlaybackIfExpired() {
+        long nowMs = SystemClock.elapsedRealtime();
+
+        if (!mIsPlaybackWarmedUp || nowMs - mWarmUpTimeMs < WARM_UP_AGAIN_MS || !YouTubeServiceManager.instance().isPoTokenToMake()) {
+            return;
+        }
+
+        mWarmUpTimeMs = nowMs;
+        YouTubeServiceManager.instance().warmUpPlayback(null);
     }
 
     public void loadFormatInfo(Video item, OnFormatInfo onFormatInfo) {
@@ -506,6 +526,9 @@ public class MediaServiceManager implements OnAccountChange {
 
     @Override
     public void onAccountChanged(Account account) {
+        // Its poToken was reset with the account: made again when the account's videos are shown, not by the first one opened
+        mIsPlaybackWarmedUp = false;
+
         for (AccountChangeListener listener : mAccountListeners) {
             listener.onAccountChanged(account);
         }
