@@ -103,7 +103,7 @@ public final class VideoStart {
          */
         MODE_SWITCH,
         /**
-         * A moment, not a time: the first frame, formats that were cached
+         * A moment, not a time: the first frame, formats that were cached, what the server made of the poToken
          */
         MARK
     }
@@ -335,6 +335,7 @@ public final class VideoStart {
             case VideoStarts.STAGE_MODE_SWITCH:
                 return Category.MODE_SWITCH;
             case VideoStarts.STAGE_FIRST_FRAME:
+            case VideoStarts.STAGE_PROTECTION:
             case "cached":
                 return Category.MARK;
             default:

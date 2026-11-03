@@ -14,6 +14,7 @@ import com.google.android.exoplayer2.source.sabr.parser.parts.MediaSegmentDataSa
 import com.google.android.exoplayer2.source.sabr.parser.parts.MediaSegmentEndSabrPart;
 import com.google.android.exoplayer2.source.sabr.parser.parts.MediaSegmentInitSabrPart;
 import com.google.android.exoplayer2.source.sabr.parser.parts.PoTokenStatusSabrPart;
+import com.google.android.exoplayer2.source.sabr.parser.parts.PoTokenStatusSabrPart.PoTokenStatus;
 import com.google.android.exoplayer2.source.sabr.parser.parts.RefreshPlayerResponseSabrPart;
 import com.google.android.exoplayer2.source.sabr.parser.parts.SabrPart;
 import com.google.android.exoplayer2.source.sabr.parser.results.ProcessFormatInitializationMetadataResult;
@@ -97,6 +98,12 @@ public class SabrStream {
     private volatile boolean isInitRequest;
     @Nullable private volatile IOException responseError;
     @Nullable private static volatile BackoffListener backoffListener;
+    @Nullable private static volatile ProtectionStatusListener protectionStatusListener;
+    @Nullable private final String videoId;
+    /**
+     * The last one told for this stream (see ProtectionStatusListener)
+     */
+    @Nullable private volatile PoTokenStatus protectionStatus;
 
     /**
      * Told each wait the server asks for (see NextRequestPolicy#getBackoffTimeMs), e.g. for the app's timing of video starts: one
@@ -108,6 +115,18 @@ public class SabrStream {
 
     public static void setBackoffListener(@Nullable BackoffListener listener) {
         backoffListener = listener;
+    }
+
+    /**
+     * Told what the server makes of the poToken (see SabrProcessor#processStreamProtectionStatus), e.g. for the app's diagnostics:
+     * a stream's first status, then each change. On the loader's thread.
+     */
+    public interface ProtectionStatusListener {
+        void onProtectionStatus(@Nullable String videoId, PoTokenStatus status);
+    }
+
+    public static void setProtectionStatusListener(@Nullable ProtectionStatusListener listener) {
+        protectionStatusListener = listener;
     }
 
     private static class NoSegmentsTracker {
@@ -154,6 +173,7 @@ public class SabrStream {
                 durationMs
         );
         url = serverAbrStreamingUrl;
+        this.videoId = videoId;
 
         // Whether we got any new (not consumed) segments in the request
         noNewSegmentsTracker = new NoSegmentsTracker();
@@ -429,8 +449,16 @@ public class SabrStream {
 
         Log.d(TAG, "Process StreamProtectionStatus: %s", sps);
         ProcessStreamProtectionStatusResult result = processor.processStreamProtectionStatus(sps);
+        PoTokenStatusSabrPart sabrPart = result.sabrPart;
+        ProtectionStatusListener listener = protectionStatusListener;
 
-        return result.sabrPart;
+        // Each response has it: told once, then when it changes
+        if (listener != null && sabrPart != null && sabrPart.status != protectionStatus) {
+            protectionStatus = sabrPart.status;
+            listener.onProtectionStatus(videoId, sabrPart.status);
+        }
+
+        return sabrPart;
     }
 
     private void processSabrRedirect(UMPPart part) {

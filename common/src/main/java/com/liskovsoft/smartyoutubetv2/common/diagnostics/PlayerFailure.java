@@ -64,6 +64,10 @@ public final class PlayerFailure {
     private String mVideoFormat;
     private String mAudioFormat;
     private List<Attempt> mClientAttempts;
+    /**
+     * What SABR's server made of the video's poToken (see ProtectionStatuses), when it's recorded
+     */
+    private JSONArray mProtection;
     private JSONObject mFormats;
     private JSONObject mSettings;
     private JSONObject mDetails;
@@ -309,6 +313,8 @@ public final class PlayerFailure {
 
         try {
             mFormats = FormatAttempts.snapshot(mContext, mVideoId);
+            // Of this process: not of a failure from one before (e.g. an app exit), whose video may be playing again
+            mProtection = mIsStateIncluded ? ProtectionStatuses.snapshot(mVideoId) : null;
             PlayerFailureLog.instance(mContext).record(this);
         } catch (RuntimeException e) {
             android.util.Log.e("PlayerFailure", "Can't record: " + e);
@@ -327,6 +333,8 @@ public final class PlayerFailure {
 
         try {
             mFormats = FormatAttempts.snapshot(mContext, mVideoId);
+            // Of this process: not of a failure from one before (e.g. an app exit), whose video may be playing again
+            mProtection = mIsStateIncluded ? ProtectionStatuses.snapshot(mVideoId) : null;
             PlayerFailureLog.instance(mContext).recordNow(this);
         } catch (RuntimeException e) {
             android.util.Log.e("PlayerFailure", "Can't record: " + e);
@@ -418,6 +426,8 @@ public final class PlayerFailure {
 
                 result.put("clientAttempts", attempts);
             }
+
+            putOpt(result, "protection", mProtection);
 
             result.put("actions", new JSONArray(mActions));
             result.put("repeats", 0);

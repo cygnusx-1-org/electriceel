@@ -2,6 +2,7 @@ package com.liskovsoft.smartyoutubetv2.common.diagnostics;
 
 import android.content.Context;
 
+import com.google.android.exoplayer2.source.sabr.parser.parts.PoTokenStatusSabrPart.PoTokenStatus;
 import com.liskovsoft.mediaserviceinterfaces.oauth.Account;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.listener.PlayerEventListener;
@@ -58,6 +59,7 @@ public class DiagnosticsContractTest {
         mLog = PlayerFailureLog.useForTesting(mFolder.getRoot());
         mVideoStarts = VideoStartLog.useForTesting(mFolder.getRoot());
         FormatAttempts.resetForTesting();
+        ProtectionStatuses.resetForTesting(null);
         // Cronet can't load under Robolectric
         mSavedEngine = PlayerTweaksData.instance(getContext()).getPlayerDataSource();
         PlayerTweaksData.instance(getContext()).setPlayerDataSource(PlayerTweaksData.PLAYER_DATA_SOURCE_OKHTTP);
@@ -67,6 +69,7 @@ public class DiagnosticsContractTest {
     public void tearDown() {
         FormatAttempts.sClock = System::currentTimeMillis;
         FormatAttempts.resetForTesting();
+        ProtectionStatuses.resetForTesting(null);
         PlayerFailureLog.useForTesting(null);
         VideoStartLog.useForTesting(null);
         VideoStarts.resetForTesting();
@@ -97,10 +100,16 @@ public class DiagnosticsContractTest {
 
         Set<String> kinds = new HashSet<>();
         JSONArray failures = report.getJSONArray("playerFailures");
+        boolean hasProtection = false;
 
         for (int i = 0; i < failures.length(); i++) {
             kinds.add(failures.getJSONObject(i).getString("kind"));
+            hasProtection |= failures.getJSONObject(i).has("protection");
         }
+
+        // What the server made of the poToken, with a failure and in a start: checked against the schema
+        assertTrue(hasProtection);
+        assertTrue(report.getJSONArray("videoStarts").toString().contains("\"" + VideoStarts.STAGE_PROTECTION + "\""));
 
         assertEquals(new HashSet<>(Arrays.asList(PlayerFailure.KIND_ENGINE_ERROR, PlayerFailure.KIND_FORMAT_ERROR,
                 PlayerFailure.KIND_UNPLAYABLE, PlayerFailure.KIND_EMPTY_FORMATS, PlayerFailure.KIND_STALL,
@@ -189,7 +198,11 @@ public class DiagnosticsContractTest {
             mVideoStarts.record(start);
         };
         VideoStarts.sFramesRecorder = mVideoStarts::addFrames;
+        // What the server made of the poToken, in the buffering
+        VideoStarts.sProtection = (videoId, fromMs, toMs) -> Collections.singletonList(
+                new VideoStart.Stage(VideoStarts.STAGE_PROTECTION, PoTokenStatus.OK.name(), 1, fromMs + 400, fromMs + 400));
         fixture.slowStart();
+        VideoStarts.sProtection = (videoId, fromMs, toMs) -> Collections.emptyList();
         VideoStarts.onFrames(new PlaybackHealth.StartFrames(VideoStartFixture.VIDEO_ID, 10_000, 40, 120, 1, 4_500));
 
         fixture.at(20_000);
@@ -247,6 +260,9 @@ public class DiagnosticsContractTest {
         now[0] += 2_000;
         FormatAttempts.onPlaying(true);
         FormatAttempts.onStreamFailed(false);
+        // Streamed by SABR: the server took the poToken, then wanted it again
+        ProtectionStatuses.onStatus("video", PoTokenStatus.OK);
+        ProtectionStatuses.onStatus("video", PoTokenStatus.PENDING);
 
         PlayerFailure.create(getContext(), PlayerFailure.KIND_ENGINE_ERROR)
                 .video(video)

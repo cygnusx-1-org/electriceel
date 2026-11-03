@@ -80,6 +80,10 @@ public final class VideoStarts {
      */
     static final String STAGE_SERVER_BACKOFF = "server backoff";
     /**
+     * What SABR's server made of the poToken when it said so, a moment: the first, then each change (see ProtectionStatuses)
+     */
+    static final String STAGE_PROTECTION = "protection";
+    /**
      * The first segments of a start, by kind: each its own row
      */
     private static final String[] CHUNK_STAGES = {STAGE_VIDEO_INIT_CHUNK, STAGE_AUDIO_INIT_CHUNK, STAGE_FIRST_VIDEO_CHUNK,
@@ -143,6 +147,8 @@ public final class VideoStarts {
     @VisibleForTesting
     static LoadHoldSource sBackoffs = ServerBackoffs::take;
     @VisibleForTesting
+    static ProtectionSource sProtection = ProtectionStatuses::take;
+    @VisibleForTesting
     static Recorder sRecorder = VideoStarts::save;
     @VisibleForTesting
     static FramesRecorder sFramesRecorder = VideoStarts::saveFrames;
@@ -184,6 +190,10 @@ public final class VideoStarts {
 
     interface LoadHoldSource {
         List<VideoStart.Stage> take(long fromMs, long toMs);
+    }
+
+    interface ProtectionSource {
+        List<VideoStart.Stage> take(String videoId, long fromMs, long toMs);
     }
 
     interface FetchStageSource {
@@ -344,6 +354,7 @@ public final class VideoStarts {
         }
 
         SabrStream.setBackoffListener(ServerBackoffs::onBackoff);
+        SabrStream.setProtectionStatusListener(ProtectionStatuses::onStatus);
     }
 
     public static void setListener(@Nullable Listener listener) {
@@ -870,8 +881,9 @@ public final class VideoStarts {
             Collections.sort(children, byStart); // stable: a fetch's stages keep their order
 
             for (VideoStart.Stage child : children) {
-                // Too short to see, unless it's a moment
-                if (child.getDurationMs() < 1 && child.getCategory() != VideoStart.Category.MARK) {
+                // Too short to see, unless it's a moment, or how a poToken was got at once (e.g. none, see PoTokenGate#getPoToken)
+                if (child.getDurationMs() < 1 && child.getCategory() != VideoStart.Category.MARK
+                        && child.getCategory() != VideoStart.Category.POTOKEN) {
                     continue;
                 }
 
@@ -914,6 +926,8 @@ public final class VideoStarts {
             result.addAll(sConnections.take(timer.prepareMs, endMs));
             // A wait asked for by the server and not waited: what's asked for in it may be answered late
             result.addAll(sBackoffs.take(timer.prepareMs, endMs));
+            // Whether the server took the poToken: past its grace period, it sends no media with one it hasn't
+            result.addAll(sProtection.take(timer.videoId, timer.prepareMs, endMs));
         }
 
         return result;
@@ -1065,6 +1079,7 @@ public final class VideoStarts {
         sLoadHolds = LoadHolds::take;
         sConnections = Connections::take;
         sBackoffs = ServerBackoffs::take;
+        sProtection = ProtectionStatuses::take;
         sRecorder = VideoStarts::save;
         sFramesRecorder = VideoStarts::saveFrames;
     }

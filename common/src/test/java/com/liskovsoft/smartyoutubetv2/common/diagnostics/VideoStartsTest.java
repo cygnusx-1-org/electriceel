@@ -231,6 +231,63 @@ public class VideoStartsTest {
     }
 
     /**
+     * What the server made of the poToken is a moment of the buffering, of the start's video
+     */
+    @Test
+    public void theProtectionStatusIsAMomentOfTheBuffering() {
+        String[] videoIds = new String[1];
+        VideoStarts.sProtection = (videoId, fromMs, toMs) -> {
+            videoIds[0] = videoId;
+            return Collections.singletonList(new VideoStart.Stage(VideoStarts.STAGE_PROTECTION, "PENDING", 1, fromMs + 400, fromMs + 400));
+        };
+        VideoStart start = mFixture.slowStart();
+        boolean isFound = false;
+
+        for (VideoStart.Stage stage : start.stages) {
+            isFound |= VideoStarts.STAGE_PROTECTION.equals(stage.name) && "PENDING".equals(stage.detail) && stage.depth == 1
+                    && stage.startMs == 1859 + 400 && stage.getDurationMs() == 0 && stage.getCategory() == VideoStart.Category.MARK;
+        }
+
+        assertTrue(isFound);
+        assertEquals(VIDEO_ID, videoIds[0]);
+    }
+
+    /**
+     * A poToken taken at once is kept: how it was got (e.g. none, kept by a run before) is what it tells. Other stages that short
+     * aren't.
+     */
+    @Test
+    public void aPoTokenTakenAtOnceIsKept() {
+        mFixture.at(0);
+        VideoStarts.start("video", VideoStart.TRIGGER_OPEN);
+        VideoStarts.onFetch("video");
+        mFixture.fetchStages = stages(
+                stage("fetch", null, 0, 1, 500),
+                stage("TV attempt", "ok", 1, 1, 400),
+                stage("poToken", "TV, none: no WebView", 2, 2, 2),
+                stage("player JS", null, 2, 2, 2),
+                stage("request", null, 2, 2, 400));
+        mFixture.at(500);
+        VideoStarts.onFormats("video", "TV");
+        VideoStarts.onPrepare();
+        VideoStarts.onPlaying(false);
+
+        List<String> names = new ArrayList<>();
+
+        for (VideoStart.Stage stage : last().stages) {
+            names.add(stage.name);
+
+            if ("poToken".equals(stage.name)) {
+                assertEquals("TV, none: no WebView", stage.detail);
+                assertEquals(0, stage.getDurationMs());
+            }
+        }
+
+        assertTrue(names.toString(), names.contains("poToken"));
+        assertFalse(names.toString(), names.contains("player JS"));
+    }
+
+    /**
      * The formats were fetched while the player started: both rows from the click, the fetch's stages in it
      */
     @Test
