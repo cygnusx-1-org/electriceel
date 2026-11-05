@@ -15,7 +15,10 @@ import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -117,6 +120,85 @@ public class SidebarServiceTest {
         getService().removePinnedItem(group("group1", "Climbing"));
 
         assertFalse(getService().isPinned(group("group1", "Climbing")));
+    }
+
+    /**
+     * A pinned group by an id the group had before takes its id now (see ChannelGroupServiceWrapper.normalizeReferences), the boot
+     * section with it; two of one group become one; saved
+     */
+    @Test
+    public void pinnedGroupTakesTheGroupsIdNow() {
+        getService().addPinnedItem(group("Ab12Cd34Ef56", "Music"));
+        getService().addPinnedItem(group("Gh78Ij90Kl12", "Music"));
+        getService().addPinnedItem(group("t-1111111111111111", "Climbing"));
+        getService().setBootSectionId(group("Ab12Cd34Ef56", "Music").getId());
+
+        int oldSectionId = group("Ab12Cd34Ef56", "Music").getId();
+        Map<String, String> ids = new HashMap<>();
+        ids.put("Ab12Cd34Ef56", "t-2222222222222222");
+        ids.put("Gh78Ij90Kl12", "t-2222222222222222");
+        Map<Integer, Integer> sectionIds = getService().normalizeGroupIds(ids::get, id -> null);
+
+        assertEquals(group("t-2222222222222222", "Music").getId(), (int) sectionIds.get(oldSectionId));
+
+        for (int i = 0; i < 2; i++) {
+            assertEquals(Arrays.asList("t-1111111111111111", "t-2222222222222222"), getGroupIds());
+            assertFalse(getService().isPinned(group("Ab12Cd34Ef56", "Music")));
+            assertEquals(group("t-2222222222222222", "Music").getId(), getService().getBootSectionId());
+
+            getService().onProfileChanged(); // read again
+        }
+    }
+
+    /**
+     * Sorted: where a group goes depends on its hash (see SidebarService.addPinnedItem)
+     */
+    /**
+     * A pinned playlist kept on the device by its old random id takes the playlist's id now, as its playlist id and its channel id
+     * (see BrowseService2Wrapper.getCachedPlaylists); a YouTube playlist keeps its own
+     */
+    @Test
+    public void pinnedPlaylistTakesThePlaylistsIdNow() {
+        getService().addPinnedItem(playlist("Ab12Cd34Ef56", "Climbing"));
+        getService().addPinnedItem(playlist("PLyoutubeplaylist", "Music"));
+        int oldSectionId = playlist("Ab12Cd34Ef56", "Climbing").getId();
+
+        Map<String, String> ids = new HashMap<>();
+        ids.put("Ab12Cd34Ef56", "p-3333333333333333");
+        ids.put("PLyoutubeplaylist", "PLyoutubeplaylist");
+        Map<Integer, Integer> sectionIds = getService().normalizeGroupIds(id -> null, ids::get);
+
+        assertEquals(Collections.singletonMap(oldSectionId, playlist("p-3333333333333333", "Climbing").getId()), sectionIds);
+        assertTrue(getService().isPinned(playlist("p-3333333333333333", "Climbing")));
+        assertTrue(getService().isPinned(playlist("PLyoutubeplaylist", "Music")));
+        assertFalse(getService().isPinned(playlist("Ab12Cd34Ef56", "Climbing")));
+
+        for (Video item : getService().getPinnedItems()) {
+            if ("p-3333333333333333".equals(item.playlistId)) {
+                assertEquals("p-3333333333333333", item.channelId);
+            }
+        }
+    }
+
+    private static Video playlist(String playlistId, String title) {
+        Video item = new Video();
+        item.playlistId = playlistId;
+        item.channelId = playlistId;
+        item.title = title;
+        return item;
+    }
+
+    private static List<String> getGroupIds() {
+        List<String> result = new ArrayList<>();
+
+        for (Video item : getService().getPinnedItems()) {
+            if (item.channelGroupId != null) {
+                result.add(item.channelGroupId);
+            }
+        }
+
+        Collections.sort(result);
+        return result;
     }
 
     private static Video group(String channelGroupId, String title) {

@@ -33,6 +33,7 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.HideContentData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.LocaleData;
 import com.liskovsoft.smartyoutubetv2.common.proxy.ProxyManager;
 import com.liskovsoft.smartyoutubetv2.common.utils.IntentExtractor;
+import com.liskovsoft.smartyoutubetv2.common.storage.StorageSync;
 import com.liskovsoft.smartyoutubetv2.common.utils.SimpleEditDialog;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.service.YouTubeServiceManager;
@@ -135,6 +136,10 @@ public class SplashPresenter extends BasePresenter<SplashView> {
         Utils.updateChannels(getContext());
         GDriveBackupWorker.schedule(getContext());
         LocalDriveBackupWorker.schedule(getContext());
+        // Settings → System → Storage sync: in the background, the app never waits for the server
+        if (getContext() != null) {
+            StorageSync.instance(getContext()).start();
+        }
 
         if (getContext() != null) {
             Context context = getContext().getApplicationContext();

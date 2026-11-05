@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs.ProfileChangeListener;
+import java.util.Set;
 
 /**
  * Each account has its own
@@ -156,6 +157,13 @@ public class SearchData implements ProfileChangeListener {
     @Override
     public void onProfileChanged() {
         restoreData();
+    }
+
+    @Override
+    public void onProfileDataSynced(Set<String> keys) {
+        if (keys.contains(SEARCH_DATA)) {
+            onProfileChanged();
+        }
     }
 
     /**

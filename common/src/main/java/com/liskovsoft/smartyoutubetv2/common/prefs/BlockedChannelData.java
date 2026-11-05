@@ -1,6 +1,7 @@
 package com.liskovsoft.smartyoutubetv2.common.prefs;
 
 import android.annotation.SuppressLint;
+import com.liskovsoft.smartyoutubetv2.common.prefs.common.PendingSave;
 import android.content.Context;
 import android.util.Pair;
 
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeSet;
+import java.util.Set;
 
 public class BlockedChannelData implements ProfileChangeListener {
     static final String BLOCKED_CHANNEL_DATA = "blocked_channel_data";
@@ -24,7 +26,7 @@ public class BlockedChannelData implements ProfileChangeListener {
     private final AppPrefs mPrefs;
     private final TreeSet<Channel> mChannels =
             new TreeSet<>((channel1, channel2) -> Helpers.compareToIgnoreCase(channel1.channelName, channel2.channelName));
-    private final Runnable mPersistStateInt = this::persistStateInt;
+    private final PendingSave mPersistStateInt = new PendingSave(this::persistStateInt);
     private final List<BlockedChannelListener> mListeners = new ArrayList<>();
 
     private static class Channel {
@@ -196,11 +198,11 @@ public class BlockedChannelData implements ProfileChangeListener {
     }
 
     public void persistNow() {
-        Utils.post(mPersistStateInt);
+        mPersistStateInt.post();
     }
 
     private void persistState() {
-        Utils.post(mPersistStateInt);
+        mPersistStateInt.post();
     }
 
     private void persistStateInt() {
@@ -228,5 +230,17 @@ public class BlockedChannelData implements ProfileChangeListener {
     @Override
     public void onProfileChanged() {
         restoreState();
+    }
+
+    @Override
+    public void persistPendingData() {
+        mPersistStateInt.flush();
+    }
+
+    @Override
+    public void onProfileDataSynced(Set<String> keys) {
+        if (keys.contains(BLOCKED_CHANNEL_DATA)) {
+            onProfileChanged();
+        }
     }
 }

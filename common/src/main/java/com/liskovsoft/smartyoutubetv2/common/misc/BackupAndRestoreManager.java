@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.List;
 
 import io.reactivex.disposables.Disposable;
+import com.liskovsoft.smartyoutubetv2.common.storage.StorageSync;
 
 public class BackupAndRestoreManager implements MotherActivity.OnPermissions {
     private static final String TAG = BackupAndRestoreManager.class.getSimpleName();
@@ -213,6 +214,10 @@ public class BackupAndRestoreManager implements MotherActivity.OnPermissions {
             MessageHelpers.showLongMessage(mContext, "Oops. Backup folder is empty.");
             return;
         }
+
+        // The restored settings don't overwrite the other devices of the storage sync's group: the group's are taken instead.
+        // Before the copy: the sync sees each file copied as a change made here.
+        StorageSync.onBackupRestored(mContext);
 
         if (mSharedPrefsDir.isDirectory()) {
             // remove old data

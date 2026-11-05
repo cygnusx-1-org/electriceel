@@ -34,9 +34,9 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
     private static final String MULTI_PROFILES = "multi_profiles";
     private static final String STATE_UPDATER_DATA = "state_updater_data";
     private static final String CHANNEL_GROUP_DATA = "channel_group_data";
-    private static final String SIDEBAR_DATA = "sidebar_data";
-    private static final String HOME_SCREEN_PLAYLISTS_DATA = "home_screen_playlists_data";
-    private static final String HOME_SCREEN_CHANNELS_DATA = "home_screen_channels_data";
+    public static final String SIDEBAR_DATA = "sidebar_data";
+    static final String HOME_SCREEN_PLAYLISTS_DATA = "home_screen_playlists_data";
+    static final String HOME_SCREEN_CHANNELS_DATA = "home_screen_channels_data";
     private static final String VIEW_MANAGER_DATA = "view_manager_data";
     private static final String WEB_PROXY_URI = "web_proxy_uri";
     private static final String WEB_PROXY_ENABLED = "web_proxy_enabled";
@@ -70,6 +70,19 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
          */
         default void onProfileDataCopied() {
             onProfileChanged();
+        }
+
+        /**
+         * Saves the values still waiting to be saved: the storage sync is about to change the files (see StorageSync)
+         */
+        default void persistPendingData() {
+        }
+
+        /**
+         * The storage sync changed these data keys of the selected profile (see StorageSync): a listener that keeps one of
+         * them reads it again
+         */
+        default void onProfileDataSynced(Set<String> keys) {
         }
     }
 
@@ -496,6 +509,46 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
 
     public void removeListener(ProfileChangeListener listener) {
         mListeners.remove(listener);
+    }
+
+    /**
+     * Before the storage sync changes the files of the selected profile: the values waiting to be saved are saved first, so
+     * the sync neither misses them nor overwrites them. On the main thread.
+     */
+    public void persistPendingData() {
+        mListeners.forEach(ProfileChangeListener::persistPendingData);
+    }
+
+    /**
+     * After the storage sync changed data keys of the selected profile: their owners read them again. On the main thread.
+     */
+    public void onProfileDataSynced(Set<String> keys) {
+        mListeners.forEach(listener -> listener.onProfileDataSynced(keys));
+    }
+
+    /**
+     * The key the given account's data is kept under, whichever account is selected (see getProfileKey)
+     * @param account null: signed out
+     */
+    public String getAccountDataKey(@Nullable Account account, String key) {
+        return getProfileKey(account, key);
+    }
+
+    /**
+     * The account's profile is the selected one
+     * @param account null: signed out
+     */
+    public boolean isSelectedProfile(@Nullable Account account) {
+        String selected = getProfileName();
+        return getProfileName(account).equals(selected) || (account == null && TextUtils.isEmpty(selected));
+    }
+
+    /**
+     * The file a data key is kept in (see getData), read directly: no migration from the old preferences, which is done
+     * on the main thread by the data's owner
+     */
+    public File getDataFile(String key) {
+        return new File(FileHelpers.getFilesDir(getContext()), PREFS_DIR + "/" + key);
     }
 
     /**

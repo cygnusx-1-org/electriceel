@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * The order of the rows of Home and the rows added to it: the Subscriptions feed, subscription groups (each a row of the uploads
@@ -182,6 +183,14 @@ public class HomeRowsData implements ProfileChangeListener {
             sInstance = new HomeRowsData(context.getApplicationContext());
         }
 
+        return sInstance;
+    }
+
+    /**
+     * The one made, without making it: null while nothing has read the rows
+     */
+    @Nullable
+    public static HomeRowsData peekInstance() {
         return sInstance;
     }
 
@@ -368,6 +377,43 @@ public class HomeRowsData implements ProfileChangeListener {
         }
     }
 
+    /**
+     * The rows of subscription groups refer to the groups by the ids they have now: a group's id comes from its title, the
+     * random one it had before is kept as an alias (see ChannelGroupServiceImpl). Rows synced from another device then find the
+     * group here. Saved when a row changed.
+     * @param canonicalId the group's id now, from any id it had; null when no group has it
+     */
+    public synchronized void normalizeChannelGroupIds(Function<String, String> canonicalId) {
+        boolean isChanged = false;
+        List<Row> result = new ArrayList<>();
+
+        for (Row row : mRows) {
+            Row normalized = row;
+
+            if (row.type == Row.TYPE_CHANNEL_GROUP && row.channelGroupId != null) {
+                String id = canonicalId.apply(row.channelGroupId);
+
+                if (id != null && !id.equals(row.channelGroupId)) {
+                    normalized = Row.channelGroup(id, row.title);
+                    isChanged = true;
+                }
+            }
+
+            // Two rows of one group, made by two devices before
+            if (result.contains(normalized)) {
+                isChanged = true;
+            } else {
+                result.add(normalized);
+            }
+        }
+
+        if (isChanged) {
+            mRows.clear();
+            mRows.addAll(result);
+            persistState();
+        }
+    }
+
     public synchronized void removeChannelGroup(String channelGroupId) {
         if (channelGroupId != null) {
             remove(Row.channelGroup(channelGroupId, null));
@@ -435,6 +481,13 @@ public class HomeRowsData implements ProfileChangeListener {
     @Override
     public void onProfileChanged() {
         restoreState();
+    }
+
+    @Override
+    public void onProfileDataSynced(Set<String> keys) {
+        if (keys.contains(HOME_ROWS_DATA)) {
+            onProfileChanged();
+        }
     }
 
     /**

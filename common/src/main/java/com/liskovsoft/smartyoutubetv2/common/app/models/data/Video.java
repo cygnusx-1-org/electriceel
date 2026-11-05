@@ -31,6 +31,7 @@ import com.liskovsoft.googlecommon.common.helpers.YouTubeHelper;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Video is an object that holds the various metadata associated with a single video.
@@ -313,6 +314,46 @@ public final class Video {
         }
 
         return id;
+    }
+
+    /**
+     * Brought to the id its subscription group or its playlist kept on the device has now: a group's id comes from its title, its
+     * old random one is an alias (see GroupReferences)
+     * @param channelGroupId the group's id now, from any id it had; null when no group has it
+     * @param playlistId the same for a playlist
+     * @return changed: its id, a hash, is made again
+     */
+    public boolean normalizeGroupIds(Function<String, String> channelGroupId, Function<String, String> playlistId) {
+        boolean isChanged = false;
+
+        if (this.channelGroupId != null) {
+            String newId = channelGroupId.apply(this.channelGroupId);
+
+            if (newId != null && !newId.equals(this.channelGroupId)) {
+                this.channelGroupId = newId;
+                isChanged = true;
+            }
+        }
+
+        if (this.playlistId != null) {
+            String newId = playlistId.apply(this.playlistId);
+
+            if (newId != null && !newId.equals(this.playlistId)) {
+                // A playlist kept on the device has its id as the channel id too (see BrowseService2Wrapper.getCachedPlaylists)
+                if (this.playlistId.equals(channelId)) {
+                    channelId = newId;
+                }
+
+                this.playlistId = newId;
+                isChanged = true;
+            }
+        }
+
+        if (isChanged) {
+            id = 0;
+        }
+
+        return isChanged;
     }
 
     public String getTitle() {

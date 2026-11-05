@@ -1,6 +1,7 @@
 package com.liskovsoft.smartyoutubetv2.common.prefs;
 
 import android.annotation.SuppressLint;
+import com.liskovsoft.smartyoutubetv2.common.prefs.common.PendingSave;
 import android.content.Context;
 import android.os.Build.VERSION;
 
@@ -9,6 +10,7 @@ import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs.ProfileChangeListener;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
+import java.util.Set;
 
 public class PlayerTweaksData implements ProfileChangeListener {
     static final String VIDEO_PLAYER_TWEAKS_DATA = "video_player_tweaks_data";
@@ -112,7 +114,7 @@ public class PlayerTweaksData implements ProfileChangeListener {
     private boolean mIsDontResizeVideoToFitDialogEnabled;
     private boolean mIsSuggestionsHorizontallyScrolled;
     private boolean mIsQueueRespectsPlaybackMode;
-    private final Runnable mPersistDataInt = this::persistDataInt;
+    private final PendingSave mPersistDataInt = new PendingSave(this::persistDataInt);
 
     private PlayerTweaksData(Context context) {
         mPrefs = AppPrefs.instance(context);
@@ -779,11 +781,11 @@ public class PlayerTweaksData implements ProfileChangeListener {
     }
 
     public void persistNow() {
-        Utils.post(mPersistDataInt);
+        mPersistDataInt.post();
     }
 
     private void persistData() {
-        Utils.post(mPersistDataInt);
+        mPersistDataInt.post();
     }
 
     private void persistDataInt() {
@@ -815,7 +817,19 @@ public class PlayerTweaksData implements ProfileChangeListener {
 
     @Override
     public void onProfileChanged() {
-        Utils.removeCallbacks(mPersistDataInt);
+        mPersistDataInt.cancel();
         restoreData();
+    }
+
+    @Override
+    public void persistPendingData() {
+        mPersistDataInt.flush();
+    }
+
+    @Override
+    public void onProfileDataSynced(Set<String> keys) {
+        if (keys.contains(VIDEO_PLAYER_TWEAKS_DATA)) {
+            onProfileChanged();
+        }
     }
 }

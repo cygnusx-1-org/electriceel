@@ -16,6 +16,11 @@ import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.smartyoutubetv2.common.R;
 
 public class SimpleEditDialog {
+    /**
+     * No microphone key on the keyboard: "nm" for the AOSP keyboards, the other for Gboard (Android TV's included)
+     */
+    private static final String NO_MICROPHONE = "nm,com.google.android.inputmethod.latin.noMicrophoneKey";
+
     public interface OnChange {
         boolean onChange(String newValue);
     }
@@ -48,9 +53,24 @@ public class SimpleEditDialog {
     }
 
     /**
-     * @param inputType the InputType.TYPE_* of the field, or {@link InputType#TYPE_NULL} for the one of the layout
+     * An address, e.g. of a server: no autocorrection, no suggestions, no capital letter, no voice input. The layout's type
+     * (textUri|textPersonName) adds up to a postal address, which keyboards autocorrect.
      */
+    public static void showUrl(Context context, String dialogTitle, String dialogHint, String defaultValue, OnChange onChange) {
+        show(context, dialogTitle, dialogHint, defaultValue, onChange, null,
+                InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS, NO_MICROPHONE);
+    }
+
     private static void show(Context context, String dialogTitle, String dialogHint, String defaultValue, OnChange onChange, Runnable onDismiss, int inputType) {
+        show(context, dialogTitle, dialogHint, defaultValue, onChange, onDismiss, inputType, null);
+    }
+
+    /**
+     * @param inputType the InputType.TYPE_* of the field, or {@link InputType#TYPE_NULL} for the one of the layout
+     * @param privateImeOptions for the keyboard (see EditorInfo.privateImeOptions), null for none
+     */
+    private static void show(Context context, String dialogTitle, String dialogHint, String defaultValue, OnChange onChange, Runnable onDismiss,
+                             int inputType, String privateImeOptions) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppDialog);
         LayoutInflater inflater = LayoutInflater.from(context);
         View contentView = inflater.inflate(R.layout.simple_edit_dialog, null);
@@ -58,6 +78,9 @@ public class SimpleEditDialog {
         EditText editField = contentView.findViewById(R.id.simple_edit_value);
         if (inputType != InputType.TYPE_NULL) {
             editField.setInputType(inputType);
+        }
+        if (privateImeOptions != null) {
+            editField.setPrivateImeOptions(privateImeOptions);
         }
         KeyHelpers.fixShowKeyboard(editField);
 

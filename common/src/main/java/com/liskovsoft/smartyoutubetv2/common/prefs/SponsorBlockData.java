@@ -330,6 +330,13 @@ public class SponsorBlockData implements ProfileChangeListener {
         restoreState();
     }
 
+    @Override
+    public void onProfileDataSynced(Set<String> keys) {
+        if (keys.contains(SPONSOR_BLOCK_DATA)) {
+            onProfileChanged();
+        }
+    }
+
     /**
      * The next instance reads the saved values again
      */

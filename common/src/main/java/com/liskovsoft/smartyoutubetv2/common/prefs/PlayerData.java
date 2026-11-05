@@ -1,6 +1,7 @@
 package com.liskovsoft.smartyoutubetv2.common.prefs;
 
 import android.annotation.SuppressLint;
+import com.liskovsoft.smartyoutubetv2.common.prefs.common.PendingSave;
 import android.content.Context;
 import android.os.Build;
 import android.os.Build.VERSION;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class PlayerData extends DataChangeBase implements PlayerConstants, ProfileChangeListener {
     static final String VIDEO_PLAYER_DATA = "video_player_data";
@@ -100,7 +102,7 @@ public class PlayerData extends DataChangeBase implements PlayerConstants, Profi
     private float mPitch;
     private long mAfrSwitchTimeMs;
     private List<String> mLastAudioLanguages;
-    private final Runnable mPersistStateInt = this::persistStateInt;
+    private final PendingSave mPersistStateInt = new PendingSave(this::persistStateInt);
     private boolean mIsLegacyCodecsForced;
     private boolean mIsAudioDelayEnabled;
 
@@ -907,12 +909,12 @@ public class PlayerData extends DataChangeBase implements PlayerConstants, Profi
     }
 
     public void persistNow() {
-        Utils.post(mPersistStateInt);
+        mPersistStateInt.post();
     }
 
     private void persistState() {
         onDataChange();
-        Utils.post(mPersistStateInt);
+        mPersistStateInt.post();
     }
 
     private void persistStateInt() {
@@ -932,11 +934,25 @@ public class PlayerData extends DataChangeBase implements PlayerConstants, Profi
 
     @Override
     public void onProfileChanged() {
-        Utils.removeCallbacks(mPersistStateInt);
+        mPersistStateInt.cancel();
 
         // reset on profile change
         mSpeeds.clear();
 
         restoreState();
+    }
+
+    @Override
+    public void persistPendingData() {
+        mPersistStateInt.flush();
+    }
+
+    @Override
+    public void onProfileDataSynced(Set<String> keys) {
+        if (keys.contains(VIDEO_PLAYER_DATA)) {
+            mPersistStateInt.cancel();
+            restoreState();
+            onDataChange();
+        }
     }
 }

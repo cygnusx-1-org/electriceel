@@ -10,6 +10,7 @@ import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 public abstract class DataSaverBase extends DataChangeBase {
     private final AppPrefs mAppPrefs;
@@ -17,8 +18,25 @@ public abstract class DataSaverBase extends DataChangeBase {
     private final boolean mIsProfileData;
     private final String mDataKey;
     private final List<Object> mValues;
-    private final Runnable mPersistStateInt = this::persistStateInt;
-    private final ProfileChangeListener mOnProfileChanged = this::onProfileChanged;
+    private final PendingSave mPersistStateInt = new PendingSave(this::persistStateInt);
+    private final ProfileChangeListener mOnProfileChanged = new ProfileChangeListener() {
+        @Override
+        public void onProfileChanged() {
+            DataSaverBase.this.onProfileChanged();
+        }
+
+        @Override
+        public void persistPendingData() {
+            mPersistStateInt.flush();
+        }
+
+        @Override
+        public void onProfileDataSynced(Set<String> keys) {
+            if (keys.contains(mDataKey)) {
+                DataSaverBase.this.onProfileChanged();
+            }
+        }
+    };
 
     private interface Converter {
         Object convert(String input);
@@ -122,16 +140,16 @@ public abstract class DataSaverBase extends DataChangeBase {
     }
 
     public void persistNow() {
-        Utils.post(mPersistStateInt);
+        mPersistStateInt.post();
     }
 
     private void persistState() {
         onDataChange();
 
         if (mPersistImmediately) {
-            Utils.post(mPersistStateInt);
+            mPersistStateInt.post();
         } else {
-            Utils.postDelayed(mPersistStateInt, 10_000);
+            mPersistStateInt.postDelayed(10_000);
         }
     }
 
@@ -150,7 +168,7 @@ public abstract class DataSaverBase extends DataChangeBase {
      */
     private void onProfileChanged() {
         // Already the new account: a pending save would put the old values there
-        Utils.removeCallbacks(mPersistStateInt);
+        mPersistStateInt.cancel();
         mValues.clear();
         restoreState();
         onDataChange();

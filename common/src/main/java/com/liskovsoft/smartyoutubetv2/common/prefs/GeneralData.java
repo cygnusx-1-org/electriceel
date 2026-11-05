@@ -1,6 +1,7 @@
 package com.liskovsoft.smartyoutubetv2.common.prefs;
 
 import android.content.Context;
+import com.liskovsoft.smartyoutubetv2.common.prefs.common.PendingSave;
 
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
@@ -10,8 +11,11 @@ import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 
 public class GeneralData implements ProfileChangeListener {
     public static final int SCREENSAVER_TIMEOUT_NEVER = 0;
@@ -100,7 +104,7 @@ public class GeneralData implements ProfileChangeListener {
     private int mLocalDriveBackupFreqDays;
     private List<Video> mOldPinnedItems;
     private boolean mIsRemapSToSpeedToggleEnabled;
-    private final Runnable mPersistStateInt = this::persistStateInt;
+    private final PendingSave mPersistStateInt = new PendingSave(this::persistStateInt);
 
     private GeneralData(Context context) {
         mPrefs = AppPrefs.instance(context);
@@ -493,6 +497,64 @@ public class GeneralData implements ProfileChangeListener {
         mSelectedItems.remove(sectionId);
     }
 
+    /**
+     * The last playlist, the playlists' sort orders and the remembered positions refer to the subscription groups and the
+     * playlists kept on the device by the ids they have now (see GroupReferences). Saved when one changed.
+     * @param sectionIds the pinned sections whose id changed (see SidebarService.normalizeGroupIds)
+     */
+    public void normalizeGroupIds(Function<String, String> channelGroupId, Function<String, String> playlistId,
+                                  Map<Integer, Integer> sectionIds) {
+        boolean isChanged = false;
+        String lastPlaylistId = mLastPlaylistId != null ? playlistId.apply(mLastPlaylistId) : null;
+
+        if (lastPlaylistId != null && !lastPlaylistId.equals(mLastPlaylistId)) {
+            mLastPlaylistId = lastPlaylistId;
+            isChanged = true;
+        }
+
+        // A key that already was the playlist's new id is the newer
+        Map<String, Integer> playlistOrder = new LinkedHashMap<>(mPlaylistOrder);
+        for (Map.Entry<String, Integer> entry : mPlaylistOrder.entrySet()) {
+            String newId = entry.getKey() != null ? playlistId.apply(entry.getKey()) : null;
+
+            if (newId != null && !newId.equals(entry.getKey())) {
+                playlistOrder.remove(entry.getKey());
+                isChanged = true;
+
+                if (!mPlaylistOrder.containsKey(newId)) {
+                    playlistOrder.put(newId, entry.getValue());
+                }
+            }
+        }
+
+        Map<Integer, Video> selectedItems = new LinkedHashMap<>(mSelectedItems);
+        for (Map.Entry<Integer, Video> entry : mSelectedItems.entrySet()) {
+            Integer newId = sectionIds.get(entry.getKey());
+
+            if (newId != null) {
+                selectedItems.remove(entry.getKey());
+                isChanged = true;
+
+                if (!mSelectedItems.containsKey(newId)) {
+                    selectedItems.put(newId, entry.getValue());
+                }
+            }
+        }
+
+        // The card of a playlist (e.g. in Playlists): found by its ids
+        for (Video item : selectedItems.values()) {
+            if (item != null && item.normalizeGroupIds(channelGroupId, playlistId)) {
+                isChanged = true;
+            }
+        }
+
+        if (isChanged) {
+            mPlaylistOrder = playlistOrder;
+            mSelectedItems = selectedItems;
+            persistState();
+        }
+    }
+
     public List<String> getChangelog() {
         return mChangelog;
     }
@@ -680,11 +742,11 @@ public class GeneralData implements ProfileChangeListener {
     }
 
     public void persistNow() {
-        Utils.post(mPersistStateInt);
+        mPersistStateInt.post();
     }
 
     private void persistState() {
-        Utils.post(mPersistStateInt);
+        mPersistStateInt.post();
     }
 
     private void persistStateInt() {
@@ -707,8 +769,20 @@ public class GeneralData implements ProfileChangeListener {
 
     @Override
     public void onProfileChanged() {
-        Utils.removeCallbacks(mPersistStateInt);
+        mPersistStateInt.cancel();
         restoreState();
+    }
+
+    @Override
+    public void persistPendingData() {
+        mPersistStateInt.flush();
+    }
+
+    @Override
+    public void onProfileDataSynced(Set<String> keys) {
+        if (keys.contains(GENERAL_DATA)) {
+            onProfileChanged();
+        }
     }
 
     /**

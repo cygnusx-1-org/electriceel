@@ -37,6 +37,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.VideoMe
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.providers.channelgroup.ChannelGroupServiceWrapper;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.interfaces.SectionPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.interfaces.VideoGroupPresenter;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.GroupReferences;
 import com.liskovsoft.smartyoutubetv2.common.app.views.BrowseView;
 import com.liskovsoft.smartyoutubetv2.common.misc.AppDataSourceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.BrowseProcessorManager;
@@ -117,8 +118,9 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         mBrowseProcessor = new BrowseProcessorManager(getContext(), this::syncItem);
         mActions = new ArrayList<>();
         WatchLaterManager.instance(context).setOnEdited(this::onWatchLaterEdited);
-
         initSectionMappings();
+        // Read above: the Home rows and the pinned items refer to the groups by the ids they have now, before the sections are made
+        GroupReferences.instance(context).update();
         updateChannelSorting();
         updatePlaylistsStyle();
     }

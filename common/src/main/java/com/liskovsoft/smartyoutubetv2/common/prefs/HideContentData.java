@@ -7,6 +7,7 @@ import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs.ProfileChangeListener;
 import com.liskovsoft.smartyoutubetv2.common.prefs.common.DataChangeBase;
 import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
+import java.util.Set;
 
 /**
  * The content hidden in the sections (Shorts, watched, upcoming, mixes, streams, Home categories) and the Shorts quick toggle.<br/>
@@ -65,6 +66,13 @@ public class HideContentData extends DataChangeBase implements ProfileChangeList
     public void onProfileChanged() {
         restoreState();
         onDataChange();
+    }
+
+    @Override
+    public void onProfileDataSynced(Set<String> keys) {
+        if (keys.contains(HIDE_CONTENT_DATA)) {
+            onProfileChanged();
+        }
     }
 
     private void restoreState() {

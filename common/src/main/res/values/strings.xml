@@ -1109,4 +1109,40 @@
         <item quantity="one">%s year ago</item>
         <item quantity="other">%s years ago</item>
     </plurals>
+    <!-- Storage sync (Settings → System → Storage sync): the settings shared through an electriceel-storage server -->
+    <string name="storage_sync">Storage sync</string>
+    <string name="storage_sync_desc">Shares the settings with your other devices through an electriceel-storage server</string>
+    <string name="storage_status_no_server">Pick the server below</string>
+    <string name="storage_status_not_authorized">This device isn\'t authorized yet</string>
+    <string name="storage_status_revoked">No longer authorized: authorize it again</string>
+    <string name="storage_status_denied">The authorization was refused</string>
+    <string name="storage_status_expired">The code expired: ask for a new one</string>
+    <string name="storage_status_pairing">Waiting for the authorization</string>
+    <string name="storage_status_connecting">Connecting…</string>
+    <string name="storage_status_synced">Synced with %1$s at %2$s</string>
+    <string name="storage_status_offline">Server unreachable, the app works as usual (%s)</string>
+    <string name="storage_server">Server</string>
+    <string name="storage_server_none">Not picked</string>
+    <string name="storage_server_searching">Searching for servers…</string>
+    <string name="storage_server_none_found">No server found on this network</string>
+    <string name="storage_server_enter">Enter the address</string>
+    <string name="storage_server_enter_desc">E.g. 192.168.1.10 or https://storage.example.com</string>
+    <string name="storage_server_search_again">Search again</string>
+    <string name="storage_server_invalid">Not an electriceel-storage server: %s</string>
+    <string name="storage_authorize">Authorize this device</string>
+    <string name="storage_authorize_desc">Shows a code to check in the server\'s web interface, under Devices waiting</string>
+    <string name="storage_code">Code %s</string>
+    <string name="storage_code_desc">In the web interface, Devices waiting: authorize the request with this code. Select to cancel.</string>
+    <string name="storage_authorized">Authorized in %s</string>
+    <string name="storage_group">Device group: %s</string>
+    <string name="storage_forget">Forget the server</string>
+    <string name="storage_forget_desc">This device stops syncing and keeps its settings</string>
+    <string name="storage_accounts">Accounts to sync</string>
+    <string name="storage_accounts_none">No account synced yet. A ticked account takes the group\'s settings, then shares its own.</string>
+    <string name="storage_all_accounts">All accounts</string>
+    <string name="storage_signed_out">Signed out</string>
+    <string name="storage_sync_global">Sync global settings</string>
+    <string name="storage_sync_global_desc">The settings of the device rather than of an account (remote control). Storage sync\'s own never are.</string>
+    <string name="storage_sync_now">Sync now</string>
+    <string name="storage_child_mode">Child mode is on: this account isn\'t synced until it\'s off</string>
 </resources>

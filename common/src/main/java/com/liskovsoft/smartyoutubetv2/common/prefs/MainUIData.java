@@ -1,6 +1,7 @@
 package com.liskovsoft.smartyoutubetv2.common.prefs;
 
 import android.annotation.SuppressLint;
+import com.liskovsoft.smartyoutubetv2.common.prefs.common.PendingSave;
 import android.content.Context;
 import android.os.Build;
 
@@ -18,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MainUIData extends DataChangeBase implements ProfileChangeListener {
     static final String MAIN_UI_DATA = "main_ui_data2";
@@ -157,7 +159,7 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
     private boolean mIsChannelSearchBarEnabled;
     private boolean mIsPinnedChannelRowsEnabled;
     private int mCardPreviewType;
-    private final Runnable mPersistStateInt = this::persistStateInt;
+    private final PendingSave mPersistStateInt = new PendingSave(this::persistStateInt);
     private boolean mIsUnlocalizedTitlesEnabled;
     private long mUiTweaks;
     private boolean mIsShortsDateEnabled;
@@ -749,14 +751,14 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
     }
 
     public void persistNow() {
-        Utils.post(mPersistStateInt);
+        mPersistStateInt.post();
     }
 
     private void persistState() {
         onDataChange();
         // Saved right away: a save still pending when the account changes is dropped (see onProfileChanged),
         // so e.g. a color scheme picked just before switching the account was lost
-        Utils.post(mPersistStateInt);
+        mPersistStateInt.post();
     }
 
     private void persistStateInt() {
@@ -821,9 +823,21 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
     @Override
     public void onProfileChanged() {
         // Already the new account: a pending save would put the old account's values there
-        Utils.removeCallbacks(mPersistStateInt);
+        mPersistStateInt.cancel();
         restoreState();
         onDataChange();
+    }
+
+    @Override
+    public void persistPendingData() {
+        mPersistStateInt.flush();
+    }
+
+    @Override
+    public void onProfileDataSynced(Set<String> keys) {
+        if (keys.contains(MAIN_UI_DATA)) {
+            onProfileChanged();
+        }
     }
 
     /**

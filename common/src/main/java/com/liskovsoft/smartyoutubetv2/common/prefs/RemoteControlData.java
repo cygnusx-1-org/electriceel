@@ -7,7 +7,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.prefs.common.DataChangeBase;
 
 public class RemoteControlData extends DataChangeBase {
-    private static final String DEVICE_LINK_DATA = "device_link_data";
+    static final String DEVICE_LINK_DATA = "device_link_data";
     @SuppressLint("StaticFieldLeak")
     private static RemoteControlData sInstance;
     private final Context mContext;
@@ -87,6 +87,14 @@ public class RemoteControlData extends DataChangeBase {
 
     public boolean isConnectedBefore() {
         return mIsConnectedBefore;
+    }
+
+    /**
+     * The storage sync changed the saved values (see StorageSync)
+     */
+    public void onDataSynced() {
+        restoreState();
+        onDataChange();
     }
 
     private void restoreState() {

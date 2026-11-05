@@ -16,6 +16,7 @@ import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -281,6 +282,45 @@ public class HiddenVideosDataTest {
 
         assertEquals(Arrays.asList(MediaGroup.TYPE_HOME, MediaGroup.TYPE_HISTORY, SectionFilterData.SECTION_CHANNEL_GROUPS, PINNED_CHANNEL,
                 otherPinned, MediaGroup.TYPE_SEARCH, MediaGroup.TYPE_CHANNEL, MediaGroup.TYPE_SUGGESTIONS), result);
+    }
+
+    /**
+     * A pinned section whose id changed (see SidebarService.normalizeGroupIds) takes its hidden videos; one hidden from both is
+     * one, the newest
+     */
+    @Test
+    public void hiddenVideosGoWithTheirSectionsNewId() {
+        HiddenVideosData data = getData();
+        int newSection = "New climbing channel".hashCode();
+
+        data.hide(PINNED_CHANNEL, "Climbing", createVideo("video1"));
+        data.hide(PINNED_CHANNEL, "Climbing", createVideo("video2"));
+        data.hide(newSection, "Climbing again", createVideo("video2"));
+        data.hide(MediaGroup.TYPE_HOME, null, createVideo("video3"));
+
+        data.moveSections(Collections.singletonMap(PINNED_CHANNEL, newSection));
+
+        for (HiddenVideosData current : Arrays.asList(data, getDataReadAgain())) {
+            assertFalse(current.isHidden(PINNED_CHANNEL, "video1"));
+            assertTrue(current.isHidden(newSection, "video1"));
+            assertTrue(current.isHidden(newSection, "video2"));
+            assertTrue(current.isHidden(MediaGroup.TYPE_HOME, "video3"));
+
+            Section moved = null;
+            for (Section section : current.getSections()) {
+                if (section.sectionId == newSection) {
+                    moved = section;
+                }
+            }
+
+            assertEquals(Arrays.asList("video2", "video1"), getIds(moved));
+            assertEquals("Climbing again", moved.title);
+        }
+    }
+
+    private static HiddenVideosData getDataReadAgain() {
+        HiddenVideosData.resetInstanceForTesting();
+        return getData();
     }
 
     private static List<String> getIds(Section section) {

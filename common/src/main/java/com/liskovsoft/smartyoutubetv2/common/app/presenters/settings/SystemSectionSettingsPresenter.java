@@ -43,6 +43,8 @@ public class SystemSectionSettingsPresenter extends BasePresenter<Void> implemen
                 () -> RemoteControlSettingsPresenter.instance(context).show(), R.drawable.settings_cast));
         items.add(new SettingsItem(context.getString(R.string.app_backup_restore),
                 () -> BackupSettingsPresenter.instance(context).show(), R.drawable.settings_backup));
+        items.add(new SettingsItem(context.getString(R.string.storage_sync),
+                () -> StorageSettingsPresenter.instance(context).show(), R.drawable.settings_storage_sync));
 
         return items;
     }

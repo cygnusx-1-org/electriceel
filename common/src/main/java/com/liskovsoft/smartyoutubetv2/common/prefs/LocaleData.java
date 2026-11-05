@@ -10,6 +10,7 @@ import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.locale.LocaleUpdater;
 import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs.ProfileChangeListener;
+import java.util.Set;
 
 /**
  * The language and the country of the Language/Country settings.
@@ -93,6 +94,13 @@ public class LocaleData implements ProfileChangeListener {
         }
 
         applyProfileData();
+    }
+
+    @Override
+    public void onProfileDataSynced(Set<String> keys) {
+        if (keys.contains(LOCALE_DATA)) {
+            onProfileChanged();
+        }
     }
 
     /**

@@ -3,6 +3,8 @@ package com.liskovsoft.smartyoutubetv2.common.app.presenters.service;
 import android.annotation.SuppressLint;
 import android.content.Context;
 
+import androidx.annotation.Nullable;
+
 import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.smartyoutubetv2.common.R;
@@ -14,9 +16,12 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 
 public class SidebarService implements ProfileChangeListener {
     @SuppressLint("StaticFieldLeak")
@@ -47,6 +52,14 @@ public class SidebarService implements ProfileChangeListener {
             sInstance = new SidebarService(context.getApplicationContext());
         }
 
+        return sInstance;
+    }
+
+    /**
+     * The one made, without making it: null while nothing has read the sidebar
+     */
+    @Nullable
+    public static SidebarService peekInstance() {
         return sInstance;
     }
 
@@ -420,9 +433,61 @@ public class SidebarService implements ProfileChangeListener {
         mPrefs.setSidebarData(Helpers.mergeData(mPinnedItems, mBootSectionId, mIsSettingsSectionEnabled));
     }
 
+    /**
+     * The pinned subscription groups and playlists kept on the device refer to them by the ids they have now (see
+     * GroupReferences). A section is known by the item's hash, which has the id: the boot section follows it. Saved when an item
+     * changed.
+     * @return the sections whose id changed: the old id to the new one
+     */
+    public Map<Integer, Integer> normalizeGroupIds(Function<String, String> channelGroupId, Function<String, String> playlistId) {
+        Map<Integer, Integer> sectionIds = new HashMap<>();
+        boolean isChanged = false;
+        List<Video> result = new ArrayList<>();
+
+        for (Video item : mPinnedItems) {
+            if (item != null) {
+                int oldSectionId = getSectionId(item);
+
+                if (item.normalizeGroupIds(channelGroupId, playlistId)) {
+                    int sectionId = getSectionId(item); // the hash again, saved with the item
+                    isChanged = true;
+
+                    if (sectionId != oldSectionId) {
+                        sectionIds.put(oldSectionId, sectionId);
+
+                        if (mBootSectionId == oldSectionId) {
+                            mBootSectionId = sectionId;
+                        }
+                    }
+                }
+            }
+
+            // Two of one group, made by two devices before
+            if (result.contains(item)) {
+                isChanged = true;
+            } else {
+                result.add(item);
+            }
+        }
+
+        if (isChanged) {
+            mPinnedItems = result;
+            persistState();
+        }
+
+        return sectionIds;
+    }
+
     @Override
     public void onProfileChanged() {
         restoreState();
+    }
+
+    @Override
+    public void onProfileDataSynced(Set<String> keys) {
+        if (keys.contains(AppPrefs.SIDEBAR_DATA)) {
+            restoreState();
+        }
     }
 
     /**

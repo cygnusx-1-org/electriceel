@@ -16,6 +16,8 @@ import org.robolectric.annotation.Config;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -343,6 +345,34 @@ public class HomeRowsDataTest {
 
         assertEquals(Arrays.asList(Row.channel("UCfirst", null), Row.subscriptions(), Row.youTube()), getData().getRows());
         assertEquals("First", getData().getRows().get(0).title);
+    }
+
+    /**
+     * A group row by an id the group had before takes its id now (see ChannelGroupServiceWrapper.normalizeReferences): two rows
+     * of one group become one, a row of a group not found stays, and it's saved
+     */
+    @Test
+    public void groupRowsTakeTheGroupsIdsNow() {
+        HomeRowsData data = getData();
+        data.addChannelGroup("Ab12Cd34Ef56", "Music");
+        data.addChannelGroup("t-1111111111111111", "Climbing");
+        data.addChannelGroup("Gh78Ij90Kl12", "Music");
+        data.addChannelGroup("Mn34Op56Qr78", "Removed");
+
+        Map<String, String> ids = new HashMap<>();
+        ids.put("Ab12Cd34Ef56", "t-2222222222222222");
+        ids.put("Gh78Ij90Kl12", "t-2222222222222222");
+        ids.put("t-1111111111111111", "t-1111111111111111");
+        data.normalizeChannelGroupIds(ids::get);
+
+        List<Row> expected = Arrays.asList(Row.channelGroup("t-2222222222222222", null), Row.channelGroup("t-1111111111111111", null),
+                Row.channelGroup("Mn34Op56Qr78", null), Row.youTube());
+        assertEquals(expected, data.getRows());
+        assertEquals("Music", data.getRows().get(0).title);
+
+        HomeRowsData.resetInstanceForTesting();
+
+        assertEquals(expected, getData().getRows());
     }
 
     private static AppPrefs getPrefs() {

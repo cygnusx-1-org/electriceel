@@ -163,6 +163,13 @@ public class KeywordFilterData implements ProfileChangeListener {
         restoreState();
     }
 
+    @Override
+    public void onProfileDataSynced(Set<String> keys) {
+        if (keys.contains(KEYWORD_FILTER_DATA)) {
+            onProfileChanged();
+        }
+    }
+
     /**
      * The next instance reads the saved values again
      */

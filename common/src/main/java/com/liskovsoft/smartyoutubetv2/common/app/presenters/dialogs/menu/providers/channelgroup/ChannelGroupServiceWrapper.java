@@ -11,6 +11,7 @@ import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs.ProfileChangeListener;
 import com.liskovsoft.smartyoutubetv2.common.prefs.HomeRowsData;
+import com.liskovsoft.youtubeapi.service.ServiceProfileData;
 import com.liskovsoft.youtubeapi.service.YouTubeServiceManager;
 
 import java.io.File;
@@ -194,6 +195,16 @@ public class ChannelGroupServiceWrapper implements ProfileChangeListener {
     @Override
     public void onProfileChanged() {
         restoreState();
+    }
+
+    /**
+     * The storage sync gave the service other groups (see ServiceProfileData.onDataSynced): the channels of the groups are read again
+     */
+    @Override
+    public void onProfileDataSynced(Set<String> keys) {
+        if (keys.contains(ServiceProfileData.SUBSCRIPTION_GROUPS)) {
+            onGroupsChanged();
+        }
     }
 
     private ChannelGroupService getService() {

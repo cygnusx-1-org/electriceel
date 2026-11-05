@@ -172,6 +172,37 @@ public class HiddenVideosData implements ProfileChangeListener {
     }
 
     /**
+     * The videos hidden from a pinned section whose id changed go with it (see SidebarService.normalizeGroupIds)
+     * @param sectionIds the old id to the new one
+     */
+    public void moveSections(Map<Integer, Integer> sectionIds) {
+        if (sectionIds.isEmpty()) {
+            return;
+        }
+
+        boolean isChanged = false;
+        List<Entry> entries = new ArrayList<>();
+
+        for (Entry entry : mSnapshot.entries) {
+            Integer newId = sectionIds.get(entry.sectionId);
+
+            if (newId != null) {
+                // Hidden from the new one too: one entry, the newest
+                removeEntry(entries, newId, entry.video.videoId);
+                entries.add(new Entry(newId, entry.title, entry.video));
+                isChanged = true;
+            } else {
+                removeEntry(entries, entry.sectionId, entry.video.videoId);
+                entries.add(entry);
+            }
+        }
+
+        if (isChanged) {
+            update(entries);
+        }
+    }
+
+    /**
      * Each section with hidden videos, in the order of the oldest one still hidden from each, the newest hidden first.
      * New cards each time: the rows own them.
      */
@@ -242,6 +273,13 @@ public class HiddenVideosData implements ProfileChangeListener {
     @Override
     public void onProfileChanged() {
         restoreState();
+    }
+
+    @Override
+    public void onProfileDataSynced(Set<String> keys) {
+        if (keys.contains(HIDDEN_VIDEOS_DATA)) {
+            restoreState();
+        }
     }
 
     private static void removeEntry(List<Entry> entries, int sectionId, String videoId) {

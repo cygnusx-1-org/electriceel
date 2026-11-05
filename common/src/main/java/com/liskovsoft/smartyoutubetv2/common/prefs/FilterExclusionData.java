@@ -12,6 +12,7 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs.ProfileChangeListene
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The channels excluded from the hiding of the Hide or mark content filters, each from the ones picked
@@ -197,6 +198,13 @@ public class FilterExclusionData implements ProfileChangeListener {
     @Override
     public void onProfileChanged() {
         restoreState();
+    }
+
+    @Override
+    public void onProfileDataSynced(Set<String> keys) {
+        if (keys.contains(FILTER_EXCLUSION_DATA)) {
+            onProfileChanged();
+        }
     }
 
     /**
