@@ -14,11 +14,14 @@ import java.util.regex.Pattern;
 
 public class ShortsCardPresenter extends VideoCardPresenter {
     // A landscape thumbnail of YouTube's (e.g. "sd2.jpg" of a short of a playlist: 4:3 with black sides),
-    // or the first frame of the video, which the shorts of the Shorts section come with rather than the thumbnail (see BrowseService2.getShortsWeb)
+    // or the first frame of the video, which the shorts of the Shorts section come with rather than the thumbnail (see BrowseService2.getShortsWeb).
+    // A short of a row of videos has "hq720.jpg" or, when its thumbnail is another one of YouTube's, "hq720_2.jpg" (group 2: the "2").
     private static final Pattern REPLACED_THUMB =
-            Pattern.compile("^(https://i\\.ytimg\\.com/vi/[^/]+/)(?:(?:sd|hq|mq)(?:default|[123])|hq720|frame0)\\.jpg(?:\\?.*)?$");
-    // The vertical thumbnail in full size (e.g. 1080x1920): only the urls YouTube signs are resized
+            Pattern.compile("^(https://i\\.ytimg\\.com/vi/[^/]+/)(?:(?:sd|hq|mq)(?:default|[123])|hq720(?:_(\\d+))?|frame0)\\.jpg(?:\\?.*)?$");
+    // The vertical thumbnail in full size (e.g. 1080x1920): only the urls YouTube signs are resized.
+    // The one of "hq720_2.jpg" is "oar2.jpg": that short has no "oardefault.jpg".
     private static final String ORIGINAL_THUMB = "oardefault.jpg";
+    private static final Pattern ORIGINAL_THUMB_URL = Pattern.compile("/oar(?:default|\\d+)\\.jpg$");
 
     /**
      * The vertical thumbnail of the short rather than a landscape one or a frame, unless frames are picked as thumbnails (see ClickbaitRemover).
@@ -29,7 +32,8 @@ public class ShortsCardPresenter extends VideoCardPresenter {
     protected String getCardImageUrl(Video video, int thumbQuality) {
         String url = super.getCardImageUrl(video, thumbQuality);
         Matcher matcher = url != null && thumbQuality == ClickbaitRemover.THUMB_QUALITY_DEFAULT ? REPLACED_THUMB.matcher(url) : null;
-        String thumbUrl = matcher != null && matcher.matches() ? matcher.group(1) + ORIGINAL_THUMB : null;
+        String thumbUrl = matcher != null && matcher.matches() ?
+                matcher.group(1) + (matcher.group(2) != null ? "oar" + matcher.group(2) + ".jpg" : ORIGINAL_THUMB) : null;
 
         return thumbUrl != null ? thumbUrl : url;
     }
@@ -39,7 +43,7 @@ public class ShortsCardPresenter extends VideoCardPresenter {
      */
     @Override
     protected DiskCacheStrategy getDiskCacheStrategy(String url) {
-        return url != null && url.endsWith("/" + ORIGINAL_THUMB) ? DiskCacheStrategy.RESOURCE : super.getDiskCacheStrategy(url);
+        return url != null && ORIGINAL_THUMB_URL.matcher(url).find() ? DiskCacheStrategy.RESOURCE : super.getDiskCacheStrategy(url);
     }
 
     @Override
