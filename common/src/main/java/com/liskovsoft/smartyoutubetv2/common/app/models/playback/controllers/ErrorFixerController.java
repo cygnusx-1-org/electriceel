@@ -400,7 +400,10 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
             return false;
         }
 
-        MessageHelpers.showLongMessage(getContext(), "%s. Attempt: %s", reloadError.getMessage(), mSabrErrorFixAttempts);
+        // The first is the server's routine ask (e.g. its session expired in a long pause): reloaded, it plays on without a word
+        if (mSabrErrorFixAttempts > 1) {
+            MessageHelpers.showLongMessage(getContext(), "%s. Attempt: %s", reloadError.getMessage(), mSabrErrorFixAttempts);
+        }
 
         failure.action("sabr_reload " + mSabrErrorFixAttempts + "/" + MAX_SABR_ERROR_FIX_ATTEMPTS).action("reload_video");
         YouTubeServiceManager.instance().reloadPlayerResponse(video.videoId, reloadError.reloadPlaybackToken);

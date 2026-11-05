@@ -18,7 +18,22 @@ public final class AudioClockInfo {
   public volatile int clockMismatches;
   /** Latencies ignored for being impossibly large. */
   public volatile int badLatencies;
+  /**
+   * Times the position stopped waiting on a timestamp that didn't advance, the playhead having got too far past it: it went by the
+   * playhead from there (see AudioTrackPositionTracker#MAX_TIMESTAMP_HOLD_US).
+   */
+  public volatile int holdReleases;
+  /** The longest the position waited on a timestamp that didn't advance: how far the playhead got past it meanwhile. */
+  public volatile long longestHoldMs;
+  /**
+   * Of all the AudioTracks so far, never reset: what they go up by over a while is that while's, whatever tracks it had (e.g. a seek
+   * makes another).
+   */
+  public volatile int totalFramesMismatches;
+  public volatile int totalClockMismatches;
+  public volatile int totalHoldReleases;
 
+  /** Another AudioTrack, or none: the totals go on. */
   /* package */ void reset() {
     timestampState = TIMESTAMP_STATE_UNKNOWN;
     playheadMs = -1;
@@ -26,5 +41,7 @@ public final class AudioClockInfo {
     framesMismatches = 0;
     clockMismatches = 0;
     badLatencies = 0;
+    holdReleases = 0;
+    longestHoldMs = 0;
   }
 }

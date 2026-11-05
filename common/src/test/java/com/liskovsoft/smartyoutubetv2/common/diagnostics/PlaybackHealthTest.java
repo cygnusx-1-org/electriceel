@@ -422,6 +422,156 @@ public class PlaybackHealthTest {
         assertTrue(mHealth.getStartTrail().isEmpty());
     }
 
+    /**
+     * The counters are of all the AudioTracks: the start has what they went up by in it, not the video's before
+     */
+    @Test
+    public void theStartsAudioClockIsWhatItWentThroughInIt() {
+        mSample.videoId = "video";
+        setAudioTotals(2, 0, 5);
+        mSample.audioTimestampState = 1;
+        mSample.audioLongestHoldMs = 0;
+        tick(500, 0, 1, 0);
+
+        mSample.audioLongestHoldMs = 480;
+        setAudioTotals(2, 0, 6);
+        tick(500, 500, 2, 0);
+        mSample.audioTimestampState = 2;
+        playPastTheStart();
+
+        PlaybackHealth.StartAudioClock audio = mHealth.takeStartFrames().audioClock;
+        assertEquals(2, audio.timestampState);
+        assertEquals(0, audio.framesMismatches);
+        assertEquals(0, audio.clockMismatches);
+        assertEquals(1, audio.holdReleases);
+        assertEquals(480, audio.longestHoldMs);
+    }
+
+    /**
+     * The engine restarted in the start: the new player's counters start over from 0
+     */
+    @Test
+    public void anotherPlayersCountersAddToTheStart() {
+        setAudioTotals(3, 1, 2);
+        tick(500, 0, 1, 0);
+        setAudioTotals(4, 1, 3);
+        tick(500, 500, 2, 0);
+        setAudioTotals(1, 0, 1);
+        tick(500, 500, 3, 0);
+
+        PlaybackHealth.StartAudioClock audio = mHealth.endStart().audioClock;
+        assertEquals(2, audio.framesMismatches);
+        assertEquals(0, audio.clockMismatches);
+        assertEquals(2, audio.holdReleases);
+    }
+
+    @Test
+    public void aStartWithoutTheAudioClockHasNone() {
+        tick(2_000, 2_000, 1, 0);
+        tick(2_000, 2_000, 50, 0);
+
+        assertNull(mHealth.endStart().audioClock);
+    }
+
+    @Test
+    public void playingAgainIsSampledCloselyWithItsTrail() {
+        playPastTheStart();
+        mHealth.onInterrupted(PlaybackHealth.RESUMED_BY_SEEK);
+        mSample.isPlaying = false;
+        tick(2_000, 0, 360, 0);
+        assertEquals(2_000, mHealth.getTickMs());
+
+        mSample.isPlaying = true;
+        mHealth.onResumed(mSample.nowMs + 100);
+        mSample.positionMs = 60_000;
+        mSample.audioTimestampState = 1;
+        tick(100, 0, 361, 0);
+        tick(500, 0, 361, 0);
+
+        assertEquals(500, mHealth.getTickMs());
+        assertEquals(PlaybackHealth.RESUMED_BY_SEEK, mHealth.getResumedBy());
+        assertEquals(2, mHealth.getResumeTrail().size());
+        assertArrayEquals(new long[]{0, 60_000, 361, 0, -1, -1, 1, -1, -1}, mHealth.getResumeTrail().get(0));
+        assertEquals(500, mHealth.getResumeTrail().get(1)[0]);
+        // Past the start, it has none
+        assertTrue(mHealth.getStartTrail().isEmpty());
+
+        for (int i = 0; i < 19; i++) {
+            tick(500, 500, 362 + i * 12, 0);
+        }
+
+        assertEquals(PlaybackHealth.START_MS, mHealth.getResumeTrail().get(mHealth.getResumeTrail().size() - 1)[0]);
+        tick(500, 500, 600, 0);
+        assertTrue(mHealth.getResumeTrail().isEmpty());
+        assertEquals(2_000, mHealth.getTickMs());
+    }
+
+    /**
+     * A seek makes another AudioTrack: it's what it plays again after, whatever else stopped it meanwhile. A pause goes before buffering.
+     */
+    @Test
+    public void whatItPlaysAgainAfterIsTheMostLikelyToRestartTheClock() {
+        mHealth.onInterrupted(PlaybackHealth.RESUMED_BY_PAUSE);
+        mHealth.onInterrupted(PlaybackHealth.RESUMED_BY_SEEK);
+        mHealth.onInterrupted(PlaybackHealth.RESUMED_BY_BUFFERING);
+        mHealth.onResumed(0);
+        assertEquals(PlaybackHealth.RESUMED_BY_SEEK, mHealth.getResumedBy());
+
+        mHealth.onInterrupted(PlaybackHealth.RESUMED_BY_BUFFERING);
+        mHealth.onInterrupted(PlaybackHealth.RESUMED_BY_PAUSE);
+        mHealth.onResumed(0);
+        assertEquals(PlaybackHealth.RESUMED_BY_PAUSE, mHealth.getResumedBy());
+
+        mHealth.onResumed(0);
+        assertNull(mHealth.getResumedBy());
+    }
+
+    /**
+     * The first play since the player was prepared is the start, not a resume: what stopped the video before is forgotten
+     */
+    @Test
+    public void theStartEndsTheResumeBefore() {
+        tick(500, 500, 1, 0);
+        mHealth.onResumed(mSample.nowMs);
+        tick(500, 500, 2, 0);
+        assertEquals(1, mHealth.getResumeTrail().size());
+
+        mHealth.onInterrupted(PlaybackHealth.RESUMED_BY_PAUSE);
+        mHealth.onStarted();
+        tick(500, 500, 3, 0);
+        assertTrue(mHealth.getResumeTrail().isEmpty());
+
+        mHealth.onResumed(mSample.nowMs);
+        assertNull(mHealth.getResumedBy());
+    }
+
+    /**
+     * Another format of the video (e.g. another quality) plays on the same clock: its trail goes on. Another video's doesn't.
+     */
+    @Test
+    public void anotherFormatGoesOnWithTheTrailAnotherVideoDoesnt() {
+        mSample.videoId = "video";
+        tick(500, 500, 1, 0);
+        mHealth.onResumed(mSample.nowMs);
+        tick(500, 500, 2, 0);
+
+        mSample.attempt = 2;
+        tick(500, 500, 3, 0);
+        assertEquals(2, mHealth.getResumeTrail().size());
+        assertEquals(1_000, mHealth.getResumeTrail().get(1)[0]);
+
+        mSample.attempt = 3;
+        mSample.videoId = "next";
+        tick(500, 500, 0, 0);
+        assertTrue(mHealth.getResumeTrail().isEmpty());
+    }
+
+    private void setAudioTotals(long framesMismatches, long clockMismatches, long holdReleases) {
+        mSample.audioTotalFramesMismatches = framesMismatches;
+        mSample.audioTotalClockMismatches = clockMismatches;
+        mSample.audioTotalHoldReleases = holdReleases;
+    }
+
     private void playPastTheStart() {
         for (int i = 1; i <= 6; i++) {
             tick(2_000, 2_000, i * 60, 0);

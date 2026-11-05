@@ -7,6 +7,7 @@ import com.liskovsoft.sharedutils.helpers.Helpers;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,6 +27,17 @@ public final class PlaybackHealth {
     public static final String KIND_FRAME_DROPS = "frame_drops";
     public static final String KIND_STALLS = "stalls";
     public static final String KIND_AUDIO_SILENT = "audio_silent";
+    /**
+     * What it plays again after (see #onInterrupted): a seek makes another AudioTrack, a pause or buffering pauses the one it has. Its
+     * clock starts over either way.
+     */
+    public static final String RESUMED_BY_SEEK = "seek";
+    public static final String RESUMED_BY_PAUSE = "pause";
+    public static final String RESUMED_BY_BUFFERING = "buffering";
+    /**
+     * The more likely to have started the audio clock over, the later: one comes before the ones it's in front of
+     */
+    private static final List<String> RESUME_CAUSES = Arrays.asList(RESUMED_BY_BUFFERING, RESUMED_BY_PAUSE, RESUMED_BY_SEEK);
     /**
      * Playing this long and no frame shown
      */
@@ -123,6 +135,28 @@ public final class PlaybackHealth {
      */
     @Nullable
     private long[] mLastFrames;
+    /**
+     * The start's audio clock: what the counts of all the AudioTracks went up by in it, its timestamp's last state and the longest the
+     * position waited on one, -1 till a sample has them
+     */
+    private final Increase mStartFramesMismatches = new Increase();
+    private final Increase mStartClockMismatches = new Increase();
+    private final Increase mStartHoldReleases = new Increase();
+    private int mStartTimestampState = -1;
+    private long mStartLongestHoldMs = -1;
+    /**
+     * When it last played again after a seek, a pause or buffering, on the samples' clock (see #onResumed): the first seconds from
+     * there are sampled closely, as the start's are. -1 when it hasn't since the video started.
+     */
+    private long mResumedAtMs = -1;
+    @Nullable
+    private String mResumedBy;
+    /**
+     * Since it last played, see RESUME_CAUSES
+     */
+    @Nullable
+    private String mInterruption;
+    private final List<long[]> mResumeTrail = new ArrayList<>();
 
     /**
      * Where the player is at
@@ -166,6 +200,18 @@ public final class PlaybackHealth {
         public long audioPlayheadMs = -1;
         public long audioLatencyMs = -1;
         /**
+         * Of the audio clock of the AudioTrack in use (see AudioClockInfo), -1 when unknown: the longest the position waited on a
+         * timestamp that didn't advance
+         */
+        public long audioLongestHoldMs = -1;
+        /**
+         * Of the audio clock of all the AudioTracks so far (see AudioClockInfo), -1 when unknown: the timestamps rejected for their
+         * frames or their time being too far off, and the times the position stopped waiting on one that didn't advance
+         */
+        public long audioTotalFramesMismatches = -1;
+        public long audioTotalClockMismatches = -1;
+        public long audioTotalHoldReleases = -1;
+        /**
          * A frame of the format tried was shown
          */
         public boolean isVideoRendered;
@@ -198,15 +244,92 @@ public final class PlaybackHealth {
          * The picture stood still this long, while the position moved or stood still too
          */
         public final long longestFrozenMs;
+        /**
+         * Null when its samples didn't have it
+         */
+        @Nullable
+        public final StartAudioClock audioClock;
 
         StartFrames(@Nullable String videoId, long playedMs, long renderedFrames, long droppedFrames, long droppedToKeyframes,
                     long longestFrozenMs) {
+            this(videoId, playedMs, renderedFrames, droppedFrames, droppedToKeyframes, longestFrozenMs, null);
+        }
+
+        StartFrames(@Nullable String videoId, long playedMs, long renderedFrames, long droppedFrames, long droppedToKeyframes,
+                    long longestFrozenMs, @Nullable StartAudioClock audioClock) {
             this.videoId = videoId;
             this.playedMs = playedMs;
             this.renderedFrames = renderedFrames;
             this.droppedFrames = droppedFrames;
             this.droppedToKeyframes = droppedToKeyframes;
             this.longestFrozenMs = longestFrozenMs;
+            this.audioClock = audioClock;
+        }
+    }
+
+    /**
+     * The audio clock over a video's first seconds (see AudioClockInfo): whether it started on a timestamp that didn't advance, and
+     * what the position did about it
+     */
+    public static final class StartAudioClock {
+        /**
+         * AudioTimestampPoller's, at their end: -1 unknown, 0 initializing, 1 not advancing, 2 advancing, 3 none, 4 rejected
+         */
+        public final int timestampState;
+        /**
+         * Timestamps rejected in them for their frames or their time being too far off: the position waited on one that long
+         */
+        public final long framesMismatches;
+        public final long clockMismatches;
+        /**
+         * Times in them the position stopped waiting on a timestamp that didn't advance, and went by the playhead
+         */
+        public final long holdReleases;
+        /**
+         * The longest it waited on one: how far the playhead got past it meanwhile
+         */
+        public final long longestHoldMs;
+
+        StartAudioClock(int timestampState, long framesMismatches, long clockMismatches, long holdReleases, long longestHoldMs) {
+            this.timestampState = timestampState;
+            this.framesMismatches = framesMismatches;
+            this.clockMismatches = clockMismatches;
+            this.holdReleases = holdReleases;
+            this.longestHoldMs = longestHoldMs;
+        }
+    }
+
+    /**
+     * What a counter went up by from the first value given. Another player's starts over from 0.
+     */
+    private static final class Increase {
+        private long mIncrease;
+        private long mLast = -1;
+
+        void add(long value) {
+            if (value < 0) {
+                return;
+            }
+
+            if (mLast >= 0) {
+                // Under the one before: it started over, all of it is new
+                mIncrease += value >= mLast ? value - mLast : value;
+            }
+
+            mLast = value;
+        }
+
+        boolean isKnown() {
+            return mLast >= 0;
+        }
+
+        long get() {
+            return mIncrease;
+        }
+
+        void reset() {
+            mIncrease = 0;
+            mLast = -1;
         }
     }
 
@@ -224,9 +347,14 @@ public final class PlaybackHealth {
         if (sample.attempt != mAttempt) {
             // The video before ended in its start (e.g. the next one started): what it played of it. Another format of the same video
             // is measured on its own.
-            StartFrames early = Helpers.equals(sample.videoId, mVideoId) ? null : endStart();
+            boolean isSameVideo = Helpers.equals(sample.videoId, mVideoId);
+            StartFrames early = isSameVideo ? null : endStart();
             reset(sample.attempt);
             mStartFrames = early;
+
+            if (!isSameVideo) {
+                endResume();
+            }
         }
 
         mVideoId = sample.videoId;
@@ -238,6 +366,10 @@ public final class PlaybackHealth {
 
         if (sample.stalls >= STALLS && sample.stallMs >= STALLS_MIN_MS) {
             report(result, KIND_STALLS);
+        }
+
+        if (!mIsStartMeasured) {
+            addStartAudioClock(sample);
         }
 
         if (!sample.isPlaying) {
@@ -258,8 +390,11 @@ public final class PlaybackHealth {
         }
 
         if (sample.hasVideo && sample.renderedFrames >= 0 && mPlayedMs <= START_MS && mStartTrail.size() < MAX_START_TRAIL) {
-            mStartTrail.add(new long[]{mPlayedMs, sample.positionMs, sample.renderedFrames, sample.droppedFrames, sample.inputBuffers,
-                    sample.droppedToKeyframes, sample.audioTimestampState, sample.audioPlayheadMs, sample.audioLatencyMs});
+            mStartTrail.add(toTrailRow(mPlayedMs, sample));
+        }
+
+        if (sample.hasVideo && sample.renderedFrames >= 0 && isResuming(sample.nowMs) && mResumeTrail.size() < MAX_START_TRAIL) {
+            mResumeTrail.add(toTrailRow(Math.max(0, sample.nowMs - mResumedAtMs), sample));
         }
 
         if (sample.hasVideo && !sample.isVideoRendered && wasPlaying) {
@@ -308,7 +443,7 @@ public final class PlaybackHealth {
         if (!mIsStartMeasured && mPlayedMs >= START_MS && sample.hasVideo && sample.renderedFrames >= 0 && sample.droppedFrames >= 0) {
             mIsStartMeasured = true;
             mStartFrames = new StartFrames(mVideoId, mPlayedMs, sample.renderedFrames, sample.droppedFrames, sample.droppedToKeyframes,
-                    mLongestFrozenMs);
+                    mLongestFrozenMs, getStartAudioClock());
         }
 
         mLastTickMs = sample.nowMs;
@@ -359,11 +494,75 @@ public final class PlaybackHealth {
     }
 
     /**
+     * {played, position, rendered, dropped, given to the decoder, dropped to a keyframe, audio timestamp state, audio playhead, audio
+     * latency}
+     */
+    private static long[] toTrailRow(long playedMs, Sample sample) {
+        return new long[]{playedMs, sample.positionMs, sample.renderedFrames, sample.droppedFrames, sample.inputBuffers,
+                sample.droppedToKeyframes, sample.audioTimestampState, sample.audioPlayheadMs, sample.audioLatencyMs};
+    }
+
+    private void addStartAudioClock(Sample sample) {
+        if (sample.audioTotalHoldReleases < 0) {
+            return;
+        }
+
+        mStartFramesMismatches.add(sample.audioTotalFramesMismatches);
+        mStartClockMismatches.add(sample.audioTotalClockMismatches);
+        mStartHoldReleases.add(sample.audioTotalHoldReleases);
+        mStartTimestampState = sample.audioTimestampState;
+        mStartLongestHoldMs = Math.max(mStartLongestHoldMs, sample.audioLongestHoldMs);
+    }
+
+    @Nullable
+    private StartAudioClock getStartAudioClock() {
+        if (!mStartHoldReleases.isKnown()) {
+            return null;
+        }
+
+        return new StartAudioClock(mStartTimestampState, mStartFramesMismatches.get(), mStartClockMismatches.get(), mStartHoldReleases.get(),
+                mStartLongestHoldMs);
+    }
+
+    /**
+     * It stopped playing: one of the RESUMED_BY_ kinds. Till it plays again, the one more likely to have started the audio clock over
+     * is kept.
+     */
+    public void onInterrupted(String cause) {
+        if (RESUME_CAUSES.indexOf(cause) > RESUME_CAUSES.indexOf(mInterruption)) {
+            mInterruption = cause;
+        }
+    }
+
+    /**
+     * It plays for the first time since the player was prepared: the start (see #getStartTrail)
+     */
+    public void onStarted() {
+        mInterruption = null;
+        endResume();
+    }
+
+    /**
+     * It plays again since the player was prepared, after a seek, a pause or buffering: the seconds from here are sampled closely,
+     * as the start's are (see #getResumeTrail). A sample now is the trail's first.
+     */
+    public void onResumed(long nowMs) {
+        mResumedAtMs = nowMs;
+        mResumedBy = mInterruption;
+        mInterruption = null;
+        mResumeTrail.clear();
+    }
+
+    private boolean isResuming(long nowMs) {
+        return mResumedAtMs >= 0 && nowMs - mResumedAtMs <= START_MS;
+    }
+
+    /**
      * Till the next sample
      */
     public long getTickMs() {
         // Paused in it (for hours maybe) there's nothing to watch closely
-        return mPlayedMs < START_MS && (mIsPlaying || mPlayedMs == 0) ? START_TICK_MS : TICK_MS;
+        return (mPlayedMs < START_MS || isResuming(mLastTickMs)) && (mIsPlaying || mPlayedMs == 0) ? START_TICK_MS : TICK_MS;
     }
 
     /**
@@ -389,6 +588,22 @@ public final class PlaybackHealth {
     }
 
     /**
+     * Each sample of the seconds since it last played again after a seek, a pause or buffering (see #onResumed), oldest first, as the
+     * start's (see #getStartTrail) but its first is the time since then. Empty past them.
+     */
+    public List<long[]> getResumeTrail() {
+        return isResuming(mLastTickMs) ? mResumeTrail : new ArrayList<>();
+    }
+
+    /**
+     * What it last played again after (see #getResumeTrail): one of the RESUMED_BY_ kinds, null when unknown
+     */
+    @Nullable
+    public String getResumedBy() {
+        return mResumedBy;
+    }
+
+    /**
      * The format tried ends before its start has played (e.g. the user left): what it played of it, once. Null when nothing of it
      * played, or its start was measured.
      */
@@ -400,7 +615,7 @@ public final class PlaybackHealth {
 
         mIsStartMeasured = true;
 
-        return new StartFrames(mVideoId, mPlayedMs, mLastFrames[0], mLastFrames[1], mLastFrames[2], mLongestFrozenMs);
+        return new StartFrames(mVideoId, mPlayedMs, mLastFrames[0], mLastFrames[1], mLastFrames[2], mLongestFrozenMs, getStartAudioClock());
     }
 
     /**
@@ -440,5 +655,17 @@ public final class PlaybackHealth {
         mIsStartMeasured = false;
         mStartFrames = null;
         mLastFrames = null;
+        mStartFramesMismatches.reset();
+        mStartClockMismatches.reset();
+        mStartHoldReleases.reset();
+        mStartTimestampState = -1;
+        mStartLongestHoldMs = -1;
+        // Of the player's clock, not of a format: another one switched to (e.g. another quality) goes on with it
+    }
+
+    private void endResume() {
+        mResumedAtMs = -1;
+        mResumedBy = null;
+        mResumeTrail.clear();
     }
 }

@@ -2,6 +2,7 @@ package com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers;
 
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItemFormatInfo;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
+import com.liskovsoft.smartyoutubetv2.common.app.views.PlaybackView;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailure;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailureLog;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
@@ -160,6 +161,53 @@ public class VideoLoaderControllerTest {
         assertTrue(details.getBoolean("serverAbrUrl"));
     }
 
+    /**
+     * Played again after its streams expired (e.g. a night's pause, K3F6GAY6 #15): fetched again first, once for those formats
+     */
+    @Test
+    public void playedAgainWithItsStreamsExpiringItsFetchedAgain() throws Exception {
+        PlayingController controller = new PlayingController(video("bNAlycU0Xzg"));
+        setFormats(controller, "bNAlycU0Xzg", System.currentTimeMillis() + MediaItemFormatInfo.STREAMS_EXPIRE_MARGIN_MS - 1_000);
+
+        controller.onPlay();
+        controller.onPlay();
+
+        assertEquals(1, controller.mReloads);
+    }
+
+    @Test
+    public void playedAgainWithTimeLeftItPlaysOn() throws Exception {
+        PlayingController controller = new PlayingController(video("bNAlycU0Xzg"));
+        setFormats(controller, "bNAlycU0Xzg", System.currentTimeMillis() + 2 * MediaItemFormatInfo.STREAMS_EXPIRE_MARGIN_MS);
+        controller.onPlay();
+
+        // Unknown, or of another video
+        setFormats(controller, "bNAlycU0Xzg", 0);
+        controller.onPlay();
+        setFormats(controller, "another", System.currentTimeMillis() - 1_000);
+        controller.onPlay();
+
+        // A live stream's manifest is fetched again by the player
+        PlayingController live = new PlayingController(video("WsDyRAPFBC8"));
+        live.getVideo().isLive = true;
+        setFormats(live, "WsDyRAPFBC8", System.currentTimeMillis() - 1_000);
+        live.onPlay();
+
+        assertEquals(0, controller.mReloads);
+        assertEquals(0, live.mReloads);
+    }
+
+    private static void setFormats(VideoLoaderController controller, String videoId, long streamsExpireTimeMs) throws Exception {
+        setField(controller, "mFormatVideoId", videoId);
+        setField(controller, "mStreamsExpireTimeMs", streamsExpireTimeMs);
+    }
+
+    private static void setField(VideoLoaderController controller, String name, Object value) throws Exception {
+        java.lang.reflect.Field field = VideoLoaderController.class.getDeclaredField(name);
+        field.setAccessible(true);
+        field.set(controller, value);
+    }
+
     private static boolean isLiveClientToSwitch(VideoLoaderController controller, MediaItemFormatInfo formatInfo) throws Exception {
         Method method = VideoLoaderController.class.getDeclaredMethod("isLiveClientToSwitch", MediaItemFormatInfo.class);
         method.setAccessible(true);
@@ -192,26 +240,32 @@ public class VideoLoaderControllerTest {
      * By method name; the defaults (false, 0, null) for the others
      */
     private static MediaItemFormatInfo formatInfo(Map<String, Object> values) {
-        return (MediaItemFormatInfo) Proxy.newProxyInstance(MediaItemFormatInfo.class.getClassLoader(),
-                new Class<?>[]{MediaItemFormatInfo.class}, (proxy, method, args) -> {
-                    if (values.containsKey(method.getName())) {
-                        return values.get(method.getName());
-                    }
+        return stub(MediaItemFormatInfo.class, values);
+    }
 
-                    Class<?> type = method.getReturnType();
+    /**
+     * By method name; the defaults (false, 0, null) for the others
+     */
+    private static <T> T stub(Class<T> type, Map<String, Object> values) {
+        return type.cast(Proxy.newProxyInstance(type.getClassLoader(), new Class<?>[]{type}, (proxy, method, args) -> {
+            if (values.containsKey(method.getName())) {
+                return values.get(method.getName());
+            }
 
-                    if (type == boolean.class) {
-                        return false;
-                    } else if (type == int.class) {
-                        return 0;
-                    } else if (type == long.class) {
-                        return 0L;
-                    } else if (type == float.class) {
-                        return 0f;
-                    }
+            Class<?> returned = method.getReturnType();
 
-                    return null;
-                });
+            if (returned == boolean.class) {
+                return false;
+            } else if (returned == int.class) {
+                return 0;
+            } else if (returned == long.class) {
+                return 0L;
+            } else if (returned == float.class) {
+                return 0f;
+            }
+
+            return null;
+        }));
     }
 
     private static Video video(String videoId) {
@@ -230,6 +284,28 @@ public class VideoLoaderControllerTest {
         @Override
         public Video getVideo() {
             return mVideo;
+        }
+    }
+
+    /**
+     * With a player: its reloads are counted, not done
+     */
+    private static class PlayingController extends TestController {
+        private final PlaybackView mPlayer = stub(PlaybackView.class, new HashMap<>());
+        private int mReloads;
+
+        private PlayingController(Video video) {
+            super(video);
+        }
+
+        @Override
+        public PlaybackView getPlayer() {
+            return mPlayer;
+        }
+
+        @Override
+        public void reloadVideo(int delayMs) {
+            mReloads++;
         }
     }
 }

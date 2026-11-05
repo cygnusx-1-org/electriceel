@@ -70,6 +70,11 @@ public class VideoLoaderController extends BasePlayerController {
     private String mFormatClient;
     private String mFormatProtocol;
     /**
+     * When the streams of the formats in use expire (see MediaItemFormatInfo#getStreamsExpireTimeMs), of the video in mFormatVideoId:
+     * 0 when unknown, or once they're being fetched again for it
+     */
+    private long mStreamsExpireTimeMs;
+    /**
      * The live stream the clients are switched for, and how many times (see MAX_LIVE_CLIENT_SWITCHES)
      */
     private String mLiveSwitchVideoId;
@@ -220,6 +225,26 @@ public class VideoLoaderController extends BasePlayerController {
         if (getPlayerTweaksData().isPlayerUiOnNextEnabled()) {
             getPlayer().showOverlay(true);
         }
+    }
+
+    /**
+     * Played again, e.g. after a long pause: when its streams expire before long, the server would refuse the next segment (SABR
+     * asks for the player response again, a URL answers 403). Fetched again first, from where it is.
+     */
+    @Override
+    public void onPlay() {
+        Video video = getVideo();
+
+        if (getPlayer() == null || video == null || video.isLive || !isFormatOfVideo() || mStreamsExpireTimeMs <= 0
+                || System.currentTimeMillis() < mStreamsExpireTimeMs - MediaItemFormatInfo.STREAMS_EXPIRE_MARGIN_MS) {
+            return;
+        }
+
+        Log.d(TAG, "The streams expire: fetching them again before playing on");
+        // Once for these formats: the ones fetched have their own time
+        mStreamsExpireTimeMs = 0;
+        YouTubeServiceManager.instance().reloadPlayerResponse(video.videoId, null);
+        reloadVideo(0);
     }
 
     @Override
@@ -381,6 +406,7 @@ public class VideoLoaderController extends BasePlayerController {
         mFormatVideoId = getVideo().videoId;
         mFormatClient = getClientName(formatInfo);
         mFormatProtocol = null;
+        mStreamsExpireTimeMs = formatInfo.getStreamsExpireTimeMs();
         // Fetched again from another client: the start goes on (see VideoStarts#onFetch)
         boolean isRefetched = false;
 

@@ -203,7 +203,8 @@ public class DiagnosticsContractTest {
                 new VideoStart.Stage(VideoStarts.STAGE_PROTECTION, PoTokenStatus.OK.name(), 1, fromMs + 400, fromMs + 400));
         fixture.slowStart();
         VideoStarts.sProtection = (videoId, fromMs, toMs) -> Collections.emptyList();
-        VideoStarts.onFrames(new PlaybackHealth.StartFrames(VideoStartFixture.VIDEO_ID, 10_000, 40, 120, 1, 4_500));
+        VideoStarts.onFrames(new PlaybackHealth.StartFrames(VideoStartFixture.VIDEO_ID, 10_000, 40, 120, 1, 4_500,
+                new PlaybackHealth.StartAudioClock(1, 1, 0, 1, 480)));
 
         fixture.at(20_000);
         VideoStarts.start("bare", VideoStart.TRIGGER_REMOTE);
@@ -246,6 +247,7 @@ public class DiagnosticsContractTest {
         // A video playing: formats tried, offered, decoders, frames, a stall, segments loaded
         FormatAttempts.onNewVideo(getContext(), "video");
         FormatAttempts.onPrepare();
+        FormatAttempts.onSource("TV", PlayerFailure.PROTOCOL_SABR);
         FormatAttempts.onRequest("rr1---sn-a.googlevideo.com");
         FormatAttempts.onTracks(VP9_4K, FormatItem.AUDIO_51_EC3);
         FormatAttempts.onOffered(Arrays.asList(VP9_4K, AVC_FHD), Collections.singletonList(FormatItem.AUDIO_HQ_MP4A));

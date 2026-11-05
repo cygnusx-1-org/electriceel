@@ -166,6 +166,8 @@ import java.lang.reflect.Method;
   private long latencyUs;
   private final AudioClockInfo clockInfo = new AudioClockInfo();
   private volatile boolean timestampsDisabled;
+  /** The position stopped waiting on the timestamp that doesn't advance: counted once, till the poller has another. */
+  private boolean isHoldReleased;
   private boolean hasData;
 
   private boolean isOutputPcm;
@@ -221,6 +223,7 @@ import java.lang.reflect.Method;
     this.applyDolbyPassThroughQuirk = applyDolbyPassThroughQuirk; // AMZN_CHANGE_ONELINE
     audioTimestampPoller = new AudioTimestampPoller(audioTrack);
     clockInfo.reset();
+    isHoldReleased = false;
     outputSampleRate = audioTrack.getSampleRate();
     needsPassthroughWorkarounds = needsPassthroughWorkarounds(outputEncoding);
     isOutputPcm = Util.isEncodingLinearPcm(outputEncoding);
@@ -274,10 +277,7 @@ import java.lang.reflect.Method;
         log.v("getCurrentPositionUs : applyDolbyPassThroughQuirk positionUs = "  + positionUs);
       }
       return positionUs;
-    } else if (audioTimestampPoller.hasTimestamp()
-        && !audioTimestampPoller.isTimestampAdvancing()
-        && getPlaybackHeadPositionUs() - framesToDurationUs(audioTimestampPoller.getTimestampPositionFrames())
-            < MAX_TIMESTAMP_HOLD_US) {
+    } else if (holdsStuckTimestamp(audioTimestampPoller)) {
       // The playhead may lead what's heard (no latency is known for passthrough): wait for the timestamp to advance, as it soon does
       return framesToDurationUs(audioTimestampPoller.getTimestampPositionFrames());
     } else if (audioTimestampPoller.isTimestampAdvancing()) { // AMZN_CHANGE_END
@@ -463,6 +463,35 @@ import java.lang.reflect.Method;
     resetSyncParams();
     audioTrack = null;
     audioTimestampPoller = null;
+    // None in use: what the one before went by isn't told as the next one's
+    clockInfo.reset();
+    isHoldReleased = false;
+  }
+
+  /**
+   * The timestamp doesn't advance, and the playhead isn't {@link #MAX_TIMESTAMP_HOLD_US} past it: the position waits on it. How long
+   * it waited, and when it stopped waiting, go to the clock info.
+   */
+  private boolean holdsStuckTimestamp(AudioTimestampPoller audioTimestampPoller) {
+    if (!audioTimestampPoller.hasTimestamp() || audioTimestampPoller.isTimestampAdvancing()) {
+      isHoldReleased = false;
+      return false;
+    }
+
+    long leadUs = getPlaybackHeadPositionUs() - framesToDurationUs(audioTimestampPoller.getTimestampPositionFrames());
+
+    if (leadUs < MAX_TIMESTAMP_HOLD_US) {
+      clockInfo.longestHoldMs = Math.max(clockInfo.longestHoldMs, leadUs / 1000);
+      return true;
+    }
+
+    if (!isHoldReleased) {
+      isHoldReleased = true;
+      clockInfo.holdReleases++;
+      clockInfo.totalHoldReleases++;
+    }
+
+    return false;
   }
 
   private void maybeSampleSyncParams() {
@@ -514,6 +543,7 @@ import java.lang.reflect.Method;
     long audioTimestampPositionFrames = audioTimestampPoller.getTimestampPositionFrames();
     if (Math.abs(audioTimestampSystemTimeUs - systemTimeUs) > MAX_AUDIO_TIMESTAMP_OFFSET_US) {
       clockInfo.clockMismatches++;
+      clockInfo.totalClockMismatches++;
       listener.onSystemTimeUsMismatch(
           audioTimestampPositionFrames,
           audioTimestampSystemTimeUs,
@@ -523,6 +553,7 @@ import java.lang.reflect.Method;
     } else if (Math.abs(framesToDurationUs(audioTimestampPositionFrames) - playbackPositionUs)
         > MAX_AUDIO_TIMESTAMP_OFFSET_US) {
       clockInfo.framesMismatches++;
+      clockInfo.totalFramesMismatches++;
       listener.onPositionFramesMismatch(
           audioTimestampPositionFrames,
           audioTimestampSystemTimeUs,

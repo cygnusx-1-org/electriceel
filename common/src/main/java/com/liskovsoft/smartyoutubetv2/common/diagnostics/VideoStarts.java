@@ -727,6 +727,17 @@ public final class VideoStarts {
             result.put("dropped", frames.droppedFrames);
             result.put("droppedToKeyframes", frames.droppedToKeyframes);
             result.put("longestFrozenMs", frames.longestFrozenMs);
+
+            // Whether the picture waited on an audio timestamp that didn't advance, and for how long: below what's a failure too
+            PlaybackHealth.StartAudioClock audio = frames.audioClock;
+
+            if (audio != null) {
+                result.put("audioTimestampState", audio.timestampState);
+                result.put("audioFramesMismatches", audio.framesMismatches);
+                result.put("audioClockMismatches", audio.clockMismatches);
+                result.put("audioHoldReleases", audio.holdReleases);
+                result.put("audioLongestHoldMs", audio.longestHoldMs);
+            }
         } catch (JSONException e) {
             throw new IllegalStateException(e);
         }

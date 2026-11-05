@@ -160,6 +160,28 @@ public class VideoStartsTest {
         assertEquals(1, frames.get(0).optInt("droppedToKeyframes"));
         assertEquals(4_500, frames.get(0).optInt("longestFrozenMs"));
         assertEquals(10_000, frames.get(0).optInt("playedMs"));
+        // The player had no audio clock to tell of
+        assertFalse(frames.get(0).has("audioHoldReleases"));
+    }
+
+    /**
+     * Whether the picture waited on an audio timestamp that didn't advance: told even when too little was dropped for a failure
+     */
+    @Test
+    public void theFramesSayWhatTheAudioClockDid() {
+        List<JSONObject> frames = new ArrayList<>();
+        VideoStarts.sFramesRecorder = (ts, result) -> frames.add(result);
+        mFixture.slowStart();
+
+        VideoStarts.onFrames(new PlaybackHealth.StartFrames(VIDEO_ID, 10_000, 250, 9, 0, 0,
+                new PlaybackHealth.StartAudioClock(2, 0, 1, 1, 480)));
+
+        JSONObject result = frames.get(0);
+        assertEquals(2, result.optInt("audioTimestampState"));
+        assertEquals(0, result.optInt("audioFramesMismatches"));
+        assertEquals(1, result.optInt("audioClockMismatches"));
+        assertEquals(1, result.optInt("audioHoldReleases"));
+        assertEquals(480, result.optInt("audioLongestHoldMs"));
     }
 
     /**

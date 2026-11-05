@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.os.SystemClock;
 
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.PoTokenError;
+import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrReloadPlayerError;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.UnknownPartError;
 import com.google.android.exoplayer2.source.sabr.parser.parts.PoTokenStatusSabrPart.PoTokenStatus;
 import com.google.android.exoplayer2.upstream.DataSpec;
@@ -35,6 +36,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowToast;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -154,6 +156,28 @@ public class ErrorFixerControllerTest {
                 new UnexpectedLoaderException(new UnknownPartError("Unknown part encountered: id=1459, size=1131850, position=5")));
 
         assertEquals(Arrays.asList("network_reload 1/3", "reload_video"), getActions(mLog.readAll().get(0)));
+    }
+
+    /**
+     * SABR's server asked for the player response again, e.g. its session expired in a night's pause (K3F6GAY6 #15): reloaded without
+     * a word, as it plays on. Asked again, it's told.
+     */
+    @Test
+    public void aSabrReloadIsOnlyToldWhenItsAskedAgain() throws Exception {
+        TestController controller = new TestController(video("bNAlycU0Xzg"));
+        controller.onPlay();
+
+        controller.onEngineError(PlayerEventListener.ERROR_TYPE_SOURCE, PlayerEventListener.RENDERER_INDEX_UNKNOWN,
+                new UnexpectedLoaderException(new SabrReloadPlayerError("token")));
+
+        assertEquals(0, ShadowToast.shownToastCount());
+        assertEquals(Arrays.asList("sabr_reload 1/3", "reload_video"), getActions(mLog.readAll().get(0)));
+
+        controller.onEngineError(PlayerEventListener.ERROR_TYPE_SOURCE, PlayerEventListener.RENDERER_INDEX_UNKNOWN,
+                new UnexpectedLoaderException(new SabrReloadPlayerError("token")));
+
+        assertEquals(1, ShadowToast.shownToastCount());
+        assertEquals("SABR server requested a player response reload. Attempt: 2", ShadowToast.getTextOfLatestToast());
     }
 
     /**

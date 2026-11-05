@@ -69,6 +69,10 @@ public final class PlayerFailure {
      */
     private JSONArray mProtection;
     private JSONObject mFormats;
+    /**
+     * How it played up to the failure (see FormatAttempts#getPlaying)
+     */
+    private JSONObject mPlaying;
     private JSONObject mSettings;
     private JSONObject mDetails;
     private long mTs;
@@ -313,6 +317,7 @@ public final class PlayerFailure {
 
         try {
             mFormats = FormatAttempts.snapshot(mContext, mVideoId);
+            mPlaying = mIsStateIncluded ? FormatAttempts.getPlaying(mVideoId) : null;
             // Of this process: not of a failure from one before (e.g. an app exit), whose video may be playing again
             mProtection = mIsStateIncluded ? ProtectionStatuses.snapshot(mVideoId) : null;
             PlayerFailureLog.instance(mContext).record(this);
@@ -333,6 +338,7 @@ public final class PlayerFailure {
 
         try {
             mFormats = FormatAttempts.snapshot(mContext, mVideoId);
+            mPlaying = mIsStateIncluded ? FormatAttempts.getPlaying(mVideoId) : null;
             // Of this process: not of a failure from one before (e.g. an app exit), whose video may be playing again
             mProtection = mIsStateIncluded ? ProtectionStatuses.snapshot(mVideoId) : null;
             PlayerFailureLog.instance(mContext).recordNow(this);
@@ -395,6 +401,7 @@ public final class PlayerFailure {
             putOpt(result, "positionMs", mPositionMs);
             putOpt(result, "durationMs", mDurationMs);
             putOpt(result, "startedPlaying", mStartedPlaying);
+            putOpt(result, "playing", mPlaying);
             putOpt(result, "error", mError);
             putOpt(result, "playability", mPlayability);
             putOpt(result, "http", mHttp);

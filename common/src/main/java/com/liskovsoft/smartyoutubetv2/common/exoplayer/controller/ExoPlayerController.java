@@ -87,6 +87,10 @@ public class ExoPlayerController implements Player.EventListener {
     private AudioClockInfo mAudioClockInfo;
     private final Runnable mHealthCheck = this::checkHealth;
     /**
+     * It played since the player was prepared with its source: playing again is a resume (see PlaybackHealth#onResumed), not the start
+     */
+    private boolean mHasPlayedSource;
+    /**
      * The video has a surface to be shown on. Without one (e.g. the sound plays on in the background) no frame is rendered.
      */
     private boolean mHasSurface;
@@ -236,6 +240,10 @@ public class ExoPlayerController implements Player.EventListener {
                 sample.audioTimestampState = mAudioClockInfo.timestampState;
                 sample.audioPlayheadMs = mAudioClockInfo.playheadMs;
                 sample.audioLatencyMs = mAudioClockInfo.latencyMs;
+                sample.audioLongestHoldMs = mAudioClockInfo.longestHoldMs;
+                sample.audioTotalFramesMismatches = mAudioClockInfo.totalFramesMismatches;
+                sample.audioTotalClockMismatches = mAudioClockInfo.totalClockMismatches;
+                sample.audioTotalHoldReleases = mAudioClockInfo.totalHoldReleases;
             }
 
             DecoderCounters counters = mPlayer.getVideoDecoderCounters();
@@ -300,10 +308,20 @@ public class ExoPlayerController implements Player.EventListener {
                 failure.detail("startTrail", trail);
             }
 
+            // Past the start too: the audio clock starts over after a seek, a pause or buffering
+            JSONArray resumeTrail = toJson(mHealth.getResumeTrail());
+
+            if (resumeTrail.length() > 0) {
+                failure.detail("resumeTrail", resumeTrail);
+                failure.detail("resumedBy", mHealth.getResumedBy());
+            }
+
             if (mAudioClockInfo != null) {
                 failure.detail("audioFramesMismatches", mAudioClockInfo.framesMismatches);
                 failure.detail("audioClockMismatches", mAudioClockInfo.clockMismatches);
                 failure.detail("audioBadLatencies", mAudioClockInfo.badLatencies);
+                failure.detail("audioHoldReleases", mAudioClockInfo.holdReleases);
+                failure.detail("audioLongestHoldMs", mAudioClockInfo.longestHoldMs);
             }
         }
 
@@ -315,6 +333,26 @@ public class ExoPlayerController implements Player.EventListener {
         }
 
         failure.record();
+    }
+
+    /**
+     * The first play since the source was prepared is the start. Past it, a play is after a seek, a pause or buffering: its audio
+     * clock started over, the seconds from here are sampled closely as the start's are.
+     */
+    private void onHealthPlaying() {
+        if (!mHasPlayedSource) {
+            mHasPlayedSource = true;
+            mHealth.onStarted();
+            return;
+        }
+
+        mHealth.onResumed(SystemClock.elapsedRealtime());
+
+        if (mPlayer != null) {
+            // Where it is as it plays again: the trail's first sample
+            Utils.removeCallbacks(mHealthCheck);
+            Utils.postDelayed(mHealthCheck, 0);
+        }
     }
 
     private static void onStartFrames(@Nullable PlaybackHealth.StartFrames frames) {
@@ -400,6 +438,7 @@ public class ExoPlayerController implements Player.EventListener {
         mEventListener.onSourceChanged(getVideo());
         VideoStarts.onPrepare();
         FormatAttempts.onPrepare();
+        mHasPlayedSource = false;
         mPlayer.prepare(mediaSource);
         // Its first seconds are looked at closely: the check may be 2 s away, past its first frame
         Utils.removeCallbacks(mHealthCheck);
@@ -661,13 +700,16 @@ public class ExoPlayerController implements Player.EventListener {
 
         if (isPlayPressed) {
             VideoStarts.onPlaying(mHasSurface);
+            onHealthPlaying();
             mEventListener.onPlay();
         } else if (isPausePressed) {
+            mHealth.onInterrupted(PlaybackHealth.RESUMED_BY_PAUSE);
             mEventListener.onPause();
         } else if (isPlaybackEnded) {
             mEventListener.onPlayEnd();
             mIsEnded = true;
         } else if (isBuffering) {
+            mHealth.onInterrupted(PlaybackHealth.RESUMED_BY_BUFFERING);
             mEventListener.onBuffering();
         }
 
@@ -684,6 +726,7 @@ public class ExoPlayerController implements Player.EventListener {
             mFrameStepper.onSeek();
             // Any seek (SponsorBlock, chapters, remote, not only the UI's): its buffering comes before onSeekProcessed and isn't a stall
             FormatAttempts.onSeek();
+            mHealth.onInterrupted(PlaybackHealth.RESUMED_BY_SEEK);
         }
 
         mRangeMuter.onSeek();

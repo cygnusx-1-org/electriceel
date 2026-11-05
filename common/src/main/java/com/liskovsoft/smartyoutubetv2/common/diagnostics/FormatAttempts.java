@@ -117,6 +117,13 @@ public final class FormatAttempts {
      * Another for each format tried (see #getAttemptId)
      */
     private static long sAttemptId;
+    /**
+     * Of the video, whatever the formats: its last stretch of playing, from when (-1 till it played) to when (-1 while it goes on), and
+     * how long it hadn't played before it (-1 when it's the first)
+     */
+    private static long sStretchStart = -1;
+    private static long sStretchEnd = -1;
+    private static long sStoppedBeforeMs = -1;
 
     interface Clock {
         long now();
@@ -125,6 +132,13 @@ public final class FormatAttempts {
     private static final class Attempt {
         final String video;
         final String audio;
+        /**
+         * Where its formats are from and how they're played, when it was tried (see #onSource): after a switch, another client's
+         */
+        @Nullable
+        final String client;
+        @Nullable
+        final String protocol;
         /**
          * Of the video format, as the stream gives it: -1 when it doesn't. What the throughput is to keep up with.
          */
@@ -164,6 +178,8 @@ public final class FormatAttempts {
         Attempt(@Nullable String video, @Nullable String audio) {
             this.video = video;
             this.audio = audio;
+            client = sClient;
+            protocol = sProtocol;
         }
 
         boolean isSameFormats(Attempt other) {
@@ -384,13 +400,13 @@ public final class FormatAttempts {
      * Playing, or not anymore (paused, buffering, failed)
      */
     public static void onPlaying(boolean isPlaying) {
+        long now = sClock.now();
+        onStretch(isPlaying, now);
         Attempt last = getLast();
 
         if (last == null) {
             return;
         }
-
-        long now = sClock.now();
 
         if (isPlaying) {
             if (last.stallSince >= 0) {
@@ -410,6 +426,47 @@ public final class FormatAttempts {
             last.playedMs += now - last.playingSince;
             last.playingSince = -1;
         }
+    }
+
+    private static void onStretch(boolean isPlaying, long now) {
+        if (sVideoId == null) {
+            return;
+        }
+
+        boolean isGoingOn = sStretchStart >= 0 && sStretchEnd < 0;
+
+        if (isPlaying && !isGoingOn) {
+            sStoppedBeforeMs = sStretchEnd >= 0 ? now - sStretchEnd : -1;
+            sStretchStart = now;
+            sStretchEnd = -1;
+        } else if (!isPlaying && isGoingOn) {
+            sStretchEnd = now;
+        }
+    }
+
+    /**
+     * For a failure of the video: {"forMs": its last stretch of playing so far, "stoppedForMs": since it ended (null while it goes on),
+     * "stoppedBeforeMs": how long it hadn't played before it (null when it's the first)}. A failure right after a long pause has a
+     * short stretch and a long stop before it. Null when another video is playing, or it hasn't played.
+     */
+    @Nullable
+    static JSONObject getPlaying(@Nullable String videoId) {
+        if (videoId == null || !videoId.equals(sVideoId) || sStretchStart < 0) {
+            return null;
+        }
+
+        long now = sClock.now();
+        JSONObject result = new JSONObject();
+
+        try {
+            result.put("forMs", (sStretchEnd >= 0 ? sStretchEnd : now) - sStretchStart);
+            result.put("stoppedForMs", sStretchEnd >= 0 ? now - sStretchEnd : JSONObject.NULL);
+            result.put("stoppedBeforeMs", sStoppedBeforeMs >= 0 ? sStoppedBeforeMs : JSONObject.NULL);
+        } catch (JSONException e) {
+            throw new IllegalStateException(e);
+        }
+
+        return result;
     }
 
     /**
@@ -587,6 +644,9 @@ public final class FormatAttempts {
         sLastSeekMs = -1;
         sAttemptId++;
         sVideoId = null;
+        sStretchStart = -1;
+        sStretchEnd = -1;
+        sStoppedBeforeMs = -1;
         sClient = null;
         sProtocol = null;
         sAttempts.clear();
@@ -779,6 +839,8 @@ public final class FormatAttempts {
         result.put("throughputKbps", attempt.loadMs > 0 ? attempt.loadedBytes * 8 / attempt.loadMs : JSONObject.NULL);
         result.put("videoBitrateKbps", attempt.videoBitrateKbps > 0 ? attempt.videoBitrateKbps : JSONObject.NULL);
         result.put("hosts", new JSONArray(attempt.hosts));
+        result.put("client", nullable(attempt.client));
+        result.put("protocol", nullable(attempt.protocol));
 
         return result;
     }

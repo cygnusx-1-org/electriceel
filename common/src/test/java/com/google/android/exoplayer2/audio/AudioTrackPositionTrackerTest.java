@@ -98,6 +98,56 @@ public final class AudioTrackPositionTrackerTest {
 
         assertEquals(2, mTracker.getClockInfo().timestampState); // AudioTimestampPoller's STATE_TIMESTAMP_ADVANCING
         assertTrue("position " + positionUs, positionUs >= 3_000_000);
+        assertEquals(0, mTracker.getClockInfo().holdReleases);
+    }
+
+    @Test
+    public void theWaitOnATimestampThatDoesntAdvanceIsCountedWhenLetGo() throws InterruptedException {
+        playMs(300);
+        AudioClockInfo info = mTracker.getClockInfo();
+
+        assertEquals(0, info.holdReleases);
+        assertTrue("held " + info.longestHoldMs, info.longestHoldMs >= 200 && info.longestHoldMs < 500);
+
+        playMs(1_000);
+
+        // Once, not at each position after it
+        assertEquals(1, info.holdReleases);
+        assertEquals(1, info.totalHoldReleases);
+        assertTrue("held " + info.longestHoldMs, info.longestHoldMs < 500);
+    }
+
+    @Test
+    public void theTotalsGoOnWithAnotherTrack() throws InterruptedException {
+        playMs(1_000);
+        setTrack();
+        mPlayheadFrames = 0;
+        mTracker.start();
+
+        assertEquals(0, mTracker.getClockInfo().holdReleases);
+        assertEquals(0, mTracker.getClockInfo().longestHoldMs);
+        assertEquals(1, mTracker.getClockInfo().totalHoldReleases);
+
+        playMs(1_000);
+
+        assertEquals(1, mTracker.getClockInfo().holdReleases);
+        assertEquals(2, mTracker.getClockInfo().totalHoldReleases);
+    }
+
+    /**
+     * Its track released (e.g. a seek, another video): what it went by isn't the next one's
+     */
+    @Test
+    public void aResetTellsNothingOfTheTrackBefore() throws InterruptedException {
+        playMs(1_000);
+        mTracker.reset();
+        AudioClockInfo info = mTracker.getClockInfo();
+
+        assertEquals(AudioClockInfo.TIMESTAMP_STATE_UNKNOWN, info.timestampState);
+        assertEquals(-1, info.playheadMs);
+        assertEquals(0, info.holdReleases);
+        assertEquals(0, info.longestHoldMs);
+        assertEquals(1, info.totalHoldReleases);
     }
 
     @Test
@@ -132,6 +182,7 @@ public final class AudioTrackPositionTrackerTest {
 
         assertTrue(mListenerMismatches >= 1);
         assertEquals(mListenerMismatches, mTracker.getClockInfo().framesMismatches);
+        assertEquals(mListenerMismatches, mTracker.getClockInfo().totalFramesMismatches);
         assertTrue(mTracker.getClockInfo().playheadMs >= 6_000);
     }
 
@@ -143,6 +194,7 @@ public final class AudioTrackPositionTrackerTest {
         setTrack();
 
         assertEquals(0, mTracker.getClockInfo().framesMismatches);
+        assertEquals(mListenerMismatches, mTracker.getClockInfo().totalFramesMismatches);
         assertEquals(-1, mTracker.getClockInfo().playheadMs);
         assertEquals(AudioClockInfo.TIMESTAMP_STATE_UNKNOWN, mTracker.getClockInfo().timestampState);
     }

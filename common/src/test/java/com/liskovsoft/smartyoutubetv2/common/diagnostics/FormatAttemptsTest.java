@@ -320,6 +320,96 @@ public class FormatAttemptsTest {
         assertEquals(FormatAttempts.STATUS_WORKED, formats.getJSONObject("final").getString("audioStatus"));
     }
 
+    /**
+     * The client was switched after the failure: the format that played says it's the new one's
+     */
+    @Test
+    public void eachAttemptSaysWhichClientItsFormatsCameFrom() throws Exception {
+        FormatAttempts.onNewVideo(getContext(), "video");
+        FormatAttempts.onSource("TV", PlayerFailure.PROTOCOL_SABR);
+        FormatAttempts.onTracks(AVC_FHD, FormatItem.AUDIO_HQ_MP4A);
+        failure("video").record();
+
+        FormatAttempts.onSource("WEB", PlayerFailure.PROTOCOL_DASH);
+        FormatAttempts.onTracks(VP9_4K, FormatItem.AUDIO_HQ_MP4A);
+        FormatAttempts.onVideoRendered();
+        FormatAttempts.end(getContext());
+
+        JSONObject formats = mLog.readAll().get(0).getJSONObject("formats");
+        JSONArray attempted = formats.getJSONArray("attempted");
+
+        assertEquals("TV", attempted.getJSONObject(0).getString("client"));
+        assertEquals(PlayerFailure.PROTOCOL_SABR, attempted.getJSONObject(0).getString("protocol"));
+        assertEquals("WEB", attempted.getJSONObject(1).getString("client"));
+        assertEquals(PlayerFailure.PROTOCOL_DASH, formats.getJSONObject("final").getString("protocol"));
+    }
+
+    /**
+     * Played again after a night's pause, it failed at once (K3F6GAY6 #15): a short stretch, a long stop before it
+     */
+    @Test
+    public void aFailureSaysHowLongItHadntPlayedBeforeIt() throws Exception {
+        long[] now = {1_000_000};
+        FormatAttempts.sClock = () -> now[0];
+        FormatAttempts.onNewVideo(getContext(), "video");
+        FormatAttempts.onTracks(VP9_4K, FormatItem.AUDIO_HQ_MP4A);
+        FormatAttempts.onPlaying(true);
+        now[0] += 900_000;
+        FormatAttempts.onPlaying(false);
+        now[0] += 34_200_000;
+        FormatAttempts.onPlaying(true);
+        // Playing again while it plays is the same stretch
+        FormatAttempts.onPlaying(true);
+        now[0] += 120;
+        // The error ends it before the failure is recorded
+        FormatAttempts.onPlaying(false);
+        now[0] += 30;
+
+        failure("video").record();
+
+        JSONObject playing = mLog.readAll().get(0).getJSONObject("playing");
+        assertEquals(120, playing.getLong("forMs"));
+        assertEquals(30, playing.getLong("stoppedForMs"));
+        assertEquals(34_200_000, playing.getLong("stoppedBeforeMs"));
+    }
+
+    /**
+     * Its first stretch, going on. A reload of the video goes on with it; another video starts over.
+     */
+    @Test
+    public void aFailureInItsFirstStretchHasNoStopBeforeIt() throws Exception {
+        long[] now = {1_000_000};
+        FormatAttempts.sClock = () -> now[0];
+        FormatAttempts.onNewVideo(getContext(), "video");
+        FormatAttempts.onPlaying(true);
+        FormatAttempts.onTracks(VP9_4K, FormatItem.AUDIO_HQ_MP4A);
+        FormatAttempts.onNewVideo(getContext(), "video");
+        now[0] += 5_000;
+
+        failure("video").record();
+
+        JSONObject playing = mLog.readAll().get(0).getJSONObject("playing");
+        assertEquals(5_000, playing.getLong("forMs"));
+        assertTrue(playing.isNull("stoppedForMs"));
+        assertTrue(playing.isNull("stoppedBeforeMs"));
+
+        FormatAttempts.onNewVideo(getContext(), "next");
+        failure("next").record();
+        assertFalse(mLog.readAll().get(1).has("playing"));
+    }
+
+    @Test
+    public void anAttemptBeforeItsSourceIsKnownHasNoClient() throws Exception {
+        FormatAttempts.onNewVideo(getContext(), "video");
+        FormatAttempts.onTracks(AVC_FHD, FormatItem.AUDIO_HQ_MP4A);
+
+        failure("video").record();
+
+        JSONObject attempt = mLog.readAll().get(0).getJSONObject("formats").getJSONObject("final");
+        assertTrue(attempt.isNull("client"));
+        assertTrue(attempt.isNull("protocol"));
+    }
+
     @Test
     public void theRequestedOnesStatusIsOfTheFirstOneLikeIt() throws Exception {
         PlayerData playerData = PlayerData.instance(getContext());
