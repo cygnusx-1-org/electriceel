@@ -49,6 +49,100 @@ public class VideoStartsTest {
     }
 
     /**
+     * A resume 41 s in: 1.7 s on a Shield went by with no row, the frames from the keyframe before decoded first. Where it started,
+     * with what, and that time are the start's.
+     */
+    @Test
+    public void aResumeTimesTheFramesDecodedToItsPosition() throws Exception {
+        mFixture.at(0);
+        VideoStarts.start(VIDEO_ID, VideoStart.TRIGGER_OPEN);
+        VideoStarts.onFetch(VIDEO_ID);
+        mFixture.at(160);
+        VideoStarts.onFormats(VIDEO_ID, "TV");
+        VideoStarts.onPrepare();
+        mFixture.at(1_000);
+        VideoStarts.onLoad(false, true, false, T0 + 330, T0 + 1_000, 23_300_000);
+        mFixture.at(2_740);
+        VideoStarts.onFirstFrame(new VideoStarts.FirstFrame(41_200, "3840x2160 vp09 60fps", 25_000, 297, T0 + 1_020));
+        VideoStarts.onPlaying(true);
+
+        VideoStart start = last();
+
+        assertStage(find(start, VideoStarts.STAGE_TO_POSITION), VideoStarts.STAGE_TO_POSITION, "297 frames", 1, 1_020, 2_740);
+        assertEquals(VideoStart.Category.DECODER, find(start, VideoStarts.STAGE_TO_POSITION).getCategory());
+        assertEquals(41_200, start.positionMs);
+        assertEquals("open, first of run, TV, from 0:41", start.describe());
+
+        JSONObject json = start.toJson();
+
+        assertEquals(41_200, json.getLong("positionMs"));
+        assertEquals("3840x2160 vp09 60fps", json.getString("video"));
+        assertEquals(25_000, json.getInt("videoBitrateKbps"));
+    }
+
+    /**
+     * From its start: nothing skipped, no row; what it started with still said
+     */
+    @Test
+    public void aStartFromTheBeginningSkipsNothing() throws Exception {
+        mFixture.at(0);
+        VideoStarts.start(VIDEO_ID, VideoStart.TRIGGER_OPEN);
+        VideoStarts.onFetch(VIDEO_ID);
+        mFixture.at(160);
+        VideoStarts.onFormats(VIDEO_ID, "TV");
+        VideoStarts.onPrepare();
+        mFixture.at(900);
+        VideoStarts.onFirstFrame(new VideoStarts.FirstFrame(0, "1920x1080 vp09 30fps", -1, 0, -1));
+        VideoStarts.onPlaying(true);
+
+        VideoStart start = last();
+        JSONObject json = start.toJson();
+
+        assertTrue(start.stages.stream().noneMatch(stage -> VideoStarts.STAGE_TO_POSITION.equals(stage.name)));
+        assertEquals("open, first of run, TV", start.describe());
+        assertEquals(0, json.getLong("positionMs"));
+        assertFalse(json.has("videoBitrateKbps"));
+    }
+
+    /**
+     * The renderer counts since its position was set: skips told from before the source was prepared are another source's
+     */
+    @Test
+    public void skipsOfTheSourceBeforeAreNotTheStarts() {
+        mFixture.at(0);
+        VideoStarts.start(VIDEO_ID, VideoStart.TRIGGER_OPEN);
+        VideoStarts.onFetch(VIDEO_ID);
+        mFixture.at(160);
+        VideoStarts.onFormats(VIDEO_ID, "TV");
+        VideoStarts.onPrepare();
+        mFixture.at(900);
+        VideoStarts.onFirstFrame(new VideoStarts.FirstFrame(5_000, null, -1, 40, T0 + 100));
+        VideoStarts.onPlaying(true);
+
+        assertTrue(last().stages.stream().noneMatch(stage -> VideoStarts.STAGE_TO_POSITION.equals(stage.name)));
+    }
+
+    /**
+     * No frame (e.g. the sound in the background): where it started isn't known
+     */
+    @Test
+    public void aStartWithNoFrameHasNoPosition() throws Exception {
+        mFixture.at(0);
+        VideoStarts.start(VIDEO_ID, VideoStart.TRIGGER_OPEN);
+        VideoStarts.onFetch(VIDEO_ID);
+        mFixture.at(160);
+        VideoStarts.onFormats(VIDEO_ID, "TV");
+        VideoStarts.onPrepare();
+        mFixture.at(900);
+        VideoStarts.onPlaying(false);
+
+        JSONObject json = last().toJson();
+
+        assertFalse(json.has("positionMs"));
+        assertFalse(json.has("video"));
+    }
+
+    /**
      * Unknown (e.g. Cronet couldn't be checked): left out
      */
     @Test

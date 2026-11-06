@@ -10,6 +10,7 @@ import android.os.SystemClock;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.source.sabr.parser.SabrStream;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
@@ -89,6 +90,11 @@ public final class VideoStarts {
     private static final String[] CHUNK_STAGES = {STAGE_VIDEO_INIT_CHUNK, STAGE_AUDIO_INIT_CHUNK, STAGE_FIRST_VIDEO_CHUNK,
             STAGE_FIRST_AUDIO_CHUNK};
     static final String STAGE_VIDEO_DECODER = "video decoder";
+    /**
+     * The frames decoded only to reach where the video starts (e.g. a resume's position), from the keyframe before it, till its first
+     * frame: from the first of them (see DebugInfoMediaCodecVideoRenderer#getSkippedToPosition)
+     */
+    static final String STAGE_TO_POSITION = "to the position";
     static final String STAGE_MODE_SWITCH = "display mode switch";
     static final String STAGE_FIRST_FRAME = "first frame";
     /**
@@ -183,6 +189,46 @@ public final class VideoStarts {
         long now();
     }
 
+    /**
+     * Where the video starts and what with, at its first frame
+     */
+    public static final class FirstFrame {
+        /**
+         * In ms into the video, -1 when not known
+         */
+        final long positionMs;
+        /**
+         * E.g. "3840x2160 vp09 60fps"
+         */
+        @Nullable
+        final String video;
+        final int videoBitrateKbps;
+        /**
+         * The frames decoded only to reach the position, and when the first of them was, in the clock's time (-1 for none)
+         */
+        final int skippedFrames;
+        final long skipStartMs;
+
+        @VisibleForTesting
+        FirstFrame(long positionMs, @Nullable String video, int videoBitrateKbps, int skippedFrames, long skipStartMs) {
+            this.positionMs = positionMs;
+            this.video = video;
+            this.videoBitrateKbps = videoBitrateKbps;
+            this.skippedFrames = skippedFrames;
+            this.skipStartMs = skipStartMs;
+        }
+
+        /**
+         * @param format the video's, null when not known
+         * @param skipStartMs {@link SystemClock#elapsedRealtime()} of the first frame skipped, -1 for none
+         */
+        public static FirstFrame of(long positionMs, @Nullable Format format, int skippedFrames, long skipStartMs) {
+            int bitrateKbps = format != null && format.bitrate > 0 ? format.bitrate / 1000 : -1;
+
+            return new FirstFrame(positionMs, PlayerFailure.describeVideo(format), bitrateKbps, skippedFrames, skipStartMs);
+        }
+    }
+
     interface EngineSource {
         @Nullable
         String get();
@@ -270,6 +316,13 @@ public final class VideoStarts {
         long firstFrameMs = -1;
         long playingMs = -1;
         long modeSwitchMs = -1;
+        /**
+         * Of its first frame (see FirstFrame)
+         */
+        long positionMs = -1;
+        @Nullable
+        String video;
+        int videoBitrateKbps = -1;
         /**
          * Of each kind of first segment (see CHUNK_STAGES): loaded, and when it started to, -1 till then (SABR streams a response for
          * long, past the first frame)
@@ -562,6 +615,9 @@ public final class VideoStarts {
         timer.prepareMs = now;
         timer.firstFrameMs = -1;
         timer.playingMs = -1;
+        timer.positionMs = -1;
+        timer.video = null;
+        timer.videoBitrateKbps = -1;
         Arrays.fill(timer.isChunkLoaded, false);
         Arrays.fill(timer.chunkLoadMs, -1);
         timer.hasVideoDecoder = false;
@@ -679,6 +735,13 @@ public final class VideoStarts {
     }
 
     public static void onFirstFrame() {
+        onFirstFrame(null);
+    }
+
+    /**
+     * @param frame where it starts and what with, null when not known
+     */
+    public static void onFirstFrame(@Nullable FirstFrame frame) {
         Timer timer = getTimer();
 
         if (timer == null || timer.prepareMs < 0 || timer.firstFrameMs >= 0) {
@@ -686,6 +749,18 @@ public final class VideoStarts {
         }
 
         timer.firstFrameMs = sClock.now();
+
+        if (frame != null) {
+            timer.positionMs = frame.positionMs;
+            timer.video = frame.video;
+            timer.videoBitrateKbps = frame.videoBitrateKbps;
+
+            // Of this source: the renderer counts since its position was set
+            if (frame.skippedFrames > 0 && frame.skipStartMs >= timer.prepareMs) {
+                addToBuffering(timer, STAGE_TO_POSITION, frame.skippedFrames + " frames", frame.skipStartMs, timer.firstFrameMs);
+            }
+        }
+
         maybeFinish(timer, true);
     }
 
@@ -908,7 +983,8 @@ public final class VideoStarts {
         }
 
         return new VideoStart(timer.ts, timer.videoId, timer.trigger, timer.isFirstOfRun, timer.sinceProcessStartMs, timer.client,
-                timer.protocol, timer.engine, timer.isCached, outcome, endMs - timer.t0, stages);
+                timer.protocol, timer.engine, timer.isCached, outcome, endMs - timer.t0, stages, timer.positionMs, timer.video,
+                timer.videoBitrateKbps);
     }
 
     /**

@@ -118,7 +118,10 @@ public class DiagnosticsContractTest {
                 AppExits.KIND_APP_EXIT)), kinds);
         // The E-AC3 that failed and the AAC that played
         assertEquals(2, report.getJSONObject("playbackStats").getJSONArray("formats").length());
-        assertEquals(3, report.getJSONArray("videoStarts").length());
+        assertEquals(4, report.getJSONArray("videoStarts").length());
+        // A resume: where it started, with what, and the frames decoded to get there
+        assertTrue(report.getJSONArray("videoStarts").toString().contains("\"positionMs\""));
+        assertTrue(report.getJSONArray("videoStarts").toString().contains("\"" + VideoStarts.STAGE_TO_POSITION + "\""));
     }
 
     /**
@@ -189,7 +192,7 @@ public class DiagnosticsContractTest {
 
     /**
      * As the player records them: one with every kind of stage, one with as little as there can be (no client, protocol or
-     * frame), and one that never played
+     * frame), one that never played, and a resume (where it started, with what, and the frames decoded to get there)
      */
     private void recordVideoStarts() {
         VideoStartFixture fixture = new VideoStartFixture();
@@ -219,6 +222,16 @@ public class DiagnosticsContractTest {
         VideoStarts.onFetch("stuck");
         fixture.at(45_000);
         fixture.fireGiveUp();
+
+        fixture.at(50_000);
+        VideoStarts.start("resumed", VideoStart.TRIGGER_OPEN);
+        VideoStarts.onFetch("resumed");
+        fixture.at(50_200);
+        VideoStarts.onFormats("resumed", "TV");
+        VideoStarts.onPrepare();
+        fixture.at(52_700);
+        VideoStarts.onFirstFrame(new VideoStarts.FirstFrame(41_200, "3840x2160 vp09 60fps", 25_000, 297, VideoStartFixture.T0 + 51_000));
+        VideoStarts.onPlaying(true);
     }
 
     /**

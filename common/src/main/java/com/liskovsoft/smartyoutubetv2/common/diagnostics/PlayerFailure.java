@@ -501,7 +501,7 @@ public final class PlayerFailure {
     }
 
     @Nullable
-    private static String describeVideo(@Nullable Format format) {
+    static String describeVideo(@Nullable Format format) {
         // E.g. the settings' auto
         if (format == null || (format.width <= 0 && format.height <= 0 && format.codecs == null && format.sampleMimeType == null)) {
             return null;

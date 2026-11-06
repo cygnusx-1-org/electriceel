@@ -17,12 +17,21 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.io.IOException;
+import java.net.ConnectException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import okhttp3.Call;
 import okhttp3.EventListener;
 import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
 import okhttp3.Request;
 
 import static org.junit.Assert.assertEquals;
@@ -32,6 +41,9 @@ import static org.junit.Assert.assertTrue;
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 28)
 public class ConnectionsTest {
+    private static final String HOST = "rr1---sn-example.googlevideo.com";
+    private static final InetAddress IPV4 = address(new byte[] {(byte) 142, (byte) 250, 1, 1});
+    private static final InetAddress IPV6 = address(new byte[] {0x26, 0x07, (byte) 0xf8, (byte) 0xb0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1});
     private final AtomicLong mNow = new AtomicLong();
     /**
      * Not run: the listener is told what OkHttp would tell it
@@ -209,6 +221,108 @@ public class ConnectionsTest {
         assertTrue(Connections.take(0, 999).isEmpty());
     }
 
+    /**
+     * Its lookup, then the address that connected (TLS included)
+     */
+    @Test
+    public void aConnectSaysItsLookupAndAddress() throws IOException {
+        EventListener listener = Connections.LISTENER.create(mCall);
+        mNow.set(1_000);
+        listener.dnsStart(mCall, HOST);
+        mNow.set(1_002);
+        listener.dnsEnd(mCall, HOST, Collections.singletonList(IPV4));
+        listener.connectStart(mCall, new InetSocketAddress(IPV4, 443), Proxy.NO_PROXY);
+        mNow.set(1_070);
+        listener.connectEnd(mCall, new InetSocketAddress(IPV4, 443), Proxy.NO_PROXY, Protocol.HTTP_1_1);
+
+        List<VideoStart.Stage> stages = Connections.take(500, 3_000);
+
+        assertEquals(1, stages.size());
+        assertEquals(VideoStarts.STAGE_CONNECT, stages.get(0).name);
+        assertEquals("DNS 2 ms, IPv4 68 ms", stages.get(0).detail);
+        assertEquals(1_000, stages.get(0).startMs);
+        assertEquals(1_070, stages.get(0).endMs);
+    }
+
+    /**
+     * 5070 ms on a Shield: an address that doesn't answer costs the connect timeout, then the next one is tried. Told apart from a
+     * slow lookup.
+     */
+    @Test
+    public void aDeadAddressIsTimedApartFromTheLookup() throws IOException {
+        EventListener listener = Connections.LISTENER.create(mCall);
+        mNow.set(1_000);
+        listener.dnsStart(mCall, HOST);
+        mNow.set(1_003);
+        listener.dnsEnd(mCall, HOST, Arrays.asList(IPV4, IPV6));
+        listener.connectStart(mCall, new InetSocketAddress(IPV4, 443), Proxy.NO_PROXY);
+        mNow.set(6_003);
+        listener.connectFailed(mCall, new InetSocketAddress(IPV4, 443), Proxy.NO_PROXY, null,
+                new SocketTimeoutException("connect timed out"));
+        listener.connectStart(mCall, new InetSocketAddress(IPV6, 443), Proxy.NO_PROXY);
+        mNow.set(6_073);
+        listener.connectEnd(mCall, new InetSocketAddress(IPV6, 443), Proxy.NO_PROXY, Protocol.HTTP_1_1);
+
+        List<VideoStart.Stage> stages = Connections.take(500, 7_000);
+
+        assertEquals(1, stages.size());
+        assertEquals("DNS 3 ms, IPv4 timed out after 5000 ms, IPv6 70 ms", stages.get(0).detail);
+        assertEquals(1_000, stages.get(0).startMs);
+        assertEquals(6_073, stages.get(0).endMs);
+    }
+
+    @Test
+    public void aSlowLookupIsTheDns() throws IOException {
+        EventListener listener = Connections.LISTENER.create(mCall);
+        mNow.set(1_000);
+        listener.dnsStart(mCall, HOST);
+        mNow.set(6_003);
+        listener.dnsEnd(mCall, HOST, Collections.singletonList(IPV4));
+        listener.connectStart(mCall, new InetSocketAddress(IPV4, 443), Proxy.NO_PROXY);
+        mNow.set(6_070);
+        listener.connectEnd(mCall, new InetSocketAddress(IPV4, 443), Proxy.NO_PROXY, Protocol.HTTP_1_1);
+
+        assertEquals("DNS 5003 ms, IPv4 67 ms", Connections.take(500, 7_000).get(0).detail);
+    }
+
+    /**
+     * Looked at while it connects: what it's at
+     */
+    @Test
+    public void oneGoingSaysWhatItsAt() throws IOException {
+        EventListener listener = Connections.LISTENER.create(mCall);
+        mNow.set(1_000);
+        listener.dnsStart(mCall, HOST);
+
+        assertEquals("DNS, " + VideoStarts.DETAIL_GOING, Connections.take(500, 3_000).get(0).detail);
+
+        listener.dnsEnd(mCall, HOST, Collections.singletonList(IPV4));
+        listener.connectStart(mCall, new InetSocketAddress(IPV4, 443), Proxy.NO_PROXY);
+
+        assertEquals("DNS 0 ms, IPv4, " + VideoStarts.DETAIL_GOING, Connections.take(500, 3_000).get(0).detail);
+    }
+
+    /**
+     * Every address failed: the call fails, and the connect ends with them
+     */
+    @Test
+    public void aConnectThatFailsEndsWithItsAttempts() throws IOException {
+        EventListener listener = Connections.LISTENER.create(mCall);
+        mNow.set(1_000);
+        listener.dnsStart(mCall, HOST);
+        listener.dnsEnd(mCall, HOST, Collections.singletonList(IPV4));
+        listener.connectStart(mCall, new InetSocketAddress(IPV4, 443), Proxy.NO_PROXY);
+        mNow.set(1_020);
+        listener.connectFailed(mCall, new InetSocketAddress(IPV4, 443), Proxy.NO_PROXY, null,
+                new ConnectException("Connection refused"));
+        listener.callFailed(mCall, new ConnectException("Connection refused"));
+
+        List<VideoStart.Stage> stages = Connections.take(500, 3_000);
+
+        assertEquals("DNS 0 ms, IPv4 refused after 20 ms", stages.get(0).detail);
+        assertEquals(1_020, stages.get(0).endMs);
+    }
+
     @Test
     public void onlyTheOnesOfTheStartCutToIt() {
         Connections.add(1_000, 2_000);
@@ -234,6 +348,14 @@ public class ConnectionsTest {
 
         assertEquals(Connections.MAX_CONNECTIONS, Connections.take(0, 1_000).size());
         assertTrue(Connections.take(0, 5).isEmpty());
+    }
+
+    private static InetAddress address(byte[] bytes) {
+        try {
+            return InetAddress.getByAddress(bytes);
+        } catch (UnknownHostException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**

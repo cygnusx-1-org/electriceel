@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.MediaCodec;
 import android.os.Build.VERSION;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.view.Surface;
 import androidx.annotation.Nullable;
 import com.google.android.exoplayer2.C;
@@ -41,6 +42,13 @@ public class DebugInfoMediaCodecVideoRenderer extends MediaCodecVideoRenderer {
     private volatile int mFrameStepRequest;
     private volatile int mFrameStepCount;
     private volatile boolean mIsFrameStepSupported;
+    /**
+     * Of the frames decoded only to reach the position (e.g. a resume's, from the keyframe before it), since the renderer was enabled
+     * or its position reset: how many, and when the first was ({@link SystemClock#elapsedRealtime()}, -1 for none). Read by the main
+     * thread at the first frame (see VideoStarts#onFirstFrame).
+     */
+    private volatile int mSkippedToPosition;
+    private volatile long mSkipStartMs = -1;
 
     // Exo 2.9
     //public DebugInfoMediaCodecVideoRenderer(Context context, MediaCodecSelector mediaCodecSelector, long allowedJoiningTimeMs,
@@ -125,6 +133,7 @@ public class DebugInfoMediaCodecVideoRenderer extends MediaCodecVideoRenderer {
 
         // Tunneled frames go straight from the decoder to the display, so there's no decoded frame to hold back and release
         mIsFrameStepSupported = getConfiguration().tunnelingAudioSessionId == C.AUDIO_SESSION_ID_UNSET;
+        resetSkippedToPosition();
     }
 
     @Override
@@ -137,6 +146,7 @@ public class DebugInfoMediaCodecVideoRenderer extends MediaCodecVideoRenderer {
     protected void onPositionReset(long positionUs, boolean joining) throws ExoPlaybackException {
         super.onPositionReset(positionUs, joining);
         setPendingFrameSteps(0);
+        resetSkippedToPosition();
     }
 
     @Override
@@ -149,6 +159,15 @@ public class DebugInfoMediaCodecVideoRenderer extends MediaCodecVideoRenderer {
     protected boolean processOutputBuffer(long positionUs, long elapsedRealtimeUs, MediaCodec codec, ByteBuffer buffer, int bufferIndex,
                                           int bufferFlags, long bufferPresentationTimeUs, boolean isDecodeOnlyBuffer, boolean isLastBuffer,
                                           Format format) throws ExoPlaybackException {
+        // Skipped by the renderer at once: decoded only to get to the position
+        if (isDecodeOnlyBuffer && !isLastBuffer) {
+            if (mSkipStartMs < 0) {
+                mSkipStartMs = SystemClock.elapsedRealtime();
+            }
+
+            mSkippedToPosition++;
+        }
+
         if (super.processOutputBuffer(positionUs, elapsedRealtimeUs, codec, buffer, bufferIndex, bufferFlags, bufferPresentationTimeUs,
                 isDecodeOnlyBuffer, isLastBuffer, format)) {
             return true;
@@ -167,6 +186,25 @@ public class DebugInfoMediaCodecVideoRenderer extends MediaCodecVideoRenderer {
         setPendingFrameSteps(mPendingFrameSteps - 1);
 
         return true;
+    }
+
+    /**
+     * The frames decoded only to reach the position since it was set (e.g. a resume's, from the keyframe before it)
+     */
+    public int getSkippedToPosition() {
+        return mSkippedToPosition;
+    }
+
+    /**
+     * When the first of them was decoded ({@link SystemClock#elapsedRealtime()}), -1 for none
+     */
+    public long getSkipStartMs() {
+        return mSkipStartMs;
+    }
+
+    private void resetSkippedToPosition() {
+        mSkipStartMs = -1;
+        mSkippedToPosition = 0;
     }
 
     public boolean hasPendingFrameSteps() {

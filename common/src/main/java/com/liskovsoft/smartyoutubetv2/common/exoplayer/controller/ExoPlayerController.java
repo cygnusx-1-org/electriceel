@@ -95,6 +95,11 @@ public class ExoPlayerController implements Player.EventListener {
      */
     private boolean mHasSurface;
     /**
+     * Of the player set (see setVideoRenderer): the frames it decoded to reach a position
+     */
+    @Nullable
+    private DebugInfoMediaCodecVideoRenderer mVideoRenderer;
+    /**
      * How the formats tried do (see FormatAttempts): a frame shown means the video works, plus the decoders, the frames dropped
      * and the throughput of the segments
      */
@@ -102,7 +107,7 @@ public class ExoPlayerController implements Player.EventListener {
         @Override
         public void onRenderedFirstFrame(EventTime eventTime, @Nullable Surface surface) {
             FormatAttempts.onVideoRendered();
-            VideoStarts.onFirstFrame();
+            VideoStarts.onFirstFrame(getFirstFrame());
         }
 
         @Override
@@ -533,6 +538,17 @@ public class ExoPlayerController implements Player.EventListener {
      */
     public void setVideoRenderer(DebugInfoMediaCodecVideoRenderer renderer) {
         mFrameStepper.setPlayer(mPlayer, renderer);
+        mVideoRenderer = renderer;
+    }
+
+    /**
+     * Where the video starts (e.g. a resume's position) and what with, and the frames decoded first to get there
+     */
+    private VideoStarts.FirstFrame getFirstFrame() {
+        DebugInfoMediaCodecVideoRenderer renderer = mVideoRenderer;
+
+        return VideoStarts.FirstFrame.of(mPlayer != null ? mPlayer.getCurrentPosition() : -1, mPlayer != null ? mPlayer.getVideoFormat() : null,
+                renderer != null ? renderer.getSkippedToPosition() : 0, renderer != null ? renderer.getSkipStartMs() : -1);
     }
 
     /**
@@ -882,6 +898,7 @@ public class ExoPlayerController implements Player.EventListener {
         onStartFrames(mHealth.endStart());
         LastState.onPlayer(mContext, false, false);
         mFrameStepper.setPlayer(null, null);
+        mVideoRenderer = null;
         mRangeMuter.setPlayer(null);
 
         if (mPlayer == null) {

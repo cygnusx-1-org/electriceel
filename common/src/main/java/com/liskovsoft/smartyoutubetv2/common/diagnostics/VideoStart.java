@@ -190,6 +190,19 @@ public final class VideoStart {
      * In the order they started, an outer one before the ones it holds
      */
     public final List<Stage> stages;
+    /**
+     * Where it started, in ms into the video, at its first frame (e.g. a resume's position). -1 when not known (e.g. no frame).
+     */
+    public final long positionMs;
+    /**
+     * The video format it started with, e.g. "3840x2160 vp09 60fps", null when not known
+     */
+    @Nullable
+    public final String video;
+    /**
+     * Its bitrate, -1 when not known
+     */
+    public final int videoBitrateKbps;
 
     /**
      * One that played
@@ -207,6 +220,13 @@ public final class VideoStart {
     public VideoStart(long ts, String videoId, String trigger, boolean isFirstOfRun, long sinceProcessStartMs, @Nullable String client,
                       @Nullable String protocol, @Nullable String engine, boolean isCached, String outcome, long totalMs,
                       List<Stage> stages) {
+        this(ts, videoId, trigger, isFirstOfRun, sinceProcessStartMs, client, protocol, engine, isCached, outcome, totalMs, stages, -1,
+                null, -1);
+    }
+
+    public VideoStart(long ts, String videoId, String trigger, boolean isFirstOfRun, long sinceProcessStartMs, @Nullable String client,
+                      @Nullable String protocol, @Nullable String engine, boolean isCached, String outcome, long totalMs,
+                      List<Stage> stages, long positionMs, @Nullable String video, int videoBitrateKbps) {
         this.ts = ts;
         this.videoId = videoId;
         this.trigger = trigger;
@@ -219,6 +239,9 @@ public final class VideoStart {
         this.outcome = outcome;
         this.totalMs = totalMs;
         this.stages = Collections.unmodifiableList(new ArrayList<>(stages));
+        this.positionMs = positionMs;
+        this.video = video;
+        this.videoBitrateKbps = videoBitrateKbps;
     }
 
     public boolean isPlayed() {
@@ -226,7 +249,7 @@ public final class VideoStart {
     }
 
     /**
-     * E.g. "intent, first of run, TV sabr", "next, TV sabr, gave_up"
+     * E.g. "intent, first of run, TV sabr", "next, TV sabr, gave_up", "open, cached, TV sabr, from 0:41"
      */
     public String describe() {
         StringBuilder result = new StringBuilder(trigger);
@@ -250,7 +273,23 @@ public final class VideoStart {
             result.append(", ").append(outcome);
         }
 
+        // Not from the start (e.g. a resume): its frames from the keyframe before were decoded first (see VideoStarts#STAGE_TO_POSITION)
+        if (positionMs >= 1_000) {
+            result.append(", from ").append(formatPosition(positionMs));
+        }
+
         return result.toString();
+    }
+
+    /**
+     * E.g. 0:41, 1:02:05
+     */
+    static String formatPosition(long positionMs) {
+        long seconds = positionMs / 1_000;
+        long hours = seconds / 3_600;
+
+        return hours > 0 ? String.format(Locale.US, "%d:%02d:%02d", hours, seconds / 60 % 60, seconds % 60)
+                : String.format(Locale.US, "%d:%02d", seconds / 60, seconds % 60);
     }
 
     public JSONObject toJson() {
@@ -288,6 +327,18 @@ public final class VideoStart {
             result.put("outcome", outcome);
             result.put("totalMs", totalMs);
 
+            if (positionMs >= 0) {
+                result.put("positionMs", positionMs);
+            }
+
+            if (video != null) {
+                result.put("video", video);
+            }
+
+            if (videoBitrateKbps > 0) {
+                result.put("videoBitrateKbps", videoBitrateKbps);
+            }
+
             JSONArray stageArray = new JSONArray();
 
             for (Stage stage : stages) {
@@ -322,6 +373,10 @@ public final class VideoStart {
             case "player JS":
             case "player JS load":
             case "player JS check":
+            case "player download":
+            case "V8 start":
+            case "player preprocess":
+            case "n-function load":
             case "decipher":
                 return Category.PLAYER_JS;
             case VideoStarts.STAGE_BUFFERING:
@@ -331,6 +386,7 @@ public final class VideoStart {
             case VideoStarts.STAGE_AUDIO_INIT_CHUNK:
                 return Category.BUFFER;
             case VideoStarts.STAGE_VIDEO_DECODER:
+            case VideoStarts.STAGE_TO_POSITION:
                 return Category.DECODER;
             case VideoStarts.STAGE_MODE_SWITCH:
                 return Category.MODE_SWITCH;
