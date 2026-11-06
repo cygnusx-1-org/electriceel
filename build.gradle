@@ -21,8 +21,9 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:9.3.0'
         // AGP's built-in Kotlin ('com.android.built-in-kotlin'). AGP doesn't depend on it, so it goes on the classpath by hand.
-        // It brings the matching Kotlin compiler (2.2.10, see kotlinVersion).
         classpath 'com.android.tools.build:gradle-kotlin:9.3.0'
+        // It brings Kotlin 2.2.10; this raises the compiler to kotlinVersion, the forced kotlin-stdlib below.
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:' + kotlinVersion
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files

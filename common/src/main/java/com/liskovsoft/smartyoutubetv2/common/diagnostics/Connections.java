@@ -20,6 +20,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NoRouteToHostException;
 import java.net.Proxy;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 
 import java.util.ArrayDeque;
@@ -53,6 +54,10 @@ public final class Connections {
      */
     static final long MIN_RESPONSE_MS = 200;
     /**
+     * Of an address given up on: another connected first, or the call was cancelled
+     */
+    static final String FAILURE_CANCELLED = "cancelled";
+    /**
      * For the client of the player only: the API's connections aren't the video's
      */
     public static final EventListener.Factory LISTENER = call -> new Listener();
@@ -66,8 +71,9 @@ public final class Connections {
     }
 
     /**
-     * A new connection: its name's lookup, then each address tried till one connects (OkHttp tries the next when one fails, e.g. after
-     * the connect timeout). Its fields change on the call's thread, and are read by take: under the class's lock.
+     * A new connection: its name's lookup, then each address tried till one connects. OkHttp tries the next when one fails (e.g. after
+     * the connect timeout), and 250 ms into one that hasn't connected yet. Its fields change on OkHttp's threads (an attempt has its
+     * own), and are read by take: under the class's lock.
      */
     @VisibleForTesting
     static final class Connection {
@@ -79,15 +85,10 @@ public final class Connections {
          */
         long dnsEndMs = -1;
         /**
-         * The addresses tried that didn't connect, then the one that did: e.g. "IPv4 timed out after 5000 ms", "IPv6 70 ms"
+         * The addresses tried, in the order they were: e.g. "IPv4 timed out after 5000 ms", "IPv6 70 ms". They can overlap: OkHttp 5
+         * starts the next 250 ms into one that hasn't connected yet (fast fallback).
          */
-        final List<String> attempts = new ArrayList<>(2);
-        /**
-         * Of the address being tried, null for none
-         */
-        @Nullable
-        String attemptFamily;
-        long attemptStartMs = -1;
+        final List<Attempt> attempts = new ArrayList<>(2);
 
         Connection(long startMs) {
             this.startMs = startMs;
@@ -109,10 +110,8 @@ public final class Connections {
                 parts.add(isGoing ? "DNS" : "DNS failed after " + (endMs - startMs) + " ms");
             }
 
-            parts.addAll(attempts);
-
-            if (attemptFamily != null) {
-                parts.add(attemptFamily);
+            for (Attempt attempt : attempts) {
+                parts.add(attempt.describe());
             }
 
             if (isGoing) {
@@ -120,6 +119,40 @@ public final class Connections {
             }
 
             return parts.isEmpty() ? null : TextUtils.join(", ", parts);
+        }
+    }
+
+    /**
+     * An address tried. Its end changes under the class's lock.
+     */
+    static final class Attempt {
+        final InetSocketAddress address;
+        final String family;
+        final long startMs;
+        long endMs = -1;
+        /**
+         * Why it didn't connect, e.g. "timed out", null for one that did or is going
+         */
+        @Nullable
+        String failure;
+
+        Attempt(InetSocketAddress address, String family, long startMs) {
+            this.address = address;
+            this.family = family;
+            this.startMs = startMs;
+        }
+
+        /**
+         * E.g. "IPv4 70 ms", "IPv6 timed out after 5000 ms", just "IPv4" for one going
+         */
+        String describe() {
+            if (endMs < 0) {
+                return family;
+            }
+
+            long durationMs = endMs - startMs;
+
+            return failure != null ? family + " " + failure + " after " + durationMs + " ms" : family + " " + durationMs + " ms";
         }
     }
 
@@ -172,7 +205,7 @@ public final class Connections {
         @Override
         public void connectStart(@NonNull Call call, @NonNull InetSocketAddress inetSocketAddress, @NonNull Proxy proxy) {
             onStart();
-            startAttempt(mConnection, familyOf(inetSocketAddress));
+            startAttempt(mConnection, inetSocketAddress);
         }
 
         /**
@@ -184,7 +217,7 @@ public final class Connections {
             Connection connection = mConnection;
 
             if (connection != null) {
-                endAttempt(connection, describeFailure(ioe));
+                endAttempt(connection, inetSocketAddress, describeFailure(ioe));
             }
         }
 
@@ -193,7 +226,7 @@ public final class Connections {
             Connection connection = mConnection;
 
             if (connection != null) {
-                endAttempt(connection, null);
+                endAttempt(connection, inetSocketAddress, null);
             }
 
             onEnd();
@@ -357,24 +390,39 @@ public final class Connections {
         connection.dnsEndMs = sClock.now();
     }
 
-    private static synchronized void startAttempt(Connection connection, String family) {
-        connection.attemptFamily = family;
-        connection.attemptStartMs = sClock.now();
+    private static synchronized void startAttempt(Connection connection, InetSocketAddress address) {
+        connection.attempts.add(new Attempt(address, familyOf(address), sClock.now()));
     }
 
     /**
+     * Ends the last attempt going to the address. One that connected ends the others going: OkHttp cancels them, and may tell their
+     * end only after this one's.
+     *
      * @param failure why it didn't connect, e.g. "timed out", null for one that did
      */
-    private static synchronized void endAttempt(Connection connection, @Nullable String failure) {
-        if (connection.attemptFamily == null) {
+    private static synchronized void endAttempt(Connection connection, InetSocketAddress address, @Nullable String failure) {
+        long nowMs = sClock.now();
+
+        for (int i = connection.attempts.size() - 1; i >= 0; i--) {
+            Attempt attempt = connection.attempts.get(i);
+
+            if (attempt.endMs < 0 && attempt.address.equals(address)) {
+                attempt.endMs = nowMs;
+                attempt.failure = failure;
+                break;
+            }
+        }
+
+        if (failure != null) {
             return;
         }
 
-        long durationMs = sClock.now() - connection.attemptStartMs;
-        connection.attempts.add(failure != null ? connection.attemptFamily + " " + failure + " after " + durationMs + " ms"
-                : connection.attemptFamily + " " + durationMs + " ms");
-        connection.attemptFamily = null;
-        connection.attemptStartMs = -1;
+        for (Attempt attempt : connection.attempts) {
+            if (attempt.endMs < 0) {
+                attempt.endMs = nowMs;
+                attempt.failure = FAILURE_CANCELLED;
+            }
+        }
     }
 
     /**
@@ -398,10 +446,17 @@ public final class Connections {
             return "unreachable";
         }
 
-        if (ioe instanceof ConnectException) {
-            String message = ioe.getMessage();
+        String message = ioe.getMessage();
 
+        if (ioe instanceof ConnectException) {
             return message != null && message.contains("ENETUNREACH") ? "unreachable" : "refused";
+        }
+
+        // OkHttp closes the socket of an attempt it cancels ("Socket closed"), or stops one not started yet ("canceled"). Not a
+        // handshake's "Connection closed by peer": the server ended that one.
+        if ("canceled".equalsIgnoreCase(message)
+                || ioe instanceof SocketException && ("Socket closed".equals(message) || "Socket is closed".equals(message))) {
+            return FAILURE_CANCELLED;
         }
 
         return "failed";
