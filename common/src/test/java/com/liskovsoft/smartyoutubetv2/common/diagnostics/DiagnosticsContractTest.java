@@ -88,7 +88,8 @@ public class DiagnosticsContractTest {
         recordEveryKind();
         recordVideoStarts();
 
-        JSONObject report = DiagnosticsReport.build(getContext(), account(), 2, mLog.readAll(), System.currentTimeMillis());
+        JSONObject report = DiagnosticsReport.build(getContext(), account(), 2, mLog.readAll(), mVideoStarts.readAll(),
+                System.currentTimeMillis());
 
         assertEquals(Collections.emptyList(), validator.validate(report));
 
@@ -180,7 +181,8 @@ public class DiagnosticsContractTest {
     @Test
     public void aFieldNotInTheContractFails() throws Exception {
         JsonSchemaValidator validator = new JsonSchemaValidator(readSchema());
-        JSONObject report = DiagnosticsReport.build(getContext(), null, 0, Collections.emptyList(), System.currentTimeMillis());
+        JSONObject report = DiagnosticsReport.build(getContext(), null, 0, Collections.emptyList(), Collections.emptyList(),
+                System.currentTimeMillis());
         report.getJSONObject("app").put("somethingNew", 1);
         report.getJSONObject("system").put("sdkInt", "34");
 

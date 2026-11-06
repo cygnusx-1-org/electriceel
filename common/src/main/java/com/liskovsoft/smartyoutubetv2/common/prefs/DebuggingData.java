@@ -34,6 +34,7 @@ public class DebuggingData extends DataSaverBase {
     private static final int LAST_SUBMISSION_TIME = 5;
     private static final int LAST_APP_EXIT_TS = 6;
     private static final int START_GRAPH = 7;
+    private static final int LAST_SUBMITTED_START_TS = 8;
     private static final String KEYS_DELIM = ",";
     private static DebuggingData sInstance;
 
@@ -94,6 +95,13 @@ public class DebuggingData extends DataSaverBase {
     }
 
     /**
+     * The time of the newest video start submitted, 0 when none was
+     */
+    public synchronized long getLastSubmittedStartTs() {
+        return Helpers.parseLong(getString(LAST_SUBMITTED_START_TS, null), 0);
+    }
+
+    /**
      * The ID the server gave the last submission, null when there was none
      */
     @Nullable
@@ -105,8 +113,9 @@ public class DebuggingData extends DataSaverBase {
         return Helpers.parseLong(getString(LAST_SUBMISSION_TIME, null), 0);
     }
 
-    public synchronized void setLastSubmission(String id, long newestFailureTs, long time) {
+    public synchronized void setLastSubmission(String id, long newestFailureTs, long newestStartTs, long time) {
         setString(LAST_SUBMITTED_FAILURE_TS, String.valueOf(newestFailureTs));
+        setString(LAST_SUBMITTED_START_TS, String.valueOf(newestStartTs));
         setString(LAST_SUBMISSION_ID, id);
         setString(LAST_SUBMISSION_TIME, String.valueOf(time));
     }

@@ -16,8 +16,6 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.DataSubmitter;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.JsonHighlighter;
-import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailureLog;
-import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStartLog;
 import com.liskovsoft.smartyoutubetv2.common.prefs.DebuggingData;
 
 import java.text.DateFormat;
@@ -57,7 +55,7 @@ public class DebuggingSettingsPresenter extends BasePresenter<Void> {
     }
 
     /**
-     * Once the failures and the video starts are counted (the logs are read in the background)
+     * Once the failures and the video starts not submitted yet are counted (the logs are read in the background)
      *
      * @param submittedId of the submission just sent: the panel takes the place of the one shown, so Back from the QR code
      *                    over it shows the submission too
@@ -69,11 +67,11 @@ public class DebuggingSettingsPresenter extends BasePresenter<Void> {
             return;
         }
 
-        PlayerFailureLog log = PlayerFailureLog.instance(context);
-        VideoStartLog videoStarts = VideoStartLog.instance(context);
+        Context appContext = context.getApplicationContext();
 
-        RxHelper.execute(RxHelper.fromCallable(() -> new int[] {log.readAll().size(), videoStarts.readAll().size()}),
-                counts -> showPanel(counts[0], counts[1], submittedId), error -> showPanel(0, 0, submittedId));
+        RxHelper.execute(RxHelper.fromCallable(() -> DataSubmitter.Unsent.read(appContext)),
+                unsent -> showPanel(unsent.failures.size(), unsent.videoStarts.size(), submittedId),
+                error -> showPanel(0, 0, submittedId));
     }
 
     private void showPanel(int failureCount, int videoStartCount, @Nullable String submittedId) {

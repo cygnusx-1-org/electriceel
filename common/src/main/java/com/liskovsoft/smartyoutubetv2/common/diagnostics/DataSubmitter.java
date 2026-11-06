@@ -3,6 +3,7 @@ package com.liskovsoft.smartyoutubetv2.common.diagnostics;
 import android.content.Context;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.sharedutils.okhttp.OkHttpManager;
@@ -16,6 +17,7 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
@@ -44,6 +46,71 @@ public final class DataSubmitter {
         }
     }
 
+    /**
+     * The player failures and the video starts recorded since the last submission: the ones sent before stay in the logs, but
+     * aren't sent again
+     */
+    public static final class Unsent {
+        /**
+         * Oldest first
+         */
+        public final List<JSONObject> failures;
+        public final List<JSONObject> videoStarts;
+        /**
+         * Of the newest of each, the last submission's when none is newer: where the next submission starts from
+         */
+        final long newestFailureTs;
+        final long newestStartTs;
+
+        private Unsent(List<JSONObject> failures, List<JSONObject> videoStarts, long newestFailureTs, long newestStartTs) {
+            this.failures = failures;
+            this.videoStarts = videoStarts;
+            this.newestFailureTs = newestFailureTs;
+            this.newestStartTs = newestStartTs;
+        }
+
+        /**
+         * Blocks till the logs are read: not on the main thread
+         */
+        public static Unsent read(Context context) {
+            DebuggingData debuggingData = DebuggingData.instance(context);
+
+            return read(PlayerFailureLog.instance(context).readAll(), debuggingData.getLastSubmittedFailureTs(),
+                    VideoStartLog.instance(context).readAll(), debuggingData.getLastSubmittedStartTs(), System.currentTimeMillis());
+        }
+
+        @VisibleForTesting
+        static Unsent read(List<JSONObject> allFailures, long lastFailureTs, List<JSONObject> allStarts, long lastStartTs, long nowMs) {
+            List<JSONObject> failures = new ArrayList<>();
+            List<JSONObject> starts = new ArrayList<>();
+
+            return new Unsent(failures, starts, after(allFailures, lastFailureTs, nowMs, failures),
+                    after(allStarts, lastStartTs, nowMs, starts));
+        }
+
+        /**
+         * The ones newer than the last submission's newest. A clock set back since then (it was ahead) would hold back every
+         * one after it till it caught up: they're all sent again instead.
+         *
+         * @return the time of the newest
+         */
+        private static long after(List<JSONObject> all, long lastTs, long nowMs, List<JSONObject> result) {
+            long cutoff = lastTs > nowMs ? 0 : lastTs;
+            long newest = cutoff;
+
+            for (JSONObject item : all) {
+                long ts = item.optLong("ts");
+
+                if (ts > cutoff) {
+                    result.add(item);
+                    newest = Math.max(newest, ts);
+                }
+            }
+
+            return newest;
+        }
+    }
+
     private static final String TAG = DataSubmitter.class.getSimpleName();
 
     private DataSubmitter() {
@@ -65,7 +132,8 @@ public final class DataSubmitter {
         Context appContext = context.getApplicationContext();
 
         return RxHelper.fromCallable(() -> {
-            JSONObject report = DiagnosticsReport.build(appContext, PlayerFailureLog.instance(appContext).readAll());
+            Unsent unsent = Unsent.read(appContext);
+            JSONObject report = DiagnosticsReport.build(appContext, unsent.failures, unsent.videoStarts);
             return report.toString(1);
         });
     }
@@ -90,20 +158,16 @@ public final class DataSubmitter {
      */
     @Nullable
     static synchronized String submit(Context context, boolean onlyIfNew) throws IOException {
-        DebuggingData debuggingData = DebuggingData.instance(context);
-        List<JSONObject> failures = PlayerFailureLog.instance(context).readAll();
-        long newestFailureTs = debuggingData.getLastSubmittedFailureTs();
+        Unsent unsent = Unsent.read(context);
 
-        for (JSONObject failure : failures) {
-            newestFailureTs = Math.max(newestFailureTs, failure.optLong("ts"));
-        }
-
-        if (onlyIfNew && newestFailureTs <= debuggingData.getLastSubmittedFailureTs()) {
+        // Not the unsent ones: with the clock set back since the last submission they're all of them, every time
+        if (onlyIfNew && unsent.newestFailureTs <= DebuggingData.instance(context).getLastSubmittedFailureTs()) {
             return null;
         }
 
-        String id = submit(context.getString(R.string.submit_data_url), DiagnosticsReport.build(context, failures));
-        debuggingData.setLastSubmission(id, newestFailureTs, System.currentTimeMillis());
+        String id = submit(context.getString(R.string.submit_data_url),
+                DiagnosticsReport.build(context, unsent.failures, unsent.videoStarts));
+        DebuggingData.instance(context).setLastSubmission(id, unsent.newestFailureTs, unsent.newestStartTs, System.currentTimeMillis());
 
         return id;
     }

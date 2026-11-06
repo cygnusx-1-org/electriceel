@@ -271,7 +271,7 @@ public class DiagnosticsReportTest {
     }
 
     private static JSONObject build(Account selected, int signedIn, List<JSONObject> failures) {
-        return DiagnosticsReport.build(getContext(), selected, signedIn, failures, NOW);
+        return DiagnosticsReport.build(getContext(), selected, signedIn, failures, VideoStartLog.instance(getContext()).readAll(), NOW);
     }
 
     private static int getActive(JSONObject report) throws Exception {

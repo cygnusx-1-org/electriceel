@@ -43,7 +43,7 @@ public class DebuggingDataTest {
 
         // Not after the other values are set either (see DataSaverBase#checkCapacity)
         getData().getAccountNumber(TestAccounts.FIRST);
-        getData().setLastSubmission("K7M2QX9P", 123, 456);
+        getData().setLastSubmission("K7M2QX9P", 123, 124, 456);
         ShadowLooper.shadowMainLooper().idle();
         DebuggingData.resetInstanceForTesting();
 
@@ -74,15 +74,17 @@ public class DebuggingDataTest {
     public void theLastSubmissionIsKept() {
         assertNull(getData().getLastSubmissionId());
         assertEquals(0, getData().getLastSubmittedFailureTs());
+        assertEquals(0, getData().getLastSubmittedStartTs());
 
         getData().setAutoSubmitEnabled(true);
-        getData().setLastSubmission("K7M2QX9P", 1_792_000_000_000L, 1_792_000_100_000L);
+        getData().setLastSubmission("K7M2QX9P", 1_792_000_000_000L, 1_792_000_050_000L, 1_792_000_100_000L);
         ShadowLooper.shadowMainLooper().idle();
         DebuggingData.resetInstanceForTesting();
 
         assertTrue(getData().isAutoSubmitEnabled());
         assertEquals("K7M2QX9P", getData().getLastSubmissionId());
         assertEquals(1_792_000_000_000L, getData().getLastSubmittedFailureTs());
+        assertEquals(1_792_000_050_000L, getData().getLastSubmittedStartTs());
         assertEquals(1_792_000_100_000L, getData().getLastSubmissionTime());
     }
 

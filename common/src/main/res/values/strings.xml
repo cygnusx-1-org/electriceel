@@ -212,8 +212,8 @@
     <string name="release_notes_gone">The release notes closed: the WebView stopped</string>
     <string name="settings_debugging">Debugging</string>
     <string name="submit_data">Submit data</string>
-    <string name="submit_data_desc">Sends app settings, device info and the recorded player failures to %s</string>
-    <string name="submit_data_recorded">Recorded failures: %1$d, video starts: %2$d</string>
+    <string name="submit_data_desc">Sends app settings, device info and the new player failures to %s</string>
+    <string name="submit_data_recorded">Unsent failures: %1$d, video starts: %2$d</string>
     <string name="submit_data_include_video_ids">Include video IDs</string>
     <string name="submit_data_include_video_ids_desc">Video IDs are always recorded on the device. This only decides whether they\'re sent.</string>
     <string name="submit_data_sending">Sending…</string>

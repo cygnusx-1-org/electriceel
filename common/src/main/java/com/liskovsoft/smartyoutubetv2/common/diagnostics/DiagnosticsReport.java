@@ -47,17 +47,19 @@ public final class DiagnosticsReport {
      * Not on the main thread (the device's decoders are listed)
      *
      * @param failures as read from the log (see PlayerFailureLog#readAll)
+     * @param videoStarts as read from theirs (see VideoStartLog#readAll)
      */
-    public static JSONObject build(Context context, List<JSONObject> failures) {
+    public static JSONObject build(Context context, List<JSONObject> failures, List<JSONObject> videoStarts) {
         MediaServiceManager service = MediaServiceManager.instance();
         List<Account> accounts = service.getAccounts();
 
-        return build(context, service.getSelectedAccount(), accounts != null ? accounts.size() : 0, failures, System.currentTimeMillis());
+        return build(context, service.getSelectedAccount(), accounts != null ? accounts.size() : 0, failures, videoStarts,
+                System.currentTimeMillis());
     }
 
     @VisibleForTesting
     static JSONObject build(Context context, @Nullable Account selectedAccount, int signedInAccounts, List<JSONObject> failures,
-                            long nowMs) {
+                            List<JSONObject> videoStarts, long nowMs) {
         Scrubber.update(context);
         DebuggingData debuggingData = DebuggingData.instance(context);
         JSONObject result = new JSONObject();
@@ -126,7 +128,7 @@ public final class DiagnosticsReport {
             boolean includeVideoIds = debuggingData.isVideoIdsIncluded();
             JSONArray videoStartsJson = new JSONArray();
 
-            for (JSONObject start : VideoStartLog.instance(context).readAll()) {
+            for (JSONObject start : videoStarts) {
                 if (!includeVideoIds) {
                     start.remove("videoId");
                 }
