@@ -511,7 +511,6 @@
   <string name="card_multiline_subtitle">Многоредови субтитри</string>
   <string name="auto_frame_rate_modes">Поддържани режими</string>
   <string name="loading">Зареждане...</string>
-  <string name="hide_streams">Скриване на потоци от абонаменти</string>
   <string name="video_rotate">Завъртане</string>
   <string name="trending_searches">Набиращи популярност търсения</string>
   <string name="video_duration_any">Всички</string>

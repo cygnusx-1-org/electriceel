@@ -538,7 +538,6 @@
     <string name="card_multiline_subtitle">Sottotitoli multiriga</string>
     <string name="auto_frame_rate_modes">Modalità supportate</string>
     <string name="loading">Caricamento in corso…</string>
-    <string name="hide_streams">Nascondi le trasmissioni dalle iscrizioni</string>
     <string name="video_rotate">Ruota</string>
     <string name="video_flip">Capovolgi (specchio)</string>
     <string name="trending_searches">Ricerca per tendenze</string>

@@ -492,7 +492,6 @@
     <string name="card_multiline_subtitle">Višeredni podnaslovi</string>
     <string name="auto_frame_rate_modes">Podržani načini</string>
     <string name="loading">Učitavanje…</string>
-    <string name="hide_streams">Sakrij strujanja iz Pretplata</string>
     <string name="client_order">Redoslijed YouTube klijenata</string>
     <string name="client_signed_in">%s (prijavljen, najbolji za Premium)</string>
     <string name="header_blocked_ai_channels">Blokirani UI kanali</string>

@@ -10,6 +10,7 @@ import com.liskovsoft.mediaserviceinterfaces.data.VideoCategory;
 import com.liskovsoft.sharedutils.helpers.FileHelpers;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.sharedutils.rx.RxHelper;
+import com.liskovsoft.smartyoutubetv2.common.prefs.CategoryFilterData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.service.YouTubeServiceManager;
 import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
@@ -28,24 +29,24 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import io.reactivex.Observable;
 
 /**
- * Hides music, gaming, sports, news and tech videos from Home. Only with the user's own Data API key (see {@link #isAvailable}).<br/>
+ * Marks or hides music, gaming, sports, news and tech videos in Home, each as its filter is set (see CategoryFilterData).
+ * Only with the user's own Data API key (see {@link #isAvailable}).<br/>
  * Home cards don't carry the category. It's looked up once per video before the row is shown,
- * so the hidden videos never appear, and cached on disk by the video id.<br/>
+ * so the hidden videos never appear, nor do the marked ones without their label, and cached on disk by the video id.<br/>
  * The category is whatever the uploader picked (e.g. many music mixes are People & Blogs). The lookup also brings
- * the topics YouTube finds in the video itself (e.g. Music), and either one hides the video.<br/>
- * Whole rows go too: the ones marked with a hidden topic (e.g. music shelves) and the ones left with a single video or none.<br/>
+ * the topics YouTube finds in the video itself (e.g. Music), and either one marks or hides the video.<br/>
+ * Whole rows go too, for the hidden categories only: the rows of a hidden topic (e.g. music shelves) and the ones left
+ * with a single video or none.<br/>
  * The Gaming section can drop its non-gaming videos the same way (see {@link #isNonGaming}).<br/>
  * The player uses the same lookup to tell music videos for Music autoplay (see {@link #isMusic}).
  */
 public class VideoCategoryManager {
     private static final String TAG = VideoCategoryManager.class.getSimpleName();
-    // Content flag, the category YouTube gives the video (always in English), the topic of a row (none for tech)
-    private static final int[] CONTENT = {
-            MediaServiceData.CONTENT_MUSIC_HOME, MediaServiceData.CONTENT_GAMING_HOME,
-            MediaServiceData.CONTENT_SPORTS_HOME, MediaServiceData.CONTENT_NEWS_HOME, MediaServiceData.CONTENT_TECH_HOME};
     private static final String MUSIC_CATEGORY = "Music";
     private static final String MUSIC_TOPIC = "Music";
     private static final String GAMING_CATEGORY = "Gaming";
+    // CATEGORIES, VIDEO_TOPICS and TOPICS go by the index of the filter (see CategoryFilterData.all).
+    // The category YouTube gives the video (always in English).
     private static final String[] CATEGORIES = {MUSIC_CATEGORY, GAMING_CATEGORY, "Sports", "News & Politics", "Science & Technology"};
     // The parent topics of the Data API (Wikipedia page names), every sub-genre carries them too (e.g. Electronic_music + Music)
     private static final String[] VIDEO_TOPICS = {MUSIC_TOPIC, "Video_game_culture", "Sport", "Politics", "Technology"};
@@ -54,6 +55,7 @@ public class VideoCategoryManager {
     private static final List<String> GAME_GENRE_TOPICS = Arrays.asList(
             "Action_game", "Action-adventure_game", "Casual_game", "Music_video_game", "Puzzle_video_game",
             "Racing_video_game", "Role-playing_video_game", "Simulation_video_game", "Sports_game", "Strategy_video_game");
+    // The topic of a row (none for tech)
     private static final int[] TOPICS = {
             MediaGroup.TOPIC_MUSIC, MediaGroup.TOPIC_GAMING, MediaGroup.TOPIC_SPORTS, MediaGroup.TOPIC_NEWS, MediaGroup.TOPIC_NONE};
     private static final String CATEGORIES_FILE = "videocategory/categories.tsv";
@@ -63,6 +65,7 @@ public class VideoCategoryManager {
     private static final long SAVE_DELAY_MS = 10_000;
     @SuppressLint("StaticFieldLeak")
     private static VideoCategoryManager sInstance;
+    private final Context mContext;
     private final MediaItemService mItemService;
     private final File mCategoriesFile;
     // Access order, so the least recently seen video is dropped first
@@ -77,6 +80,7 @@ public class VideoCategoryManager {
     private final Runnable mSaveCategories = () -> RxHelper.runAsync(this::saveCategories);
 
     private VideoCategoryManager(Context context) {
+        mContext = context;
         mItemService = YouTubeServiceManager.instance().getMediaItemService();
         mCategoriesFile = new File(FileHelpers.getFilesDir(context), CATEGORIES_FILE);
         RxHelper.runAsync(this::restoreCategories);
@@ -91,7 +95,7 @@ public class VideoCategoryManager {
     }
 
     /**
-     * Some category should be removed from the group
+     * Some category should be removed from the group or marked in it
      */
     public boolean isGroupEnabled(int groupType) {
         if (!isAvailable()) {
@@ -106,8 +110,8 @@ public class VideoCategoryManager {
             return false;
         }
 
-        for (int content : CONTENT) {
-            if (isContentHidden(content)) {
+        for (CategoryFilterData filter : getFilters()) {
+            if (filter.isEnabled(MediaGroup.TYPE_HOME)) {
                 return true;
             }
         }
@@ -133,6 +137,33 @@ public class VideoCategoryManager {
     }
 
     /**
+     * The categories the video found earlier is marked with in the group: bits by the index of the filter (see CategoryFilterData.all).
+     * Home only.
+     */
+    public int getMarks(String videoId, int groupType) {
+        VideoCategory category = getCached(videoId);
+
+        if (category == null || groupType != MediaGroup.TYPE_HOME || !isAvailable()) {
+            return 0;
+        }
+
+        return getMarks(category.getCategory(), category.getTopics());
+    }
+
+    int getMarks(String category, List<String> topics) {
+        CategoryFilterData[] filters = getFilters();
+        int marks = 0;
+
+        for (int i = 0; i < filters.length; i++) {
+            if (filters[i].isMarkingEnabled(MediaGroup.TYPE_HOME) && isCategory(i, category, topics)) {
+                marks |= 1 << i;
+            }
+        }
+
+        return marks;
+    }
+
+    /**
      * Neither the Gaming category nor a game genre topic. Every gaming video has one or the other
      * (e.g. a Minecraft video in People & Blogs has Action-adventure_game).
      * Without topics (found by the player, see {@link #needsTopics}) the video stays.
@@ -155,8 +186,10 @@ public class VideoCategoryManager {
      * The category or one of the topics is hidden from Home
      */
     boolean isHidden(String category, List<String> topics) {
-        for (int i = 0; i < CONTENT.length; i++) {
-            if (isContentHidden(CONTENT[i]) && (CATEGORIES[i].equals(category) || (topics != null && topics.contains(VIDEO_TOPICS[i])))) {
+        CategoryFilterData[] filters = getFilters();
+
+        for (int i = 0; i < filters.length; i++) {
+            if (filters[i].isHidingEnabled(MediaGroup.TYPE_HOME) && isCategory(i, category, topics)) {
                 return true;
             }
         }
@@ -165,7 +198,14 @@ public class VideoCategoryManager {
     }
 
     /**
-     * The category or one of the topics of the video found earlier is music, as "Hide music from Home" sees it
+     * The category or one of the topics is the one of the filter at the index (see CategoryFilterData.all)
+     */
+    private static boolean isCategory(int index, String category, List<String> topics) {
+        return CATEGORIES[index].equals(category) || (topics != null && topics.contains(VIDEO_TOPICS[index]));
+    }
+
+    /**
+     * The category or one of the topics of the video found earlier is music, as the Music category filter sees it
      * (e.g. a mix the uploader put in People & Blogs). Unknown videos aren't.
      */
     public boolean isMusic(String videoId) {
@@ -188,7 +228,7 @@ public class VideoCategoryManager {
 
         for (int i = 0; i < TOPICS.length; i++) {
             if (TOPICS[i] == topic) {
-                return isContentHidden(CONTENT[i]);
+                return getFilters()[i].isHidingEnabled(MediaGroup.TYPE_HOME);
             }
         }
 
@@ -197,6 +237,13 @@ public class VideoCategoryManager {
 
     private static boolean isContentHidden(int content) {
         return MediaServiceData.instance().isContentHidden(content);
+    }
+
+    /**
+     * Read anew each time: a test may start over with new ones
+     */
+    private CategoryFilterData[] getFilters() {
+        return CategoryFilterData.all(mContext);
     }
 
     /**

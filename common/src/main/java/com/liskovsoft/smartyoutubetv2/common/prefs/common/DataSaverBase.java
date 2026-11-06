@@ -54,10 +54,18 @@ public abstract class DataSaverBase extends DataChangeBase {
      * @param isProfileData each account has its own values (see AppPrefs.PROFILE_DATA_KEYS)
      */
     public DataSaverBase(Context context, boolean persistImmediately, boolean isProfileData) {
+        this(context, persistImmediately, isProfileData, null);
+    }
+
+    /**
+     * @param isProfileData each account has its own values (see AppPrefs.PROFILE_DATA_KEYS)
+     * @param dataKey the name the values are saved under, or null for the name of the class (e.g. several instances of one class)
+     */
+    public DataSaverBase(Context context, boolean persistImmediately, boolean isProfileData, String dataKey) {
         mAppPrefs = AppPrefs.instance(context);
         mPersistImmediately = persistImmediately;
         mIsProfileData = isProfileData;
-        mDataKey = this.getClass().getSimpleName();
+        mDataKey = dataKey != null ? dataKey : this.getClass().getSimpleName();
         mValues = new ArrayList<>();
         restoreState();
 

@@ -535,7 +535,6 @@
     <string name="card_multiline_subtitle">Flerlinjers undertekster</string>
     <string name="auto_frame_rate_modes">Støttede moduser</string>
     <string name="loading">Laster inn …</string>
-    <string name="hide_streams">Skjul strømminger fra Abonnementer</string>
     <string name="video_rotate">Roter</string>
     <string name="video_flip">Vend (speil)</string>
     <string name="trending_searches">Populære søk</string>

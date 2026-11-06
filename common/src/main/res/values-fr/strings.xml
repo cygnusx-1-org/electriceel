@@ -508,7 +508,6 @@
   <string name="card_multiline_subtitle">Sous-titres multilignes</string>
   <string name="auto_frame_rate_modes">Modes supportés</string>
   <string name="loading">Chargement…</string>
-  <string name="hide_streams">Masquer les diffusions en direct des abonnements</string>
   <string name="video_rotate">Pivoter</string>
   <string name="trending_searches">Recherches populaires</string>
   <string name="video_duration_any">Toutes</string>

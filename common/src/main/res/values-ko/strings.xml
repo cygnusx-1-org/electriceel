@@ -524,7 +524,6 @@
   <string name="card_multiline_subtitle">여러 줄 자막</string>
   <string name="auto_frame_rate_modes">지원되는 모드</string>
   <string name="loading">불러오는 중...</string>
-  <string name="hide_streams">구독에서 스트리밍 숨기기</string>
   <string name="video_rotate">회전</string>
   <string name="trending_searches">인기 검색어</string>
   <string name="video_duration_any">모두</string>

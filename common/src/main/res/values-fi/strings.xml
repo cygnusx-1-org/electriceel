@@ -490,7 +490,6 @@
   <string name="card_multiline_subtitle">Monirivinen tekstitys</string>
   <string name="auto_frame_rate_modes">Tuetut tilat</string>
   <string name="loading">Ladataan</string>
-  <string name="hide_streams">Piilota streamit tilauksista</string>
   <string name="video_rotate">Käännä</string>
   <string name="trending_searches">Trendaavat haut</string>
   <string name="video_duration_any">Mikä tahansa</string>

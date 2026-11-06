@@ -10,6 +10,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.SidebarService;
+import com.liskovsoft.smartyoutubetv2.common.prefs.CategoryFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.CollaborationsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.ExploreTopicsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.FilterExclusionData;
@@ -27,7 +28,7 @@ import java.util.Map.Entry;
 /**
  * A card of the Content Filtering settings that shows, marks or hides a filter's videos, where, the color of the label,
  * the channels excluded from the hiding and the quick toggle of the hiding
- * (e.g. Collaborations, Watch later, Shows, Streamed or Live, Top channels you watch, Explore more topics)
+ * (e.g. Collaborations, Watch later, Shows, Streamed or Live, Top channels you watch, Explore more topics, a category of Home)
  */
 public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
     // Outside the sidebar: the title, the section id the filter knows it by (see VideoGroup.getFilterSectionId)
@@ -40,7 +41,7 @@ public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
     private final int mTitleResId;
     private final int[][] mModes; // the title of each mode, the mode
     private final int mMarkDescResId;
-    private final int mSectionsResId;
+    private final int mSectionsResId; // the title of the sections, or 0 for a filter of a single section: there's nothing to pick
     private final boolean mHasPageSections; // also in search and on channel pages
     private final int mExclusionFilter; // the FilterExclusionData.FILTER_* channels are excluded from, or 0
     private final boolean mHasQuickToggle; // the button on the main screen turns the hiding off and on (see QuickTogglePresenter)
@@ -92,6 +93,15 @@ public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
         return new SectionFilterSettingsPresenter(context, TopChannelsData.instance(context), R.string.top_channels,
                 R.string.top_channels_show, R.string.top_channels_mark, R.string.top_channels_mark_desc, R.string.top_channels_hide,
                 R.string.top_channels_sections, false, 0, false);
+    }
+
+    /**
+     * Home only (see CategoryFilterData)
+     */
+    public static SectionFilterSettingsPresenter category(Context context, CategoryFilterData data) {
+        return new SectionFilterSettingsPresenter(context, data, data.getTitleResId(),
+                R.string.categories_show, R.string.categories_mark, data.getMarkDescResId(), R.string.categories_hide,
+                0, false, 0, false);
     }
 
     public static SectionFilterSettingsPresenter exploreTopics(Context context) {
@@ -158,8 +168,13 @@ public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
      * The same sections as Hide videos older than, then Search and Channel pages for a filter of videos found there too.
      * Such a filter has the sections of the subscription groups too, after Subscriptions.
      * All is first: it checks or unchecks the others, and it's checked while they all are.
+     * None for a filter of a single section.
      */
     private void appendSectionsCategory(AppDialogPresenter presenter) {
+        if (mSectionsResId == 0) {
+            return;
+        }
+
         List<int[]> titledSections = new ArrayList<>();
 
         for (Entry<Integer, Integer> section : mSidebarService.getDefaultSections().entrySet()) {

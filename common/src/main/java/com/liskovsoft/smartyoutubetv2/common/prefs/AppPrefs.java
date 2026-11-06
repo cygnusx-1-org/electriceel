@@ -57,7 +57,8 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
             OldVideosData.class.getSimpleName(), AiSListFilterData.class.getSimpleName(), SponsorBlockData.SPONSOR_BLOCK_DATA,
             HideContentData.HIDE_CONTENT_DATA, DeArrowData.class.getSimpleName(), SearchData.SEARCH_DATA,
             DuplicatesData.class.getSimpleName(), CensoredWordsData.class.getSimpleName(), ChannelGroupFilterData.class.getSimpleName(),
-            OpenedVideosData.class.getSimpleName()
+            OpenedVideosData.class.getSimpleName(), CategoryFilterData.MUSIC_KEY, CategoryFilterData.GAMING_KEY,
+            CategoryFilterData.SPORTS_KEY, CategoryFilterData.NEWS_KEY, CategoryFilterData.TECH_KEY
     };
     private String mBootResolution;
     private final WeakHashSet<ProfileChangeListener> mListeners = new WeakHashSet<>();
@@ -102,6 +103,36 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
         initSharedSettingsProfile();
         MediaServiceManager.instance().addAccountListener(this);
         initAccountProfile();
+        migrateHiddenStreams();
+    }
+
+    /**
+     * Hide streams from Subscriptions of Hide content is part of Streamed or Live now (Hide or mark content).
+     * The current account had it checked: Streamed or Live hides streams in Subscriptions, unless its mode was picked already,
+     * then it stays as it was set. Run on the account's settings before their owners read them.
+     *
+     * @return the keys of the settings it changed
+     */
+    Set<String> migrateHiddenStreams() {
+        String hideContent = HideContentData.removeHiddenStreams(getProfileData(HideContentData.HIDE_CONTENT_DATA));
+
+        if (hideContent == null) {
+            return Collections.emptySet();
+        }
+
+        Set<String> keys = new LinkedHashSet<>();
+        String streamedKey = StreamedData.class.getSimpleName();
+        String streamed = StreamedData.hideInSubscriptions(getProfileData(streamedKey));
+
+        if (streamed != null) {
+            setProfileData(streamedKey, streamed);
+            keys.add(streamedKey);
+        }
+
+        setProfileData(HideContentData.HIDE_CONTENT_DATA, hideContent);
+        keys.add(HideContentData.HIDE_CONTENT_DATA);
+
+        return keys;
     }
 
     /**
@@ -283,6 +314,7 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
     public void onAccountChanged(Account account) {
         copySharedProfiles(MediaServiceManager.instance().getAccounts());
         selectProfile(account);
+        migrateHiddenStreams();
         onProfileChanged();
     }
 
@@ -423,6 +455,7 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
             putString(SHARED_SETTINGS_PROFILE_NAME, "");
         }
 
+        migrateHiddenStreams();
         mListeners.forEach(ProfileChangeListener::onProfileDataCopied);
     }
 
@@ -523,7 +556,17 @@ public class AppPrefs extends SharedPreferencesBase implements AccountChangeList
      * After the storage sync changed data keys of the selected profile: their owners read them again. On the main thread.
      */
     public void onProfileDataSynced(Set<String> keys) {
-        mListeners.forEach(listener -> listener.onProfileDataSynced(keys));
+        // E.g. from a device with a version before Hide streams from Subscriptions moved
+        Set<String> migrated = keys.contains(HideContentData.HIDE_CONTENT_DATA) ? migrateHiddenStreams() : Collections.emptySet();
+        Set<String> changed = keys;
+
+        if (!migrated.isEmpty()) {
+            changed = new LinkedHashSet<>(keys);
+            changed.addAll(migrated);
+        }
+
+        Set<String> synced = changed;
+        mListeners.forEach(listener -> listener.onProfileDataSynced(synced));
     }
 
     /**

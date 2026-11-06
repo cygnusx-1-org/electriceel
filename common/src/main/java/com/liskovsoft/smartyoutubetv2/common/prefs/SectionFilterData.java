@@ -3,13 +3,18 @@ package com.liskovsoft.smartyoutubetv2.common.prefs;
 import android.content.Context;
 
 import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
+import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.smartyoutubetv2.common.misc.OldVideoFilter;
 import com.liskovsoft.smartyoutubetv2.common.prefs.common.DataSaverBase;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A filter that shows, marks or hides its videos in the chosen sections (e.g. CollaborationsData, WatchLaterData).<br/>
  * The label of a marked video has the colors of the AiSList marker (see AiSListFilterData.getMarkShade).<br/>
- * Each subclass is saved apart, under its own name. Each account has its own values.
+ * Each subclass is saved apart, under its own name (the class name, unless it gives one). Each account has its own values.
  */
 public abstract class SectionFilterData extends DataSaverBase {
     public static final int MODE_SHOW = 0;
@@ -31,8 +36,40 @@ public abstract class SectionFilterData extends DataSaverBase {
     private static final int DEFAULT_SECTIONS = Integer.MAX_VALUE; // every section (bits 0-30), the ones added later too
 
     protected SectionFilterData(Context context) {
+        this(context, null);
+    }
+
+    /**
+     * @param dataKey the name the values are saved under, or null for the name of the class
+     */
+    protected SectionFilterData(Context context, String dataKey) {
         // Saved right away: a save still pending when the account changes is dropped
-        super(context, true, true);
+        super(context, true, true, dataKey);
+    }
+
+    /**
+     * The saved values of a filter set to hide its videos in the one section, unless its mode was picked already
+     *
+     * @return the new values or null when the mode was picked
+     */
+    static String setToHideIn(String data, int sectionId) {
+        String[] split = Helpers.splitData(data);
+        int mode = Helpers.parseInt(split, MODE_INDEX, -1);
+
+        if (mode == MODE_SHOW || mode == MODE_MARK || mode == MODE_HIDE) {
+            return null;
+        }
+
+        List<String> values = split != null ? new ArrayList<>(Arrays.asList(split)) : new ArrayList<>();
+
+        while (values.size() <= SECTIONS_INDEX) {
+            values.add(null);
+        }
+
+        values.set(MODE_INDEX, String.valueOf(MODE_HIDE));
+        values.set(SECTIONS_INDEX, String.valueOf(1 << sectionId));
+
+        return Helpers.mergeData(values.toArray());
     }
 
     /**

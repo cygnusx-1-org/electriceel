@@ -516,7 +516,6 @@
   <string name="card_multiline_subtitle">Mitmerealised subtiitrid</string>
   <string name="auto_frame_rate_modes">Toetatud režiimid</string>
   <string name="loading">Laadimine…</string>
-  <string name="hide_streams">Peida otseülekanded tellimustest</string>
   <string name="video_rotate">Pööra</string>
   <string name="trending_searches">Populaarsed otsingud</string>
   <string name="video_duration_any">Kõik</string>

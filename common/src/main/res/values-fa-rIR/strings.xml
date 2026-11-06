@@ -489,7 +489,6 @@
   <string name="auto_frame_rate_modes">حالت‌های پشتیبانی شده</string>
   <string name="loading">در حال بارگیری…</string>
   <string name="video_rotate">چرخش</string>
-  <string name="hide_streams">پنهان کردن پخش زنده از اشتراک‌ها</string>
   <string name="card_multiline_subtitle">زیرنویس چند خطی</string>
   <string name="player_button_long_click">کلیک کوتاه برای عمل سریع و کلیک طولانی برای باز کردن تنظیمات در پنجره بازشو</string>
   <string name="trending_searches">جستجوهای محبوب</string>

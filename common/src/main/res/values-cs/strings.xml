@@ -538,7 +538,6 @@
     <string name="card_multiline_subtitle">Víceřádkové titulky</string>
     <string name="auto_frame_rate_modes">Podporované režimy</string>
     <string name="loading">Načítání…</string>
-    <string name="hide_streams">Skrýt živá vysílání z Odběrů</string>
     <string name="video_rotate">Otočit</string>
     <string name="video_flip">Překlopit (zrcadlově)</string>
     <string name="trending_searches">Vyhledávací trendy</string>

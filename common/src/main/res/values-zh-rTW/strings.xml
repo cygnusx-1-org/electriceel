@@ -479,7 +479,6 @@
   <string name="card_multiline_subtitle">多行字幕</string>
   <string name="auto_frame_rate_modes">支援的模式</string>
   <string name="loading">正在載入…</string>
-  <string name="hide_streams">從訂閱中隱藏串流</string>
   <string name="video_rotate">旋轉</string>
   <string name="trending_searches">熱門搜尋</string>
   <string name="video_duration_any">任何</string>

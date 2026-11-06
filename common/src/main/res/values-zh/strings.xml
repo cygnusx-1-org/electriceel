@@ -524,7 +524,6 @@
   <string name="card_multiline_subtitle">多行字幕</string>
   <string name="auto_frame_rate_modes">支持的模式</string>
   <string name="loading">加载中……</string>
-  <string name="hide_streams">隐藏订阅分区的直播</string>
   <string name="video_rotate">旋转</string>
   <string name="trending_searches">热门搜索</string>
   <string name="video_duration_any">任意</string>

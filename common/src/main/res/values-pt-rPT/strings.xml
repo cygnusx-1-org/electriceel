@@ -537,7 +537,6 @@
     <string name="card_multiline_subtitle">Legendas multilinha</string>
     <string name="auto_frame_rate_modes">Modos suportados</string>
     <string name="loading">A carregar...</string>
-    <string name="hide_streams">Ocultar emissões nas subscrições</string>
     <string name="video_rotate">Rodar</string>
     <string name="video_flip">Inverter (espelhar)</string>
     <string name="trending_searches">Pesquisas nas tendências</string>

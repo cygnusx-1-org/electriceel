@@ -524,7 +524,6 @@
   <string name="card_multiline_subtitle">Napisy wielowierszowe</string>
   <string name="auto_frame_rate_modes">Wspierane tryby</string>
   <string name="loading">Wczytywanie…</string>
-  <string name="hide_streams">Ukryj transmisje w sekcji Subskrypcje</string>
   <string name="video_rotate">Obróć</string>
   <string name="trending_searches">Popularne wyszukiwania</string>
   <string name="video_duration_any">Wszystkie</string>

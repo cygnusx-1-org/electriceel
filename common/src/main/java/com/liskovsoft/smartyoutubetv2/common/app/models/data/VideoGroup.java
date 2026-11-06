@@ -729,7 +729,8 @@ public class VideoGroup {
     }
 
     /**
-     * The categories are looked up before the group is created (see VideoCategoryManager)
+     * The categories are looked up before the group is created (see VideoCategoryManager).
+     * Also marks the video with the categories set to mark instead of hiding.
      */
     private boolean isHiddenCategory(Video video) {
         // No context before the app is initialized (GlobalPreferences)
@@ -743,7 +744,13 @@ public class VideoGroup {
             return false;
         }
 
-        return manager.isVideoHidden(video.videoId, getType());
+        if (manager.isVideoHidden(video.videoId, getType())) {
+            return true;
+        }
+
+        video.categoryMarks = manager.getMarks(video.videoId, getType());
+
+        return false;
     }
 
     /**

@@ -521,7 +521,6 @@
   <string name="card_multiline_subtitle">Meerregelige ondertitels</string>
   <string name="auto_frame_rate_modes">Ondersteunde video-modi</string>
   <string name="loading">Bezig met laden…</string>
-  <string name="hide_streams">Verberg streams van abonnementen</string>
   <string name="video_rotate">Het beeld draaien</string>
   <string name="trending_searches">Populaire zoekopdrachten</string>
   <string name="pressing_back">door op TERUG te drukken</string>

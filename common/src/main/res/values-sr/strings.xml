@@ -535,7 +535,6 @@
     <string name="card_multiline_subtitle">Вишелинијски титлови</string>
     <string name="auto_frame_rate_modes">Подржани режими</string>
     <string name="loading">Учитавам…</string>
-    <string name="hide_streams">Сакриј жива емитовања са Претплата</string>
     <string name="video_rotate">Ротирај</string>
     <string name="video_flip">Обрни (огледало)</string>
     <string name="trending_searches">Претраге у тренду</string>

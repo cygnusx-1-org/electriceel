@@ -528,7 +528,6 @@
   <string name="card_multiline_subtitle">მრავალსტრიქონიანი სუბტიტრები</string>
   <string name="auto_frame_rate_modes">მხარდაჭერილი რეჟიმები</string>
   <string name="loading">იტვირთება…</string>
-  <string name="hide_streams">პირდაპირი ტრანსლაციების დამალვა გამოწერებიდან</string>
   <string name="video_rotate">შეტრიალება</string>
   <string name="video_flip">სარკული ანარეკლი</string>
   <string name="trending_searches">პოპულარული ძიებები</string>

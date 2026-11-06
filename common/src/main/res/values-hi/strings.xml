@@ -506,7 +506,6 @@
   <string name="card_multiline_subtitle">एकाधिक पंक्ति वाले उपशीर्षक</string>
   <string name="auto_frame_rate_modes">समर्थित मोड</string>
   <string name="loading">लोड हो रहा है…</string>
-  <string name="hide_streams">सब्सक्रिप्शन से स्ट्रीम छुपाएं</string>
   <string name="video_rotate">घुमाएँ</string>
   <string name="trending_searches">ट्रेंडिंग खोज</string>
   <string name="video_duration_any">किसी भी</string>

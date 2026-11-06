@@ -23,6 +23,16 @@ public class StreamedData extends SectionFilterData {
         return sInstance;
     }
 
+    /**
+     * Hide streams from Subscriptions of Hide content is part of this filter now: the account that had it checked hides streams
+     * in Subscriptions with it, unless its mode was picked already (see AppPrefs.migrateHiddenStreams)
+     *
+     * @return the new values or null when the mode was picked
+     */
+    static String hideInSubscriptions(String data) {
+        return setToHideIn(data, MediaGroup.TYPE_SUBSCRIPTIONS);
+    }
+
     @Override
     protected int getDefaultMarkColor() {
         return AiSListFilterData.MARK_COLOR_PURPLE;

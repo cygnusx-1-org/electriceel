@@ -491,7 +491,6 @@
   <string name="auto_frame_rate_modes">Támogatott módok</string>
   <string name="video_rotate">Forgatás</string>
   <string name="loading">Betöltés...</string>
-  <string name="hide_streams">Élő adás elrejtése a Feliratkozásokból</string>
   <string name="trending_searches">Felkapott keresések</string>
   <string name="video_duration_any">Bármi</string>
   <string name="video_duration">Időtartam</string>

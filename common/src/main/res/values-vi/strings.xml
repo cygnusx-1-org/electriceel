@@ -577,7 +577,6 @@
   <string name="speech_engine">Công cụ tìm kiếm bằng giọng nói</string>
   <string name="dearrow_status">Kiểm tra trạng thái máy chủ của DeArrow</string>
   <string name="lost_setting_warning">Cài đặt ứng dụng sẽ được thay đổi. Hãy đảm bảo rằng bạn đã sao lưu các cài đặt.</string>
-  <string name="hide_streams">Ẩn video phát trực tiếp khỏi mục Kênh đăng ký</string>
   <string name="player_long_speed_list">Danh sách tốc độ dài</string>
   <string name="player_extra_long_speed_list">Danh sách tốc độ cực dài</string>
   <string name="alt_app_icon">Biểu tượng ứng dụng thay thế (cần khởi động lại)</string>

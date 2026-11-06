@@ -491,7 +491,6 @@
   <string name="loading">Φόρτωση…</string>
   <string name="video_buffer_size_none">Καθόλου</string>
   <string name="pressing_back">Πατώντας ΠΙΣΩ</string>
-  <string name="hide_streams">Απόκρυψη ροών από τις Συνδρομές</string>
   <string name="video_rotate">Περιστροφή</string>
   <string name="trending_searches">Δημοφιλείς αναζητήσεις</string>
   <string name="video_duration_any">Οσηδήποτε</string>

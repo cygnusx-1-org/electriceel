@@ -490,7 +490,6 @@
   <string name="auto_frame_rate_modes">الأوضاع المدعومة</string>
   <string name="loading">جارٍ التحميل…</string>
   <string name="video_rotate">تدوير</string>
-  <string name="hide_streams">إخفاء البث المباشر من الاشتراكات</string>
   <string name="card_multiline_subtitle">ترجمة متعددة الأسطر</string>
   <string name="player_button_long_click">اضغط مطولًا على هذا الزر لخيارات إضافية</string>
   <string name="trending_searches">البحث الرائج</string>

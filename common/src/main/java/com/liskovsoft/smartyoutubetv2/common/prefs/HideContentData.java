@@ -10,7 +10,9 @@ import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
 import java.util.Set;
 
 /**
- * The content hidden in the sections (Shorts, watched, upcoming, mixes, streams, Home categories) and the Shorts quick toggle.<br/>
+ * The content hidden in the sections (Shorts, watched, upcoming, mixes, non-gaming videos of Gaming) and the Shorts quick toggle.<br/>
+ * Hidden streams moved to Streamed or Live (see AppPrefs.migrateHiddenStreams).<br/>
+ * The Home categories checked before they could be marked stay here: they're hidden until their filter is set (see CategoryFilterData).<br/>
  * The ones in use stay in MediaServiceData: the shared modules hide the content by them.
  * This keeps a copy per account and puts the account's into MediaServiceData when the account changes (see LocaleData).
  */
@@ -30,6 +32,13 @@ public class HideContentData extends DataChangeBase implements ProfileChangeList
 
         mPrefs.migrateToProfileData(HIDE_CONTENT_DATA);
 
+        // The values just copied from the ones for all the accounts may have them
+        Set<String> migrated = mPrefs.migrateHiddenStreams();
+
+        if (!migrated.isEmpty()) {
+            mPrefs.onProfileDataSynced(migrated);
+        }
+
         // E.g. copied from the profile the account shared since the last start (see AppPrefs.copySharedProfiles)
         restoreState();
 
@@ -42,6 +51,24 @@ public class HideContentData extends DataChangeBase implements ProfileChangeList
         }
 
         return sInstance;
+    }
+
+    /**
+     * The saved values without hidden streams in Subscriptions (see AppPrefs.migrateHiddenStreams)
+     *
+     * @return the new values or null when they weren't hidden
+     */
+    static String removeHiddenStreams(String data) {
+        String[] split = Helpers.splitData(data);
+        int hiddenContent = Helpers.parseInt(split, 0, MediaServiceData.CONTENT_HIDDEN_DEFAULT);
+
+        if ((hiddenContent & MediaServiceData.CONTENT_STREAMS_SUBSCRIPTIONS) == 0) {
+            return null;
+        }
+
+        split[0] = String.valueOf(hiddenContent & ~MediaServiceData.CONTENT_STREAMS_SUBSCRIPTIONS);
+
+        return Helpers.mergeData((Object[]) split);
     }
 
     public void setContentHidden(int content, boolean hide) {

@@ -9,6 +9,8 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.data.BrowseSection;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.SimpleMediaItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.VideoGroup;
+import com.liskovsoft.smartyoutubetv2.common.prefs.CategoryFilterData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.SectionFilterData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
 
@@ -49,6 +51,12 @@ public class VideoCategoryManagerTest {
     private static final String PLAYER_VLOG_ID = "playerVlog"; // People & Blogs, found by the player (no topics)
     private static final String AI_ID = "ai"; // Science & Technology with game footage: the gaming topic alone, no game genre
     private static final String NO_TOPICS_ID = "noTopics"; // Entertainment, YouTube found no topics
+    // The bits of the category marks (see CategoryFilterData.all)
+    private static final int MUSIC = 0;
+    private static final int GAMING = 1;
+    private static final int SPORTS = 2;
+    private static final int NEWS = 3;
+    private static final int TECH = 4;
 
     @Before
     public void setUp() {
@@ -163,7 +171,7 @@ public class VideoCategoryManagerTest {
     public void musicIsTheCategoryOrTheTopic() {
         VideoCategoryManager manager = getManager();
 
-        // Whatever Hide music from Home is set to
+        // Whatever the Music category filter is set to
         assertTrue(manager.isMusic(MUSIC_ID));
         assertTrue(manager.isMusic(MUSIC_MIX_ID));
         assertFalse(manager.isMusic(VLOG_ID));
@@ -400,6 +408,111 @@ public class VideoCategoryManagerTest {
     }
 
     @Test
+    public void markedCategoryStaysWithItsMark() {
+        setMarked(MediaServiceData.CONTENT_GAMING_HOME, true);
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME);
+
+        addVideos(home);
+        home.add(createVideo(GAME_VLOG_ID));
+
+        assertEquals(5, home.getSize());
+        // By the category or the topic
+        assertEquals(1 << GAMING, getVideo(home, GAMING_ID).categoryMarks);
+        assertEquals(1 << GAMING, getVideo(home, GAME_VLOG_ID).categoryMarks);
+        assertEquals(0, getVideo(home, MUSIC_ID).categoryMarks);
+        assertEquals(0, getVideo(home, NO_CATEGORY_ID).categoryMarks);
+        assertEquals(0, getVideo(home, UNKNOWN_ID).categoryMarks);
+    }
+
+    @Test
+    public void videoHasEveryMarkOfItsCategoryAndTopics() {
+        String gameMusicId = "gameMusic"; // a game soundtrack: Gaming, YouTube's topics say music
+        getManager().setCategoryForTesting(gameMusicId, "Gaming", Arrays.asList("Video_game_culture", "Music"));
+        setMarked(MediaServiceData.CONTENT_MUSIC_HOME, true);
+        setMarked(MediaServiceData.CONTENT_GAMING_HOME, true);
+        setMarked(MediaServiceData.CONTENT_TECH_HOME, true);
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME);
+
+        home.add(createVideo(gameMusicId));
+        home.add(createVideo(AI_ID));
+
+        assertEquals(2, home.getSize());
+        assertEquals(1 << MUSIC | 1 << GAMING, getVideo(home, gameMusicId).categoryMarks);
+        assertEquals(1 << GAMING | 1 << TECH, getVideo(home, AI_ID).categoryMarks);
+        // Copied with the video
+        assertEquals(1 << MUSIC | 1 << GAMING, Video.from(getVideo(home, gameMusicId)).categoryMarks);
+    }
+
+    @Test
+    public void hiddenCategoryWinsOverMarkedOne() {
+        setHidden(MediaServiceData.CONTENT_MUSIC_HOME, true);
+        setMarked(MediaServiceData.CONTENT_GAMING_HOME, true);
+        String gameMusicId = "gameMusicHidden";
+        getManager().setCategoryForTesting(gameMusicId, "Gaming", Arrays.asList("Video_game_culture", "Music"));
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME);
+
+        home.add(createVideo(gameMusicId));
+        home.add(createVideo(MUSIC_MIX_ID));
+        home.add(createVideo(GAMING_ID));
+
+        assertEquals(1, home.getSize());
+        assertEquals(1 << GAMING, getVideo(home, GAMING_ID).categoryMarks);
+    }
+
+    @Test
+    public void markedCategoryKeepsItsRows() {
+        setMarked(MediaServiceData.CONTENT_MUSIC_HOME, true);
+        setMarked(MediaServiceData.CONTENT_GAMING_HOME, true);
+        VideoCategoryManager manager = getManager();
+
+        assertTrue(manager.isGroupEnabled(MediaGroup.TYPE_HOME));
+        // A music shelf, a row of marked videos only, a row left with one unmarked video
+        assertFalse(manager.isRowHidden(new TestMediaGroup(MediaGroup.TYPE_HOME, MediaGroup.TOPIC_MUSIC, MUSIC_ID, TECH_ID)));
+        assertFalse(manager.isRowHidden(new TestMediaGroup(MediaGroup.TYPE_HOME, MediaGroup.TOPIC_NONE, MUSIC_ID, GAMING_ID)));
+        assertFalse(manager.isRowHidden(new TestMediaGroup(MediaGroup.TYPE_HOME, MediaGroup.TOPIC_NONE, GAMING_ID, GAMING_ID + 2, TECH_ID)));
+        assertFalse(manager.isVideoHidden(MUSIC_ID, MediaGroup.TYPE_HOME));
+    }
+
+    @Test
+    public void marksStayInHome() {
+        setMarked(MediaServiceData.CONTENT_MUSIC_HOME, true);
+        setMarked(MediaServiceData.CONTENT_GAMING_HOME, true);
+
+        for (int type : new int[] {MediaGroup.TYPE_MUSIC, MediaGroup.TYPE_GAMING, MediaGroup.TYPE_SEARCH, MediaGroup.TYPE_SUBSCRIPTIONS, MediaGroup.TYPE_HISTORY}) {
+            VideoGroup group = createGroup(type);
+            addVideos(group);
+            assertEquals("Group type " + type, 0, getVideo(group, MUSIC_ID).categoryMarks);
+            assertEquals("Group type " + type, 0, getVideo(group, GAMING_ID).categoryMarks);
+            assertEquals("Group type " + type, 0, getManager().getMarks(GAMING_ID, type));
+        }
+    }
+
+    @Test
+    public void nothingIsMarkedWithoutKey() {
+        setMarked(MediaServiceData.CONTENT_GAMING_HOME, true);
+        MediaServiceData.instance().setDataApiKey(null);
+        VideoGroup home = createGroup(MediaGroup.TYPE_HOME);
+
+        addVideos(home);
+
+        assertFalse(getManager().isGroupEnabled(MediaGroup.TYPE_HOME));
+        assertEquals(0, getVideo(home, GAMING_ID).categoryMarks);
+        assertEquals(0, getManager().getMarks(GAMING_ID, MediaGroup.TYPE_HOME));
+    }
+
+    @Test
+    public void markedCategoryLooksUpTheTopicsOfItsVideos() {
+        setMarked(MediaServiceData.CONTENT_MUSIC_HOME, true);
+        VideoCategoryManager manager = getManager();
+        String playerMusicId = "playerMusicMarked";
+        manager.setCategoryForTesting(playerMusicId, "Music");
+        TestMediaGroup row = new TestMediaGroup(MediaGroup.TYPE_HOME, MediaGroup.TOPIC_NONE, playerMusicId, UNKNOWN_ID);
+
+        // Its topics may add another mark: the category alone doesn't hide it
+        assertEquals(Arrays.asList(UNKNOWN_ID, playerMusicId), manager.getUnknownVideoIdsForTesting(row));
+    }
+
+    @Test
     public void nonGamingVideosAreHiddenFromGaming() {
         setHidden(MediaServiceData.CONTENT_NON_GAMING_GAMING, true);
         VideoGroup gaming = createGroup(MediaGroup.TYPE_GAMING);
@@ -512,8 +625,42 @@ public class VideoCategoryManagerTest {
         return VideoCategoryManager.instance(RuntimeEnvironment.getApplication());
     }
 
+    /**
+     * The categories of Home by their filter (see CategoryFilterData), the non-gaming videos of Gaming in Hide content
+     */
     private static void setHidden(int content, boolean hide) {
-        MediaServiceData.instance().setContentHidden(content, hide);
+        setMode(content, hide ? SectionFilterData.MODE_HIDE : SectionFilterData.MODE_SHOW);
+    }
+
+    private static void setMarked(int content, boolean mark) {
+        setMode(content, mark ? SectionFilterData.MODE_MARK : SectionFilterData.MODE_SHOW);
+    }
+
+    private static void setMode(int content, int mode) {
+        int index;
+
+        switch (content) {
+            case MediaServiceData.CONTENT_MUSIC_HOME:
+                index = MUSIC;
+                break;
+            case MediaServiceData.CONTENT_GAMING_HOME:
+                index = GAMING;
+                break;
+            case MediaServiceData.CONTENT_SPORTS_HOME:
+                index = SPORTS;
+                break;
+            case MediaServiceData.CONTENT_NEWS_HOME:
+                index = NEWS;
+                break;
+            case MediaServiceData.CONTENT_TECH_HOME:
+                index = TECH;
+                break;
+            default:
+                MediaServiceData.instance().setContentHidden(content, mode == SectionFilterData.MODE_HIDE);
+                return;
+        }
+
+        CategoryFilterData.all(RuntimeEnvironment.getApplication())[index].setMode(mode);
     }
 
     private static VideoGroup createGroup(int type) {
@@ -617,6 +764,16 @@ public class VideoCategoryManagerTest {
         public int getFilteredVideoCount() {
             return 0;
         }
+    }
+
+    private static Video getVideo(VideoGroup group, String videoId) {
+        for (Video video : group.getVideos()) {
+            if (videoId.equals(video.videoId)) {
+                return video;
+            }
+        }
+
+        throw new AssertionError("No video " + videoId);
     }
 
     private static boolean contains(VideoGroup group, String videoId) {

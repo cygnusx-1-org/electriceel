@@ -538,7 +538,6 @@
   <string name="card_multiline_subtitle">Undertexter med flera rader</string>
   <string name="auto_frame_rate_modes">Lägen som stöds</string>
   <string name="loading">Läser in …</string>
-  <string name="hide_streams">Dölj streamar i Prenumerationer</string>
   <string name="video_rotate">Rotera</string>
   <string name="video_flip">Spegelvänd</string>
   <string name="trending_searches">Populära sökningar</string>

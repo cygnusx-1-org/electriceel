@@ -538,7 +538,6 @@
     <string name="card_multiline_subtitle">マルチライン字幕</string>
     <string name="auto_frame_rate_modes">対応モードの一覧</string>
     <string name="loading">読み込み中…</string>
-    <string name="hide_streams">登録チャンネルからライブ配信を非表示</string>
     <string name="video_rotate">回転</string>
     <string name="video_flip">反転 (ミラー)</string>
     <string name="trending_searches">急上昇の検索</string>

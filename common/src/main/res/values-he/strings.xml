@@ -541,7 +541,6 @@ So, make a copy of values-he and name it values-iw. Keep both in your structure.
     <string name="card_multiline_subtitle">כתוביות מרובות שורה</string>
     <string name="auto_frame_rate_modes">מצבים נתמכים</string>
     <string name="loading">בטעינה…</string>
-    <string name="hide_streams">הסתרת שידורים מהמינויים</string>
     <string name="video_rotate">סיבוב</string>
     <string name="video_flip">היפוך (שיקוף)</string>
     <string name="trending_searches">חיפושים חמים</string>

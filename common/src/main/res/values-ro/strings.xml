@@ -525,7 +525,6 @@
   <string name="card_multiline_subtitle">Subtitrari pe mai multe linii</string>
   <string name="auto_frame_rate_modes">Moduri acceptate</string>
   <string name="loading">Se încarcă...</string>
-  <string name="hide_streams">Ascunde fluxurile din abonamente</string>
   <string name="video_rotate">Rotește</string>
   <string name="trending_searches">Căutări populare</string>
   <string name="video_duration_any">Oricare</string>

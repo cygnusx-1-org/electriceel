@@ -349,6 +349,11 @@ public final class SyncedSettings {
         whole("filters.topChannels", TopChannelsData.class.getSimpleName(), "Top channels");
         whole("filters.watchLater", WatchLaterData.class.getSimpleName(), "Watch later");
         whole("filters.exploreTopics", ExploreTopicsData.class.getSimpleName(), "Explore topics");
+        whole("filters.musicCategory", CategoryFilterData.MUSIC_KEY, "Music category");
+        whole("filters.gamingCategory", CategoryFilterData.GAMING_KEY, "Gaming category");
+        whole("filters.sportsCategory", CategoryFilterData.SPORTS_KEY, "Sports category");
+        whole("filters.newsCategory", CategoryFilterData.NEWS_KEY, "News & Politics category");
+        whole("filters.techCategory", CategoryFilterData.TECH_KEY, "Science & Technology category");
         whole("filters.blockedChannels", BlockedChannelData.BLOCKED_CHANNEL_DATA, "Blocked channels");
         whole("filters.keywords", KeywordFilterData.KEYWORD_FILTER_DATA, "Keyword filter");
         whole("filters.exclusions", FilterExclusionData.FILTER_EXCLUSION_DATA, "Filter exclusions");

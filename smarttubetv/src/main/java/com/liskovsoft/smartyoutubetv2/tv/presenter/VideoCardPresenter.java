@@ -35,6 +35,7 @@ import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AiSListFilterData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.CategoryFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.CollaborationsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.ExploreTopicsData;
@@ -259,8 +260,9 @@ public class VideoCardPresenter extends LongClickPresenter {
     }
 
     /**
-     * The second title, shortened for a short (see CompactInfo), after the "AI", "Collab", "Watch later", "Show", "Top channel", "Topic"
-     * and "Streamed" or "Live" markers the video has. The "Streamed" marker takes the word off the date ("Streamed • 5 hours ago").
+     * The second title, shortened for a short (see CompactInfo), after the "AI", "Collab", "Watch later", "Show", "Top channel", "Topic",
+     * category ("Music", "Gaming", "Sports", "News", "Tech") and "Streamed" or "Live" markers the video has.
+     * The "Streamed" marker takes the word off the date ("Streamed • 5 hours ago").
      */
     private static CharSequence getContentText(Context context, Video video, boolean selected) {
         CharSequence secondTitle = video.isStreamedMarked ? CompactInfo.removeStreamed(video.getSecondTitle()) : video.getSecondTitle();
@@ -272,6 +274,10 @@ public class VideoCardPresenter extends LongClickPresenter {
 
         if (video.isLiveMarked) {
             text = addMark(context, text, R.string.live_label, StreamedData.instance(context).getMarkColor(), selected);
+        }
+
+        if (video.categoryMarks != 0) {
+            text = addCategoryMarks(context, text, video.categoryMarks, selected);
         }
 
         if (video.isExploreTopicMarked) {
@@ -296,6 +302,23 @@ public class VideoCardPresenter extends LongClickPresenter {
 
         if (video.aiMarkList != -1) {
             text = addMark(context, text, R.string.aislist_mark, AiSListFilterData.instance(context).getMarkColor(video.aiMarkList), selected);
+        }
+
+        return text;
+    }
+
+    /**
+     * In the order of the settings: each marker goes before the text, so the last category comes first
+     *
+     * @param categoryMarks bits by the index of the filter (see CategoryFilterData.all)
+     */
+    private static CharSequence addCategoryMarks(Context context, CharSequence text, int categoryMarks, boolean selected) {
+        CategoryFilterData[] filters = CategoryFilterData.all(context);
+
+        for (int i = filters.length - 1; i >= 0; i--) {
+            if ((categoryMarks & (1 << i)) != 0) {
+                text = addMark(context, text, filters[i].getLabelResId(), filters[i].getMarkColor(), selected);
+            }
         }
 
         return text;

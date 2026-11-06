@@ -532,7 +532,6 @@
     <string name="card_multiline_subtitle">Несколько строк в подзаголовках</string>
     <string name="auto_frame_rate_modes">Поддерживаемые режимы</string>
     <string name="loading">Загрузка…</string>
-    <string name="hide_streams">Скрывать прямые трансляции из Подписок</string>
     <string name="video_rotate">Вращать</string>
     <string name="video_flip">Отразить</string>
     <string name="trending_searches">Популярные запросы</string>

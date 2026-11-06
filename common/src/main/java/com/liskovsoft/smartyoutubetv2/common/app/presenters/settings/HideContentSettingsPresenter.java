@@ -10,7 +10,6 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.BrowsePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.service.SidebarService;
-import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.ChannelGroupFilterData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.DuplicatesData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
@@ -51,7 +50,6 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
         options.add(createMenuItem(R.string.header_shorts, this::showShortsMenu));
         options.add(createMenuItem(R.string.hide_content_mixes, this::showMixesMenu));
         options.add(createMenuItem(R.string.hide_content_watched, this::showWatchedMenu));
-        options.add(createMenuItem(R.string.hide_content_streams, this::showStreamsMenu));
         options.add(createMenuItem(R.string.hide_content_upcoming, this::showUpcomingMenu));
         options.add(createMenuItem(R.string.hide_content_duplicates, this::showDuplicatesMenu));
         options.add(createMenuItem(R.string.subscription_groups, this::showChannelGroupsMenu));
@@ -60,14 +58,7 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
 
         OptionItem categories = createMenuItem(R.string.hide_content_categories, this::showCategoriesMenu);
         options.add(categories);
-
-        // Last in the list: the note is added below it, and the rows above stay where they are
-        if (!VideoCategoryManager.isAvailable()) {
-            categories.setEnabled(false);
-            OptionItem note = UiOptionItem.from(getContext().getString(R.string.hide_content_categories_needs_key));
-            note.setNote(true);
-            options.add(note);
-        }
+        FilteringSettingsPresenter.appendCategoriesKeyNote(getContext(), categories, options);
 
         String title = getContext().getString(R.string.hide_unwanted_content);
         presenter.appendCheckedCategory(title, options);
@@ -143,14 +134,6 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
         showSubmenu(R.string.hide_content_watched, options);
     }
 
-    private void showStreamsMenu() {
-        List<OptionItem> options = new ArrayList<>();
-
-        options.add(createContentItem(R.string.hide_streams, MediaServiceData.CONTENT_STREAMS_SUBSCRIPTIONS));
-
-        showSubmenu(R.string.hide_content_streams, options);
-    }
-
     private void showUpcomingMenu() {
         List<OptionItem> options = new ArrayList<>();
 
@@ -224,17 +207,12 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
     }
 
     /**
-     * The music, gaming, sports, news and tech videos of Home, the non-gaming videos of Gaming.
+     * The non-gaming videos of Gaming. The categories of Home are marked or hidden in Hide or mark content (see FilteringSettingsPresenter).
      * Only with the user's own Data API key (see VideoCategoryManager).
      */
     private void showCategoriesMenu() {
         List<OptionItem> options = new ArrayList<>();
 
-        options.add(createContentItem(R.string.hide_music_from_home, MediaServiceData.CONTENT_MUSIC_HOME));
-        options.add(createContentItem(R.string.hide_gaming_from_home, MediaServiceData.CONTENT_GAMING_HOME));
-        options.add(createContentItem(R.string.hide_sports_from_home, MediaServiceData.CONTENT_SPORTS_HOME));
-        options.add(createContentItem(R.string.hide_news_from_home, MediaServiceData.CONTENT_NEWS_HOME));
-        options.add(createContentItem(R.string.hide_tech_from_home, MediaServiceData.CONTENT_TECH_HOME));
         options.add(createContentItem(R.string.hide_non_gaming_from_gaming, MediaServiceData.CONTENT_NON_GAMING_GAMING));
 
         showSubmenu(R.string.hide_content_categories, options);

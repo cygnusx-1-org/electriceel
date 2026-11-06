@@ -557,7 +557,6 @@
   <string name="card_multiline_subtitle">Flerlinjede undertekster</string>
   <string name="auto_frame_rate_modes">Understøttede tilstande</string>
   <string name="loading">Indlæser…</string>
-  <string name="hide_streams">Skjul streams fra Abonnementer-sektionen</string>
   <string name="video_rotate">Roter</string>
   <string name="trending_searches">Populære søgninger</string>
   <string name="video_duration_any">Enhver</string>

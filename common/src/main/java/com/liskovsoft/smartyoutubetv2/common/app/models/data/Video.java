@@ -63,6 +63,7 @@ public final class Video {
     public boolean isLiveMarked; // marked as a stream that's live now (see StreamedData)
     public boolean isTopChannelMarked; // marked as a channel of a row of channels (see TopChannelsData)
     public boolean isExploreTopicMarked; // marked as a topic of a row of topics (see ExploreTopicsData)
+    public int categoryMarks; // the categories marked in Home, bits by the index of the filter (see CategoryFilterData.all)
     public boolean isDateAdded; // the date of a short is in the second title (see ShortsDateManager)
     public String videoId;
     public String playlistId;
@@ -201,6 +202,7 @@ public final class Video {
         video.isLiveMarked = item.isLiveMarked;
         video.isTopChannelMarked = item.isTopChannelMarked;
         video.isExploreTopicMarked = item.isExploreTopicMarked;
+        video.categoryMarks = item.categoryMarks;
         video.isDateAdded = item.isDateAdded;
         video.bgImageUrl = item.bgImageUrl;
         video.cardImageUrl = item.cardImageUrl;
