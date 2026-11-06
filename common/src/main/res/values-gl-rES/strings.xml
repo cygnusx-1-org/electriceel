@@ -744,6 +744,14 @@
   <string name="network_settings">Axustes de rede</string>
   <string name="remove_video_to_watch_later">Eliminar de Ver máis tarde</string>
   <string name="comments_disabled">Os comentarios están desactivados para este vídeo</string>
+  <plurals name="hours">
+        <item quantity="one">%s hora</item>
+        <item quantity="other">%s horas</item>
+    </plurals>
+  <plurals name="seconds">
+        <item quantity="one">%s segundo</item>
+        <item quantity="other">%s segundos</item>
+    </plurals>
     <string name="header_blocked_ai_channels">Canles de IA bloqueadas</string>
     <string name="blocked_ai_channels_message">Canles das que AiSList agochou vídeos dos teus feeds desde que se iniciou a aplicación, non a lista completa</string>
     <string name="aislist_mark_videos">Marcar os vídeos</string>

@@ -770,4 +770,13 @@
     <string name="report_ai_channel">Ilmoita kanava AiSListiin</string>
     <string name="add_remove_from_home_rows">Lisää/poista Kodista</string>
   <string name="remove_video_to_watch_later">Poista ”Katso myöhemmin” listalta</string>
+  <string name="player_toggle_speed">Nopeuden kytkeminen päälle/pois</string>
+  <plurals name="hours">
+        <item quantity="one">%s tunti</item>
+        <item quantity="other">%s tuntia</item>
+    </plurals>
+  <plurals name="seconds">
+        <item quantity="one">%s sekunti</item>
+        <item quantity="other">%s sekuntia</item>
+    </plurals>
 </resources>

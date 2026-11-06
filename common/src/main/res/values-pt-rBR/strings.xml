@@ -771,4 +771,12 @@
     <string name="report_ai_channel">Denunciar o canal ao AiSList</string>
     <string name="add_remove_from_home_rows">Adicionar/Remover do Início</string>
   <string name="remove_video_to_watch_later">Remover da playlist \"Assistir mais tarde\"</string>
+  <plurals name="hours">
+        <item quantity="one">%s hora</item>
+        <item quantity="other">%s horas</item>
+    </plurals>
+  <plurals name="seconds">
+        <item quantity="one">%s segundo</item>
+        <item quantity="other">%s segundos</item>
+    </plurals>
 </resources>

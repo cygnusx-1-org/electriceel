@@ -742,6 +742,16 @@
   <string name="comments_disabled">Τα σχόλια είναι απενεργοποιημένα για αυτό το βίντεο</string>
   <string name="remove_from_search_history">Αφαίρεση από το ιστορικό αναζήτησης</string>
   <string name="player_unexpected_error">Απροσδόκητο σφάλμα αναπαραγωγής</string>
+  <string name="sidebar_notification">Εμφάνιση ειδοποίησης στην πλαϊνή στήλη</string>
+  <string name="color_scheme_dark_blue_oled">Σκούρο Μπλε (OLED)</string>
+  <plurals name="hours">
+        <item quantity="one">%s ώρα</item>
+        <item quantity="other">%s ώρες</item>
+    </plurals>
+  <plurals name="seconds">
+        <item quantity="one">%s δευτερόλεπτο</item>
+        <item quantity="other">%s δευτερόλεπτα</item>
+    </plurals>
     <string name="header_blocked_ai_channels">Αποκλεισμένα κανάλια ΤΝ</string>
     <string name="blocked_ai_channels_message">Κανάλια των οποίων τα βίντεο απέκρυψε το AiSList από τις ροές σας από την έναρξη της εφαρμογής, όχι ολόκληρη η λίστα</string>
     <string name="aislist_mark_videos">Σήμανση βίντεο</string>

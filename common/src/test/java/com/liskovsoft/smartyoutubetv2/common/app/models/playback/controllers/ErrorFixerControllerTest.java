@@ -237,6 +237,35 @@ public class ErrorFixerControllerTest {
     }
 
     /**
+     * The DNS isn't Google's at the start of a video: it's switched, and the engine restarted (the DNS is read at each lookup)
+     */
+    @Test
+    public void aStartThatHangsSwitchesTheDns() throws Exception {
+        getTweaks().setPreferredDnsType(PlayerTweaksData.DNS_TYPE_SYSTEM);
+        TestController controller = new TestController(video("p5miU3x4Sr8"));
+
+        controller.onLongBuffering();
+
+        assertEquals(Arrays.asList("dns_google", "restart_engine"), getActions(mLog.readAll().get(0)));
+        assertEquals(PlayerTweaksData.DNS_TYPE_GOOGLE, getTweaks().getPreferredDnsType());
+    }
+
+    /**
+     * A resumed video that hangs: a hang there is more likely the poToken's (no attestation grace period on resume) than the DNS's.
+     * The client is switched, the DNS left as it is.
+     */
+    @Test
+    public void aResumedVideoThatHangsSwitchesTheClientNotTheDns() throws Exception {
+        getTweaks().setPreferredDnsType(PlayerTweaksData.DNS_TYPE_SYSTEM);
+        TestController controller = new TestController(video("p5miU3x4Sr8"), null, playerStub(null, null, 754_000));
+
+        controller.onLongBuffering();
+
+        assertEquals(Arrays.asList("switch_next_client_now", "reload_video"), getActions(mLog.readAll().get(0)));
+        assertEquals(PlayerTweaksData.DNS_TYPE_SYSTEM, getTweaks().getPreferredDnsType());
+    }
+
+    /**
      * A 403 while it played is the client's: switched as before
      */
     @Test
@@ -486,11 +515,20 @@ public class ErrorFixerControllerTest {
     }
 
     private static PlaybackView playerStub(List<FormatItem> videoFormats, FormatItem videoFormat) {
+        return playerStub(videoFormats, videoFormat, 0);
+    }
+
+    /**
+     * @param positionMs where the playback is, e.g. a resumed video's saved position
+     */
+    private static PlaybackView playerStub(List<FormatItem> videoFormats, FormatItem videoFormat, long positionMs) {
         return (PlaybackView) Proxy.newProxyInstance(PlaybackView.class.getClassLoader(), new Class<?>[]{PlaybackView.class},
                 (proxy, method, args) -> {
                     Class<?> type = method.getReturnType();
 
-                    if ("getVideoFormats".equals(method.getName())) {
+                    if ("getPositionMs".equals(method.getName())) {
+                        return positionMs;
+                    } else if ("getVideoFormats".equals(method.getName())) {
                         return videoFormats;
                     } else if ("getVideoFormat".equals(method.getName())) {
                         return videoFormat;

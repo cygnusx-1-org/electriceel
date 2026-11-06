@@ -159,10 +159,12 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
             // The one the player uses: OkHttp while IPv6 doesn't connect, whatever is chosen (see ExoMediaSourceFactory)
             boolean isRequiredEngineInUse = getPlayerTweaksData().getPlayerDataSource() == requiredEngine || OkHttpManager.isIpv6Disabled();
             boolean isCustomDnsActive = isRequiredEngineInUse && getPlayerTweaksData().getPreferredDnsType() == customDns;
-            if (!isCustomDnsActive && !getPlayerTweaksData().isNetworkErrorFixingDisabled()) {
+            // A resumed video doesn't start at 0: a hang there is more likely the poToken's (no attestation grace period on resume) than the DNS's
+            if (getPlayer().getPositionMs() == 0 && !isCustomDnsActive && !getPlayerTweaksData().isNetworkErrorFixingDisabled()) {
                 // Wrong DNS resolving could cause hanging at start
                 // Do switch to only engine that respects custom DNS settings
-                MessageHelpers.showLongMessage(getContext(), "Fixing incorrect DNS resolution. App restart needed...");
+                // The DNS is read at each lookup (see PreferredDns in SharedModules): the engine's restart applies it, not the app's
+                MessageHelpers.showLongMessage(getContext(), "Fixing incorrect DNS resolution...");
 
                 if (!isRequiredEngineInUse) {
                     failure.action("switch_engine:" + Utils.getNetworkEngineId(requiredEngine));

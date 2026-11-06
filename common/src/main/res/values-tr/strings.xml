@@ -686,7 +686,7 @@
     <string name="calm_msg">Sorunu düzeltiyoruz. Zaman zaman güncellemeleri kontrol edin</string>
     <string name="without_picture">Resimsiz</string>
     <string name="video_disabled">Video devre dışı</string>
-    <string name="applying_fix">Oynatıcıyı kapatmayın. Düzeltme uygulanıyor...</string>
+    <string name="applying_fix">Oynatıcıyı kapatmayın. Düzeltme uygulanıyor…</string>
     <string name="hide_mixes">Karışımları gizle</string>
     <string name="player_global_focus_desc">Bu özellik, oynatıcı düğmeleri sıraları arasında gezinirken hangi oynatıcı düğmesinin odaklanacağını etkiler</string>
     <string name="disable_network_error_fixing">Otomatik ağ hatası düzeltmeyi devre dışı bırak</string>
@@ -742,6 +742,8 @@
     <string name="enable_conscrypt_desc">Bazı cihazlarda HTTPS, TLS ve VPN uyumluluğunu artırır, ancak bazen oynatma sorunlarına veya ağın yavaşlamasına neden olabilir</string>
     <string name="network_settings">Ağ ayarları</string>
     <string name="comments_disabled">Bu videoda yorumlar devre dışı bırakıldı</string>
+    <string name="install_bridge">ATV/Amazon köprüsünü yükle</string>
+    <string name="fix_empty_subs_and_channels">Boş Abonelikleri ve Kanalları düzelt</string>
     <plurals name="hours">
         <item quantity="one">%s saat</item>
         <item quantity="other">%s saat</item>
