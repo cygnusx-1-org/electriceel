@@ -4,6 +4,8 @@
   <string name="header_home">Avaleht</string>
   <string name="header_subscriptions">Tellimused</string>
   <string name="header_history">Ajalugu</string>
+  <string name="history_videos">Videote ajalugu</string>
+  <string name="history_shorts">Lühivideote ajalugu</string>
   <string name="header_music">Muusika</string>
   <string name="header_news">Uudised</string>
   <string name="header_gaming">Mängud</string>
@@ -344,7 +346,6 @@
   <string name="hide_shorts_from_home">Peida lühivideod avalehelt</string>
   <string name="finish_on_disconnect">Lülita äpp pärast seadme lahtiühenamist välja</string>
   <string name="update_error">Viga uuendamisel</string>
-  <string name="hide_shorts_from_history">Peida lühivideod ajaloost</string>
   <string name="disable_screensaver">Keela ekraanisäästja</string>
   <string name="description_not_found">Kirjeldust ei leitud</string>
   <string name="proxy_port_hint">Puhverserveri port</string>
@@ -628,6 +629,7 @@
   <string name="unpin_group_from_sidebar">Eemalda tellimuste rühm</string>
   <string name="action_sound_off">Vaigista</string>
   <string name="hide_shorts_from_search">Peida Shortsid otsingutulemustest</string>
+  <string name="hide_shorts_history">Peida lühivideote ajalugu</string>
   <string name="remember_position_of_live_videos">Jäta otseülekande asukoht meelde</string>
   <string name="save_playlist">Lisa esitusloend jaotisse Esitusloendid</string>
   <string name="remove_playlist_fmt">Kas eemaldada %s jäädavalt?</string>
@@ -702,6 +704,7 @@
   <string name="lb_playback_controls_closed_captioning_disable">Keela subtiitrid</string>
   <string name="lb_playback_controls_closed_captioning_enable">Luba subtiitrid</string>
   <string name="my_videos">Minu videod</string>
+  <string name="my_shorts">Minu lühivideod</string>
   <string name="player_audio_focus">Heli fookus (peata, kui tuvastatakse teised mängijad)</string>
   <string name="paid_content_notification">Tasulise sisu teavitus</string>
   <string name="you_liked">sulle meeldis</string>

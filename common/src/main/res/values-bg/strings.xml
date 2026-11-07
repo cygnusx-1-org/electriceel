@@ -4,6 +4,8 @@
   <string name="title_search">Търсене</string>
   <string name="header_subscriptions">Абонаменти</string>
   <string name="header_history">История</string>
+  <string name="history_videos">История на видеата</string>
+  <string name="history_shorts">История на кратките видеа</string>
   <string name="header_music">Музика</string>
   <string name="header_news">Новини</string>
   <string name="header_gaming">Игри</string>
@@ -339,7 +341,6 @@
   <string name="hide_shorts_from_home">Скриване на кратки видеота от началния екран</string>
   <string name="finish_on_disconnect">Затваряне на приложението след изключване на телефона/таблета</string>
   <string name="update_error">Грешка при актуализиране</string>
-  <string name="hide_shorts_from_history">Скриване на кратките видеа от История</string>
   <string name="proxy_test_btn">Тест</string>
   <string name="disable_screensaver">Изключване на скрийнсейвъра</string>
   <string name="description_not_found">Описание не е намерено</string>
@@ -614,6 +615,7 @@
   <string name="hide_upcoming_channel">Скриване на предстоящите от канала</string>
   <string name="hide_upcoming_home">Скриване на предстоящите от началото</string>
   <string name="hide_shorts_from_search">Скриване на Shorts от резултатите от търсенето</string>
+  <string name="hide_shorts_history">Скриване на историята на кратките видеа</string>
   <string name="remember_position_of_live_videos">Запомняне на позицията в предаване на живо</string>
   <string name="save_playlist">Добавяне на плейлиста към раздел Плейлисти</string>
   <string name="remove_playlist_fmt">Да се премахне ли %s завинаги?</string>
@@ -702,6 +704,7 @@
   <string name="lb_playback_controls_closed_captioning_disable">Изключване на субтитрите</string>
   <string name="lb_playback_controls_closed_captioning_enable">Включване на субтитрите</string>
   <string name="my_videos">Моите видеа</string>
+  <string name="my_shorts">Моите кратки видеа</string>
   <string name="player_audio_focus">Аудио фокус (пауза, ако бъдат открити други плейъри)</string>
   <string name="paid_content_notification">Известие за платено съдържание</string>
   <string name="you_liked">харесахте</string>

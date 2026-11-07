@@ -8,6 +8,8 @@ So, make a copy of values-he and name it values-iw. Keep both in your structure.
     <string name="title_search">חיפוש</string>
     <string name="header_subscriptions">מינויים</string>
     <string name="header_history">היסטוריה</string>
+    <string name="history_videos">היסטוריית סרטונים</string>
+    <string name="history_shorts">היסטוריית Shorts</string>
     <string name="header_music">מוזיקה</string>
     <string name="header_news">חדשות</string>
     <string name="header_gaming">משחקים</string>
@@ -360,7 +362,7 @@ So, make a copy of values-he and name it values-iw. Keep both in your structure.
     <string name="finish_on_disconnect">סגירת היישום לאחר ניתוק הטלפון/טאבלט</string>
     <string name="update_error">שגיאת עדכון</string>
     <string name="hide_shorts_from_search">הסתרת Shorts מתוצאת החיפוש</string>
-    <string name="hide_shorts_from_history">הסתרת Shorts מההיסטוריה</string>
+    <string name="hide_shorts_history">הסתרת היסטוריית Shorts</string>
     <string name="disable_screensaver">השבתת שומר מסך</string>
     <string name="description_not_found">לא נמצא תיאור</string>
     <string name="proxy_port_hint">יציאת פרוקסי</string>
@@ -703,6 +705,7 @@ So, make a copy of values-he and name it values-iw. Keep both in your structure.
     <string name="lb_playback_controls_closed_captioning_disable">השבתת כתוביות סמויות</string>
     <string name="lb_playback_controls_closed_captioning_enable">הפעלת כתוביות סמויות</string>
     <string name="my_videos">הסרטונים שלי</string>
+    <string name="my_shorts">ה-Shorts שלי</string>
     <string name="player_audio_focus">מיקוד שמע (הפסקה אם זוהו נגנים אחרים)</string>
     <string name="paid_content_notification">התראת תוכן בתשלום</string>
     <string name="you_liked">אהבת</string>

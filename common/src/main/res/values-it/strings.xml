@@ -4,6 +4,8 @@
     <string name="title_search">Ricerca</string>
     <string name="header_subscriptions">Iscrizioni</string>
     <string name="header_history">Cronologia</string>
+    <string name="history_videos">Cronologia video</string>
+    <string name="history_shorts">Cronologia video brevi</string>
     <string name="header_music">Musica</string>
     <string name="header_news">Notizie</string>
     <string name="header_gaming">Videogiochi</string>
@@ -357,7 +359,7 @@
     <string name="finish_on_disconnect">Chiudi l\'app dopo aver scollegato il telefono/tablet</string>
     <string name="update_error">Errore di aggiornamento</string>
     <string name="hide_shorts_from_search">Nascondi i video brevi dal risultato della ricerca</string>
-    <string name="hide_shorts_from_history">Nascondi i video brevi dalla Cronologia</string>
+    <string name="hide_shorts_history">Nascondi la cronologia dei video brevi</string>
     <string name="disable_screensaver">Disabilita lo screensaver</string>
     <string name="description_not_found">Descrizione non trovata</string>
     <string name="proxy_port_hint">Porta proxy</string>
@@ -702,6 +704,7 @@
     <string name="lb_playback_controls_closed_captioning_disable">Disabilita i sottotitoli per non udenti</string>
     <string name="lb_playback_controls_closed_captioning_enable">Abilita i sottotitoli per non udenti</string>
     <string name="my_videos">I miei video</string>
+    <string name="my_shorts">I miei video brevi</string>
     <string name="player_audio_focus">Messa a fuoco audio (pausa se vengono rilevati altri lettori)</string>
     <string name="paid_content_notification">Notifica di contenuti a pagamento</string>
     <string name="you_liked">piaciuto</string>

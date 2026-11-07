@@ -4,6 +4,8 @@
     <string name="header_home">Главная</string>
     <string name="header_subscriptions">Подписки</string>
     <string name="header_history">История</string>
+    <string name="history_videos">История видео</string>
+    <string name="history_shorts">История Shorts</string>
     <string name="header_music">Музыка</string>
     <string name="header_news">Новости</string>
     <string name="header_gaming">Видеоигры</string>
@@ -353,7 +355,7 @@
     <string name="finish_on_disconnect">Завершать приложение после отключения телефона/планшета</string>
     <string name="update_error">Ошибка обновления</string>
     <string name="hide_shorts_from_search">Скрывать shorts из Поиска</string>
-    <string name="hide_shorts_from_history">Скрывать shorts из Истории</string>
+    <string name="hide_shorts_history">Скрывать историю Shorts</string>
     <string name="disable_screensaver">Отключить скринсейвер</string>
     <string name="description_not_found">Описание не найдено</string>
     <string name="proxy_port_hint">Порт прокси</string>
@@ -693,6 +695,7 @@
     <string name="playlists_rows">Отображать раздел Плейлисты в виде строк</string>
     <string name="import_subscriptions_group">Импортировать</string>
     <string name="my_videos">Ваши видео</string>
+    <string name="my_shorts">Ваши Shorts</string>
     <string name="player_audio_focus">Аудиофокус (пауза, если обнаружены другие плееры)</string>
     <string name="paid_content_notification">Уведомление о платном содержимом</string>
     <string name="you_liked">вам понравилось</string>

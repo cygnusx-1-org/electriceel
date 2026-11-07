@@ -4,6 +4,8 @@
   <string name="header_home">მთავარი</string>
   <string name="header_subscriptions">გამოწერები</string>
   <string name="header_history">ისტორია</string>
+  <string name="history_videos">ვიდეოების ისტორია</string>
+  <string name="history_shorts">Shorts-ის ისტორია</string>
   <string name="header_music">მუსიკა</string>
   <string name="header_news">სიახლეები</string>
   <string name="header_gaming">თამაშები</string>
@@ -353,7 +355,7 @@
   <string name="finish_on_disconnect">აპლიკაციის დასრულება ტელეფონის/პლანშეტის გათიშვის შემდეგ</string>
   <string name="update_error">განახლების შეცდომა</string>
   <string name="hide_shorts_from_search">shorts-ის დამალვა ძებნიდან</string>
-  <string name="hide_shorts_from_history">shorts-ის დამალვა ისტორიიდან</string>
+  <string name="hide_shorts_history">Shorts-ის ისტორიის დამალვა</string>
   <string name="disable_screensaver">ეკრანის დამცველის გამორთვა</string>
   <string name="description_not_found">აღწერა ვერ მოიძებნა</string>
   <string name="proxy_port_hint">პროქსის პორტი</string>
@@ -687,6 +689,7 @@
   <string name="playlists_rows">ფლეილისტების განყოფილების სტრიქონების სახით ჩვენება</string>
   <string name="import_subscriptions_group">იმპორტი</string>
   <string name="my_videos">ჩემი ვიდეოები</string>
+  <string name="my_shorts">ჩემი Shorts</string>
   <string name="player_audio_focus">აუდიოფოკუსი (პაუზა, თუ აღმოჩენილია სხვა ფლეიერი)</string>
   <string name="paid_content_notification">შეტყობინება ფასიანი შიგთავსის შესახებ</string>
   <string name="you_liked">მოგეწონათ</string>

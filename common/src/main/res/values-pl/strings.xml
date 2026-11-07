@@ -4,6 +4,8 @@
   <string name="title_search">Szukaj</string>
   <string name="header_subscriptions">Subskrypcje</string>
   <string name="header_history">Historia</string>
+  <string name="history_videos">Historia filmów</string>
+  <string name="history_shorts">Historia Shorts</string>
   <string name="header_music">Muzyka</string>
   <string name="header_news">Wiadomości</string>
   <string name="header_gaming">Gry</string>
@@ -348,7 +350,6 @@
   <string name="hide_shorts_from_home">Ukryj Szorty w sekcji Strona główna</string>
   <string name="finish_on_disconnect">Zamknij aplikację po odłączeniu urządzenia zdalnego sterowania (telefon/tablet)</string>
   <string name="update_error">Błąd aktualizacji</string>
-  <string name="hide_shorts_from_history">Ukryj shorts w sekcji Historia</string>
   <string name="disable_screensaver">Wyłącz wygaszacz ekranu</string>
   <string name="description_not_found">Nie znaleziono opisu</string>
   <string name="proxy_port_hint">Port proxy</string>
@@ -664,6 +665,7 @@
   <string name="video_buffer_size_highest">Największy</string>
   <string name="unpin_group_from_sidebar">Usuń grupę Subskrypcji</string>
   <string name="hide_shorts_from_search">Ukryj shorts w wynikach wyszukiwania</string>
+  <string name="hide_shorts_history">Ukryj historię Shorts</string>
   <string name="suggestions">Sugestie</string>
   <string name="place_comments_left">Umieść komentarze po lewej stronie</string>
   <string name="unknown_source_error">Nieznany błąd źródła</string>
@@ -687,6 +689,7 @@
   <string name="lb_playback_controls_closed_captioning_disable">Wyłącz napisy wkodowane</string>
   <string name="lb_playback_controls_closed_captioning_enable">Włącz napisy wkodowane</string>
   <string name="my_videos">Moje filmy</string>
+  <string name="my_shorts">Moje Shorts</string>
   <string name="player_audio_focus">Automatyzacja audio (pauza w przypadku wykrycia innych odtwarzaczy)</string>
   <string name="paid_content_notification">Powiadomienia o płatnych treściach</string>
   <string name="you_liked">polubionych</string>

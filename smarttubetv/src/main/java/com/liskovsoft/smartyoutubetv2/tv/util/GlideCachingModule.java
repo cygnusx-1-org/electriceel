@@ -20,7 +20,7 @@ import java.io.InputStream;
  */
 @GlideModule
 public class GlideCachingModule extends AppGlideModule {
-    private final static long CACHE_SIZE = 10 * 1024 * 1024; // 10 MB
+    private final static long CACHE_SIZE = 100 * 1024 * 1024; // 100 MB
 
     @Override
     public void applyOptions(Context context, GlideBuilder builder) {

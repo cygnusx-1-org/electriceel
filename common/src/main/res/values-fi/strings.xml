@@ -4,6 +4,8 @@
   <string name="title_search">Haku</string>
   <string name="header_subscriptions">Tilaukset</string>
   <string name="header_history">Historia</string>
+  <string name="history_videos">Videohistoria</string>
+  <string name="history_shorts">Short-videoiden historia</string>
   <string name="header_music">Musiikki</string>
   <string name="header_news">Uutiset</string>
   <string name="header_gaming">Pelit</string>
@@ -320,7 +322,6 @@
   <string name="update_error">Päivitys ei onnistunut</string>
   <string name="unpin_from_sidebar">Poista sivuvalikosta</string>
   <string name="player_show_ending_time">Näytä loppuaika</string>
-  <string name="hide_shorts_from_history">Piilota Shorts-videot katseluhistoriasta</string>
   <string name="disable_screensaver">Älä käytä näytönsäästäjää</string>
   <string name="action_video_info">Videon kuvaus</string>
   <string name="description_not_found">Kuvausta ei löydy</string>
@@ -686,6 +687,7 @@
   <string name="lb_playback_controls_closed_captioning_disable">Poista suljetut tekstitykset käytöstä</string>
   <string name="lb_playback_controls_closed_captioning_enable">Ota käyttöön suljettu tekstitykset</string>
   <string name="my_videos">Omat videoni</string>
+  <string name="my_shorts">Omat Short-videoni</string>
   <string name="player_audio_focus">Äänen tarkennus (tauko, jos muita soittimia havaitaan)</string>
   <string name="paid_content_notification">Maksullista sisältöä koskeva ilmoitus</string>
   <string name="you_liked">Peukkua ylös</string>
@@ -701,6 +703,7 @@
   <string name="video_flip">Peilaa</string>
   <string name="dont_resize_video_to_fit_dialog">Älä muuta videon kokoa kommentteja lukiessa</string>
   <string name="hide_shorts_from_search">Piilota shortsit hakutuloksista</string>
+  <string name="hide_shorts_history">Piilota Short-videoiden historia</string>
   <string name="remove_playlist_fmt">Poistetaanko %s pysyvästi\?</string>
   <string name="typing_corrections">Poista automaattinen korjaus käytöstä tekstiä kirjoitettaessa</string>
   <string name="suggestions_horizontally_scrolled">Vaakasuunnassa vieritettävät ehdotukset</string>

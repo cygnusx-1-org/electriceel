@@ -4,6 +4,8 @@
     <string name="title_search">Vyhľadávanie</string>
     <string name="header_subscriptions">Odbery</string>
     <string name="header_history">História</string>
+    <string name="history_videos">História videí</string>
+    <string name="history_shorts">História Shorts</string>
     <string name="header_music">Hudba</string>
     <string name="header_news">Správy</string>
     <string name="header_gaming">Hry</string>
@@ -356,7 +358,7 @@
     <string name="finish_on_disconnect">Ukončiť aplikáciu po odpojení telefónu/tabletu</string>
     <string name="update_error">Chyba aktualizácie</string>
     <string name="hide_shorts_from_search">Skryť Shorts z výsledkov vyhľadávania</string>
-    <string name="hide_shorts_from_history">Skryť Shorts z Histórie</string>
+    <string name="hide_shorts_history">Skryť históriu Shorts</string>
     <string name="disable_screensaver">Vypnúť šetrič obrazovky</string>
     <string name="description_not_found">Popis nenájdený</string>
     <string name="proxy_port_hint">Proxy port</string>
@@ -698,6 +700,7 @@
     <string name="lb_playback_controls_closed_captioning_disable">Vypnúť titulky</string>
     <string name="lb_playback_controls_closed_captioning_enable">Zapnúť titulky</string>
     <string name="my_videos">Moje videá</string>
+    <string name="my_shorts">Moje Shorts</string>
     <string name="player_audio_focus">Zameranie zvuku (pozastaviť ak boli detekované iné prehrávače)</string>
     <string name="paid_content_notification">Upozornenie na platený obsah</string>
     <string name="you_liked">páči sa ti</string>

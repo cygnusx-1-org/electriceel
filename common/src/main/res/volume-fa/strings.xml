@@ -4,6 +4,8 @@
   <string name="title_search">جستجو</string>
   <string name="header_subscriptions">اشتراک‌ها</string>
   <string name="header_history">تاریخچه</string>
+  <string name="history_videos">تاریخچه ویدیوها</string>
+  <string name="history_shorts">تاریخچه کوته ویدیوها</string>
   <string name="header_music">موسیقی</string>
   <string name="header_news">اخبار</string>
   <string name="header_gaming">بازی‌ها</string>
@@ -315,7 +317,6 @@
   <string name="hide_shorts_from_home">پنهان کردن کوته ویدیوها از صفحه اصلی</string>
   <string name="finish_on_disconnect">بستن برنامه پس از قطع اتصال موبایل/تبلت</string>
   <string name="update_error">خطا در بروزرسانی</string>
-  <string name="hide_shorts_from_history">پنهان کردن کوته ویدیوها از تاریخچه</string>
   <string name="disable_screensaver">غیرفعال کردن محافظ صفحه</string>
   <string name="player_ok_button_behavior">رفتار دکمه OK</string>
   <string name="content_block_notify_toast">اعلان</string>
@@ -682,6 +683,8 @@
   <string name="lb_playback_controls_closed_captioning_disable">غیرفعال کردن زیرنویس</string>
   <string name="lb_playback_controls_closed_captioning_enable">فعال کردن زیرنویس</string>
   <string name="my_videos">ویدیوهای من</string>
+  <string name="my_shorts">کوته ویدیوهای من</string>
   <string name="hide_mixes">پنهان کردن میکس‌ها</string>
   <string name="hide_shorts_from_search">پنهان کردن کوته ویدیوها از نتایج جستجو</string>
+  <string name="hide_shorts_history">پنهان کردن تاریخچه کوته ویدیوها</string>
 </resources>

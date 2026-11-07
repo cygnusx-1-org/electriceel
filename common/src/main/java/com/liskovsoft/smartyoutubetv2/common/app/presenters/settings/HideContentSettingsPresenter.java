@@ -94,7 +94,13 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
         options.add(createContentItem(R.string.hide_shorts_from_search, MediaServiceData.CONTENT_SHORTS_SEARCH));
         options.add(createContentItem(R.string.hide_shorts_from_home, MediaServiceData.CONTENT_SHORTS_HOME));
         options.add(createContentItem(R.string.hide_shorts_channel, MediaServiceData.CONTENT_SHORTS_CHANNEL));
-        options.add(createContentItem(R.string.hide_shorts_from_history, MediaServiceData.CONTENT_SHORTS_HISTORY));
+        // History's row of shorts (see ContentService.getHistoryRows): History is the grid of its videos instead
+        options.add(UiOptionItem.from(getContext().getString(R.string.hide_shorts_history),
+                option -> {
+                    mHideContentData.setContentHidden(MediaServiceData.CONTENT_SHORTS_HISTORY_ROW, option.isSelected());
+                    BrowsePresenter.instance(getContext()).updateHistoryStyle();
+                },
+                mMediaServiceData.isContentHiddenInSettings(MediaServiceData.CONTENT_SHORTS_HISTORY_ROW)));
         options.add(createContentItem(R.string.hide_shorts_from_sports, MediaServiceData.CONTENT_SHORTS_SPORTS));
         options.add(createContentItem(R.string.hide_shorts_from_live, MediaServiceData.CONTENT_SHORTS_LIVE));
         options.add(createContentItem(R.string.hide_shorts_from_my_videos, MediaServiceData.CONTENT_SHORTS_MY_VIDEOS));

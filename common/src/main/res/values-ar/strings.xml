@@ -4,6 +4,8 @@
   <string name="title_search">بحث</string>
   <string name="header_subscriptions">الاشتراكات</string>
   <string name="header_history">السجلّ</string>
+  <string name="history_videos">سجلّ الفيديوهات</string>
+  <string name="history_shorts">سجلّ Shorts</string>
   <string name="header_music">موسيقى</string>
   <string name="header_news">أخبار</string>
   <string name="header_gaming">ألعاب فيديو</string>
@@ -317,7 +319,6 @@
   <string name="hide_shorts_from_home">إخفاء فيديوهات Shorts من القائمة الرئيسية</string>
   <string name="finish_on_disconnect">أغلق التطبيق بعد فصل الجوّال/الجهاز اللوحي</string>
   <string name="update_error">خطأ في التحديث</string>
-  <string name="hide_shorts_from_history">إخفاء فيديوهات Shorts من السجلّ</string>
   <string name="disable_screensaver">تعطيل شاشة التوقف</string>
   <string name="player_ok_button_behavior">وظيفة زر OK</string>
   <string name="content_block_notify_toast">الإشعار</string>
@@ -685,6 +686,7 @@
   <string name="original_lang">الأصلية</string>
   <string name="search_exit_shortcut">الخروج من البحث</string>
   <string name="hide_shorts_from_search">إخفاء فيديوهات Shorts من نتائج البحث</string>
+  <string name="hide_shorts_history">إخفاء سجلّ Shorts</string>
   <string name="remove_playlist_fmt">هل تريد إزالة %s بشكل دائم؟</string>
   <string name="video_flip">انعكاس (مرآة)</string>
   <string name="play_from_start">التشغيل من البداية</string>
@@ -694,6 +696,7 @@
   <string name="lb_playback_controls_closed_captioning_disable">إيقاف الترجمة والشرح</string>
   <string name="lb_playback_controls_closed_captioning_enable">تمكين الترجمة والشرح</string>
   <string name="my_videos">فيديوهاتي</string>
+  <string name="my_shorts">Shorts الخاصة بي</string>
   <string name="player_audio_focus">التركيز الصوتي (إيقاف عند اكتشاف مشغلات أخرى)</string>
   <string name="paid_content_notification">إشعار المحتوى المدفوع</string>
   <string name="you_liked">أعجبك</string>

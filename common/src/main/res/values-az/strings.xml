@@ -4,6 +4,8 @@
     <string name="title_search">Axtarış</string>
     <string name="header_subscriptions">Abunəliklər</string>
     <string name="header_history">Tarixçə</string>
+    <string name="history_videos">Video tarixçəsi</string>
+    <string name="history_shorts">Shorts tarixçəsi</string>
     <string name="header_music">Musiqi</string>
     <string name="header_news">Xəbərlər</string>
     <string name="header_gaming">Oyunlar</string>
@@ -357,7 +359,7 @@
     <string name="finish_on_disconnect">Telefonun/planşetin bağlantısı kəsildikdən sonra tətbiqi bağla</string>
     <string name="update_error">Yeniləmə xətası</string>
     <string name="hide_shorts_from_search">Axtarış nəticələrindən Shortsları gizlət</string>
-    <string name="hide_shorts_from_history">Tarixçədən Shortsları gizlət</string>
+    <string name="hide_shorts_history">Shorts tarixçəsini gizlət</string>
     <string name="disable_screensaver">Ekran qoruyucusunu söndür</string>
     <string name="description_not_found">Təsvir tapılmadı</string>
     <string name="proxy_port_hint">Proksi portu</string>
@@ -702,6 +704,7 @@
     <string name="lb_playback_controls_closed_captioning_disable">Subtitrləri söndür</string>
     <string name="lb_playback_controls_closed_captioning_enable">Subtitrləri yandır</string>
     <string name="my_videos">Mənim videolarım</string>
+    <string name="my_shorts">Mənim Shortslarım</string>
     <string name="player_audio_focus">Audio fokus (başqa oynadıcılar aşkar edilərsə dayandır)</string>
     <string name="paid_content_notification">Ödənişli məzmun bildirişi</string>
     <string name="you_liked">bəyəndikləriniz</string>

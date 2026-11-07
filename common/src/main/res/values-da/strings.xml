@@ -4,6 +4,8 @@
   <string name="title_search">Søg</string>
   <string name="header_subscriptions">Abonnementer</string>
   <string name="header_history">Historik</string>
+  <string name="history_videos">Videohistorik</string>
+  <string name="history_shorts">Shorts-historik</string>
   <string name="header_music">Musik</string>
   <string name="header_news">Nyheder</string>
   <string name="header_gaming">Spil</string>
@@ -322,7 +324,6 @@
   <string name="hide_shorts_from_home">Skjul shorts fra Hjem</string>
   <string name="finish_on_disconnect">Luk Electric Eel efter at have afbrudt telefonen/tabletten</string>
   <string name="update_error">Opdateringsfejl</string>
-  <string name="hide_shorts_from_history">Skjul shorts fra Historik</string>
   <string name="disable_screensaver">Deaktiver pauseskærm</string>
   <string name="color_scheme_blue">Blå</string>
   <string name="unlock_high_bitrate_audio_formats">Lås op for høj bitrate på mp4a-formater</string>
@@ -608,6 +609,7 @@
   <string name="hide_upcoming_channel">Skjul kommende fra Kanaler</string>
   <string name="hide_upcoming_home">Skjul kommende fra Hjem</string>
   <string name="hide_shorts_from_search">Skjul shorts fra søgeresultaterne</string>
+  <string name="hide_shorts_history">Skjul Shorts-historik</string>
   <string name="remember_position_of_live_videos">Husk position af livestreams</string>
   <string name="save_playlist">Føj playliste til Playlister-sektionen</string>
   <string name="skip_shorts">Spring shorts over</string>
@@ -685,6 +687,7 @@
   <string name="lb_playback_controls_closed_captioning_disable">Deaktiver undertekster</string>
   <string name="lb_playback_controls_closed_captioning_enable">Aktivér undertekster</string>
   <string name="my_videos">Mine videoer</string>
+  <string name="my_shorts">Mine Shorts</string>
   <string name="player_extra_long_speed_list">Ekstra lang hastighedsliste</string>
   <string name="long_press_for_options">LANGT TRYK FOR VALGMULIGHEDER</string>
   <string name="original_lang">Original</string>

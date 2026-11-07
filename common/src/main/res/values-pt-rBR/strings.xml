@@ -4,6 +4,8 @@
   <string name="title_search">Pesquisar</string>
   <string name="header_subscriptions">Inscrições</string>
   <string name="header_history">Histórico</string>
+  <string name="history_videos">Histórico de vídeos</string>
+  <string name="history_shorts">Histórico de Shorts</string>
   <string name="header_music">Músicas</string>
   <string name="header_news">Notícias</string>
   <string name="header_gaming">Jogos</string>
@@ -356,7 +358,7 @@
   <string name="finish_on_disconnect">Fechar o aplicativo após desconectar o telefone/tablet</string>
   <string name="update_error">Erro de atualização</string>
   <string name="hide_shorts_from_search">Ocultar os shorts (vídeos curtos) nos resultados da pesquisa</string>
-  <string name="hide_shorts_from_history">Ocultar os shorts (vídeos curtos) na seção \"Histórico\"</string>
+  <string name="hide_shorts_history">Ocultar o histórico de Shorts</string>
   <string name="disable_screensaver">Desativar o protetor de tela</string>
   <string name="description_not_found">Descrição não encontrada</string>
   <string name="proxy_port_hint">Porta do proxy</string>
@@ -698,6 +700,7 @@
   <string name="lb_playback_controls_closed_captioning_disable">Desabilitar legendas</string>
   <string name="lb_playback_controls_closed_captioning_enable">Habilitar legendas</string>
   <string name="my_videos">Meus vídeos</string>
+  <string name="my_shorts">Meus Shorts</string>
   <string name="player_audio_focus">Foco de áudio do player (pausar ao detectar outros reprodutores)</string>
   <string name="paid_content_notification">Notificações de conteúdo pago</string>
   <string name="you_liked">Você gostou</string>

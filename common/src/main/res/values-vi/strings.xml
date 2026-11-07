@@ -4,6 +4,8 @@
   <string name="title_search">Tìm kiếm</string>
   <string name="header_subscriptions">Kênh đăng ký</string>
   <string name="header_history">Lịch sử</string>
+  <string name="history_videos">Lịch sử video</string>
+  <string name="history_shorts">Lịch sử Shorts</string>
   <string name="header_music">Âm nhạc</string>
   <string name="header_news">Tin tức</string>
   <string name="header_gaming">Trò chơi</string>
@@ -315,7 +317,6 @@
   <string name="player_seek_regular">Bình thường</string>
   <string name="hide_shorts_from_home">Ẩn Shorts từ Trang chủ</string>
   <string name="update_error">Lỗi cập nhật</string>
-  <string name="hide_shorts_from_history">Ẩn Shorts từ Lịch sử</string>
   <string name="disable_screensaver">Tắt màn hình chờ</string>
   <string name="description_not_found">Không tìm thấy mô tả</string>
   <string name="finish_on_disconnect">Đóng ứng dụng sau khi ngắt kết nối điện thoại/máy tính bảng</string>
@@ -664,6 +665,7 @@
   <string name="remember_position_of_live_videos">Nhớ vị trí của các video phát trực tiếp</string>
   <string name="not_supported_by_device">Thiết bị của bạn không hỗ trợ tính năng này</string>
   <string name="hide_shorts_from_search">Ẩn Shorts từ kết quả tìm kiếm</string>
+  <string name="hide_shorts_history">Ẩn lịch sử Shorts</string>
   <string name="suggestions">Gợi ý</string>
   <string name="video_feature_hdr">HDR</string>
   <string name="unlock_all_formats_desc">Ở một số thiết bị thì hệ điều hành sẽ báo sai một số định dạng video là \"không được hỗ trợ\", mặc dù thực tế là có.\n(ví dụ như các TV thông minh có độ phân giải 1080p thường sẽ báo không hỗ trợ độ phân giải 4K).</string>
@@ -687,6 +689,7 @@
   <string name="lb_playback_controls_closed_captioning_enable">Tắt phụ đề</string>
   <string name="import_subscriptions_group">Nhập</string>
   <string name="my_videos">Video của bạn</string>
+  <string name="my_shorts">Shorts của bạn</string>
   <string name="paid_content_notification">Thông báo nội dung trả tiền</string>
   <string name="you_liked">đã thích</string>
   <string name="player_audio_focus">Lấy nét âm thanh (tạm dừng nếu trình phát khác đã phát hiện)</string>

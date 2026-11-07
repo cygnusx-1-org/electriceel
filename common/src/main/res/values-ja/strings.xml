@@ -4,6 +4,8 @@
     <string name="title_search">検索</string>
     <string name="header_subscriptions">登録チャンネル</string>
     <string name="header_history">履歴</string>
+    <string name="history_videos">動画の履歴</string>
+    <string name="history_shorts">ショートの履歴</string>
     <string name="header_music">音楽</string>
     <string name="header_news">ニュース</string>
     <string name="header_gaming">ゲーム</string>
@@ -357,7 +359,7 @@
     <string name="finish_on_disconnect">スマートフォンまたはタブレットから切断時にアプリを終了</string>
     <string name="update_error">更新エラー</string>
     <string name="hide_shorts_from_search">検索結果からショートを非表示</string>
-    <string name="hide_shorts_from_history">履歴からショートを非表示</string>
+    <string name="hide_shorts_history">ショートの履歴を非表示</string>
     <string name="disable_screensaver">スクリーンセーバーを無効化</string>
     <string name="description_not_found">概要はありません</string>
     <string name="proxy_port_hint">プロキシのポート</string>
@@ -702,6 +704,7 @@
     <string name="lb_playback_controls_closed_captioning_disable">字幕を無効化</string>
     <string name="lb_playback_controls_closed_captioning_enable">字幕を有効化</string>
     <string name="my_videos">作成した動画</string>
+    <string name="my_shorts">作成したショート</string>
     <string name="player_audio_focus">オーディオフォーカス (他のプレーヤーが検出された場合に一時停止)</string>
     <string name="paid_content_notification">課金コンテンツの通知</string>
     <string name="you_liked">高評価</string>

@@ -4,6 +4,8 @@
   <string name="title_search">Αναζήτηση</string>
   <string name="header_subscriptions">Εγγραφές</string>
   <string name="header_history">Ιστορικό</string>
+  <string name="history_videos">Ιστορικό βίντεο</string>
+  <string name="history_shorts">Ιστορικό Shorts</string>
   <string name="header_music">Μουσική</string>
   <string name="header_news">Ειδήσεις</string>
   <string name="header_gaming">Παιχνίδια</string>
@@ -321,7 +323,6 @@
   <string name="hide_shorts_from_home">Απόκρυψη shorts από την Αρχική</string>
   <string name="finish_on_disconnect">Τερματισμός εφαρμογής μετά την αποσύνδεση τηλεφώνου/τάμπλετ</string>
   <string name="update_error">Σφάλμα ενημέρωσης</string>
-  <string name="hide_shorts_from_history">Απόκρυψη shorts από το Ιστορικό</string>
   <string name="disable_screensaver">Απενεργοποίηση screensaver</string>
   <string name="description_not_found">Δε βρέθηκε περιγραφή</string>
   <string name="proxy_port_hint">Πύλη proxy</string>
@@ -678,6 +679,7 @@
   <string name="search_exit_shortcut">Έξοδος από αναζήτηση</string>
   <string name="unpin_group_from_sidebar">Αφαίρεση ομάδας συνδρομών</string>
   <string name="hide_shorts_from_search">Απόκρυψη shorts από το αποτέλεσμα αναζήτησης</string>
+  <string name="hide_shorts_history">Απόκρυψη ιστορικού Shorts</string>
   <string name="remove_playlist_fmt">Αφαίρεση %s μόνιμα;</string>
   <string name="create_playlist_note">δε θα φαίνεται στην εφαρμογή YouTube</string>
   <string name="suggestions">Προτάσεις</string>
@@ -698,6 +700,7 @@
   <string name="lb_playback_controls_closed_captioning_disable">Απενεργοποίηση Λεζάντων</string>
   <string name="lb_playback_controls_closed_captioning_enable">Ενεργοποίηση Λεζάντων</string>
   <string name="my_videos">Τα βίντεό μου</string>
+  <string name="my_shorts">Τα Shorts μου</string>
   <string name="player_audio_focus">Εστίαση ήχου (παύση αν ανιχνευθούν άλλα προγράμματα αναπαραγωγής)</string>
   <string name="paid_content_notification">Ειδοποίηση περιεχομένου επί πληρωμή</string>
   <string name="you_liked">σας άρεσε</string>

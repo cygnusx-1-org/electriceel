@@ -4,6 +4,8 @@
   <string name="title_search">Kërko</string>
   <string name="header_subscriptions">Abonimet</string>
   <string name="header_history">Historiku</string>
+  <string name="history_videos">Historiku i videove</string>
+  <string name="history_shorts">Historiku i videove të shkurtra</string>
   <string name="header_music">Muzikë</string>
   <string name="header_news">Lajme</string>
   <string name="header_gaming">Video lojëra</string>
@@ -348,7 +350,6 @@
   <string name="hide_shorts_from_home">Fshih videot e shkurtra nga Kryefaqja</string>
   <string name="finish_on_disconnect">Mbyll aplikacionin pasi të kesh shkëputur telefonin tënd</string>
   <string name="update_error">Gabim përditësimi</string>
-  <string name="hide_shorts_from_history">Fshih videot e shkurtra nga Historiku</string>
   <string name="disable_screensaver">Çaktivizo mbrojtësin e ekranit</string>
   <string name="description_not_found">Përshkrimi nuk u gjet</string>
   <string name="proxy_port_hint">Porta e ndërmjetësit</string>
@@ -683,10 +684,12 @@
   <string name="playlists_rows">Shfaq Listat e Luajtjes si rreshta</string>
   <string name="not_supported_by_device">Pajisja nuk mbështet këtë veçori</string>
   <string name="hide_shorts_from_search">Fshih videot e shkurtra nga rezultatet e kërkimit</string>
+  <string name="hide_shorts_history">Fshih historikun e videove të shkurtra</string>
   <string name="import_subscriptions_group">Importo</string>
   <string name="lb_playback_controls_closed_captioning_disable">Çaktivizo Titrat</string>
   <string name="lb_playback_controls_closed_captioning_enable">Aktivizo Titrat</string>
   <string name="my_videos">Videot e mia</string>
+  <string name="my_shorts">Videot e mia të shkurtra</string>
   <string name="paid_content_notification">Njoftim për përmbajtje me pagesë</string>
   <string name="player_audio_focus">Përqendrimi i zërit (pezullo nëse zbulohen luajtës të tjerë)</string>
   <string name="you_liked">E pëlqeve</string>

@@ -4,6 +4,8 @@
   <string name="title_search">खोजे</string>
   <string name="header_subscriptions">सदस्यता</string>
   <string name="header_history">इतिहास</string>
+  <string name="history_videos">वीडियो इतिहास</string>
+  <string name="history_shorts">शॉर्ट्स इतिहास</string>
   <string name="header_music">संगीत</string>
   <string name="header_news">समाचार</string>
   <string name="header_gaming">गेमिंग</string>
@@ -313,7 +315,6 @@
   <string name="content_block_filler">असंबंधित (फिल्टर)</string>
   <string name="search_background_playback">खोजते समय PIP चालू करे </string>
   <string name="disable_screensaver">स्क्रीन सेवर बंद</string>
-  <string name="hide_shorts_from_history">इतिहास से शॉर्ट्स छुपाए</string>
   <string name="update_error">अद्यतन त्रुटि</string>
   <string name="finish_on_disconnect">फोन डिस्कनेक्ट होने पर एप बंद करे</string>
   <string name="hide_shorts_from_home">होम से शॉर्ट्स छुपाए</string>
@@ -592,6 +593,7 @@
   <string name="hide_upcoming_channel">चैनल से आगामी वीडियो छिपाएं</string>
   <string name="hide_upcoming_home">होम से आगामी वीडियो छिपाएं</string>
   <string name="hide_shorts_from_search">खोज परिणामों से शॉर्ट्स छिपाएं</string>
+  <string name="hide_shorts_history">शॉर्ट्स इतिहास छुपाए</string>
   <string name="live_stream_fix_4k_desc">चेतावनी: यह बदलाव स्ट्रीम को रिवाइंड करना बंद कर देता है। लाइव स्ट्रीम के प्रदर्शन में काफ़ी सुधार करता है। अधिकतम रिज़ॉल्यूशन 4K है।</string>
   <string name="remember_position_of_live_videos">लाइव स्ट्रीम की स्थिति याद रखें</string>
   <string name="save_playlist">प्लेलिस्ट को प्लेलिस्ट अनुभाग में जोड़ें</string>
@@ -702,6 +704,7 @@
   <string name="lb_playback_controls_closed_captioning_disable">क्लोज़्ड कैप्शन अक्षम करें</string>
   <string name="lb_playback_controls_closed_captioning_enable">क्लोज़्ड कैप्शन सक्षम करें</string>
   <string name="my_videos">मेरे वीडियो</string>
+  <string name="my_shorts">मेरे शॉर्ट्स</string>
   <string name="player_audio_focus">ऑडियो फ़ोकस (अन्य प्लेयर मिलने पर रोकें)</string>
   <string name="paid_content_notification">सशुल्क सामग्री की सूचना</string>
   <string name="you_liked">आपने पसंद किया</string>
