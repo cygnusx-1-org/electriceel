@@ -27,6 +27,16 @@ public class VideoStateController extends BasePlayerController {
     private static final long OFFICIAL_LIVE_BUFFER_MS = 15_000; // Official app buffer
     private static final long LIVE_BUFFER_MS = OFFICIAL_LIVE_BUFFER_MS;
     private static final long SHORT_LIVE_BUFFER_MS = 0; // Note, on buffer lower than the 60sec you'll notice segment skip
+    /**
+     * Loaded past the position the live one is restored to (see restoreActualLivePosition): the player's buffer after a rebuffer
+     * (DefaultLoadControl#bufferForPlaybackAfterRebufferMs), so it plays at once
+     */
+    private static final long LIVE_RESTORE_MARGIN_MS = 5_000;
+    /**
+     * The least a restore of the live position gains (see restoreActualLivePosition): its seek buffers for a moment. After a
+     * rebuffer only a second or two is loaded past the margin, after a pause up to the whole buffer (30 s by default).
+     */
+    private static final long LIVE_RESTORE_MIN_GAIN_MS = 5_000;
     private static final long BEGIN_THRESHOLD_MS = 10_000;
     private static final long EMBED_THRESHOLD_MS = 30_000;
     private static final int HISTORY_UPDATE_INTERVAL_MINUTES = 3; // Sync history every x minutes
@@ -38,6 +48,10 @@ public class VideoStateController extends BasePlayerController {
     private long mNewVideoTimeMs;
     @Nullable
     private Boolean mIsRestoreActualLive;
+    /**
+     * The live position is being restored (see restoreActualLivePosition): the play after that seek's buffering isn't a new one
+     */
+    private boolean mIsRestoringActualLive;
     private long mSleepTimerStartMs;
 
     @Override
@@ -242,9 +256,15 @@ public class VideoStateController extends BasePlayerController {
         // throttle seeking calls
         Utils.removeCallbacks(mUpdateHistory);
 
-        if (isRestoreActualLive()) {
-            seekToActualLivePosition();
+        if (mIsRestoringActualLive) {
+            mIsRestoringActualLive = false;
+        } else if (isRestoreActualLive()) {
+            restoreActualLivePosition();
         }
+
+        // Not on the start's buffering: the time it took is taken as the live stream left behind, and seeking to the live position
+        // then buffers again
+        setRestoreActualLive();
     }
 
     @Override
@@ -292,14 +312,16 @@ public class VideoStateController extends BasePlayerController {
 
         // Live stream starts to buffer after the end
         showHideScreensaver(true);
-
-        setRestoreActualLive();
     }
 
     @Override
     public void onSourceChanged(Video item) {
         // At this stage video isn't loaded yet. So format switch isn't take any resources.
         restoreFormats();
+
+        // A new start (see setRestoreActualLive), not the previous video's
+        mIsRestoreActualLive = null;
+        mIsRestoringActualLive = false;
     }
 
     @Override
@@ -791,6 +813,23 @@ public class VideoStateController extends BasePlayerController {
             return true;
         } else {
             return false;
+        }
+    }
+
+    /**
+     * Back toward the live position after the playback fell behind (buffered or paused), within what's loaded: the live position by
+     * the clock may not exist yet (a broadcaster behind real time), and seeking past what's loaded buffers again
+     */
+    private void restoreActualLivePosition() {
+        if (getPlayer() == null) {
+            return;
+        }
+
+        long targetMs = Math.min(getPlayer().getDurationMs() - getLiveBuffer(), getPlayer().getBufferedPositionMs() - LIVE_RESTORE_MARGIN_MS);
+
+        if (targetMs - getPlayer().getPositionMs() >= LIVE_RESTORE_MIN_GAIN_MS) {
+            mIsRestoringActualLive = true;
+            getPlayer().setPositionMs(targetMs);
         }
     }
 

@@ -313,6 +313,11 @@ public class EmbedPlayerView extends PlayerView implements PlaybackView {
     }
 
     @Override
+    public long getBufferedPositionMs() {
+        return mExoPlayerController.getBufferedPositionMs();
+    }
+
+    @Override
     public long getDurationMs() {
         long durationMs = mExoPlayerController.getDurationMs();
 

@@ -239,7 +239,10 @@ public class DashManifestParser2 {
         // Increase offset a bit to compensate previous tweaks
         // Streams to check:
         // https://www.youtube.com/watch?v=drdemkJpgao
-        long offsetUnits = (long) segmentDurationUnits * mFormatInfo.getStartSegmentNum();
+        // The start segment's media time: the samples' times less it are the timeline's (see MediaItemFormatInfo#getStartSegmentTimeUs)
+        long startSegmentTimeUs = mFormatInfo.getStartSegmentTimeUs();
+        // The units are microseconds (unitsPerSecond): not scaled, the product overflows on a long stream (20 million s)
+        long offsetUnits = startSegmentTimeUs >= 0 ? startSegmentTimeUs : (long) segmentDurationUnits * mFormatInfo.getStartSegmentNum();
 
         long timescale = unitsPerSecond;
         long presentationTimeOffset = offsetUnits;

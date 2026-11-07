@@ -471,6 +471,10 @@ public class ExoPlayerController implements Player.EventListener {
         }
     }
 
+    public long getBufferedPositionMs() {
+        return mPlayer != null ? mPlayer.getBufferedPosition() : -1;
+    }
+
     public long getDurationMs() {
         if (mPlayer == null) {
             return -1;

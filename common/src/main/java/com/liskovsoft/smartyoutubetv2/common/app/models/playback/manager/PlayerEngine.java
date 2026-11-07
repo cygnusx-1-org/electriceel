@@ -19,6 +19,10 @@ public interface PlayerEngine extends PlayerConstants {
     long getPositionMs();
     void setPositionMs(long positionMs);
     long getDurationMs();
+    /**
+     * Up to where the media is loaded: a seek before it plays at once
+     */
+    long getBufferedPositionMs();
     void setPlayWhenReady(boolean play);
     boolean getPlayWhenReady();
     /**

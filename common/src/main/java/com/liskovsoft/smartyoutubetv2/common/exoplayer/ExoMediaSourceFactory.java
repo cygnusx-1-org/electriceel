@@ -220,8 +220,16 @@ public class ExoMediaSourceFactory {
 
     private MediaSource buildDashMediaSource(MediaItemFormatInfo formatInfo) {
         // Are you using FrameworkSampleSource or ExtractorSampleSource when you build your player?
+        DashChunkSource.Factory chunkSourceFactory;
+        if (!formatInfo.isLive()) {
+            chunkSourceFactory = getDashFormatsChunkSourceFactory();
+        } else if (LiveSegmentPrefetcher.isNeeded(formatInfo.getSegmentDurationUs())) {
+            chunkSourceFactory = getLivePrefetchChunkSourceFactory();
+        } else {
+            chunkSourceFactory = getDashChunkSourceFactory(); // see getDashFormatsChunkSourceFactory
+        }
         DashMediaSource dashSource = new DashMediaSource.Factory(
-                getDashFormatsChunkSourceFactory(),
+                chunkSourceFactory,
                 null
         )
                 .setLoadErrorHandlingPolicy(new DashDefaultLoadErrorHandlingPolicy())
@@ -415,10 +423,20 @@ public class ExoMediaSourceFactory {
     }
 
     /**
-     * Of a video's formats (see #fromDashFormatInfo): a live stream's manifest isn't these, its segments may be answered late
+     * Of a video's formats (see #fromDashFormatInfo), not a live stream's: its segments may be answered late. One the server doesn't
+     * have yet is held until it exists (hang=1), up to a segment's duration (5 s), and an edge that doesn't have one cached took 9 s at
+     * times (upstream SmartTube #6009). Cut at 4 s, such a segment failed every retry and the playback with them.
      */
     private DashChunkSource.Factory getDashFormatsChunkSourceFactory() {
         return new DefaultDashChunkSource.Factory(getDashMediaDataSourceFactory(), MAX_SEGMENTS_PER_LOAD);
+    }
+
+    /**
+     * Of a live stream with short segments (see LiveSegmentPrefetcher): a new one for each stream, as it keeps the stream's segments.
+     * Not the formats' read timeout (see getDashFormatsChunkSourceFactory).
+     */
+    private DashChunkSource.Factory getLivePrefetchChunkSourceFactory() {
+        return new DefaultDashChunkSource.Factory(new LiveSegmentPrefetcher(getMediaDataSourceFactory()), MAX_SEGMENTS_PER_LOAD);
     }
 
     private DataSource.Factory getDashMediaDataSourceFactory() {
