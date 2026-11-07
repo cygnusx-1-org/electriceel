@@ -4,6 +4,8 @@
     <string name="title_search">Тражи</string>
     <string name="header_subscriptions">Претплате</string>
     <string name="header_history">Историја</string>
+    <string name="history_videos">Историја видеа</string>
+    <string name="history_shorts">Историја кратких видеа</string>
     <string name="header_music">Музика</string>
     <string name="header_news">Новости</string>
     <string name="header_gaming">Играње</string>
@@ -303,7 +305,7 @@
     <string name="finish_on_disconnect">Затвори апликацију при искључењу телефона/таблета</string>
     <string name="update_error">Грешка ажурирања</string>
     <string name="hide_shorts_from_search">Сакриј кратке са резултата претраге</string>
-    <string name="hide_shorts_from_history">Сакриј кратке са Историје</string>
+    <string name="hide_shorts_history">Сакриј историју кратких видеа</string>
     <string name="disable_screensaver">Искључи чувара екрана</string>
     <string name="description_not_found">Опис није нађен</string>
     <string name="proxy_port_hint">Порт проксија</string>
@@ -693,6 +695,7 @@
     <string name="lb_playback_controls_closed_captioning_disable">Искључи титлове</string>
     <string name="lb_playback_controls_closed_captioning_enable">Укључи титлове</string>
     <string name="my_videos">Моји видеи</string>
+    <string name="my_shorts">Моји кратки видеи</string>
     <string name="player_audio_focus">Фокус звука (паузирај ако се открију други плејери)</string>
     <string name="paid_content_notification">Обавештење о плаћеном садржају</string>
     <string name="you_liked">свиђа вам се</string>

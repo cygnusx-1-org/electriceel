@@ -1002,7 +1002,9 @@ public class FragmentedMp4Extractor implements Extractor {
       sampleDecodingTimeTable[i] =
           Util.scaleLargeTimestamp(cumulativeTime, C.MILLIS_PER_SECOND, timescale) - edtsOffset;
       sampleSizeTable[i] = sampleSize;
-      sampleIsSyncFrameTable[i] = ((sampleFlags >> 16) & 0x1) == 0
+      // MOD: a text sample stands on its own. A YouTube live stream's caption ones (see DashManifestParser2) say they aren't sync
+      // samples, and a sample queue drops every sample before the first sync one: none of the captions would show.
+      sampleIsSyncFrameTable[i] = (((sampleFlags >> 16) & 0x1) == 0 || track.type == C.TRACK_TYPE_TEXT)
           && (!workaroundEveryVideoFrameIsSyncFrame || i == 0);
       cumulativeTime += sampleDuration;
     }
@@ -1243,6 +1245,13 @@ public class FragmentedMp4Extractor implements Extractor {
 
       sampleSize = currentTrackBundle.fragment
           .sampleSizeTable[currentTrackBundle.currentSampleIndex];
+
+      // MOD: a YouTube live stream's WebVTT caption sample (see DashManifestParser2) says it's a byte longer than its mdat.
+      // Read as said, it runs past the mdat into the end of the segment (EOFException, playback stops), so a text sample ends
+      // where its mdat does.
+      if (currentTrackBundle.track.type == C.TRACK_TYPE_TEXT) {
+        sampleSize = (int) Math.max(0, Math.min(sampleSize, endOfMdatPosition - input.getPosition()));
+      }
 
       if (currentTrackBundle.currentSampleIndex < currentTrackBundle.firstSampleToOutputIndex) {
         input.skipFully(sampleSize);

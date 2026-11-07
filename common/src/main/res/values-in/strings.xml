@@ -4,6 +4,8 @@
   <string name="title_search">Telusuri</string>
   <string name="header_subscriptions">Subscription</string>
   <string name="header_history">Histori</string>
+  <string name="history_videos">Histori video</string>
+  <string name="history_shorts">Histori Shorts</string>
   <string name="header_music">Musik</string>
   <string name="header_news">Berita</string>
   <string name="header_gaming">Game</string>
@@ -349,7 +351,7 @@
   <string name="finish_on_disconnect">Tutup aplikasi saat terputus dengan ponsel/tablet</string>
   <string name="update_error">Update eror</string>
   <string name="hide_shorts_from_search">Sembunyikan Shorts dari hasil penelusuran</string>
-  <string name="hide_shorts_from_history">Sembunyikan Shorts dari Histori</string>
+  <string name="hide_shorts_history">Sembunyikan Histori Shorts</string>
   <string name="disable_screensaver">Nonaktifkan screensaver</string>
   <string name="description_not_found">Deskripsi tidak ditemukan</string>
   <string name="proxy_port_hint">Port proxy</string>
@@ -670,6 +672,7 @@
   <string name="lb_playback_controls_closed_captioning_disable">Nonaktifkan Teks Tertutup</string>
   <string name="lb_playback_controls_closed_captioning_enable">Aktifkan Teks Tertutup</string>
   <string name="my_videos">Video saya</string>
+  <string name="my_shorts">Shorts saya</string>
   <string name="player_audio_focus">Fokus audio (jeda jika pemutar lain terdeteksi)</string>
   <string name="paid_content_notification">Notifikasi konten berbayar</string>
   <string name="you_liked">Anda menyukai</string>

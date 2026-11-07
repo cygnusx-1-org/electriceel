@@ -4,6 +4,8 @@
   <string name="title_search">Zoeken</string>
   <string name="header_subscriptions">Abonnementen</string>
   <string name="header_history">Geschiedenis</string>
+  <string name="history_videos">Videogeschiedenis</string>
+  <string name="history_shorts">Shorts-geschiedenis</string>
   <string name="header_music">Muziek</string>
   <string name="header_news">Nieuws</string>
   <string name="header_gaming">Games</string>
@@ -351,7 +353,6 @@
   <string name="hide_shorts_from_home">Shorts verbergen op Home</string>
   <string name="finish_on_disconnect">Voltooi de app nadat de telefoon/tablet is losgekoppeld</string>
   <string name="update_error">Update fout</string>
-  <string name="hide_shorts_from_history">Shorts verbergen bij geschiedenis</string>
   <string name="disable_screensaver">Schermbeveiliging uitschakelen</string>
   <string name="description_not_found">Beschrijving niet gevonden</string>
   <string name="proxy_port_hint">Proxy poort</string>
@@ -549,6 +550,7 @@
   <string name="not_supported_by_device">Het apparaat ondersteunt deze functie niet</string>
   <string name="live_stream_fix_4k_desc">Waarschuwing, deze tweak schakelt het terugspoelen van streams uit. Verbetert de livestreamprestaties aanzienlijk. Maximale resolutie is 4K.</string>
   <string name="hide_shorts_from_search">Shorts verbergen in zoekresultaten</string>
+  <string name="hide_shorts_history">Shorts-geschiedenis verbergen</string>
   <string name="suggestions">Suggesties</string>
   <string name="speech_engine">Stemzoekmachine</string>
   <string name="dearrow_status">Controleer de DeArrow-serverstatus</string>
@@ -685,6 +687,7 @@
   <string name="lb_playback_controls_closed_captioning_disable">Ondertiteling uitschakelen</string>
   <string name="lb_playback_controls_closed_captioning_enable">Ondertiteling inschakelen</string>
   <string name="my_videos">Mijn video\'s</string>
+  <string name="my_shorts">Mijn Shorts</string>
   <string name="player_audio_focus">Audiofocus (pauzeren als andere spelers gedetecteerd worden)</string>
   <string name="paid_content_notification">Melding betaalde content</string>
   <string name="you_liked">Je vond het leuk</string>

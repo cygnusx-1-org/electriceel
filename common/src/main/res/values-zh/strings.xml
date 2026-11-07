@@ -4,6 +4,8 @@
   <string name="title_search">搜索</string>
   <string name="header_subscriptions">订阅</string>
   <string name="header_history">历史记录</string>
+  <string name="history_videos">视频历史记录</string>
+  <string name="history_shorts">短视频历史记录</string>
   <string name="header_music">音乐</string>
   <string name="header_news">新闻</string>
   <string name="header_gaming">游戏</string>
@@ -348,7 +350,6 @@
   <string name="hide_shorts_from_home">隐藏首页的短视频</string>
   <string name="finish_on_disconnect">手机/平板断开连接后关闭应用</string>
   <string name="update_error">更新错误</string>
-  <string name="hide_shorts_from_history">隐藏历史记录的短视频</string>
   <string name="disable_screensaver">禁用屏保</string>
   <string name="description_not_found">未找到视频描述</string>
   <string name="proxy_port_hint">代理端口</string>
@@ -683,6 +684,7 @@
   <string name="lb_playback_controls_closed_captioning_disable">禁用CC字幕</string>
   <string name="lb_playback_controls_closed_captioning_enable">启用CC字幕</string>
   <string name="my_videos">我的视频</string>
+  <string name="my_shorts">我的短视频</string>
   <string name="player_audio_focus">音频聚焦（检测到其他播放器时暂停）</string>
   <string name="card_unlocalized_titles">未本地化的视频标题</string>
   <string name="disable_network_error_fixing_desc">如果你正在使用VPN，可能需要启用此选项。</string>
@@ -709,6 +711,7 @@
   <string name="player_toggle_speed">切换播放速度开/关</string>
   <string name="unpin_group_from_sidebar">移除订阅群组</string>
   <string name="hide_shorts_from_search">隐藏搜索结果的短视频</string>
+  <string name="hide_shorts_history">隐藏短视频历史记录</string>
   <string name="remove_playlist_fmt">永久移除 %s ？</string>
   <string name="create_playlist_note">注意：此项不会显示在 YouTube 应用中</string>
   <string name="play_from_start">从头开始播放</string>

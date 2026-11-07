@@ -4,6 +4,8 @@
   <string name="title_search">Cerca</string>
   <string name="header_subscriptions">Subscripcions</string>
   <string name="header_history">Història</string>
+  <string name="history_videos">Història de vídeos</string>
+  <string name="history_shorts">Història de Shorts</string>
   <string name="header_music">Música</string>
   <string name="header_news">Notícies</string>
   <string name="header_gaming">Jocs</string>
@@ -327,7 +329,6 @@
   <string name="hide_shorts_from_home">	Amaga els pantalons curts de casa</string>
   <string name="finish_on_disconnect">Finalitzeu l\'aplicació després de desconnectar el telèfon/tauleta</string>
   <string name="update_error">	Error d\'actualització</string>
-  <string name="hide_shorts_from_history">Amaga els curts de la història</string>
   <string name="disable_screensaver">Desactiva l\'estalvi de pantalla</string>
   <string name="description_not_found">No s\'ha trobat la descripció</string>
   <string name="proxy_port_hint">Port proxy</string>
@@ -533,6 +534,7 @@
   <string name="hide_upcoming_channel">Amaga els propers vídeos del canal</string>
   <string name="hide_upcoming_home">Amaga els propers vídeos de l\'inici</string>
   <string name="hide_shorts_from_search">Amaga els Shorts dels resultats de cerca</string>
+  <string name="hide_shorts_history">Amaga la història de Shorts</string>
   <string name="live_stream_fix_4k_desc">Avís: aquest ajust desactiva el rebobinatge de les emissions. Millora considerablement el rendiment de les emissions en directe. La resolució màxima és 4K.</string>
   <string name="remember_position_of_live_videos">Recorda la posició de les emissions en directe</string>
   <string name="save_playlist">Afegeix la llista a la secció Llistes de reproducció</string>
@@ -701,6 +703,7 @@
   <string name="lb_playback_controls_closed_captioning_disable">Desactiva els subtítols</string>
   <string name="lb_playback_controls_closed_captioning_enable">Activa els subtítols</string>
   <string name="my_videos">Els meus vídeos</string>
+  <string name="my_shorts">Els meus Shorts</string>
   <string name="player_audio_focus">Focus d\'àudio (pausa si es detecten altres reproductors)</string>
   <string name="paid_content_notification">Notificació de contingut de pagament</string>
   <string name="you_liked">t\'ha agradat</string>

@@ -4,6 +4,8 @@
   <string name="title_search">Căutare</string>
   <string name="header_subscriptions">Abonamente</string>
   <string name="header_history">Istoric</string>
+  <string name="history_videos">Istoric videoclipuri</string>
+  <string name="history_shorts">Istoric Shorts</string>
   <string name="header_music">Muzică</string>
   <string name="header_news">Știri</string>
   <string name="header_gaming">Jocuri</string>
@@ -348,7 +350,6 @@
   <string name="hide_shorts_from_home">Ascundeți shorts din Acasă</string>
   <string name="finish_on_disconnect">Închideți aplicația după deconectarea telefonului/tabletei</string>
   <string name="update_error">Eroare de actualizare</string>
-  <string name="hide_shorts_from_history">Ascundeți shorts din Istoric</string>
   <string name="disable_screensaver">Dezactivați economizatorul de ecran</string>
   <string name="description_not_found">Descrierea nu a fost găsită</string>
   <string name="proxy_port_hint">Port proxy</string>
@@ -670,6 +671,7 @@
   <string name="player_unexpected_error">Eroare neașteptată de redare</string>
   <string name="unpin_group_from_sidebar">Eliminați grupul de abonamente</string>
   <string name="hide_shorts_from_search">Ascundeți shorts din rezultatele căutării</string>
+  <string name="hide_shorts_history">Ascundeți istoricul Shorts</string>
   <string name="remove_playlist_fmt">Eliminați definitiv %s?</string>
   <string name="create_playlist_note">NOTĂ: Nu va fi vizibilă în aplicația YouTube</string>
   <string name="suggestions">Sugestii</string>
@@ -702,6 +704,7 @@
   <string name="lb_playback_controls_closed_captioning_disable">Dezactivați subtitrările</string>
   <string name="lb_playback_controls_closed_captioning_enable">Activați subtitrările</string>
   <string name="my_videos">Videoclipurile mele</string>
+  <string name="my_shorts">Shorts-urile mele</string>
   <string name="player_audio_focus">Focalizare audio (pauză dacă sunt detectate alte playere)</string>
   <string name="paid_content_notification">Notificare pentru conținut plătit</string>
   <string name="you_liked">ați apreciat</string>

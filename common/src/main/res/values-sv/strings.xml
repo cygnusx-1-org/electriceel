@@ -4,6 +4,8 @@
   <string name="title_search">Sök</string>
   <string name="header_subscriptions">Prenumerationer</string>
   <string name="header_history">Historik</string>
+  <string name="history_videos">Videohistorik</string>
+  <string name="history_shorts">Shorts-historik</string>
   <string name="header_music">Musik</string>
   <string name="header_news">Nyheter</string>
   <string name="header_gaming">Spel</string>
@@ -357,7 +359,7 @@
   <string name="finish_on_disconnect">Stäng appen efter att telefonen/surfplattan har frånkopplats</string>
   <string name="update_error">Uppdateringsfel</string>
   <string name="hide_shorts_from_search">Dölj Shorts-videor i sökresultat</string>
-  <string name="hide_shorts_from_history">Dölj Shorts-videor i Historik</string>
+  <string name="hide_shorts_history">Dölj Shorts-historik</string>
   <string name="disable_screensaver">Inaktivera skärmsläckare</string>
   <string name="description_not_found">Beskrivning hittades inte</string>
   <string name="proxy_port_hint">Proxyport</string>
@@ -702,6 +704,7 @@
   <string name="lb_playback_controls_closed_captioning_disable">Inaktivera textning</string>
   <string name="lb_playback_controls_closed_captioning_enable">Aktivera textning</string>
   <string name="my_videos">Mina videor</string>
+  <string name="my_shorts">Mina Shorts</string>
   <string name="player_audio_focus">Fokusera ljud (pausa om andra spelare upptäcks)</string>
   <string name="paid_content_notification">Avisering om betalt innehåll</string>
   <string name="you_liked">du gillade</string>

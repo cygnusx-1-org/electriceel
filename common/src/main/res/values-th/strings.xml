@@ -4,6 +4,8 @@
     <string name="title_search">ค้นหา</string>
     <string name="header_subscriptions">การติดตาม</string>
     <string name="header_history">ประวัติการเข้าชม</string>
+    <string name="history_videos">ประวัติการเข้าชมวิดีโอ</string>
+    <string name="history_shorts">ประวัติการเข้าชม Shorts</string>
     <string name="header_music">เพลง</string>
     <string name="header_news">ข่าวสาร</string>
     <string name="header_gaming">เกม</string>
@@ -322,7 +324,6 @@
     <string name="hide_shorts_from_home">ซ่อน shorts จากหน้าแรก</string>
     <string name="finish_on_disconnect">ปิดแอปเมื่อยกเลิกการเชื่อมโยงกับโทรศัพท์</string>
     <string name="update_error">อัปเดตข้อผิดพลาด</string>
-    <string name="hide_shorts_from_history">ซ่อน shorts จากประวัติการเข้าชม</string>
     <string name="disable_screensaver">Disable screensaver</string>
     <string name="not_supported_by_device">อุปกรณ์ไม่รองรับฟีเจอร์นี้</string>
     <string name="video_buffer_size_none">ไม่มี</string>
@@ -359,6 +360,7 @@
     <string name="hide_upcoming_channel">ซ่อนวิดีโอที่กำลังจะมาถึงจากช่อง</string>
     <string name="hide_upcoming_home">ซ่อนวิดีโอที่กำลังจะมาถึงจากหน้าหลัก</string>
     <string name="hide_shorts_from_search">ซ่อน Shorts จากผลการค้นหา</string>
+    <string name="hide_shorts_history">ซ่อนประวัติการเข้าชม Shorts</string>
     <string name="description_not_found">ไม่พบคำอธิบาย</string>
     <string name="proxy_port_hint">พอร์ตพร็อกซี</string>
     <string name="proxy_host_hint">ชื่อโฮสต์หรือ IP ของพร็อกซี</string>
@@ -725,6 +727,7 @@
     <string name="lb_playback_controls_closed_captioning_disable">ปิดคำบรรยาย</string>
     <string name="lb_playback_controls_closed_captioning_enable">เปิดคำบรรยาย</string>
     <string name="my_videos">วิดีโอของฉัน</string>
+    <string name="my_shorts">Shorts ของฉัน</string>
     <string name="player_audio_focus">โฟกัสเสียง (หยุดชั่วคราวหากตรวจพบเครื่องเล่นอื่น)</string>
     <string name="paid_content_notification">การแจ้งเตือนเนื้อหาแบบชำระเงิน</string>
     <string name="you_liked">คุณถูกใจ</string>

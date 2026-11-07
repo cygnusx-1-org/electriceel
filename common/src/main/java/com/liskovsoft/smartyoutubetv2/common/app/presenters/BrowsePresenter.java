@@ -58,6 +58,7 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.HomeRowsData.Row;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.SectionFilterData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
+import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -236,7 +237,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         mSectionsMapping.put(MediaGroup.TYPE_MUSIC, new BrowseSection(MediaGroup.TYPE_MUSIC, getContext().getString(R.string.header_music), BrowseSection.TYPE_ROW, R.drawable.icon_music));
         mSectionsMapping.put(MediaGroup.TYPE_CHANNEL_UPLOADS, new BrowseSection(MediaGroup.TYPE_CHANNEL_UPLOADS, getContext().getString(R.string.header_channels), uploadsType, R.drawable.icon_channels, false));
         mSectionsMapping.put(MediaGroup.TYPE_SUBSCRIPTIONS, new BrowseSection(MediaGroup.TYPE_SUBSCRIPTIONS, getContext().getString(R.string.header_subscriptions), BrowseSection.TYPE_GRID, R.drawable.icon_subscriptions, false));
-        mSectionsMapping.put(MediaGroup.TYPE_HISTORY, new BrowseSection(MediaGroup.TYPE_HISTORY, getContext().getString(R.string.header_history), BrowseSection.TYPE_GRID, R.drawable.icon_history, true));
+        mSectionsMapping.put(MediaGroup.TYPE_HISTORY, new BrowseSection(MediaGroup.TYPE_HISTORY, getContext().getString(R.string.header_history), getHistoryType(), R.drawable.icon_history, true));
         mSectionsMapping.put(MediaGroup.TYPE_WATCH_LATER, new BrowseSection(MediaGroup.TYPE_WATCH_LATER, getContext().getString(R.string.watch_later), BrowseSection.TYPE_GRID, R.drawable.icon_watch_later, true));
         mSectionsMapping.put(MediaGroup.TYPE_BLOCKED_CHANNELS,
                 new BrowseSection(MediaGroup.TYPE_BLOCKED_CHANNELS, getContext().getString(R.string.header_blocked_channels), BrowseSection.TYPE_GRID, R.drawable.icon_blocked_channels, false));
@@ -266,10 +267,11 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         mRowMapping.put(MediaGroup.TYPE_GAMING, getContentService().getGamingObserve());
         mRowMapping.put(MediaGroup.TYPE_USER_PLAYLISTS, getContentService().getPlaylistRowsObserve());
         mRowMapping.put(MediaGroup.TYPE_MY_VIDEOS, getContentService().getMyVideosObserve());
+        mRowMapping.put(MediaGroup.TYPE_HISTORY, getContentService().getHistoryRowsObserve());
 
         mGridMapping.put(MediaGroup.TYPE_SHORTS, getContentService().getShortsObserve());
         mGridMapping.put(MediaGroup.TYPE_SUBSCRIPTIONS, getContentService().getSubscriptionsObserve());
-        mGridMapping.put(MediaGroup.TYPE_HISTORY, getContentService().getHistoryObserve());
+        mGridMapping.put(MediaGroup.TYPE_HISTORY, getContentService().getHistoryVideosObserve());
         mGridMapping.put(MediaGroup.TYPE_WATCH_LATER, getContentService().getWatchLaterObserve());
         mGridMapping.put(MediaGroup.TYPE_CHANNEL_UPLOADS, getContentService().getSubscribedChannelsByNewContentObserve());
         mGridMapping.put(MediaGroup.TYPE_NOTIFICATIONS, getNotificationsService().getNotificationItemsObserve());
@@ -486,6 +488,28 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
                 updateCategoryType(MediaGroup.TYPE_USER_PLAYLISTS, BrowseSection.TYPE_ROW);
                 break;
         }
+    }
+
+    /**
+     * History as its rows (see ContentService.getHistoryRows), or the grid of its videos with Hide Shorts History.
+     * The section is made again when it's shown next.
+     */
+    public void updateHistoryStyle() {
+        updateCategoryType(MediaGroup.TYPE_HISTORY, getHistoryType());
+    }
+
+    /**
+     * Two rows, like My videos: its videos, then its shorts. With Hide Shorts History, the grid of its videos it was before.
+     */
+    private static int getHistoryType() {
+        return isShortsHistoryHidden() ? BrowseSection.TYPE_GRID : BrowseSection.TYPE_ROW;
+    }
+
+    /**
+     * Not the Shorts quick toggle's: History isn't one of its sections (see QuickTogglePresenter)
+     */
+    private static boolean isShortsHistoryHidden() {
+        return MediaServiceData.instance().isContentHiddenInSettings(MediaServiceData.CONTENT_SHORTS_HISTORY_ROW);
     }
 
     private void updateCategoryType(int categoryId, int categoryType) {
@@ -1027,17 +1051,29 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
                             getView().showProgressBar(false);
 
                             for (VideoGroup videoGroup : videoGroups) {
+                                appendLocalHistory(videoGroup, isShortsRow(videoGroup), false);
                                 getView().updateSection(videoGroup);
                                 mBrowseProcessor.process(videoGroup);
                                 MediaServiceManager.instance().warmUpPlaybackIfNeeded(videoGroup);
 
                                 continueGroupIfNeeded(videoGroup, false);
                             }
+
+                            // With the rows of the account, not popping in after them: History emits its rows together
+                            addMissingLocalHistoryRows(videoGroups);
                         },
                         error -> {
                             Log.e(TAG, "updateRowsHeader error: %s", error.getMessage());
                             handleLoadError(error);
-                        }, () -> handleLoadError(null));
+                        }, () -> {
+                            // The account's History has no video: the ones watched here instead, as the History grid had them
+                            if (isHistorySection() && getView() != null && getView().isEmpty() && !VideoStateService.instance(getContext()).isEmpty()) {
+                                updateLocalHistoryRows();
+                                return;
+                            }
+
+                            handleLoadError(null);
+                        });
 
         mActions.add(updateAction);
     }
@@ -1060,6 +1096,15 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
             // Before its videos: a subscription group may hide its channels from the Subscriptions row (see ChannelGroupFilter)
             Row addedRow = mAddedHomeRows.get(mediaGroup);
             VideoGroup videoGroup = VideoGroup.from(mediaGroup, section, groupIndex.get() + 1, duplicateFilter, addedRow);
+
+            // The rows of History, and the row of shorts of My videos (its cards are all shorts), under titles of their own rather than
+            // the section's or YouTube's
+            if (section.getId() == MediaGroup.TYPE_HISTORY) {
+                videoGroup.setTitle(getContext().getString(
+                        mediaGroup.getRowKind() == MediaGroup.ROW_KIND_SHORTS ? R.string.history_shorts : R.string.history_videos));
+            } else if (section.getId() == MediaGroup.TYPE_MY_VIDEOS && videoGroup.isShorts()) {
+                videoGroup.setTitle(getContext().getString(R.string.my_shorts));
+            }
 
             // Named after the channel, the subscription group, or Subscriptions
             if (addedRow != null) {
@@ -1148,7 +1193,8 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
                             }
 
                             VideoGroup videoGroup = VideoGroup.from(baseGroup, mediaGroup);
-                            appendLocalHistory(videoGroup);
+                            // The grid of History with Hide Shorts History: the videos watched here, its shorts hidden too
+                            appendLocalHistory(videoGroup, false, videoGroup.isEmpty());
                             getView().updateSection(videoGroup);
                             mBrowseProcessor.process(videoGroup);
                             MediaServiceManager.instance().warmUpPlaybackIfNeeded(videoGroup);
@@ -1265,10 +1311,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
             callback.run();
         } else if (getView() != null) {
             if (isHistorySection() && !VideoStateService.instance(getContext()).isEmpty()) {
-                getView().showProgressBar(false);
-                VideoGroup videoGroup = VideoGroup.from(getCurrentSection());
-                appendLocalHistory(videoGroup);
-                getView().updateSection(videoGroup);
+                updateLocalHistoryRows();
             } else {
                 getView().showProgressBar(false);
                 getView().showError(new SignInError(getContext()));
@@ -1612,26 +1655,115 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
         }
     }
 
-    private void appendLocalHistory(VideoGroup videoGroup) {
+    /**
+     * The rows of History of the videos watched here (see appendLocalHistory), when the account has none to show: signed out,
+     * or a history with no video. Like the rows of the account: the videos, then the shorts. The videos alone with
+     * Hide Shorts History, in the grid.
+     */
+    private void updateLocalHistoryRows() {
+        getView().showProgressBar(false);
+
+        VideoGroup clear = VideoGroup.from(getCurrentSection());
+        clear.setAction(VideoGroup.ACTION_REPLACE);
+        getView().updateSection(clear);
+
+        addLocalHistoryRow(0, false, true);
+
+        if (!isShortsHistoryHidden()) {
+            addLocalHistoryRow(1, true, true);
+        }
+    }
+
+    /**
+     * The row of History the account's history has none for, when the videos of its kind watched here aren't in it (see
+     * appendLocalHistory): the row of videos on top, the row of shorts under it
+     */
+    private void addMissingLocalHistoryRows(List<VideoGroup> rows) {
+        if (!isHistorySection()) {
+            return;
+        }
+
+        boolean hasVideosRow = false;
+        boolean hasShortsRow = false;
+
+        for (VideoGroup row : rows) {
+            if (isShortsRow(row)) {
+                hasShortsRow = true;
+            } else {
+                hasVideosRow = true;
+            }
+        }
+
+        if (!hasVideosRow) {
+            addLocalHistoryRow(0, false, false);
+        }
+
+        if (!hasShortsRow) {
+            addLocalHistoryRow(1, true, false);
+        }
+    }
+
+    /**
+     * A row with no video isn't added
+     */
+    private void addLocalHistoryRow(int position, boolean isShortsRow, boolean isHistoryEmpty) {
+        VideoGroup row = VideoGroup.from(getCurrentSection(), position);
+        // As the rows of the account (see createRowGroups)
+        row.setTitle(getContext().getString(isShortsRow ? R.string.history_shorts : R.string.history_videos));
+
+        appendLocalHistory(row, isShortsRow, isHistoryEmpty);
+        getView().updateSection(row);
+    }
+
+    /**
+     * The row of shorts of History (see ContentService.getHistoryRows)
+     */
+    private static boolean isShortsRow(VideoGroup videoGroup) {
+        MediaGroup mediaGroup = videoGroup.getMediaGroup();
+
+        return mediaGroup != null && mediaGroup.getRowKind() == MediaGroup.ROW_KIND_SHORTS;
+    }
+
+    /**
+     * The videos watched here on top of the row of History of their kind: the shorts on the row of shorts, the others on the row of
+     * videos. The ones of this launch when the account's history hasn't got them (see VideoStateService.isHistoryBroken), all of them
+     * when it has no video.<br/>
+     * A video kept from an earlier launch isn't known to be a short (see Video.toString): it's on the row of videos.
+     *
+     * @param isHistoryEmpty the account's History has no video (e.g. signed out)
+     */
+    private void appendLocalHistory(VideoGroup videoGroup, boolean isShortsRow, boolean isHistoryEmpty) {
         if (!isHistorySection()) {
             return;
         }
 
         VideoStateService stateService = VideoStateService.instance(getContext());
 
-        if (stateService.isEmpty() || (!stateService.isHistoryBroken() && !videoGroup.isEmpty())) {
+        if (stateService.isEmpty() || (!isHistoryEmpty && !stateService.isHistoryBroken())) {
+            return;
+        }
+
+        List<State> states = new ArrayList<>();
+
+        for (State state : stateService.getStates()) {
+            if (state.video.isShorts == isShortsRow) {
+                states.add(state);
+            }
+        }
+
+        if (states.isEmpty()) {
             return;
         }
 
         Video lastHistoryItem = videoGroup.isEmpty() ? null : videoGroup.get(0);
-        State lastState = stateService.getLastState();
+        State lastState = states.get(states.size() - 1);
 
-        if (lastState == null || Helpers.equals(lastHistoryItem, lastState.video)) {
+        if (Helpers.equals(lastHistoryItem, lastState.video)) {
             return;
         }
 
-        for (State state : stateService.getStates()) {
-            if (lastHistoryItem == null || state.timestamp > stateService.getSessionStartTimeMs()) {
+        for (State state : states) {
+            if (isHistoryEmpty || state.timestamp > stateService.getSessionStartTimeMs()) {
                 videoGroup.add(0, state.video);
             }
         }

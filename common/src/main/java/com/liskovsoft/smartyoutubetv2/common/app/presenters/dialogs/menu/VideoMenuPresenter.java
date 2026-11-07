@@ -19,6 +19,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.data.Playlist;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.VideoGroup;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers.CommentsController;
+import com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers.VideoStateController;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.manager.PlayerUI;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.service.VideoStateService;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.service.VideoStateService.State;
@@ -919,6 +920,9 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
                         optionItem -> {
                             VideoStateService stateService = VideoStateService.instance(getContext());
                             stateService.save(new State(mVideo, 0));
+                            // The saved position isn't enough: a live stream drops it and opens at the live edge,
+                            // and the video already in the player saves its own position over it on open.
+                            mVideo.pendingPosMs = VideoStateController.START_POSITION_MS;
                             PlaybackPresenter.instance(getContext()).openVideo(mVideo);
                             mDialogPresenter.closeDialog();
                         }

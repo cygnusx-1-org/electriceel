@@ -3,6 +3,8 @@
     <string name="title_search">Paieška</string>
     <string name="header_subscriptions">Prenumeratos</string>
     <string name="header_history">Istorija</string>
+    <string name="history_videos">Vaizdo įrašų istorija</string>
+    <string name="history_shorts">Shorts istorija</string>
     <string name="header_music">Muzika</string>
     <string name="header_news">Naujienos</string>
     <string name="header_gaming">Žaidimai</string>
@@ -323,7 +325,6 @@
     <string name="hide_shorts_from_home">Paslėpti klipukus pagrindiniame skyriuje</string>
     <string name="finish_on_disconnect">Išjungti programą atjungus telefoną</string>
     <string name="update_error">Klaida vykdant atnaujinimą</string>
-    <string name="hide_shorts_from_history">Paslėpti klipukus istorijoje</string>
     <string name="disable_screensaver">Išjungti ekrano užsklandą</string>
     <string name="description_not_found">Aprašymas nerastas</string>
     <string name="proxy_port_hint">Tarpinio serverio prievadas</string>
@@ -444,6 +445,7 @@
     <string name="hide_upcoming_channel">Slėpti būsimus iš kanalo</string>
     <string name="hide_upcoming_home">Slėpti būsimus iš pradžios</string>
     <string name="hide_shorts_from_search">Slėpti Shorts iš paieškos rezultatų</string>
+    <string name="hide_shorts_history">Paslėpti Shorts istoriją</string>
     <string name="live_stream_fix_4k_desc">Dėmesio: ši pataisa išjungia transliacijų pervyniojimą. Žymiai pagerina tiesioginių transliacijų veikimą. Didžiausia raiška yra 4K.</string>
     <string name="live_stream_fix_4k">Tiesioginių transliacijų pataisa (4K)</string>
     <string name="player_volume">Garsumas</string>
@@ -724,6 +726,7 @@
     <string name="lb_playback_controls_closed_captioning_disable">Išjungti subtitrus</string>
     <string name="lb_playback_controls_closed_captioning_enable">Įjungti subtitrus</string>
     <string name="my_videos">Mano vaizdo įrašai</string>
+    <string name="my_shorts">Mano Shorts</string>
     <string name="player_audio_focus">Garso fokusas (pristabdyti, jei aptinkami kiti grotuvai)</string>
     <string name="paid_content_notification">Pranešimas apie mokamą turinį</string>
     <string name="you_liked">jums patiko</string>

@@ -5,6 +5,8 @@
     <string name="title_search">వెతకండి</string>
     <string name="header_subscriptions">చందాలు</string>
     <string name="header_history">చరిత్ర</string>
+    <string name="history_videos">వీడియోల చరిత్ర</string>
+    <string name="history_shorts">షార్ట్స్ చరిత్ర</string>
     <string name="header_music">సంగీతం</string>
     <string name="header_news">వార్తలు</string>
     <string name="header_gaming">గేమింగ్</string>
@@ -358,7 +360,7 @@
     <string name="finish_on_disconnect">ఫోన్/టాబ్లెట్ డిస్‌కనెక్ట్ చేసిన తర్వాత యాప్‌ను మూసివేయండి</string>
     <string name="update_error">నవీకరణ లోపం</string>
     <string name="hide_shorts_from_search">శోధన ఫలితాల నుండి షార్ట్స్‌ను దాచండి</string>
-    <string name="hide_shorts_from_history">చరిత్ర నుండి షార్ట్స్‌ను దాచండి</string>
+    <string name="hide_shorts_history">షార్ట్స్ చరిత్రను దాచండి</string>
     <string name="disable_screensaver">స్క్రీన్‌సేవర్‌ను నిలిపివేయండి</string>
     <string name="description_not_found">వివరణ కనుగొనబడలేదు</string>
     <string name="proxy_port_hint">ప్రాక్సీ పోర్ట్</string>
@@ -728,6 +730,7 @@
     <string name="lb_playback_controls_closed_captioning_disable">క్లోజ్డ్ క్యాప్షనింగ్‌ను నిలిపివేయండి</string>
     <string name="lb_playback_controls_closed_captioning_enable">క్లోజ్డ్ క్యాప్షనింగ్‌ను ప్రారంభించండి</string>
     <string name="my_videos">నా వీడియోలు</string>
+    <string name="my_shorts">నా షార్ట్స్</string>
     <string name="player_audio_focus">ఆడియో ఫోకస్ (ఇతర ప్లేయర్‌లు గుర్తిస్తే పాజ్ చేయండి)</string>
     <string name="paid_content_notification">చెల్లింపు కంటెంట్ నోటిఫికేషన్</string>
     <string name="you_liked">మీరు లైక్ చేసారు</string>

@@ -271,10 +271,10 @@ public class QuickTogglePresenter extends BasePresenter<Void> {
     }
 
     /**
-     * The sections the Shorts are hidden from (see MediaGroupOptions of MediaServiceCore)
+     * The sections the Shorts are hidden from (see MediaGroupOptions of MediaServiceCore). Not History: they're a row of their own there.
      */
     private static boolean isShortsSection(int sectionId) {
-        return sectionId == MediaGroup.TYPE_HOME || sectionId == MediaGroup.TYPE_SUBSCRIPTIONS || sectionId == MediaGroup.TYPE_HISTORY ||
+        return sectionId == MediaGroup.TYPE_HOME || sectionId == MediaGroup.TYPE_SUBSCRIPTIONS ||
                 sectionId == MediaGroup.TYPE_CHANNEL_UPLOADS || sectionId == MediaGroup.TYPE_NEWS ||
                 sectionId == MediaGroup.TYPE_GAMING || sectionId == MediaGroup.TYPE_MUSIC || sectionId == MediaGroup.TYPE_SPORTS ||
                 sectionId == MediaGroup.TYPE_LIVE || sectionId == MediaGroup.TYPE_MY_VIDEOS;

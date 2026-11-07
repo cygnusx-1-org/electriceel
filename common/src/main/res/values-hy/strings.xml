@@ -3,6 +3,8 @@
     <string name="title_search">Որոնում</string>
     <string name="header_subscriptions">Բաժանորդագրություններ</string>
     <string name="header_history">Պատմություն</string>
+    <string name="history_videos">Տեսանյութերի պատմություն</string>
+    <string name="history_shorts">Shorts-ի պատմություն</string>
     <string name="header_music">Երաժշտություն</string>
     <string name="header_news">Նորություններ</string>
     <string name="header_gaming">Խաղեր</string>
@@ -356,7 +358,7 @@
     <string name="finish_on_disconnect">Փակել հավելվածը հեռախոսն/պլանշետն անջատելուց հետո</string>
     <string name="update_error">Թարմացման սխալ</string>
     <string name="hide_shorts_from_search">Թաքցնել Shorts-ը որոնման արդյունքներից</string>
-    <string name="hide_shorts_from_history">Թաքցնել Shorts-ը պատմությունից</string>
+    <string name="hide_shorts_history">Թաքցնել Shorts-ի պատմությունը</string>
     <string name="disable_screensaver">Անջատել էկրանապահը</string>
     <string name="description_not_found">Նկարագրությունը չի գտնվել</string>
     <string name="proxy_port_hint">Պրոքսիի պորտ</string>
@@ -724,6 +726,7 @@
     <string name="lb_playback_controls_closed_captioning_disable">Անջատել ենթագրերը</string>
     <string name="lb_playback_controls_closed_captioning_enable">Միացնել ենթագրերը</string>
     <string name="my_videos">Իմ տեսանյութերը</string>
+    <string name="my_shorts">Իմ Shorts-երը</string>
     <string name="player_audio_focus">Ձայնի ֆոկուս (դադար, եթե հայտնաբերվեն այլ նվագարկիչներ)</string>
     <string name="paid_content_notification">Վճարովի բովանդակության ծանուցում</string>
     <string name="you_liked">դուք հավանել եք</string>

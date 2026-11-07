@@ -4,6 +4,8 @@
   <string name="title_search">Išči</string>
   <string name="header_subscriptions">Naročnine</string>
   <string name="header_history">Zgodovina</string>
+  <string name="history_videos">Zgodovina videov</string>
+  <string name="history_shorts">Zgodovina Shorts</string>
   <string name="header_music">Glasba</string>
   <string name="header_news">Novice</string>
   <string name="header_gaming">Igre</string>
@@ -371,7 +373,7 @@
   <string name="hide_shorts_from_home">Skrij Shorts z domače strani</string>
   <string name="update_error">Napaka pri posodobitvi</string>
   <string name="hide_shorts_from_search">Skrij Shorts iz rezultatov iskanja</string>
-  <string name="hide_shorts_from_history">Skrij Shorts iz zgodovine</string>
+  <string name="hide_shorts_history">Skrij zgodovino Shorts</string>
   <string name="disable_screensaver">Onemogoči ohranjevalnik zaslona</string>
   <string name="description_not_found">Opisa ni mogoče najti</string>
   <string name="proxy_port_hint">Vrata proksija</string>
@@ -725,6 +727,7 @@
     <string name="lb_playback_controls_closed_captioning_disable">Onemogoči podnapise</string>
     <string name="lb_playback_controls_closed_captioning_enable">Omogoči podnapise</string>
     <string name="my_videos">Moji videi</string>
+    <string name="my_shorts">Moji Shorts</string>
     <string name="player_audio_focus">Zvočni fokus (premor, če so zaznani drugi predvajalniki)</string>
     <string name="paid_content_notification">Obvestilo o plačljivi vsebini</string>
     <string name="you_liked">všečkali ste</string>

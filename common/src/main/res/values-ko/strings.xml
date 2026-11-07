@@ -4,6 +4,8 @@
   <string name="title_search">검색</string>
   <string name="header_subscriptions">구독</string>
   <string name="header_history">시청 기록</string>
+  <string name="history_videos">동영상 시청 기록</string>
+  <string name="history_shorts">쇼츠 시청 기록</string>
   <string name="header_music">음악</string>
   <string name="header_news">뉴스</string>
   <string name="header_gaming">게임</string>
@@ -348,7 +350,6 @@
   <string name="hide_shorts_from_home">홈에서 쇼츠를 숨김</string>
   <string name="finish_on_disconnect">휴대폰/태블릿 연결을 해제한 후 앱 종료</string>
   <string name="update_error">업데이트 오류</string>
-  <string name="hide_shorts_from_history">기록에서 쇼츠 숨기기</string>
   <string name="disable_screensaver">화면 보호기 비활성화</string>
   <string name="description_not_found">설명을 찾을 수 없음</string>
   <string name="proxy_port_hint">프록시 포트</string>
@@ -683,12 +684,14 @@
   <string name="not_supported_by_device">해당 장치는 이 기능을 지원하지 않음</string>
   <string name="suggestions">제안</string>
   <string name="hide_shorts_from_search">검색 결과에서 쇼츠 숨기기</string>
+  <string name="hide_shorts_history">쇼츠 시청 기록 숨기기</string>
   <string name="import_subscriptions_group">가져오기</string>
   <string name="lb_playback_controls_closed_captioning_disable">폐쇄 자막 넣기 비활성화</string>
   <string name="lb_playback_controls_closed_captioning_enable">폐쇄 자막 넣기 활성화</string>
   <string name="search_exit_shortcut">검색 나가기</string>
   <string name="video_flip">뒤집기 (미러)</string>
   <string name="my_videos">내 동영상</string>
+  <string name="my_shorts">내 쇼츠</string>
   <string name="player_audio_focus">오디오 포커스 (다른 플레이어가 감지되면 일시 중지)</string>
   <string name="paid_content_notification">유료 콘텐츠 알림</string>
   <string name="you_liked">좋아요</string>

@@ -4,6 +4,8 @@
     <string name="title_search">Pretraga</string>
     <string name="header_subscriptions">Pretplata</string>
     <string name="header_history">Povijest</string>
+    <string name="history_videos">Povijest videa</string>
+    <string name="history_shorts">Povijest Shorts videa</string>
     <string name="header_music">Glazba</string>
     <string name="header_news">Novosti</string>
     <string name="header_gaming">Igre</string>
@@ -327,7 +329,6 @@
     <string name="hide_shorts_from_home">Sakrij shorts iz Početne</string>
     <string name="finish_on_disconnect">Zatvori aplikaciju nakon prekida povezivanje s telefonom/tabletom</string>
     <string name="update_error">Greška ažuriranja</string>
-    <string name="hide_shorts_from_history">Sakrij shorts iz Povijesti</string>
     <string name="disable_screensaver">Onemogući čuvara zaslona</string>
     <string name="description_not_found">Opis nije pronađen</string>
     <string name="proxy_port_hint">Proxy ulaz</string>
@@ -522,6 +523,7 @@
     <string name="hide_upcoming_channel">Sakrij nadolazeće s kanala</string>
     <string name="hide_upcoming_home">Sakrij nadolazeće s početne</string>
     <string name="hide_shorts_from_search">Sakrij Shorts iz rezultata pretraživanja</string>
+    <string name="hide_shorts_history">Sakrij povijest Shorts videa</string>
     <string name="live_stream_fix_4k_desc">Upozorenje: ova prilagodba onemogućuje premotavanje streamova. Znatno poboljšava performanse streamova uživo. Maksimalna razlučivost je 4K.</string>
     <string name="live_stream_fix_4k">Ispravak streamova uživo (4K)</string>
     <string name="player_volume">Glasnoća</string>
@@ -729,6 +731,7 @@
     <string name="lb_playback_controls_closed_captioning_disable">Onemogući titlove</string>
     <string name="lb_playback_controls_closed_captioning_enable">Omogući titlove</string>
     <string name="my_videos">Moji videi</string>
+    <string name="my_shorts">Moji Shorts videi</string>
     <string name="player_audio_focus">Audio fokus (pauziraj ako se otkriju drugi playeri)</string>
     <string name="paid_content_notification">Obavijest o plaćenom sadržaju</string>
     <string name="you_liked">svidjelo vam se</string>

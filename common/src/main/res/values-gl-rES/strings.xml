@@ -4,6 +4,8 @@
   <string name="title_search">Buscar</string>
   <string name="header_subscriptions">Subscricións</string>
   <string name="header_history">Historial</string>
+  <string name="history_videos">Historial de vídeos</string>
+  <string name="history_shorts">Historial de curtos</string>
   <string name="header_music">Música</string>
   <string name="header_news">Noticias</string>
   <string name="header_gaming">Xogos</string>
@@ -348,7 +350,6 @@
   <string name="hide_shorts_from_home">Ocultar curtos no inicio</string>
   <string name="finish_on_disconnect">Pecha a aplicación despois de desconectar o teléfono/tableta</string>
   <string name="update_error">Erro de actualización</string>
-  <string name="hide_shorts_from_history">Ocultar curtas no Historial</string>
   <string name="disable_screensaver">Desactivar o protector de pantalla</string>
   <string name="description_not_found">Non se atopou a descrición</string>
   <string name="proxy_port_hint">Porto proxy</string>
@@ -682,11 +683,13 @@
   <string name="playlists_rows">Amosar a sección de listas de reprodución como filas</string>
   <string name="not_supported_by_device">O dispositivo non soporta esta función</string>
   <string name="hide_shorts_from_search">Ocultar vídeos curtos nos resultados de busca</string>
+  <string name="hide_shorts_history">Ocultar o historial de curtos</string>
   <string name="suggestions">Suxestións</string>
   <string name="import_subscriptions_group">Importar</string>
   <string name="lb_playback_controls_closed_captioning_disable">Desactivar os subtítulos</string>
   <string name="lb_playback_controls_closed_captioning_enable">Activar os subtítulos</string>
   <string name="my_videos">Os meus vídeos</string>
+  <string name="my_shorts">Os meus curtos</string>
   <string name="player_audio_focus">Foco de son (pausar se se detectan outros reprodutores)</string>
   <string name="paid_content_notification">Notificación de contido de pago</string>
   <string name="you_liked">Gustouche</string>

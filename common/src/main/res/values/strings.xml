@@ -4,6 +4,8 @@
     <string name="title_search">Search</string>
     <string name="header_subscriptions">Subscriptions</string>
     <string name="header_history">History</string>
+    <string name="history_videos">Videos History</string>
+    <string name="history_shorts">Shorts History</string>
     <string name="header_music">Music</string>
     <string name="header_news">News</string>
     <string name="header_gaming">Gaming</string>
@@ -603,7 +605,7 @@
     <string name="update_error">Update error</string>
     <string name="update_try_again_later">try again later</string>
     <string name="hide_shorts_from_search">Hide shorts from the search result</string>
-    <string name="hide_shorts_from_history">Hide shorts from History</string>
+    <string name="hide_shorts_history">Hide Shorts History</string>
     <string name="hide_shorts_from_sports">Hide shorts from Sports</string>
     <string name="hide_shorts_from_live">Hide shorts from Live</string>
     <string name="hide_shorts_from_my_videos">Hide shorts from My videos</string>
@@ -982,6 +984,7 @@
     <string name="lb_playback_controls_closed_captioning_disable">Disable Closed Captioning</string>
     <string name="lb_playback_controls_closed_captioning_enable">Enable Closed Captioning</string>
     <string name="my_videos">My videos</string>
+    <string name="my_shorts">My Shorts</string>
     <string name="my_videos_shorts">My videos - Shorts</string>
     <string name="player_audio_focus">Audio focus (pause if other players detected)</string>
     <string name="paid_content_notification">Paid content notification</string>

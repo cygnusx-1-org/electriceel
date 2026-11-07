@@ -4,6 +4,8 @@
     <string name="title_search">Søk</string>
     <string name="header_subscriptions">Abonnementer</string>
     <string name="header_history">Historikk</string>
+    <string name="history_videos">Videohistorikk</string>
+    <string name="history_shorts">Shorts-historikk</string>
     <string name="header_music">Musikk</string>
     <string name="header_news">Nyheter</string>
     <string name="header_gaming">Spill</string>
@@ -369,7 +371,7 @@
     <string name="finish_on_disconnect">Lukk appen etter å ha koblet fra telefonen/nettbrettet</string>
     <string name="update_error">Oppdateringsfeil</string>
     <string name="hide_shorts_from_search">Skjul Shorts fra søkeresultatet</string>
-    <string name="hide_shorts_from_history">Skjul Shorts fra Historikk</string>
+    <string name="hide_shorts_history">Skjul Shorts-historikk</string>
     <string name="disable_screensaver">Deaktiver skjermsparer</string>
     <string name="description_not_found">Beskrivelse ikke funnet</string>
     <string name="proxy_port_hint">Proxy-port</string>
@@ -691,6 +693,7 @@
     <string name="lb_playback_controls_closed_captioning_disable">Deaktiver teksting for hørselshemmede</string>
     <string name="lb_playback_controls_closed_captioning_enable">Aktiver teksting for hørselshemmede</string>
     <string name="my_videos">Mine videoer</string>
+    <string name="my_shorts">Mine Shorts</string>
     <string name="player_audio_focus">Lydfokus (pause hvis andre avspillere oppdages)</string>
     <string name="paid_content_notification">Varsel om betalt innhold</string>
     <string name="you_liked">du likte</string>

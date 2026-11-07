@@ -4,6 +4,8 @@
     <string name="title_search">Пошук</string>
     <string name="header_subscriptions">Підписки</string>
     <string name="header_history">Історія</string>
+    <string name="history_videos">Історія відео</string>
+    <string name="history_shorts">Історія Shorts</string>
     <string name="header_music">Музика</string>
     <string name="header_news">Новини</string>
     <string name="header_gaming">Ігри</string>
@@ -353,7 +355,7 @@
     <string name="finish_on_disconnect">Завершувати застосунок після відключення телефону/планшету</string>
     <string name="update_error">Помилка оновлення</string>
     <string name="hide_shorts_from_search">Приховувати короткі відео з Пошуку</string>
-    <string name="hide_shorts_from_history">Приховувати короткі відео з Історії</string>
+    <string name="hide_shorts_history">Приховувати історію Shorts</string>
     <string name="disable_screensaver">Вимкнути скрінсейвер</string>
     <string name="description_not_found">Опис не знайдено</string>
     <string name="proxy_port_hint">Порт проксі-сервера</string>
@@ -693,6 +695,7 @@
     <string name="playlists_rows">Відображати розділ Плейлисти у вигляді рядків</string>
     <string name="import_subscriptions_group">Імпорт</string>
     <string name="my_videos">Мої відео</string>
+    <string name="my_shorts">Мої Shorts</string>
     <string name="player_audio_focus">Аудіо фокус (пауза, якщо виявлено інші плеєри)</string>
     <string name="paid_content_notification">Повідомлення про платний вміст</string>
     <string name="you_liked">вам сподобалося</string>

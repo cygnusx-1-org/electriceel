@@ -225,6 +225,9 @@ public class VideoCardPresenter extends LongClickPresenter {
                     .load(url)
                     .placeholder(shownImage)
                     .apply(ViewUtil.glideOptions())
+                    // A still image, unlike the animated ones the options are for: kept in memory, so a card bound again
+                    // (e.g. back in a section) shows it at once rather than reading it from disk or downloading it again
+                    .skipMemoryCache(false)
                     // improve image compression on low end devices
                     .override(mWidth, mHeight)
                     // com.liskovsoft.smartyoutubetv2.tv.util.CacheGlideModule

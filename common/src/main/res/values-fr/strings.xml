@@ -4,6 +4,8 @@
   <string name="title_search">Rechercher</string>
   <string name="header_subscriptions">Abonnements</string>
   <string name="header_history">Historique</string>
+  <string name="history_videos">Historique des vidéos</string>
+  <string name="history_shorts">Historique des Shorts</string>
   <string name="header_music">Musique</string>
   <string name="header_news">Actualités</string>
   <string name="header_gaming">Jeux vidéo</string>
@@ -336,7 +338,6 @@
   <string name="hide_shorts_from_home">Masquer les shorts de l\'accueil</string>
   <string name="finish_on_disconnect">Fermer l\'application lorsque le téléphone est déconnecté</string>
   <string name="update_error">Erreur de mise à jour</string>
-  <string name="hide_shorts_from_history">Masquer les shorts de l\'historique</string>
   <string name="disable_screensaver">Désactiver l\'économiseur d\'écran</string>
   <string name="description_not_found">Description introuvable</string>
   <string name="proxy_port_hint">Port du proxy</string>
@@ -682,12 +683,14 @@
   <string name="playlists_rows">Afficher la section Playlists sous forme de lignes</string>
   <string name="not_supported_by_device">L\'appareil ne prend pas en charge cette fonctionnalité</string>
   <string name="hide_shorts_from_search">Masquer les shorts dans les résultats de recherche</string>
+  <string name="hide_shorts_history">Masquer l\'historique des Shorts</string>
   <string name="suggestions">Suggestions</string>
   <string name="import_subscriptions_group">Importer</string>
   <string name="lb_playback_controls_closed_captioning_disable">Désactiver le sous-titrage codé</string>
   <string name="lb_playback_controls_closed_captioning_enable">Activer le sous-titrage codé</string>
   <string name="video_flip">Retournement (miroir)</string>
   <string name="my_videos">Mes vidéos</string>
+  <string name="my_shorts">Mes Shorts</string>
   <string name="player_audio_focus">Focus audio (pause si d\'autres lecteurs sont détectés)</string>
   <string name="paid_content_notification">Notification de contenu payant</string>
   <string name="you_liked">vous avez aimé</string>
