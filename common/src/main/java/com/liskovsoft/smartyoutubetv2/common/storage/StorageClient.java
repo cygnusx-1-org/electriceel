@@ -112,6 +112,11 @@ final class StorageClient {
         final List<Change> changes = new ArrayList<>();
         final Map<String, Long> cursors = new LinkedHashMap<>();
         boolean more;
+        /**
+         * New each time the group's database is restored from a backup; null from a server that doesn't tell
+         */
+        @Nullable
+        String databaseId;
     }
 
     static final class PushChange {
@@ -375,6 +380,8 @@ final class StorageClient {
             }
 
             result.more = json.optBoolean("more");
+            String databaseId = json.isNull("databaseId") ? null : json.optString("databaseId");
+            result.databaseId = databaseId != null && !databaseId.isEmpty() ? databaseId : null;
             return result;
         } catch (JSONException e) {
             throw new IOException(e);

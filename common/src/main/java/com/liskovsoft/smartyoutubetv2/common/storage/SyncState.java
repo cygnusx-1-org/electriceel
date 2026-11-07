@@ -26,6 +26,11 @@ final class SyncState {
     private static final int VERSION = 1;
     private final File mFile;
     private final Map<String, Scope> mScopes = new HashMap<>();
+    /**
+     * The server's database the revisions belong to (see StorageSync.isRestored)
+     */
+    @Nullable
+    private String mDatabaseId;
 
     static final class Key {
         long base;
@@ -80,6 +85,7 @@ final class SyncState {
                 return;
             }
 
+            mDatabaseId = json.isNull("databaseId") ? null : json.optString("databaseId", null);
             JSONObject scopes = json.getJSONObject("scopes");
 
             for (Iterator<String> it = scopes.keys(); it.hasNext(); ) {
@@ -107,6 +113,7 @@ final class SyncState {
             // Starts over: every scope is pulled whole again and the server's values win (see StorageSync.reconcile)
             Log.e(TAG, "Unreadable sync state, starting over: %s", e.getMessage());
             mScopes.clear();
+            mDatabaseId = null;
         }
     }
 
@@ -139,6 +146,7 @@ final class SyncState {
 
             JSONObject json = new JSONObject();
             json.put("version", VERSION);
+            json.put("databaseId", mDatabaseId != null ? mDatabaseId : JSONObject.NULL);
             json.put("scopes", scopes);
             FileHelpers.stringToFileAtomic(json.toString(), mFile);
         } catch (JSONException e) {
@@ -168,7 +176,43 @@ final class SyncState {
         return new java.util.HashSet<>(mScopes.keySet());
     }
 
+    /**
+     * Forgets everything: each scope is pulled whole again, and the server's values win
+     */
     void resetAll() {
         mScopes.clear();
+        mDatabaseId = null;
+    }
+
+    @Nullable
+    String getDatabaseId() {
+        return mDatabaseId;
+    }
+
+    void setDatabaseId(@Nullable String databaseId) {
+        mDatabaseId = databaseId;
+    }
+
+    /**
+     * The highest revision known of these scopes: a cursor, or a setting's last from the server (a push's result too)
+     */
+    long highestRevision(Iterable<String> names) {
+        long highest = 0;
+
+        for (String name : names) {
+            Scope scope = mScopes.get(name);
+
+            if (scope == null) {
+                continue;
+            }
+
+            highest = Math.max(highest, scope.cursor);
+
+            for (Key key : scope.keys.values()) {
+                highest = Math.max(highest, key.base);
+            }
+        }
+
+        return highest;
     }
 }

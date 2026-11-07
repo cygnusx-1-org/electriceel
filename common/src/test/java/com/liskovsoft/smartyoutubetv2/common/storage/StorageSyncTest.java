@@ -65,6 +65,18 @@ public class StorageSyncTest {
          * The last push of each key had ifAbsent
          */
         final Map<String, Boolean> ifAbsent = new java.util.concurrent.ConcurrentHashMap<>();
+        /**
+         * The cursor of each scope in the last pull: the revision the device had pulled to
+         */
+        final Map<String, Long> pulledTo = new java.util.concurrent.ConcurrentHashMap<>();
+        /**
+         * The database's ID in the pulls (the server's Group.DatabaseID), null: a server that doesn't tell
+         */
+        String databaseId;
+        /**
+         * Restored right after the next push, before the device can pull: {scope, key, json}
+         */
+        String[] restoreAfterPush;
 
         FakeServer() throws IOException {
             socket = new ServerSocket(0, 50, InetAddress.getByName("127.0.0.1"));
@@ -161,9 +173,42 @@ public class StorageSyncTest {
             set(scope, key, json);
         }
 
+        /**
+         * Restored with a new database ID, then taken to the revision given by other devices' changes (of settings of another app
+         * version), all before the device pulls again
+         */
+        synchronized void restore(String scope, String key, String json, String databaseId, long toRevision) {
+            restore(scope, key, json);
+            this.databaseId = databaseId;
+
+            while (revision < toRevision) {
+                set(scope, "another.version" + revision, "1");
+            }
+        }
+
+        synchronized void setDatabaseId(String databaseId) {
+            this.databaseId = databaseId;
+        }
+
+        synchronized void restoreAfterPush(String scope, String key, String json) {
+            restoreAfterPush = new String[] {scope, key, json};
+        }
+
         synchronized String get(String scope, String key) {
             Object[] entry = scope(scope).get(key);
             return entry != null ? (String) entry[0] : null;
+        }
+
+        synchronized long revision() {
+            return revision;
+        }
+
+        /**
+         * The device has pulled the revisions up to this one (its own pushes included), -1 before its first pull
+         */
+        long pulledTo(String scope) {
+            Long cursor = pulledTo.get(scope);
+            return cursor != null ? cursor : -1;
         }
 
         private Map<String, Object[]> scope(String scope) {
@@ -217,11 +262,15 @@ public class StorageSyncTest {
             boolean waits = req.optInt("wait") > 0;
             JSONArray changes = new JSONArray();
             JSONObject next = new JSONObject();
+            String database;
 
             synchronized (this) {
+                database = databaseId;
+
                 for (Iterator<String> it = cursors.keys(); it.hasNext(); ) {
                     String scope = it.next();
                     long since = cursors.getLong(scope);
+                    pulledTo.put(scope, since);
 
                     for (Map.Entry<String, Object[]> e : scope(scope).entrySet()) {
                         if ((long) e.getValue()[1] > since) {
@@ -246,7 +295,13 @@ public class StorageSyncTest {
                 }
             }
 
-            return new JSONObject().put("changes", changes).put("cursors", next).put("more", false).toString();
+            JSONObject res = new JSONObject().put("changes", changes).put("cursors", next).put("more", false);
+
+            if (database != null) {
+                res.put("databaseId", database);
+            }
+
+            return res.toString();
         }
 
         private synchronized String push(JSONObject req) throws JSONException {
@@ -264,7 +319,14 @@ public class StorageSyncTest {
             }
 
             pushes++;
-            return new JSONObject().put("results", results).put("revision", revision).toString();
+            String res = new JSONObject().put("results", results).put("revision", revision).toString();
+
+            if (restoreAfterPush != null) {
+                restore(restoreAfterPush[0], restoreAfterPush[1], restoreAfterPush[2]);
+                restoreAfterPush = null;
+            }
+
+            return res;
         }
 
     }
@@ -405,9 +467,53 @@ public class StorageSyncTest {
         ShadowLooper.idleMainLooper();
         connect();
         await("sent", () -> "30000".equals(mServer.get(SCOPE, "general.screensaverTimeoutMs")));
+        // Restored once the device has pulled past its pushes: its cursor goes back (aServerRestoredBeforeThePullIsJoinedAgain
+        // restores it before that)
+        long head = mServer.revision();
+        await("pulled past the pushes", () -> mServer.pulledTo(SCOPE) >= head);
 
         // Back to a backup with one revision: its value is taken, and the revisions this device knew don't hide the next ones
         mServer.restore(SCOPE, "player.subtitleScale", "2.5");
+        StorageSync.instance(mContext).wake();
+        await("the restored value taken", () -> Math.abs(player.getSubtitleScale() - 2.5f) < 0.001);
+        await("the device's own value sent again", () -> "30000".equals(mServer.get(SCOPE, "general.screensaverTimeoutMs")));
+        mServer.set(SCOPE, "player.subtitleScale", "1.1");
+        await("the next change taken", () -> Math.abs(player.getSubtitleScale() - 1.1f) < 0.001);
+    }
+
+    @Test
+    public void aServerRestoredBeforeThePullIsJoinedAgain() throws IOException {
+        PlayerData player = PlayerData.instance(mContext);
+        GeneralData general = GeneralData.instance(mContext);
+        player.setSubtitleScale(1.5f);
+        general.setScreensaverTimeoutMs(30_000);
+        ShadowLooper.idleMainLooper();
+        // Restored right after the device's first push: its cursor is still below the backup's revision, so nothing goes back,
+        // and the backup's value has a revision the device had from its push. Only that the cursor is below the revisions of its
+        // pushes shows the restore.
+        mServer.restoreAfterPush(SCOPE, "player.subtitleScale", "2.5");
+
+        connect();
+        await("the restored value taken", () -> Math.abs(player.getSubtitleScale() - 2.5f) < 0.001);
+        await("the device's own value sent again", () -> "30000".equals(mServer.get(SCOPE, "general.screensaverTimeoutMs")));
+    }
+
+    @Test
+    public void aRestoredDatabaseIsJoinedAgainAfterTheGroupWentPast() throws IOException {
+        PlayerData player = PlayerData.instance(mContext);
+        GeneralData general = GeneralData.instance(mContext);
+        player.setSubtitleScale(1.5f);
+        general.setScreensaverTimeoutMs(30_000);
+        ShadowLooper.idleMainLooper();
+        mServer.setDatabaseId("first");
+        connect();
+        await("sent", () -> "30000".equals(mServer.get(SCOPE, "general.screensaverTimeoutMs")));
+        long head = mServer.revision();
+        await("pulled past the pushes", () -> mServer.pulledTo(SCOPE) >= head);
+
+        // Restored, and the other devices take the group past this device's cursor before it pulls again: no revision goes back,
+        // only the database's ID shows the restore
+        mServer.restore(SCOPE, "player.subtitleScale", "2.5", "restored", head + 2);
         StorageSync.instance(mContext).wake();
         await("the restored value taken", () -> Math.abs(player.getSubtitleScale() - 2.5f) < 0.001);
         await("the device's own value sent again", () -> "30000".equals(mServer.get(SCOPE, "general.screensaverTimeoutMs")));

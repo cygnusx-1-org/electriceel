@@ -26,6 +26,7 @@ import com.google.android.exoplayer2.extractor.ExtractorOutput;
 import com.google.android.exoplayer2.extractor.SeekMap;
 import com.google.android.exoplayer2.extractor.TrackOutput;
 import com.google.android.exoplayer2.util.Assertions;
+import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import java.io.IOException;
 
@@ -192,6 +193,26 @@ public final class ChunkExtractorWrapper implements ExtractorOutput {
     public void format(Format format) {
       sampleFormat = manifestFormat != null ? format.copyWithManifestFormatInfo(manifestFormat)
           : format;
+      // MOD: a YouTube live stream's captions (see DashManifestParser2) say tx3g in their mp4, but each sample is a WebVTT
+      // document. The manifest's mime type is kept, the sample-relative cue times (subsampleOffsetUs) are the mp4's.
+      if (manifestFormat != null
+          && MimeTypes.TEXT_VTT.equals(manifestFormat.sampleMimeType)
+          && MimeTypes.APPLICATION_TX3G.equals(sampleFormat.sampleMimeType)) {
+        sampleFormat =
+            sampleFormat.copyWithContainerInfo(
+                sampleFormat.id,
+                sampleFormat.label,
+                MimeTypes.TEXT_VTT,
+                sampleFormat.codecs,
+                /* metadata= */ null,
+                sampleFormat.bitrate,
+                sampleFormat.width,
+                sampleFormat.height,
+                sampleFormat.frameRate,
+                sampleFormat.channelCount,
+                sampleFormat.selectionFlags,
+                sampleFormat.language);
+      }
       trackOutput.format(sampleFormat);
     }
 

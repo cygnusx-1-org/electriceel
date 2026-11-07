@@ -368,13 +368,16 @@ public final class StorageSync {
                     continue;
                 }
 
+                // What this device knows before it sends the pull: a push made meanwhile (pushNow) can come back before the pull does
+                long known = onWorker(() -> mState.highestRevision(cursors.keySet()));
+
                 if (mIsWoken) {
                     continue;
                 }
 
                 PullResult result = client.pull(cursors, StorageClient.WAIT_SEC);
                 onWorker(() -> {
-                    applyPull(result, cursors);
+                    applyPull(result, cursors, known);
                     return null;
                 });
 
@@ -737,6 +740,11 @@ public final class StorageSync {
 
             Long next = result.cursors.get(target.scope);
             cursor = next != null ? next : cursor;
+
+            if (mState.getDatabaseId() == null) {
+                // Joined from this database: a restore before the next pull shows (an ID known already is checked there)
+                mState.setDatabaseId(result.databaseId);
+            }
         } while (result.more);
 
         Map<String, String> cache = new HashMap<>();
@@ -907,17 +915,50 @@ public final class StorageSync {
     }
 
     /**
-     * On the worker: the server's changes since the cursors. A cursor going back means the group's database went back (restored
-     * from a backup): the revisions this device knows mean something else now, so the scope joins again.
+     * The server's database ID changed: it was restored from a backup (each restore gets a new one). Every scope joins again,
+     * however far the other devices have taken the group since: once they're past this device's cursor, the revisions show
+     * nothing. The first ID seen is only noted.
      */
-    private void applyPull(PullResult result, Map<String, Long> sent) throws IOException {
+    private boolean isRestored(@Nullable String databaseId) {
+        String known = mState.getDatabaseId();
+
+        if (databaseId == null || databaseId.equals(known)) {
+            return false;
+        }
+
+        if (known != null) {
+            Log.w(TAG, "The server's database was restored from a backup (%s, was %s): every scope joins again", databaseId, known);
+            mState.resetAll();
+        }
+
+        mState.setDatabaseId(databaseId);
+        return known != null;
+    }
+
+    /**
+     * On the worker: the server's changes since the cursors. If the group's database was restored from a backup, the revisions
+     * this device knows mean something else now, so the scopes join again (see isRestored).
+     */
+    private void applyPull(PullResult result, Map<String, Long> sent, long knownAtPull) throws IOException {
+        if (isRestored(result.databaseId)) {
+            mState.save();
+            mIsWoken = true;
+            return;
+        }
+
+        // Without a page cut each cursor is the group's revision, and that never goes below one the server gave before the pull
+        // was sent: the cursors sent, and the revisions of this device's own pushes too, which are past its cursor until it pulls
+        // past them. Of the scopes pulled only: one no longer synced keeps what it knew, and would make every pull look like a
+        // restore.
+        long known = result.more ? 0 : knownAtPull;
         boolean isRewound = false;
 
         for (Map.Entry<String, Long> e : result.cursors.entrySet()) {
             Long before = sent.get(e.getKey());
+            long last = Math.max(before != null ? before : 0, known);
 
-            if (before != null && e.getValue() < before) {
-                Log.w(TAG, "%s: the server's revision went back from %s to %s, joining again", e.getKey(), before, e.getValue());
+            if (e.getValue() < last) {
+                Log.w(TAG, "%s: the server's revision went back from %s to %s, joining again", e.getKey(), last, e.getValue());
                 mState.reset(e.getKey());
                 isRewound = true;
             }
