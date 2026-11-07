@@ -20,6 +20,10 @@ import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import javax.annotation.Nullable;
 
 public class VideoStateController extends BasePlayerController {
+    /**
+     * The start of the video. Above 0, as a {@link Video#pendingPosMs} of 0 means "none".
+     */
+    public static final long START_POSITION_MS = 100;
     private static final String TAG = VideoStateController.class.getSimpleName();
     private static final long MUSIC_VIDEO_MAX_DURATION_MS = 6 * 60 * 1000;
     private static final long RESTORE_LIVE_BUFFER_MS = 60_000;
@@ -88,7 +92,7 @@ public class VideoStateController extends BasePlayerController {
         // Seek to the start on prev
         if (getPlayer() != null && getPlayer().getPositionMs() > BEGIN_THRESHOLD_MS) {
             saveState(); // in case the user wants to go to previous video
-            getPlayer().setPositionMs(100);
+            getPlayer().setPositionMs(START_POSITION_MS);
             mIsRestoreActualLive = false;
             return true;
         }
@@ -618,6 +622,11 @@ public class VideoStateController extends BasePlayerController {
         if (item.pendingPosMs > 0) {
             getPlayer().setPositionMs(item.pendingPosMs);
             item.pendingPosMs = 0;
+
+            // The user picked this position: don't jump back to the live edge on play
+            if (item.isLive) {
+                mIsRestoreActualLive = false;
+            }
         }
     }
 
