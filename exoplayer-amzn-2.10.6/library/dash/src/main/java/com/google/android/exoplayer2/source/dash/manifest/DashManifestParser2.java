@@ -37,12 +37,18 @@ public class DashManifestParser2 {
     private static final String NULL_INDEX_RANGE = "0-0";
     private static final String NULL_CONTENT_LENGTH = "0";
     private static final int MAX_DURATION_SEC = 48 * 60 * 60;
+    /**
+     * A live stream's captions come as text/mp4 formats segmented like its audio and video. 386 and 387 carry the same text, each
+     * segment's one sample a srv3 document in 386 and a WebVTT one in 387; 406 came back empty (checked on news streams, 2026-11-06)
+     */
+    private static final String LIVE_CAPTION_VTT_ITAG = "387";
     private MediaItemFormatInfo mFormatInfo;
     private Set<MediaFormat> mMP4Videos;
     private Set<MediaFormat> mWEBMVideos;
     private Map<String, Set<MediaFormat>> mMP4Audios;
     private Map<String, Set<MediaFormat>> mWEBMAudios;
     private List<MediaSubtitle> mSubs;
+    private List<MediaFormat> mLiveCaptions;
 
     public DashManifest parse(@NonNull MediaItemFormatInfo formatInfo) {
         mFormatInfo = formatInfo;
@@ -52,6 +58,7 @@ public class DashManifestParser2 {
         mMP4Audios = new HashMap<>();
         mWEBMAudios = new HashMap<>();
         mSubs = new ArrayList<>();
+        mLiveCaptions = new ArrayList<>();
         return parseDashManifest(formatInfo);
     }
 
@@ -148,6 +155,13 @@ public class DashManifestParser2 {
             adaptationSets.add(parseAdaptationSet(Collections.singletonList(subtitle)));
         }
 
+        // A live stream has no subtitles of its own, only these. Both at once would list the same captions twice.
+        if (mSubs.isEmpty()) {
+            for (MediaFormat caption : mLiveCaptions) {
+                adaptationSets.add(parseLiveCaptionAdaptationSet(caption));
+            }
+        }
+
         return Pair.create(new Period(id, startMs, adaptationSets), durationMs);
     }
 
@@ -209,6 +223,15 @@ public class DashManifestParser2 {
         }
 
         return new AdaptationSet(id, contentType, representations, new ArrayList<>(), new ArrayList<>());
+    }
+
+    private AdaptationSet parseLiveCaptionAdaptationSet(MediaFormat caption) {
+        int id = mId++;
+        RepresentationInfo representationInfo = parseLiveCaptionRepresentation(caption);
+        List<Representation> representations = Collections.singletonList(
+                buildRepresentation(representationInfo, null, null, new ArrayList<>()));
+
+        return new AdaptationSet(id, C.TRACK_TYPE_TEXT, representations, new ArrayList<>(), new ArrayList<>());
     }
 
     private SegmentTemplate parseSegmentTemplate(MediaFormat format) {
@@ -472,6 +495,33 @@ public class DashManifestParser2 {
         return new RepresentationInfo(format, baseUrl, segmentBase, drmSchemeType, drmSchemeDatas, Representation.REVISION_ID_DEFAULT);
     }
 
+    /**
+     * Listed as a video's subtitles are (see parseRepresentation(MediaSubtitle)): the vssId for the id, the track's name for the
+     * language. Its segments are fetched as the audio and video ones are.
+     */
+    private RepresentationInfo parseLiveCaptionRepresentation(MediaFormat caption) {
+        mId++; // as the other representations do
+        String vssId = caption.getCaptionVssId();
+        String name = caption.getCaptionName();
+
+        Format format =
+                Format.createTextContainerFormat(
+                        vssId != null ? vssId : caption.getITag(),
+                        /* label= */ null,
+                        MimeTypes.APPLICATION_MP4,
+                        // The mp4 says tx3g, but the sample is a WebVTT document (see ChunkExtractorWrapper.BindingTrackOutput#format)
+                        MimeTypes.TEXT_VTT,
+                        /* codecs= */ null,
+                        Format.NO_VALUE,
+                        /* selectionFlags= */ 0,
+                        C.ROLE_FLAG_SUBTITLE,
+                        name != null ? name : caption.getLanguage(),
+                        Format.NO_VALUE);
+
+        return new RepresentationInfo(format, caption.getUrl(), parseSegmentTemplate(caption), null, new ArrayList<>(),
+                Representation.REVISION_ID_DEFAULT);
+    }
+
     protected Representation buildRepresentation(
             RepresentationInfo representationInfo,
             String label,
@@ -666,6 +716,11 @@ public class DashManifestParser2 {
 
         //fixOTF(mediaItem);
 
+        if (isLiveCaption(mediaItem)) {
+            mLiveCaptions.add(mediaItem);
+            return;
+        }
+
         Set<MediaFormat> placeholder = null;
         String mimeType = MediaFormatUtils.extractMimeType(mediaItem);
         if (mimeType != null) {
@@ -688,6 +743,12 @@ public class DashManifestParser2 {
         if (placeholder != null) {
             placeholder.add(mediaItem); // NOTE: reverse order
         }
+    }
+
+    private static boolean isLiveCaption(MediaFormat mediaItem) {
+        return LIVE_CAPTION_VTT_ITAG.equals(mediaItem.getITag())
+                && Helpers.startsWith(mediaItem.getMimeType(), "text/")
+                && MediaFormatUtils.isLiveMedia(mediaItem);
     }
 
     private Set<MediaFormat> getMP4Audios(String language) {
