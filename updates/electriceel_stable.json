@@ -1,13 +1,28 @@
 {
   "package": {
     "downloadUrlList_arm64-v8a": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.68.7/ElectricEel_stable_32.68.7_arm64-v8a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.70.2/ElectricEel_stable_32.70.2_arm64-v8a.apk"
     ],
     "downloadUrlList_armeabi-v7a": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.68.7/ElectricEel_stable_32.68.7_armeabi-v7a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.70.2/ElectricEel_stable_32.70.2_armeabi-v7a.apk"
     ],
     "downloadUrlList": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.68.7/ElectricEel_stable_32.68.7_armeabi-v7a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.70.2/ElectricEel_stable_32.70.2_armeabi-v7a.apk"
+    ]
+  },
+  "32.70.2": {
+    "versionCode": 2458,
+    "changelog": [
+      "Note v7a is the 32-bit build, and should be considered the default choice.",
+      "Stopped videos replaying from 0:00 when a stall check fires at their end",
+      "Fixed the playback of ultra low latency live streams",
+      "Implemented Add option to break Shorts into their own History section #22",
+      "Added captions to live streams",
+      "Fixed Play from start opening live streams at the live edge",
+      "Implemented Convert some of the \"Hide content\" options into \"Hide or mark content\" options #29",
+      "Fixed Shorts showing despite settings #68",
+      "Added a local Hide(local) option to every video card, hidden per section",
+      "Added an Unhide sidebar section, off by default, with a row per section"
     ]
   },
   "32.68.7": {
