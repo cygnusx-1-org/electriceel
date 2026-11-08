@@ -562,6 +562,29 @@ public class FormatAttemptsTest {
         assertTrue(attempt.isNull("videoBitrateKbps"));
     }
 
+    /**
+     * Why each attempt began: the first formats, others (a fallback), the same again after a failure was recorded (e.g. the stall
+     * of 9lKpEOEbr0U, whose second attempt had the same formats as its first)
+     */
+    @Test
+    public void eachAttemptSaysWhyItBegan() throws Exception {
+        FormatAttempts.onNewVideo(getContext(), "first");
+        FormatAttempts.onTracks(VP9_4K, FormatItem.AUDIO_HQ_MP4A);
+        FormatAttempts.onTracks(AVC_FHD, FormatItem.AUDIO_HQ_MP4A);
+        failure("first").record();
+        FormatAttempts.onTracks(AVC_FHD, FormatItem.AUDIO_HQ_MP4A);
+        Video video = new Video();
+        video.videoId = "first";
+        PlayerFailure.create(getContext(), PlayerFailure.KIND_STALL).video(video).record();
+
+        JSONArray attempted = mLog.readAll().get(1).getJSONObject("formats").getJSONArray("attempted");
+
+        assertEquals(3, attempted.length());
+        assertEquals(FormatAttempts.REASON_FIRST, attempted.getJSONObject(0).getString("reason"));
+        assertEquals(FormatAttempts.REASON_FORMATS_CHANGED, attempted.getJSONObject(1).getString("reason"));
+        assertEquals(FormatAttempts.REASON_AFTER_FAILURE, attempted.getJSONObject(2).getString("reason"));
+    }
+
     private static PlayerFailure failure(String videoId) {
         Video video = new Video();
         video.videoId = videoId;

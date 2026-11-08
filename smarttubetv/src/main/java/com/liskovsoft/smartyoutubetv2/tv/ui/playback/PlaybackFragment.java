@@ -18,7 +18,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.leanback.app.RowsSupportFragment;
-import androidx.leanback.media.PlayerAdapter;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.ClassPresenterSelector;
 import androidx.leanback.widget.HeaderItem;
@@ -37,6 +36,7 @@ import com.github.vkay94.dtpv.youtube.YouTubeOverlay;
 import com.github.vkay94.dtpv.youtube.YouTubeOverlay.PerformListener;
 import com.google.android.exoplayer2.ControlDispatcher;
 import com.google.android.exoplayer2.DefaultControlDispatcher;
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.ext.leanback.LeanbackPlayerAdapter;
@@ -54,6 +54,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.ChatReceiver
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.SeekBarSegment;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.PlaybackPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.PlaybackView;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerCommands;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStart;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.controller.ExoPlayerController;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.other.CensoredWords.Range;
@@ -497,7 +498,26 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
     }
 
     private void createPlayerGlue() {
-        PlayerAdapter playerAdapter = new LeanbackPlayerAdapter(getContext(), mPlayer, UPDATE_DELAY_MS); // NOTE: possible context memory leak
+        LeanbackPlayerAdapter playerAdapter = new LeanbackPlayerAdapter(getContext(), mPlayer, UPDATE_DELAY_MS); // NOTE: possible context memory leak
+        // Its plays, pauses and seeks (the player's controls, the remote's keys) bypass ExoPlayerController: for a failure (see PlayerCommands)
+        playerAdapter.setControlDispatcher(new DefaultControlDispatcher() {
+            @Override
+            public boolean dispatchSetPlayWhenReady(Player player, boolean playWhenReady) {
+                if (player.getPlayWhenReady() != playWhenReady) {
+                    PlayerCommands.onPlayWhenReady(playWhenReady, PlayerCommands.SOURCE_APP, player.getCurrentPosition());
+                }
+
+                return super.dispatchSetPlayWhenReady(player, playWhenReady);
+            }
+
+            @Override
+            public boolean dispatchSeekTo(Player player, int windowIndex, long positionMs) {
+                // E.g. a play of an ended video goes to its start (C.TIME_UNSET: the default position)
+                PlayerCommands.onSeek(PlayerCommands.SOURCE_APP, positionMs != C.TIME_UNSET ? positionMs : 0);
+
+                return super.dispatchSeekTo(player, windowIndex, positionMs);
+            }
+        });
 
         OnActionClickedListener playerActionListener = new PlayerActionListener();
         mPlayerGlue = new VideoPlayerGlue(getContext(), playerAdapter, playerActionListener); // NOTE: possible context memory leak
@@ -681,7 +701,20 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
                     return false;
                 }
 
+                // E.g. a Bluetooth speaker's play (AVRCP), for a failure (see PlayerCommands)
+                if (player.getPlayWhenReady() != playWhenReady) {
+                    PlayerCommands.onPlayWhenReady(playWhenReady, PlayerCommands.SOURCE_MEDIA_SESSION, player.getCurrentPosition());
+                }
+
                 return super.dispatchSetPlayWhenReady(player, playWhenReady);
+            }
+
+            @Override
+            public boolean dispatchSeekTo(Player player, int windowIndex, long positionMs) {
+                // E.g. a play of an ended video goes to its start (C.TIME_UNSET: the default position)
+                PlayerCommands.onSeek(PlayerCommands.SOURCE_MEDIA_SESSION, positionMs != C.TIME_UNSET ? positionMs : 0);
+
+                return super.dispatchSeekTo(player, windowIndex, positionMs);
             }
         });
     }

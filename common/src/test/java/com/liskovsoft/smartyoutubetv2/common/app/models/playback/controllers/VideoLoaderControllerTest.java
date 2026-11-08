@@ -1,7 +1,10 @@
 package com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers;
 
+import android.os.Looper;
+
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItemFormatInfo;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
+import com.liskovsoft.smartyoutubetv2.common.app.models.playback.listener.PlayerEventListener;
 import com.liskovsoft.smartyoutubetv2.common.app.views.PlaybackView;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailure;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailureLog;
@@ -20,6 +23,7 @@ import org.robolectric.annotation.Config;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,6 +31,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.robolectric.Shadows.shadowOf;
 
 /**
  * A live stream a client answered OK for with nothing to play it from (e.g. TV's for some music channels, SmartTube #6393)
@@ -195,6 +200,94 @@ public class VideoLoaderControllerTest {
 
         assertEquals(0, controller.mReloads);
         assertEquals(0, live.mReloads);
+    }
+
+    /**
+     * A stopped video is left a second before its end. At its length, whole seconds past its media (9lKpEOEbr0U: 1972 s of
+     * 1971.719 s), the player never got ready over DASH, and the stall check reloaded it from 0:00
+     */
+    @Test
+    public void aStoppedVideoIsLeftASecondBeforeItsEnd() throws Exception {
+        assertEquals(1_971_000L, stopPlayback(video("9lKpEOEbr0U"), 1_972_000));
+    }
+
+    @Test
+    public void aStoppedLiveStreamIsLeftAtItsEnd() throws Exception {
+        Video live = video("WsDyRAPFBC8");
+        live.isLive = true;
+
+        assertEquals(7_200_000L, stopPlayback(live, 7_200_000));
+    }
+
+    /**
+     * Not known yet (unset), or too short to go back from: where it was left before
+     */
+    @Test
+    public void aStoppedVideoWithoutALengthToGoBackFromIsLeftAtItsEnd() throws Exception {
+        assertEquals(-1L, stopPlayback(video("unknown"), -1));
+        assertEquals(800L, stopPlayback(video("short"), 800));
+    }
+
+    /**
+     * A reload marks the video it opens again: it stays where it was (see VideoStateController)
+     */
+    @Test
+    public void aReloadMarksTheVideoItOpensAgain() {
+        Video video = video("9lKpEOEbr0U");
+        Video[] opened = {null};
+        PlaybackView player = stub(PlaybackView.class, Collections.<String, Object>singletonMap("isEngineInitialized", true));
+        TestController controller = new TestController(video) {
+            @Override
+            public PlaybackView getPlayer() {
+                return player;
+            }
+
+            @Override
+            protected PlayerEventListener getMainController() {
+                return (PlayerEventListener) Proxy.newProxyInstance(PlayerEventListener.class.getClassLoader(),
+                        new Class<?>[]{PlayerEventListener.class}, (proxy, method, args) -> {
+                            if ("onNewVideo".equals(method.getName())) {
+                                opened[0] = (Video) args[0];
+                            }
+
+                            return method.getReturnType() == boolean.class ? false : null;
+                        });
+            }
+        };
+
+        controller.reloadVideo(0);
+        shadowOf(Looper.getMainLooper()).idle();
+
+        assertTrue(opened[0] == video && video.fromReload);
+    }
+
+    /**
+     * @return where the player was sent
+     */
+    private static long stopPlayback(Video video, long durationMs) throws Exception {
+        long[] positionMs = {Long.MIN_VALUE};
+        PlaybackView player = (PlaybackView) Proxy.newProxyInstance(PlaybackView.class.getClassLoader(), new Class<?>[]{PlaybackView.class},
+                (proxy, method, args) -> {
+                    if ("getDurationMs".equals(method.getName())) {
+                        return durationMs;
+                    } else if ("setPositionMs".equals(method.getName())) {
+                        positionMs[0] = (long) args[0];
+                    }
+
+                    return method.getReturnType() == boolean.class ? false : null;
+                });
+        TestController controller = new TestController(video) {
+            @Override
+            public PlaybackView getPlayer() {
+                return player;
+            }
+        };
+
+        Method method = VideoLoaderController.class.getDeclaredMethod("stopPlayback");
+        method.setAccessible(true);
+        method.invoke(controller);
+
+        return positionMs[0];
     }
 
     private static void setFormats(VideoLoaderController controller, String videoId, long streamsExpireTimeMs) throws Exception {

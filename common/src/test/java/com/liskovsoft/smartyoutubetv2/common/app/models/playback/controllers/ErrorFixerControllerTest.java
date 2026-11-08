@@ -1,6 +1,7 @@
 package com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers;
 
 import android.net.Uri;
+import android.os.Looper;
 import android.os.SystemClock;
 
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.PoTokenError;
@@ -42,12 +43,16 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 import java.net.SocketTimeoutException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 28)
@@ -408,6 +413,89 @@ public class ErrorFixerControllerTest {
         assertEquals(null, getPlayerData().getTempVideoFormat());
     }
 
+    /**
+     * A seek while paused, e.g. a video stopped at its end: no stall check. Paused where it never gets ready, the "stall" reloaded
+     * the video from 0:00 (9lKpEOEbr0U over DASH)
+     */
+    @Test
+    public void aSeekWhilePausedIsNoStall() throws Exception {
+        TestController controller = new TestController(video("9lKpEOEbr0U"), null, playerStub(false));
+        controller.onPlay();
+        controller.onPause();
+
+        controller.onSeekEnd();
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(30));
+
+        assertEquals(0, mLog.readAll().size());
+    }
+
+    /**
+     * A seek while playing that doesn't get ready in 20 s is a stall, as before
+     */
+    @Test
+    public void aSeekWhilePlayingThatHangsIsAStall() throws Exception {
+        TestController controller = new TestController(video("9lKpEOEbr0U"), null, playerStub(true));
+        controller.onPlay();
+
+        controller.onSeekEnd();
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(21));
+
+        List<JSONObject> events = mLog.readAll();
+
+        assertEquals(1, events.size());
+        assertEquals("stall", events.get(0).getString("kind"));
+        assertEquals(Arrays.asList("reload_video"), getActions(events.get(0)));
+    }
+
+    /**
+     * A video that played, stalled at its end (over DASH, past its whole-second length): it ended, and isn't reloaded from 0:00
+     */
+    @Test
+    public void aStallAtTheEndOfAVideoEndsIt() throws Exception {
+        TestController controller = new TestController(video("9lKpEOEbr0U"), null, playerStub(atMs(1_972_000, 1_972_000)));
+        controller.onPlay();
+
+        controller.onLongBuffering();
+
+        assertEquals(Arrays.asList("play_end"), getActions(mLog.readAll().get(0)));
+        assertEquals(1, controller.mPlayEnds);
+    }
+
+    /**
+     * One that never played is stuck, even near its end
+     */
+    @Test
+    public void aStallOfAVideoThatNeverPlayedIsntItsEnd() throws Exception {
+        TestController controller = new TestController(video("9lKpEOEbr0U"), null, playerStub(atMs(1_972_000, 1_972_000)));
+
+        controller.onLongBuffering();
+
+        assertEquals(Arrays.asList("switch_next_client_now", "reload_video"), getActions(mLog.readAll().get(0)));
+        assertEquals(0, controller.mPlayEnds);
+    }
+
+    /**
+     * Further from its end, a stall is reloaded, as before
+     */
+    @Test
+    public void aStallBeforeTheEndOfAVideoIsReloaded() throws Exception {
+        TestController controller = new TestController(video("9lKpEOEbr0U"), null, playerStub(atMs(1_960_000, 1_972_000)));
+        controller.onPlay();
+
+        controller.onLongBuffering();
+
+        assertEquals(Arrays.asList("reload_video"), getActions(mLog.readAll().get(0)));
+        assertEquals(0, controller.mPlayEnds);
+    }
+
+    private static Map<String, Object> atMs(long positionMs, long durationMs) {
+        Map<String, Object> answers = new HashMap<>();
+        answers.put("getPositionMs", positionMs);
+        answers.put("getDurationMs", durationMs);
+
+        return answers;
+    }
+
     @Test
     public void stallsFarApartOnlyReload() throws Exception {
         TestController controller = new TestController(video("g_jLBnnQuwE"), QUALITIES, QUALITIES.get(0));
@@ -519,6 +607,23 @@ public class ErrorFixerControllerTest {
     }
 
     /**
+     * @param playWhenReady it plays, or is to once it's ready
+     */
+    private static PlaybackView playerStub(boolean playWhenReady) {
+        return playerStub(Collections.singletonMap("getPlayWhenReady", playWhenReady));
+    }
+
+    /**
+     * {@link #playerStub()} with these answers, by method name
+     */
+    private static PlaybackView playerStub(Map<String, Object> answers) {
+        PlaybackView stub = playerStub();
+
+        return (PlaybackView) Proxy.newProxyInstance(PlaybackView.class.getClassLoader(), new Class<?>[]{PlaybackView.class},
+                (proxy, method, args) -> answers.containsKey(method.getName()) ? answers.get(method.getName()) : method.invoke(stub, args));
+    }
+
+    /**
      * @param positionMs where the playback is, e.g. a resumed video's saved position
      */
     private static PlaybackView playerStub(List<FormatItem> videoFormats, FormatItem videoFormat, long positionMs) {
@@ -554,6 +659,7 @@ public class ErrorFixerControllerTest {
     private static class TestController extends ErrorFixerController {
         private final PlaybackView mPlayer;
         private final Video mVideo;
+        private int mPlayEnds;
 
         private TestController(Video video) throws Exception {
             this(video, (String) null);
@@ -594,6 +700,21 @@ public class ErrorFixerControllerTest {
         @Override
         public Video getVideo() {
             return mVideo;
+        }
+
+        /**
+         * Counts the ends it's told of: the rest does nothing
+         */
+        @Override
+        protected PlayerEventListener getMainController() {
+            return (PlayerEventListener) Proxy.newProxyInstance(PlayerEventListener.class.getClassLoader(),
+                    new Class<?>[]{PlayerEventListener.class}, (proxy, method, args) -> {
+                        if ("onPlayEnd".equals(method.getName())) {
+                            mPlayEnds++;
+                        }
+
+                        return method.getReturnType() == boolean.class ? false : null;
+                    });
         }
     }
 }

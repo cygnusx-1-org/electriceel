@@ -43,6 +43,18 @@ public final class FormatAttempts {
      */
     public static final String STATUS_UNKNOWN = "unknown";
     /**
+     * Why an attempt began: the video's first formats
+     */
+    static final String REASON_FIRST = "first";
+    /**
+     * Other formats than the last attempt's (e.g. another quality, or a fallback)
+     */
+    static final String REASON_FORMATS_CHANGED = "formats_changed";
+    /**
+     * The same formats again, after the last attempt failed or a failure of the video was recorded (e.g. a stall)
+     */
+    static final String REASON_AFTER_FAILURE = "after_failure";
+    /**
      * Of the requested one: no format like it was tried
      */
     public static final String STATUS_NOT_ATTEMPTED = "not_attempted";
@@ -174,6 +186,10 @@ public final class FormatAttempts {
          * Its requests are its source's (see sSource) from when its tracks were known
          */
         long source = -1;
+        /**
+         * Why it began (see REASON_FIRST)
+         */
+        String reason = REASON_FIRST;
 
         Attempt(@Nullable String video, @Nullable String audio) {
             this.video = video;
@@ -224,6 +240,10 @@ public final class FormatAttempts {
         }
 
         useSource(attempt);
+
+        if (last != null) {
+            attempt.reason = last.isSameFormats(attempt) ? REASON_AFTER_FAILURE : REASON_FORMATS_CHANGED;
+        }
 
         // Switched while playing (e.g. another quality): this one plays from now
         boolean isPlaying = last != null && last.playingSince >= 0;
@@ -841,6 +861,7 @@ public final class FormatAttempts {
         result.put("hosts", new JSONArray(attempt.hosts));
         result.put("client", nullable(attempt.client));
         result.put("protocol", nullable(attempt.protocol));
+        result.put("reason", attempt.reason);
 
         return result;
     }

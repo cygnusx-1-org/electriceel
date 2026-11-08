@@ -94,9 +94,24 @@ public class SabrManifestParser {
                 formatInfo.getVisitorCookie());
     }
 
+    /**
+     * A video's: its media's, to the ms (see MediaItemFormatInfo#getMediaDurationMs()). Its whole seconds (lengthSeconds) are
+     * rounded: past the end, or short of it. A live stream's: its lengthSeconds, as before
+     */
     private static long getDurationMs(MediaItemFormatInfo formatInfo) {
         long lenSeconds = Helpers.parseLong(formatInfo.getLengthSeconds());
-        return lenSeconds > 0 ? lenSeconds * 1_000 : C.TIME_UNSET;
+
+        if (lenSeconds <= 0) {
+            return C.TIME_UNSET;
+        }
+
+        if (formatInfo.isLive()) {
+            return lenSeconds * 1_000;
+        }
+
+        long durationMs = formatInfo.getMediaDurationMs();
+
+        return durationMs > 0 ? durationMs : lenSeconds * 1_000;
     }
 
     private Pair<Period, Long> parsePeriod(MediaItemFormatInfo formatInfo) {

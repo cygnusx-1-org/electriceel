@@ -411,6 +411,10 @@ public class VideoStateController extends BasePlayerController {
             return;
         }
 
+        // A reload stays where it was. "Ended" near its end, it played again from 0:00
+        boolean isReload = item.fromReload;
+        item.fromReload = false;
+
         if (item.fromCrashRestorer) {
             item.fromCrashRestorer = false;
             return;
@@ -421,7 +425,7 @@ public class VideoStateController extends BasePlayerController {
         // Reset position of music videos
         boolean isShort = state != null && state.durationMs < MUSIC_VIDEO_MAX_DURATION_MS
                 && !getPlayerTweaksData().isRememberPositionOfShortVideosEnabled();
-        boolean isVideoEnded = state != null && state.durationMs - state.positionMs < 3_000;
+        boolean isVideoEnded = !isReload && state != null && state.durationMs - state.positionMs < 3_000;
         boolean isLive = item.isLive;
 
         if (getPlayerTweaksData().isRememberPositionOfLiveVideosEnabled() && item.isFullLive()) {
@@ -607,7 +611,7 @@ public class VideoStateController extends BasePlayerController {
 
         // Do I need to check that item isn't live? (state != null && !item.isLive)
         if (state != null) {
-            getPlayer().setPositionMs(state.positionMs);
+            getPlayer().setPositionMs(item.isLive ? state.positionMs : getBeforeEndMs(state.positionMs));
         }
 
         if (!mIsPlayBlocked) {
@@ -617,6 +621,16 @@ public class VideoStateController extends BasePlayerController {
                 getPlayer().showOverlay(!playEnabled);
             }
         }
+    }
+
+    /**
+     * A video's position, no later than a second before its end (as a stopped one is left, see VideoLoaderController): at its
+     * length, past its media, the player doesn't get ready
+     */
+    private long getBeforeEndMs(long positionMs) {
+        long lastMs = getPlayer().getDurationMs() - VideoLoaderController.STOP_BEFORE_END_MS;
+
+        return lastMs > 0 && positionMs > lastMs ? lastMs : positionMs;
     }
 
     private void updateHistory() {

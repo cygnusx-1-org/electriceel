@@ -4,6 +4,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.hardware.display.DisplayManager;
+import android.media.AudioAttributes;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.MediaCodecInfo;
@@ -31,6 +32,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
@@ -128,6 +130,8 @@ public final class DeviceCapabilities {
             if (audioManager != null) {
                 // E.g. the HDMI's channels change with the receiver or TV behind it
                 result.put("audioOutputs", buildAudioOutputs(audioManager));
+                // E.g. a Bluetooth speaker connected
+                result.put("mediaOutput", nullable(getMediaOutput(audioManager)));
             }
         } catch (JSONException | RuntimeException e) {
             putError(result, e);
@@ -250,8 +254,65 @@ public final class DeviceCapabilities {
         MediaRouter mediaRouter = (MediaRouter) context.getSystemService(Context.MEDIA_ROUTER_SERVICE);
         MediaRouter.RouteInfo route = mediaRouter != null ? mediaRouter.getSelectedRoute(MediaRouter.ROUTE_TYPE_LIVE_AUDIO) : null;
         result.put("currentRoute", route != null ? getRouteTypeName(route.getDeviceType()) : JSONObject.NULL);
+        result.put("mediaOutput", nullable(getMediaOutput(audioManager)));
 
         return result;
+    }
+
+    /**
+     * Where the sound of a video goes, by type as the outputs' (e.g. bluetooth_a2dp, hdmi): the route above can't tell HDMI on a
+     * TV box. Android 13+ says. Before, it's the output media goes to: a connected Bluetooth one, else wired or USB, else HDMI,
+     * else the speaker. Null with none of them
+     */
+    @Nullable
+    static String getMediaOutput(AudioManager audioManager) {
+        if (VERSION.SDK_INT >= 33) {
+            AudioAttributes media = new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MOVIE)
+                    .build();
+            List<AudioDeviceInfo> devices = audioManager.getAudioDevicesForAttributes(media);
+
+            if (!devices.isEmpty()) {
+                return getDeviceTypeName(devices.get(0).getType());
+            }
+        }
+
+        AudioDeviceInfo best = null;
+
+        for (AudioDeviceInfo device : audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)) {
+            if (getMediaOutputRank(device.getType()) > (best != null ? getMediaOutputRank(best.getType()) : 0)) {
+                best = device;
+            }
+        }
+
+        return best != null ? getDeviceTypeName(best.getType()) : null;
+    }
+
+    /**
+     * Which output media goes to when several are there: the higher, the more it's preferred. 0 for none that takes it
+     */
+    private static int getMediaOutputRank(int type) {
+        switch (type) {
+            case AudioDeviceInfo.TYPE_BLUETOOTH_A2DP:
+            case 26: // AudioDeviceInfo.TYPE_BLE_HEADSET, API 31
+            case 27: // AudioDeviceInfo.TYPE_BLE_SPEAKER, API 31
+                return 4;
+            case AudioDeviceInfo.TYPE_WIRED_HEADPHONES:
+            case AudioDeviceInfo.TYPE_WIRED_HEADSET:
+            case AudioDeviceInfo.TYPE_USB_DEVICE:
+            case AudioDeviceInfo.TYPE_USB_ACCESSORY:
+            case AudioDeviceInfo.TYPE_USB_HEADSET:
+                return 3;
+            case AudioDeviceInfo.TYPE_HDMI:
+            case AudioDeviceInfo.TYPE_HDMI_ARC:
+            case 29: // AudioDeviceInfo.TYPE_HDMI_EARC, API 31
+                return 2;
+            case AudioDeviceInfo.TYPE_BUILTIN_SPEAKER:
+                return 1;
+            default:
+                return 0;
+        }
     }
 
     private static JSONArray buildAudioOutputs(AudioManager audioManager) throws JSONException {

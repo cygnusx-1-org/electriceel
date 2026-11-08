@@ -216,6 +216,7 @@ public final class DiagnosticsReport {
         autoFrameRate.put("pauseMs", playerData.getAfrPauseMs());
         settings.put("autoFrameRate", autoFrameRate);
 
+        settings.put("playbackMode", getPlaybackModeName(playerData.getPlaybackMode()));
         settings.put("youtubeClientsOrder", new JSONArray(serviceData.getClientOrder()));
         settings.put("currentClient", YouTubeServiceManager.getCurrentClientName());
         // The ones YouTube is asked for: chosen in the app, else the system's
@@ -262,8 +263,33 @@ public final class DiagnosticsReport {
         result.put("audioDelayMs", playerData.isAudioDelayEnabled() ? playerData.getAudioDelayMs() : 0);
         result.put("audioTimeStretching", tweaksData.isAudioTimeStretchingEnabled());
         result.put("audioSyncFix", tweaksData.isAudioSyncFixEnabled());
+        result.put("playbackMode", getPlaybackModeName(playerData.getPlaybackMode()));
 
         return result;
+    }
+
+    /**
+     * What's done at the end of a video (Playback mode): pause and list leave the player at its end
+     */
+    private static String getPlaybackModeName(int playbackMode) {
+        switch (playbackMode) {
+            case PlayerConstants.PLAYBACK_MODE_ALL:
+                return "all";
+            case PlayerConstants.PLAYBACK_MODE_ONE:
+                return "one";
+            case PlayerConstants.PLAYBACK_MODE_SHUFFLE:
+                return "shuffle";
+            case PlayerConstants.PLAYBACK_MODE_LIST:
+                return "list";
+            case PlayerConstants.PLAYBACK_MODE_REVERSE_LIST:
+                return "reverse_list";
+            case PlayerConstants.PLAYBACK_MODE_PAUSE:
+                return "pause";
+            case PlayerConstants.PLAYBACK_MODE_CLOSE:
+                return "close";
+            default:
+                return "unknown";
+        }
     }
 
     private static String getBufferTypeName(int bufferType) {

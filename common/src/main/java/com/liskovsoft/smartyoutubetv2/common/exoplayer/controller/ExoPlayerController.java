@@ -33,6 +33,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.FormatAttempts;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.LastState;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlaybackHealth;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerCommands;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailure;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.SilenceDetector;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStarts;
@@ -467,6 +468,7 @@ public class ExoPlayerController implements Player.EventListener {
     public void setPositionMs(long positionMs) {
         // Url list videos at load stage has undefined (-1) length. So, we need to remove length check.
         if (mPlayer != null && positionMs >= 0 && positionMs <= getDurationMs()) {
+            PlayerCommands.onSeek(PlayerCommands.SOURCE_APP, positionMs);
             mPlayer.seekTo(positionMs);
         }
     }
@@ -486,6 +488,10 @@ public class ExoPlayerController implements Player.EventListener {
 
     public void setPlayWhenReady(boolean play) {
         if (mPlayer != null) {
+            if (mPlayer.getPlayWhenReady() != play) {
+                PlayerCommands.onPlayWhenReady(play, PlayerCommands.SOURCE_APP, mPlayer.getCurrentPosition());
+            }
+
             mPlayer.setPlayWhenReady(play);
         }
     }
@@ -703,6 +709,8 @@ public class ExoPlayerController implements Player.EventListener {
         if (BuildConfig.DEBUG) {
             Log.d(TAG, "onPlayerStateChanged: " + TrackSelectorUtil.stateToString(playbackState));
         }
+
+        PlayerCommands.onState(playbackState, getPositionMs());
 
         boolean isPlayPressed = Player.STATE_READY == playbackState && playWhenReady;
         boolean isPausePressed = Player.STATE_READY == playbackState && !playWhenReady;

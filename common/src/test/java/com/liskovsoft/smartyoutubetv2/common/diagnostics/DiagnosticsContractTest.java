@@ -59,6 +59,7 @@ public class DiagnosticsContractTest {
         mLog = PlayerFailureLog.useForTesting(mFolder.getRoot());
         mVideoStarts = VideoStartLog.useForTesting(mFolder.getRoot());
         FormatAttempts.resetForTesting();
+        PlayerCommands.resetForTesting();
         ProtectionStatuses.resetForTesting(null);
         // Cronet can't load under Robolectric
         mSavedEngine = PlayerTweaksData.instance(getContext()).getPlayerDataSource();
@@ -69,6 +70,7 @@ public class DiagnosticsContractTest {
     public void tearDown() {
         FormatAttempts.sClock = System::currentTimeMillis;
         FormatAttempts.resetForTesting();
+        PlayerCommands.resetForTesting();
         ProtectionStatuses.resetForTesting(null);
         PlayerFailureLog.useForTesting(null);
         VideoStartLog.useForTesting(null);
@@ -110,6 +112,12 @@ public class DiagnosticsContractTest {
 
         // What the server made of the poToken, with a failure and in a start: checked against the schema
         assertTrue(hasProtection);
+        // What the player was told and did, why an attempt began, the playback mode and where the sound goes: checked too
+        assertTrue(failures.toString().contains("\"commands\""));
+        assertTrue(failures.toString().contains("\"" + FormatAttempts.REASON_AFTER_FAILURE + "\""));
+        assertTrue(failures.toString().contains("\"playbackMode\""));
+        assertTrue(report.getJSONObject("app").getJSONObject("settings").has("playbackMode"));
+        assertTrue(report.getJSONObject("device").getJSONObject("audioOutput").has("mediaOutput"));
         assertTrue(report.getJSONArray("videoStarts").toString().contains("\"" + VideoStarts.STAGE_PROTECTION + "\""));
 
         assertEquals(new HashSet<>(Arrays.asList(PlayerFailure.KIND_ENGINE_ERROR, PlayerFailure.KIND_FORMAT_ERROR,
@@ -277,6 +285,13 @@ public class DiagnosticsContractTest {
         now[0] += 2_000;
         FormatAttempts.onPlaying(true);
         FormatAttempts.onStreamFailed(false);
+        // The same formats again, after the failure; then what the player was told and did
+        FormatAttempts.onTracks(VP9_4K, FormatItem.AUDIO_51_EC3);
+        PlayerCommands.onNewVideo("video");
+        PlayerCommands.onSeek(PlayerCommands.SOURCE_APP, 211_000);
+        PlayerCommands.onState(com.google.android.exoplayer2.Player.STATE_BUFFERING, 211_000);
+        PlayerCommands.onState(com.google.android.exoplayer2.Player.STATE_ENDED, 212_000);
+        PlayerCommands.onPlayWhenReady(true, PlayerCommands.SOURCE_MEDIA_SESSION, 212_000);
         // Streamed by SABR: the server took the poToken, then wanted it again
         ProtectionStatuses.onStatus("video", PoTokenStatus.OK);
         ProtectionStatuses.onStatus("video", PoTokenStatus.PENDING);

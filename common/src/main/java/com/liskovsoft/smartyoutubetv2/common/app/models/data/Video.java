@@ -103,6 +103,10 @@ public final class Video {
     public long pendingPosMs;
     public boolean fromQueue;
     public boolean fromCrashRestorer;
+    /**
+     * Opened again by a reload (e.g. ErrorFixerController's): it stays where it was, even near its end (see VideoStateController)
+     */
+    public boolean fromReload;
     public boolean isPending;
     public boolean finishOnEnded;
     public boolean incognito;

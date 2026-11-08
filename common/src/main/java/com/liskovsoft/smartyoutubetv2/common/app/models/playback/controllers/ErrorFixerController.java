@@ -28,6 +28,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.BasePlayerController;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.listener.PlayerEventListener;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.FormatAttempts;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerCommands;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailure;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailureLog;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStarts;
@@ -50,6 +51,11 @@ import java.util.Locale;
 public class ErrorFixerController extends BasePlayerController implements OnLongBuffering {
     private static final String TAG = ErrorFixerController.class.getSimpleName();
     private static final long STREAM_END_THRESHOLD_MS = 180_000;
+    /**
+     * A video stalled this close to its end has ended: nothing's left to load there (e.g. its whole-second length is past its
+     * media), and a reload played it again from 0:00
+     */
+    private static final long VIDEO_END_THRESHOLD_MS = 2_000;
     private static final int MAX_SABR_ERROR_FIX_ATTEMPTS = 3;
     private static final int MAX_NETWORK_ERROR_RELOADS = 3;
     /**
@@ -140,7 +146,7 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
     }
 
     private void runLongBufferingAction(PlayerFailure failure) {
-        if (isStreamEnded()) {
+        if (isStreamEnded() || isAtVideoEnd()) {
             failure.action("play_end");
             getMainController().onPlayEnd();
         } else if (isOfflineVideo() && isSubtitlesEnabled()) {
@@ -203,7 +209,11 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
         mBufferingDetector.reset();
         // Needed to detect additional buffering (e.g. hanged clients).
         // Don't worry this event will be canceled by subsequent onPlay() or onPause() if everything is ok.
-        mBufferingDetector.onStartBuffering();
+        // Only when it plays: paused where it never gets ready (e.g. past the media), neither comes, and the "stall" reloaded the
+        // video from 0:00. Played from there, its buffering is checked (see onBuffering())
+        if (getPlayer() != null && getPlayer().getPlayWhenReady()) {
+            mBufferingDetector.onStartBuffering();
+        }
 
         // The jump isn't the audio playing: measured from here
         if (getPlayer() != null) {
@@ -245,6 +255,7 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
     public void onNewVideo(Video item) {
         mBufferingDetector.start();
         FormatAttempts.onNewVideo(getContext(), item != null ? item.videoId : null);
+        PlayerCommands.onNewVideo(item != null ? item.videoId : null);
 
         if (item != null && item.videoId != null && item.videoId.equals(mDecoderErrorVideoId)) {
             // The same video reloaded (e.g. on a SABR error). The reload cleared the temp formats, the fallback still applies.
@@ -914,6 +925,19 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
 
         return getVideo().isLiveEnd && getPlayer().getDurationMs() > 0
                 && getPlayer().getDurationMs() - getPlayer().getPositionMs() < STREAM_END_THRESHOLD_MS;
+    }
+
+    /**
+     * A video (not a live stream) that played, stalled at its end: it ended. One that never played is stuck at its start
+     */
+    private boolean isAtVideoEnd() {
+        if (getPlayer() == null || getVideo() == null || getVideo().isLive || !mBufferingDetector.isPlayable()) {
+            return false;
+        }
+
+        long durationMs = getPlayer().getDurationMs();
+
+        return durationMs > 0 && durationMs - getPlayer().getPositionMs() < VIDEO_END_THRESHOLD_MS;
     }
 
     private boolean isOfflineVideo() {

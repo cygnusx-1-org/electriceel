@@ -98,7 +98,10 @@ public class DashManifestParser2 {
 
     /**
      * The period ends at this duration and the chunk source drops every sample past it (see DefaultDashChunkSource.newMediaChunk).<br/>
-     * lengthSeconds is rounded to the second, so the end of the longest track is used when it's longer (approxDurationMs is exact)
+     * lengthSeconds is rounded to the second, so a video's is the end of its longest track (approxDurationMs is exact, see
+     * MediaItemFormatInfo#getMediaDurationMs()). Rounded down, lengthSeconds cut the last second off (#43); rounded up, it's past
+     * the media (9lKpEOEbr0U: 1972 of 1971.792 s), where a video stopped at its length never got ready, and the stall check
+     * reloaded it from 0:00
      */
     private static long getDurationMs(MediaItemFormatInfo formatInfo) {
         long lenSeconds = Helpers.parseLong(formatInfo.getLengthSeconds());
@@ -107,18 +110,13 @@ public class DashManifestParser2 {
             return C.TIME_UNSET;
         }
 
-        long durationMs = lenSeconds * 1_000;
-
-        if (!formatInfo.isLive() && formatInfo.getAdaptiveFormats() != null) {
-            for (MediaFormat format : formatInfo.getAdaptiveFormats()) {
-                // Rounding adds half a second at most, a longer one is bogus
-                if (format != null && format.getApproxDurationMs() <= lenSeconds * 1_000 + 1_000) {
-                    durationMs = Math.max(durationMs, format.getApproxDurationMs());
-                }
-            }
+        if (formatInfo.isLive()) {
+            return lenSeconds * 1_000;
         }
 
-        return durationMs;
+        long durationMs = formatInfo.getMediaDurationMs();
+
+        return durationMs > 0 ? durationMs : lenSeconds * 1_000;
     }
 
     private Pair<Period, Long> parsePeriod(MediaItemFormatInfo formatInfo) {

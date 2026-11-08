@@ -75,6 +75,10 @@ public final class PlayerFailure {
     private JSONObject mPlaying;
     private JSONObject mSettings;
     private JSONObject mDetails;
+    /**
+     * What the player was told and did before it (see PlayerCommands)
+     */
+    private JSONArray mCommands;
     private long mTs;
     /**
      * Of the process it happened in, -1 when not known (see #withoutState)
@@ -98,6 +102,7 @@ public final class PlayerFailure {
         PlayerFailure failure = new PlayerFailure(context, kind);
         failure.mSinceProcessStartMs = VideoStarts.getSinceProcessStartMs();
         failure.mEngineSelected = Utils.getNetworkEngineId(PlayerTweaksData.instance(context).getPlayerDataSource());
+        failure.mCommands = PlayerCommands.snapshot();
         Scrubber.update(context);
 
         try {
@@ -435,6 +440,7 @@ public final class PlayerFailure {
             }
 
             putOpt(result, "protection", mProtection);
+            putOpt(result, "commands", mCommands);
 
             result.put("actions", new JSONArray(mActions));
             result.put("repeats", 0);

@@ -51,6 +51,11 @@ public class VideoLoaderController extends BasePlayerController {
      */
     private static final int MAX_LIVE_CLIENT_SWITCHES = 3;
     private static final int EMPTY_FORMATS_RELOAD_MS = 30_000;
+    /**
+     * Where a stopped video is left, before its end: its length is whole seconds (lengthSeconds), up to a second past its media
+     * (see stopPlayback)
+     */
+    static final long STOP_BEFORE_END_MS = 1_000;
     private final Playlist mPlaylist;
     private Video mPendingVideo;
     private SuggestionsController mSuggestionsController;
@@ -84,7 +89,13 @@ public class VideoLoaderController extends BasePlayerController {
      */
     private final Map<String, Integer> mLiveSwitches = new HashMap<>();
     private final Runnable mReloadVideo = () -> {
-        getMainController().onNewVideo(getVideo());
+        Video video = getVideo();
+
+        if (video != null) {
+            video.fromReload = true;
+        }
+
+        getMainController().onNewVideo(video);
     };
     private final Runnable mLoadNext = () -> loadNext(VideoStart.TRIGGER_AUTOPLAY);
     private final Runnable mMetadataSync = () -> {
@@ -883,9 +894,24 @@ public class VideoLoaderController extends BasePlayerController {
             return;
         }
 
-        getPlayer().setPositionMs(getPlayer().getDurationMs());
+        getPlayer().setPositionMs(getStopPositionMs());
         getPlayer().setPlayWhenReady(false);
         getPlayer().showSuggestions(true);
+    }
+
+    /**
+     * A second before the end of a video. At its length the player is past the media (e.g. 1972 s of 9lKpEOEbr0U's 1971.719 s)
+     * and over DASH never gets ready there: the stall check reloaded the video, from 0:00. A live stream is left at its end
+     */
+    private long getStopPositionMs() {
+        long durationMs = getPlayer().getDurationMs();
+        Video video = getVideo();
+
+        if ((video != null && video.isLive) || durationMs <= STOP_BEFORE_END_MS) {
+            return durationMs;
+        }
+
+        return durationMs - STOP_BEFORE_END_MS;
     }
 
     private void restartPlaylistIfNeeded() {
