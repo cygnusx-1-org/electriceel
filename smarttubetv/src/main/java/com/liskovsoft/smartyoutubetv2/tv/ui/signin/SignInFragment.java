@@ -57,9 +57,35 @@ public class SignInFragment extends GuidedStepSupportFragment implements SignInV
         setTitle(userCode, signInUrl, fullSignInUrl);
     }
 
+    /**
+     * Brought back by a new start (see SignInActivity#onNewIntent). The code shown stays unless a sign-in waits for a new one.
+     */
+    public void onRestarted() {
+        if (mSignInPresenter.onViewRestarted() && getGuidanceStylist().getTitleView() != null) {
+            showPlaceholder();
+        }
+    }
+
+    private void showPlaceholder() {
+        mFullSignInUrl = null;
+        getGuidanceStylist().getTitleView().setText(R.string.signin_view_title);
+        getGuidanceStylist().getDescriptionView().setText(getString(R.string.signin_view_description, ""));
+
+        Drawable qrCode = createQrCode(YTSignInPresenter.SIGN_IN_URL);
+
+        if (qrCode != null) {
+            getGuidanceStylist().getIconView().setImageDrawable(qrCode);
+        }
+    }
+
     private void setTitle(String userCode, String signInUrl, String fullSignInUrl) {
-        if (getContext() == null || TextUtils.isEmpty(userCode)) {
+        if (getContext() == null) {
             return;
+        }
+
+        if (TextUtils.isEmpty(userCode)) {
+            // No code and no error message: not left on "User Code is loading…" as if still loading
+            userCode = getString(R.string.signin_view_error);
         }
 
         getGuidanceStylist().getTitleView().setText(userCode);

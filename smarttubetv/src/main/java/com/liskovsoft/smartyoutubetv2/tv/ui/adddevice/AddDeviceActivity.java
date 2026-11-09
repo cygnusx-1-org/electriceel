@@ -16,8 +16,7 @@ public class AddDeviceActivity extends LeanbackActivity {
 
     @Override
     public void finish() {
-        super.finish();
-
+        // Not super.finish(): LeanbackActivity.finish() runs finishReally() as well, and twice starts two parents
         finishReally();
     }
 }

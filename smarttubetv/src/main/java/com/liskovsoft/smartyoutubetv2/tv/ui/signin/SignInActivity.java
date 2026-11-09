@@ -1,5 +1,6 @@
 package com.liskovsoft.smartyoutubetv2.tv.ui.signin;
 
+import android.content.Intent;
 import android.os.Bundle;
 import androidx.leanback.app.GuidedStepSupportFragment;
 import com.liskovsoft.smartyoutubetv2.tv.ui.common.LeanbackActivity;
@@ -22,9 +23,21 @@ public class SignInActivity extends LeanbackActivity {
     }
 
     @Override
-    public void finish() {
-        super.finish();
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
 
+        // singleInstance: a start while the screen is open brings it back without creating it again
+        GuidedStepSupportFragment fragment = GuidedStepSupportFragment.getCurrentGuidedStepSupportFragment(getSupportFragmentManager());
+
+        if (fragment instanceof SignInFragment) {
+            ((SignInFragment) fragment).onRestarted();
+        }
+    }
+
+    @Override
+    public void finish() {
+        // Not super.finish(): LeanbackActivity.finish() runs finishReally() as well. Run twice, it takes two views off the
+        // ViewManager stack and starts two parents (settings, then browse), so the settings cards stop opening until a restart.
         finishReally();
     }
 }

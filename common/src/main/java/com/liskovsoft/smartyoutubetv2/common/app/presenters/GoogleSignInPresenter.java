@@ -80,15 +80,20 @@ public class GoogleSignInPresenter extends SignInPresenter {
                  );
     }
 
+    /**
+     * A sign-in on its own: the success callback of an earlier start (e.g. a backup left unfinished) doesn't run after it
+     */
     @Override
     public void start() {
-        super.start();
-        RxHelper.disposeActions(mSignInAction);
+        start(null);
     }
 
+    /**
+     * The request isn't disposed here: onViewInitialized replaces it. A start while the screen is on top doesn't show it
+     * again, and disposing would leave that screen without a code or with one that never signs in.
+     */
     public void start(Runnable onSuccess) {
-        super.start();
         mCallback = onSuccess;
-        RxHelper.disposeActions(mSignInAction);
+        super.start();
     }
 }

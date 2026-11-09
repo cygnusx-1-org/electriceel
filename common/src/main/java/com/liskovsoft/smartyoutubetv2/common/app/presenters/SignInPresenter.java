@@ -59,6 +59,20 @@ public class SignInPresenter extends BasePresenter<SignInView> {
         mPresenter.onViewInitialized();
     }
 
+    /**
+     * The screen is singleInstance: a start while it's open shows it again without creating it (onNewIntent)
+     * @return true when a sign-in waits and asks for a new code; false keeps the code shown (e.g. the app brought back from the launcher)
+     */
+    public boolean onViewRestarted() {
+        if (!YTSignInPresenter.instance(getContext()).isWaiting() && !GoogleSignInPresenter.instance(getContext()).isWaiting()) {
+            return false;
+        }
+
+        onViewInitialized();
+
+        return true;
+    }
+
     public void onActionClicked() {
         if (mPresenter != null) {
             mPresenter.onActionClicked();

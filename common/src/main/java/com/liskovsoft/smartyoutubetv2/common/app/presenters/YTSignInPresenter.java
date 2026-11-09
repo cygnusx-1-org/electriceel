@@ -83,9 +83,4 @@ public class YTSignInPresenter extends SignInPresenter {
                         }
                  );
     }
-
-    public void start() {
-        super.start();
-        RxHelper.disposeActions(mSignInAction);
-    }
 }
