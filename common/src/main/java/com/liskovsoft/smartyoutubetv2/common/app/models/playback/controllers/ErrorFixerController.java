@@ -365,8 +365,9 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
             return;
         }
 
-        if (isStreamEnded()) {
-            // Url no longer works (e.g. live stream ended)
+        if (isStreamEnded() || isAtVideoEnd()) {
+            // Url no longer works (e.g. live stream ended), or a video failed in its last seconds (e.g. draining its sound at the end
+            // of the stream): it ended. A restart there plays nothing more, and its error message is about a video that played.
             failure.action("play_end");
             getMainController().onPlayEnd();
             return;

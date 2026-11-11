@@ -385,6 +385,20 @@ public class PlaybackHealthTest {
     }
 
     @Test
+    public void framesNotCountedAreNeitherFrozenNorMeasured() {
+        // Tunneled: the first frame was shown, the decoder reports no more (see DebugInfoMediaCodecVideoRenderer#isRenderedCountKnown)
+        mSample.isVideoRendered = true;
+
+        for (int i = 0; i < 40; i++) {
+            tick(500, 500, -1, -1);
+        }
+
+        assertTrue(mFound.isEmpty());
+        assertNull(mHealth.takeStartFrames());
+        assertTrue(mHealth.getStartTrail().isEmpty());
+    }
+
+    @Test
     public void onlyTheStartIsSampledClosely() {
         assertEquals(500, mHealth.getTickMs());
         playPastTheStart();

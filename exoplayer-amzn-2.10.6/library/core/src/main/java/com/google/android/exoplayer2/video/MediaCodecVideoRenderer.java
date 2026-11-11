@@ -855,6 +855,8 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
       processOutputFormat(getCodec(), format.width, format.height);
     }
     maybeNotifyVideoSizeChanged();
+    // SmartTube fix: a tunneled frame shown is counted as one rendered, as renderOutputBuffer counts it
+    decoderCounters.renderedOutputBufferCount++;
     maybeNotifyRenderedFirstFrame();
     onProcessedOutputBuffer(presentationTimeUs);
   }

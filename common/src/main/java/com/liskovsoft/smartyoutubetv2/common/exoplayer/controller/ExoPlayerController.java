@@ -257,9 +257,14 @@ public class ExoPlayerController implements Player.EventListener {
 
             if (counters != null) {
                 counters.ensureUpdated();
-                sample.renderedFrames = counters.renderedOutputBufferCount;
-                sample.droppedFrames = counters.droppedBufferCount;
-                sample.droppedToKeyframes = counters.droppedToKeyframeCount;
+
+                // Unknown, not none: a tunneled decoder that doesn't report each frame it shows (see isRenderedCountKnown)
+                if (mVideoRenderer == null || mVideoRenderer.isRenderedCountKnown()) {
+                    sample.renderedFrames = counters.renderedOutputBufferCount;
+                    sample.droppedFrames = counters.droppedBufferCount;
+                    sample.droppedToKeyframes = counters.droppedToKeyframeCount;
+                }
+
                 sample.inputBuffers = counters.inputBufferCount;
             }
 
@@ -476,6 +481,7 @@ public class ExoPlayerController implements Player.EventListener {
         // Url list videos at load stage has undefined (-1) length. So, we need to remove length check.
         if (mPlayer != null && positionMs >= 0 && positionMs <= getDurationMs()) {
             PlayerCommands.onSeek(PlayerCommands.SOURCE_APP, positionMs);
+            VideoStarts.onSeek(positionMs);
             mPlayer.seekTo(positionMs);
         }
     }

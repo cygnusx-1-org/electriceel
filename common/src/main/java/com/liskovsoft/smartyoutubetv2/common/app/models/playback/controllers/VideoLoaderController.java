@@ -21,6 +21,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.VideoGroup;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.BasePlayerController;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.manager.PlayerConstants;
+import com.liskovsoft.smartyoutubetv2.common.app.models.playback.service.VideoStateService.State;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.VideoActionPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.PlaybackView;
@@ -802,6 +803,10 @@ public class VideoLoaderController extends BasePlayerController {
                 if (VERSION.SDK_INT <= 19) {
                     // Fix frozen image on Android 4
                     restartEngine();
+                } else if (!getPlayer().containsMedia()) {
+                    // An error ended it (see ErrorFixerController): a seek doesn't play an idle player. Reloaded from its start.
+                    getStateService().save(new State(video, 0, getPlayer().getDurationMs(), getPlayer().getSpeed()));
+                    reloadVideo();
                 } else {
                     getPlayer().setPositionMs(0);
                 }

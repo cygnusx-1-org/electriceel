@@ -5,7 +5,6 @@ import android.util.AttributeSet;
 
 import androidx.annotation.Nullable;
 
-import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
@@ -576,12 +575,14 @@ public class EmbedPlayerView extends PlayerView implements PlaybackView {
         DefaultTrackSelector trackSelector = new RestoreTrackSelector(new AdaptiveTrackSelection.Factory());
         mExoPlayerController.setTrackSelector(trackSelector);
 
-        DefaultRenderersFactory renderersFactory = new CustomOverridesRenderersFactory(getContext());
+        CustomOverridesRenderersFactory renderersFactory = new CustomOverridesRenderersFactory(getContext());
         mPlayer = mPlayerInitializer.createPlayer(getContext(), renderersFactory, trackSelector);
         mPlayer.setPlayWhenReady(true);
         //mPlayer.setRepeatMode(Player.REPEAT_MODE_ONE);
 
         mExoPlayerController.setPlayer(mPlayer);
+        // Its frames as counted: a tunneled decoder that doesn't report each one isn't a frozen picture (see isRenderedCountKnown)
+        mExoPlayerController.setVideoRenderer(renderersFactory.getVideoRenderer());
         mExoPlayerController.selectFormat(mQuality == QUALITY_LOW ? FormatItem.VIDEO_SUB_SD_AVC_30 : FormatItem.VIDEO_SD_AVC_30);
         // Don't use subs! Not efficient. High cpu load. Cause input lags.
         mExoPlayerController.selectFormat(FormatItem.SUBTITLE_NONE);

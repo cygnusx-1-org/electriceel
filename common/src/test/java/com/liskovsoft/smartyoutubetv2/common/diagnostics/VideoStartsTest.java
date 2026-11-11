@@ -81,6 +81,73 @@ public class VideoStartsTest {
     }
 
     /**
+     * WFPW879H, OM9zgC2_J8I: opened at its end (38:49), back to 0:00 six seconds later, then skipped to 0:30. Its first frame came at
+     * 0:30: the seeks say what it waited for, not a 10.7 s first chunk.
+     */
+    @Test
+    public void seeksWhileItStartsAreMomentsOfItsBuffering() {
+        mFixture.at(0);
+        VideoStarts.start(VIDEO_ID, VideoStart.TRIGGER_OPEN);
+        VideoStarts.onFetch(VIDEO_ID);
+        mFixture.at(750);
+        VideoStarts.onFormats(VIDEO_ID, "TV");
+        VideoStarts.onPrepare();
+        mFixture.at(800);
+        VideoStarts.onSeek(2_329_000);
+        mFixture.at(7_900);
+        VideoStarts.onSeek(0);
+        mFixture.at(8_400);
+        VideoStarts.onSeek(10_000);
+        mFixture.at(8_600);
+        VideoStarts.onSeek(20_000);
+        mFixture.at(8_800);
+        VideoStarts.onSeek(30_000);
+        mFixture.at(11_600);
+        VideoStarts.onFirstFrame(new VideoStarts.FirstFrame(30_000, null, -1, 0, -1));
+        VideoStarts.onPlaying(true);
+        // Played: no longer the start's
+        VideoStarts.onSeek(40_000);
+
+        List<VideoStart.Stage> seeks = new ArrayList<>();
+
+        for (VideoStart.Stage stage : last().stages) {
+            if (VideoStarts.STAGE_SEEK.equals(stage.name)) {
+                seeks.add(stage);
+            }
+        }
+
+        assertEquals(5, seeks.size());
+        assertStage(seeks.get(0), VideoStarts.STAGE_SEEK, "to 38:49", 1, 800, 800);
+        assertStage(seeks.get(1), VideoStarts.STAGE_SEEK, "to 0:00", 1, 7_900, 7_900);
+        assertStage(seeks.get(4), VideoStarts.STAGE_SEEK, "to 0:30", 1, 8_800, 8_800);
+        assertEquals(VideoStart.Category.MARK, seeks.get(0).getCategory());
+    }
+
+    /**
+     * A user scrubbing while it starts: the first seeks only
+     */
+    @Test
+    public void aStartsSeeksAreCapped() {
+        mFixture.at(0);
+        VideoStarts.start(VIDEO_ID, VideoStart.TRIGGER_OPEN);
+        VideoStarts.onFetch(VIDEO_ID);
+        mFixture.at(160);
+        VideoStarts.onFormats(VIDEO_ID, "TV");
+        VideoStarts.onPrepare();
+
+        for (int i = 0; i < VideoStarts.MAX_SEEKS + 5; i++) {
+            mFixture.at(200 + i * 10);
+            VideoStarts.onSeek(i * 10_000L);
+        }
+
+        mFixture.at(900);
+        VideoStarts.onFirstFrame(new VideoStarts.FirstFrame(0, null, -1, 0, -1));
+        VideoStarts.onPlaying(true);
+
+        assertEquals(VideoStarts.MAX_SEEKS, last().stages.stream().filter(stage -> VideoStarts.STAGE_SEEK.equals(stage.name)).count());
+    }
+
+    /**
      * From its start: nothing skipped, no row; what it started with still said
      */
     @Test

@@ -5,6 +5,8 @@ import android.os.Looper;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItemFormatInfo;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.listener.PlayerEventListener;
+import com.liskovsoft.smartyoutubetv2.common.app.models.playback.manager.PlayerConstants;
+import com.liskovsoft.smartyoutubetv2.common.app.models.playback.service.VideoStateService;
 import com.liskovsoft.smartyoutubetv2.common.app.views.PlaybackView;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailure;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailureLog;
@@ -23,8 +25,10 @@ import org.robolectric.annotation.Config;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -303,6 +307,40 @@ public class VideoLoaderControllerTest {
         assertTrue(VideoLoaderController.isUpcoming(premiere(null)));
     }
 
+    /**
+     * Repeat one after an error ended the video (see ErrorFixerController#runEngineErrorAction): the player is idle, where a seek
+     * doesn't play. Reloaded from its start.
+     */
+    @Test
+    public void repeatOneOfAVideoAnErrorEndedReloadsItFromItsStart() throws Exception {
+        RepeatController controller = new RepeatController(video("9TJXo63g6JA"), false);
+
+        applyPlaybackMode(controller, PlayerConstants.PLAYBACK_MODE_ONE);
+
+        assertEquals(1, controller.mReloads);
+        assertTrue(controller.mSeeks.isEmpty());
+        assertEquals(0, VideoStateService.instance(RuntimeEnvironment.getApplication()).getByVideoId("9TJXo63g6JA").positionMs);
+    }
+
+    /**
+     * Ended as usual: back to its start in the same player
+     */
+    @Test
+    public void repeatOneOfAVideoThatEndedSeeksToItsStart() throws Exception {
+        RepeatController controller = new RepeatController(video("b1Cchyj6bZw"), true);
+
+        applyPlaybackMode(controller, PlayerConstants.PLAYBACK_MODE_ONE);
+
+        assertEquals(0, controller.mReloads);
+        assertEquals(Collections.singletonList(0L), controller.mSeeks);
+    }
+
+    private static void applyPlaybackMode(TestController controller, int playbackMode) throws Exception {
+        Method method = VideoLoaderController.class.getDeclaredMethod("applyPlaybackModeInt", Video.class, int.class);
+        method.setAccessible(true);
+        method.invoke(controller, controller.getVideo(), playbackMode);
+    }
+
     private static MediaItemFormatInfo premiere(String startTimestamp) {
         Map<String, Object> values = new HashMap<>();
         values.put("getPlayabilityStatus", "LIVE_STREAM_OFFLINE");
@@ -428,6 +466,47 @@ public class VideoLoaderControllerTest {
         @Override
         public Video getVideo() {
             return mVideo;
+        }
+    }
+
+    /**
+     * At the end of a 3:21.8 video: its seeks and reloads are counted, not done
+     */
+    private static class RepeatController extends TestController {
+        private final List<Long> mSeeks = new ArrayList<>();
+        private final PlaybackView mPlayer;
+        private int mReloads;
+
+        /**
+         * @param containsMedia false for a player an error left idle
+         */
+        private RepeatController(Video video, boolean containsMedia) {
+            super(video);
+            setAltContext(RuntimeEnvironment.getApplication());
+            Map<String, Object> values = new HashMap<>();
+            values.put("containsMedia", containsMedia);
+            values.put("getDurationMs", 201_800L);
+            values.put("getPositionMs", 201_300L);
+            values.put("getSpeed", 1.0f);
+            PlaybackView stub = stub(PlaybackView.class, values);
+            mPlayer = (PlaybackView) Proxy.newProxyInstance(PlaybackView.class.getClassLoader(), new Class<?>[]{PlaybackView.class},
+                    (proxy, method, args) -> {
+                        if ("setPositionMs".equals(method.getName())) {
+                            mSeeks.add((long) args[0]);
+                        }
+
+                        return method.invoke(stub, args);
+                    });
+        }
+
+        @Override
+        public PlaybackView getPlayer() {
+            return mPlayer;
+        }
+
+        @Override
+        public void reloadVideo(int delayMs) {
+            mReloads++;
         }
     }
 

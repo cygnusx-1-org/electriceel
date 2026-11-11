@@ -20,6 +20,9 @@ import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.versions.ExoUtils;
 
 import java.nio.ByteBuffer;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DebugInfoMediaCodecVideoRenderer extends MediaCodecVideoRenderer {
     private static final String TAG = DebugInfoMediaCodecVideoRenderer.class.getSimpleName();
@@ -31,6 +34,10 @@ public class DebugInfoMediaCodecVideoRenderer extends MediaCodecVideoRenderer {
      * Does nothing, but wakes the paused playback loop, which otherwise renders once a second.
      */
     public static final int MSG_FRAME_STEP_WAKE = C.MSG_CUSTOM_BASE + 2;
+    /**
+     * The tunneled decoders that reported a frame past the first (see {@link #isRenderedCountKnown()})
+     */
+    private static final Set<String> sFrameReportingDecoders = Collections.synchronizedSet(new HashSet<>());
     private int mFrameIndex;
     private boolean mIsSetOutputSurfaceWorkaroundEnabled;
     // Playback thread only
@@ -49,6 +56,12 @@ public class DebugInfoMediaCodecVideoRenderer extends MediaCodecVideoRenderer {
      */
     private volatile int mSkippedToPosition;
     private volatile long mSkipStartMs = -1;
+    // Playback thread only
+    private boolean mIsTunneling;
+    @Nullable
+    private String mDecoderName;
+    // Read by the main thread
+    private volatile boolean mIsRenderedCountKnown = true;
 
     // Exo 2.9
     //public DebugInfoMediaCodecVideoRenderer(Context context, MediaCodecSelector mediaCodecSelector, long allowedJoiningTimeMs,
@@ -131,9 +144,33 @@ public class DebugInfoMediaCodecVideoRenderer extends MediaCodecVideoRenderer {
     protected void onEnabled(boolean joining) throws ExoPlaybackException {
         super.onEnabled(joining);
 
+        mIsTunneling = getConfiguration().tunnelingAudioSessionId != C.AUDIO_SESSION_ID_UNSET;
         // Tunneled frames go straight from the decoder to the display, so there's no decoded frame to hold back and release
-        mIsFrameStepSupported = getConfiguration().tunnelingAudioSessionId == C.AUDIO_SESSION_ID_UNSET;
+        mIsFrameStepSupported = !mIsTunneling;
+        mIsRenderedCountKnown = !mIsTunneling;
         resetSkippedToPosition();
+    }
+
+    @Override
+    protected void onCodecInitialized(String name, long initializedTimestampMs, long initializationDurationMs) {
+        super.onCodecInitialized(name, initializedTimestampMs, initializationDurationMs);
+
+        mDecoderName = name;
+        mIsRenderedCountKnown = !mIsTunneling || sFrameReportingDecoders.contains(name);
+    }
+
+    @Override
+    protected void onProcessedTunneledBuffer(long presentationTimeUs) {
+        super.onProcessedTunneledBuffer(presentationTimeUs);
+
+        // Counted once the decoder has reported a frame past the first: it reports the frames it shows
+        if (!mIsRenderedCountKnown && decoderCounters.renderedOutputBufferCount > 1) {
+            if (mDecoderName != null) {
+                sFrameReportingDecoders.add(mDecoderName);
+            }
+
+            mIsRenderedCountKnown = true;
+        }
     }
 
     @Override
@@ -186,6 +223,16 @@ public class DebugInfoMediaCodecVideoRenderer extends MediaCodecVideoRenderer {
         setPendingFrameSteps(mPendingFrameSteps - 1);
 
         return true;
+    }
+
+    /**
+     * Whether the frames rendered are counted (see DecoderCounters#renderedOutputBufferCount). Tunneled frames are counted as the
+     * decoder reports them shown (see MediaCodec.OnFrameRenderedListener), which Android doesn't promise for each frame: a decoder
+     * that reported only the first leaves the count standing still while the picture moves. Not known till the decoder in use has
+     * reported a frame past the first, in this run of the app.
+     */
+    public boolean isRenderedCountKnown() {
+        return mIsRenderedCountKnown;
     }
 
     /**

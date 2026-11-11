@@ -98,6 +98,14 @@ public final class VideoStarts {
     static final String STAGE_MODE_SWITCH = "display mode switch";
     static final String STAGE_FIRST_FRAME = "first frame";
     /**
+     * A moment: the playback was sent elsewhere while it started, its detail where to (see #onSeek)
+     */
+    static final String STAGE_SEEK = "seek";
+    /**
+     * Of a start: a user scrubbing past it isn't a row each
+     */
+    static final int MAX_SEEKS = 10;
+    /**
      * The whole of a fetch (see FetchStages#open): its stages are shown, not it
      */
     private static final String FETCH = "fetch";
@@ -335,6 +343,7 @@ public final class VideoStarts {
         final boolean[] isChunkLoaded = new boolean[CHUNK_STAGES.length];
         final long[] chunkLoadMs = new long[CHUNK_STAGES.length];
         boolean hasVideoDecoder;
+        int seeks;
         boolean isCached;
         String client;
         String protocol;
@@ -752,6 +761,22 @@ public final class VideoStarts {
 
         addToBuffering(timer, STAGE_MODE_SWITCH, null, timer.modeSwitchMs, sClock.now());
         timer.modeSwitchMs = -1;
+    }
+
+    /**
+     * The playback is sent elsewhere while it starts (e.g. back to 0:00 from a resume at its end, then skipped ahead): what its first
+     * frame waited for is the last one's
+     */
+    public static void onSeek(long positionMs) {
+        Timer timer = getTimer();
+
+        if (timer == null || timer.prepareMs < 0 || timer.firstFrameMs >= 0 || timer.seeks >= MAX_SEEKS) {
+            return;
+        }
+
+        long now = sClock.now();
+        timer.seeks++;
+        addToBuffering(timer, STAGE_SEEK, "to " + VideoStart.formatPosition(positionMs), now, now);
     }
 
     public static void onFirstFrame() {

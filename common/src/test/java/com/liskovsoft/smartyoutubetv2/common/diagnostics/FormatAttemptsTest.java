@@ -129,6 +129,57 @@ public class FormatAttemptsTest {
     }
 
     /**
+     * WFPW879H #11: reported at 8 s, it went on, then stalled 17 s till it was left. The failure's formats tell what came after it
+     * too, not only how it was when it failed.
+     */
+    @Test
+    public void whatAFailedAttemptPlayedAndStalledAfterItsFailureIsWritten() throws Exception {
+        long[] now = {1_000_000};
+        FormatAttempts.sClock = () -> now[0];
+        FormatAttempts.onNewVideo(getContext(), "9TJXo63g6JA");
+        FormatAttempts.onTracks(VP9_4K, FormatItem.AUDIO_HQ_MP4A);
+        FormatAttempts.onVideoRendered();
+        FormatAttempts.onPlaying(true);
+        now[0] += 8_000;
+        FormatAttempts.onStreamFailed(true);
+        failure("9TJXo63g6JA").record();
+
+        now[0] += 16_000;
+        FormatAttempts.onBuffering();
+        now[0] += 17_000;
+        FormatAttempts.end(getContext());
+
+        JSONObject attempt = mLog.readAll().get(0).getJSONObject("formats").getJSONArray("attempted").getJSONObject(0);
+
+        assertEquals(24_000, attempt.getLong("playedMs"));
+        assertEquals(1, attempt.getInt("stalls"));
+        assertEquals(17_000, attempt.getLong("stallMs"));
+    }
+
+    /**
+     * Played on to the end without a pause: its time played since the failure is written too
+     */
+    @Test
+    public void aFailedAttemptStillPlayingAtTheEndIsWritten() throws Exception {
+        long[] now = {1_000_000};
+        FormatAttempts.sClock = () -> now[0];
+        FormatAttempts.onNewVideo(getContext(), "4-jgd_sKlFo");
+        FormatAttempts.onTracks(VP9_4K, FormatItem.AUDIO_HQ_MP4A);
+        FormatAttempts.onVideoRendered();
+        FormatAttempts.onPlaying(true);
+        now[0] += 8_000;
+        FormatAttempts.onStreamFailed(true);
+        failure("4-jgd_sKlFo").record();
+
+        now[0] += 1_992_000;
+        FormatAttempts.end(getContext());
+
+        JSONObject attempt = mLog.readAll().get(0).getJSONObject("formats").getJSONArray("attempted").getJSONObject(0);
+
+        assertEquals(2_000_000, attempt.getLong("playedMs"));
+    }
+
+    /**
      * Never silent, or silent to its end: nothing to tell
      */
     @Test

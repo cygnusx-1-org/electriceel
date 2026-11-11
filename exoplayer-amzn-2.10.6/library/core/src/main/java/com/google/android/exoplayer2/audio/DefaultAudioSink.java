@@ -275,6 +275,11 @@ public final class DefaultAudioSink implements AudioSink {
 
   @Nullable private ByteBuffer avSyncHeader;
   private int bytesUntilNextAvSync;
+  /**
+   * SmartTube fix: of the last buffer written in tunneling mode, for what's left of it at the end of
+   * the stream (see {@link #writeBuffer}).
+   */
+  private long lastTunnelingAvSyncPresentationTimeUs = C.TIME_UNSET;
 
   private long submittedPcmBytes;
   private long submittedEncodedFrames;
@@ -847,6 +852,14 @@ public final class DefaultAudioSink implements AudioSink {
         }
       }
     } else if (tunneling) {
+      // SmartTube fix: what's drained at the end of the stream has no time of its own. It's what was
+      // left of the last buffer when the AudioTrack was full: in tunneling, audio processors give out
+      // their last input's output at once, so it's that buffer's.
+      if (avSyncPresentationTimeUs == C.TIME_END_OF_SOURCE) {
+        avSyncPresentationTimeUs = lastTunnelingAvSyncPresentationTimeUs;
+      } else {
+        lastTunnelingAvSyncPresentationTimeUs = avSyncPresentationTimeUs;
+      }
       Assertions.checkState(avSyncPresentationTimeUs != C.TIME_UNSET);
       bytesWritten = writeNonBlockingWithAvSyncV21(audioTrack, buffer, bytesRemaining,
           avSyncPresentationTimeUs);
@@ -897,7 +910,7 @@ public final class DefaultAudioSink implements AudioSink {
       if (audioProcessorNeedsEndOfStream) {
         audioProcessor.queueEndOfStream();
       }
-      processBuffers(C.TIME_UNSET);
+      processBuffers(C.TIME_END_OF_SOURCE); // SmartTube fix: was C.TIME_UNSET (see writeBuffer)
       if (!audioProcessor.isEnded()) {
         return false;
       }
@@ -907,7 +920,7 @@ public final class DefaultAudioSink implements AudioSink {
 
     // Finish writing any remaining output to the track.
     if (outputBuffer != null) {
-      writeBuffer(outputBuffer, C.TIME_UNSET);
+      writeBuffer(outputBuffer, C.TIME_END_OF_SOURCE); // SmartTube fix: was C.TIME_UNSET
       if (outputBuffer != null) {
         return false;
       }
@@ -1075,6 +1088,7 @@ public final class DefaultAudioSink implements AudioSink {
       drainingAudioProcessorIndex = C.INDEX_UNSET;
       avSyncHeader = null;
       bytesUntilNextAvSync = 0;
+      lastTunnelingAvSyncPresentationTimeUs = C.TIME_UNSET;
       startMediaTimeState = START_NOT_SET;
       if (audioTrackPositionTracker.isPlaying()) {
         audioTrack.pause();

@@ -513,6 +513,38 @@ public class ErrorFixerControllerTest {
         assertEquals(0, controller.mPlayEnds);
     }
 
+    /**
+     * A video that played failed half a second before its end (tunneled sound drained at the end of the stream, 9TJXo63g6JA at 3:21.3 of
+     * 3:21.8): it ended, without the error's message or a restart where nothing's left to play
+     */
+    @Test
+    public void anEngineErrorAtTheEndOfAVideoEndsIt() throws Exception {
+        TestController controller = new TestController(video("9TJXo63g6JA"), null, playerStub(atMs(201_300, 201_800)));
+        controller.onPlay();
+
+        controller.onEngineError(PlayerEventListener.ERROR_TYPE_UNEXPECTED, PlayerEventListener.RENDERER_INDEX_UNKNOWN,
+                new IllegalStateException());
+
+        assertEquals(Arrays.asList("play_end"), getActions(mLog.readAll().get(0)));
+        assertEquals(1, controller.mPlayEnds);
+        assertEquals(0, ShadowToast.shownToastCount());
+    }
+
+    /**
+     * Further from its end, the same error restarts the engine, as before
+     */
+    @Test
+    public void anEngineErrorBeforeTheEndOfAVideoRestartsTheEngine() throws Exception {
+        TestController controller = new TestController(video("9TJXo63g6JA"), null, playerStub(atMs(190_000, 201_800)));
+        controller.onPlay();
+
+        controller.onEngineError(PlayerEventListener.ERROR_TYPE_UNEXPECTED, PlayerEventListener.RENDERER_INDEX_UNKNOWN,
+                new IllegalStateException());
+
+        assertEquals(Arrays.asList("restart_engine"), getActions(mLog.readAll().get(0)));
+        assertEquals(0, controller.mPlayEnds);
+    }
+
     private static Map<String, Object> atMs(long positionMs, long durationMs) {
         Map<String, Object> answers = new HashMap<>();
         answers.put("getPositionMs", positionMs);

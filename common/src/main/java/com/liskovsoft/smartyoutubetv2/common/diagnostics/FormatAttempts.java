@@ -87,7 +87,8 @@ public final class FormatAttempts {
      */
     private static boolean sHasFailed;
     /**
-     * Since the video last failed, it tried another one or found out whether one worked
+     * Since the video last failed, it tried another one, found out whether one worked, or played or stalled again: the failure's
+     * formats are written again at the end (see #end)
      */
     private static boolean sIsChangedSinceFailure;
     /**
@@ -451,15 +452,15 @@ public final class FormatAttempts {
 
             if (last.playingSince < 0) {
                 last.playingSince = now;
-            }
-
-            if (!last.hasPlayed) {
-                last.hasPlayed = true;
+                // Its time played goes on
                 sIsChangedSinceFailure = true;
             }
+
+            last.hasPlayed = true;
         } else if (last.playingSince >= 0) {
             last.playedMs += now - last.playingSince;
             last.playingSince = -1;
+            sIsChangedSinceFailure = true;
         }
     }
 
@@ -518,6 +519,7 @@ public final class FormatAttempts {
 
         last.stalls++;
         last.stallSince = now;
+        sIsChangedSinceFailure = true;
     }
 
     public static void onSeek() {
@@ -640,7 +642,7 @@ public final class FormatAttempts {
      * @param isNow before it returns: the app is about to die (a crash)
      */
     public static void flush(Context context, boolean isNow) {
-        if (sVideoId != null && sHasFailed && sIsChangedSinceFailure) {
+        if (sVideoId != null && sHasFailed && isChangedSinceFailure()) {
             PlayerFailureLog.instance(context).recordFormats(sVideoId, sSessionStart, toJson(context), isNow);
             sIsChangedSinceFailure = false;
         }
@@ -658,11 +660,20 @@ public final class FormatAttempts {
      * The video is left (another one, or the player is closed)
      */
     public static void end(Context context) {
-        if (sVideoId != null && sHasFailed && sIsChangedSinceFailure) {
+        if (sVideoId != null && sHasFailed && isChangedSinceFailure()) {
             PlayerFailureLog.instance(context).recordFormats(sVideoId, sSessionStart, toJson(context), false);
         }
 
         reset();
+    }
+
+    /**
+     * Changed since the failure (see #sIsChangedSinceFailure), or it plays or stalls still: its time has gone on (see #toJson)
+     */
+    private static boolean isChangedSinceFailure() {
+        Attempt last = getLast();
+
+        return sIsChangedSinceFailure || (last != null && (last.playingSince >= 0 || last.stallSince >= 0));
     }
 
     /**
