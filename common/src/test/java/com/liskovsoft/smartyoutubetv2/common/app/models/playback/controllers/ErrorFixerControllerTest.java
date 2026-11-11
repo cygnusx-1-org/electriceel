@@ -354,6 +354,31 @@ public class ErrorFixerControllerTest {
     }
 
     /**
+     * Its why is the player's title, seen only with the controls: they come up with it
+     */
+    @Test
+    public void unplayableOnEveryClientShowsTheControls() throws Exception {
+        ClientAttempts.clear("ended");
+        ClientAttempts.record("ended", ClientAttempts.Attempt.unplayable("TV", "UNPLAYABLE", "This live stream recording is not available."));
+        ClientAttempts.record("ended", ClientAttempts.Attempt.unplayable("WEB", "UNPLAYABLE", "This live stream recording is not available."));
+        List<String> calls = new ArrayList<>();
+        PlaybackView stub = playerStub();
+        PlaybackView player = (PlaybackView) Proxy.newProxyInstance(PlaybackView.class.getClassLoader(), new Class<?>[]{PlaybackView.class},
+                (proxy, method, args) -> {
+                    if (Arrays.asList("setTitle", "showOverlay", "showControls").contains(method.getName())) {
+                        calls.add(method.getName() + "(" + args[0] + ")");
+                    }
+
+                    return method.invoke(stub, args);
+                });
+        TestController controller = new TestController(video("ended"), null, player);
+
+        controller.runFormatErrorAction(new IllegalStateException("fromNullable result is null"));
+
+        assertEquals(Arrays.asList("setTitle(This live stream recording is not available.)", "showOverlay(true)"), calls);
+    }
+
+    /**
      * One client failed otherwise (e.g. no network): still a format error
      */
     @Test

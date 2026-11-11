@@ -821,6 +821,8 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
         }
 
         getPlayer().showProgressBar(false);
+        // The reason is the title, seen only with the controls: up, or the screen stays black. Nothing plays, so they don't hide
+        getPlayer().showOverlay(true);
         failure.action("reload_video_" + UNPLAYABLE_RELOAD_MS / 1_000 + "s");
         mVideoLoaderController.reloadVideo(UNPLAYABLE_RELOAD_MS);
     }
