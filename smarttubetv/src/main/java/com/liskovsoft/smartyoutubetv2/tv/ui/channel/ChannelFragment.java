@@ -101,7 +101,10 @@ public class ChannelFragment extends MultipleRowsFragment implements ChannelView
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mChannelPresenter.onViewDestroyed();
+        // The activity of another skin may have taken its place already (see Skins)
+        if (!mChannelPresenter.isReplacedView(this)) {
+            mChannelPresenter.onViewDestroyed();
+        }
     }
 
     public void onFinish() {

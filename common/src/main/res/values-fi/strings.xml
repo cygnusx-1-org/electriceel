@@ -782,4 +782,10 @@
         <item quantity="one">%s sekunti</item>
         <item quantity="other">%s sekuntia</item>
     </plurals>
+    <string name="modern_who_is_watching">Kuka katsoo?</string>
+    <string name="modern_add_account">Lisää tili</string>
+    <string name="modern_watch_as_guest">Katso vieraana</string>
+    <string name="modern_on">Päällä</string>
+    <string name="modern_off">Pois</string>
+    <string name="modern_try_again">Yritä uudelleen</string>
 </resources>

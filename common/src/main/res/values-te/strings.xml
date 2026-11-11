@@ -785,4 +785,10 @@
     <string name="disable_history_global">ఖాతా చరిత్రను అంతటా నిలిపివేయండి</string>
     <string name="client_order">YouTube క్లయింట్‌ల క్రమం</string>
     <string name="client_signed_in">%s (సైన్ ఇన్ చేయబడింది, Premium కోసం ఉత్తమమైనది)</string>
+    <string name="modern_who_is_watching">ఎవరు చూస్తున్నారు?</string>
+    <string name="modern_add_account">ఖాతాను జోడించండి</string>
+    <string name="modern_watch_as_guest">అతిథిగా చూడండి</string>
+    <string name="modern_on">ఆన్</string>
+    <string name="modern_off">ఆఫ్</string>
+    <string name="modern_try_again">మళ్లీ ప్రయత్నించండి</string>
 </resources>

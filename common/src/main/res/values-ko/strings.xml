@@ -780,4 +780,10 @@
     <string name="aislist_about">AiSList 정보 (커뮤니티 목록, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">AiSList에 채널 신고</string>
     <string name="add_remove_from_home_rows">홈에 추가/제거</string>
+    <string name="modern_who_is_watching">누가 시청하나요?</string>
+    <string name="modern_add_account">계정 추가</string>
+    <string name="modern_watch_as_guest">게스트로 시청</string>
+    <string name="modern_on">사용</string>
+    <string name="modern_off">사용 안함</string>
+    <string name="modern_try_again">다시 시도</string>
 </resources>

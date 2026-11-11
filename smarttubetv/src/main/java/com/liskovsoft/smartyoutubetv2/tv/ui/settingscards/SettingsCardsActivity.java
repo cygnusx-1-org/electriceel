@@ -16,6 +16,20 @@ public class SettingsCardsActivity extends LeanbackActivity {
     }
 
     @Override
+    public void onReplaced() {
+        // The screen of the other skin focuses the same card (see SettingsCardsPresenter.onViewSaved)
+        if (mFragment != null) {
+            mFragment.saveSelectedPosition();
+        }
+    }
+
+    @Override
+    protected boolean isRestartedInPlace() {
+        // The new instance focuses the same card (onReplaced)
+        return true;
+    }
+
+    @Override
     public void onBackPressed() {
         // A section opened from a card (e.g. Player - Options) goes back to its parent first
         if (mFragment != null && mFragment.goBack()) {

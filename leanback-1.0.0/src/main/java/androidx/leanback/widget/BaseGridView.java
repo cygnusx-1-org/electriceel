@@ -1007,11 +1007,23 @@ public abstract class BaseGridView extends RecyclerView {
         return mOnUnhandledKeyListener;
     }
 
+    // MOD: the strategy of the keys (dispatchKeyEvent), FOCUS_SCROLL_ALIGNED unless the grid sets another one
+    private int mKeyFocusScrollStrategy = FOCUS_SCROLL_ALIGNED;
+
+    /**
+     * MOD: the strategy to scroll in response to the focus moved by the keys (the keys reset the one of the touches, see
+     * {@link #dispatchKeyEvent}), {@link #FOCUS_SCROLL_ALIGNED} by default
+     */
+    public void setKeyFocusScrollStrategy(int scrollStrategy) {
+        setFocusScrollStrategy(scrollStrategy);
+        mKeyFocusScrollStrategy = scrollStrategy;
+    }
+
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         // MOD: Improve touchscreen and mouse support
-        // Force enable keyboard mode (FOCUS_SCROLL_ALIGNED)
-        mLayoutManager.setFocusScrollStrategy(BaseGridView.FOCUS_SCROLL_ALIGNED);
+        // Force enable keyboard mode (FOCUS_SCROLL_ALIGNED, or the one of the grid)
+        mLayoutManager.setFocusScrollStrategy(mKeyFocusScrollStrategy);
 
         if (mOnKeyInterceptListener != null && mOnKeyInterceptListener.onInterceptKeyEvent(event)) {
             return true;

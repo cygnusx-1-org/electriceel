@@ -35,9 +35,10 @@ public final class CardHold {
     };
 
     /**
-     * Hides the card till its image is in (see {@link #ready})
+     * Hides the card till its image is in (see {@link #ready}). A card other than the classic one is made transparent, so it
+     * keeps its place and its focus.
      */
-    void hold(ComplexImageCardView card) {
+    public void hold(View card) {
         drop(card); // bound again before its image came in
 
         getOpenBatch().add(card, true);
@@ -56,7 +57,7 @@ public final class CardHold {
     /**
      * The image of the card is in, or failed for good
      */
-    void ready(ComplexImageCardView card) {
+    public void ready(View card) {
         Batch batch = mBatchByView.get(card);
 
         if (batch != null) {
@@ -67,7 +68,7 @@ public final class CardHold {
     /**
      * Shows the view at once, e.g. it's unbound
      */
-    void drop(View view) {
+    public void drop(View view) {
         Batch batch = mBatchByView.remove(view);
 
         if (batch != null) {

@@ -785,4 +785,10 @@
     <string name="disable_history_global">Išjungti paskyros istoriją visur</string>
     <string name="client_order">YouTube klientų tvarka</string>
     <string name="client_signed_in">%s (prisijungta, geriausias Premium naudotojams)</string>
+    <string name="modern_who_is_watching">Kas žiūri?</string>
+    <string name="modern_add_account">Pridėti paskyrą</string>
+    <string name="modern_watch_as_guest">Žiūrėti kaip svečiui</string>
+    <string name="modern_on">Įjungta</string>
+    <string name="modern_off">Išjungta</string>
+    <string name="modern_try_again">Bandyti dar kartą</string>
 </resources>

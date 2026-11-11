@@ -786,4 +786,10 @@ So, make a copy of values-he and name it values-iw. Keep both in your structure.
     <string name="aislist_about">אודות AiSList (רשימה קהילתית, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">דיווח על הערוץ ל-AiSList</string>
     <string name="add_remove_from_home_rows">הוספה/הסרה מדף הבית</string>
+    <string name="modern_who_is_watching">מי צופה?</string>
+    <string name="modern_add_account">הוספת חשבון</string>
+    <string name="modern_watch_as_guest">צפייה כאורח</string>
+    <string name="modern_on">מופעל</string>
+    <string name="modern_off">כבוי</string>
+    <string name="modern_try_again">נסה שוב</string>
 </resources>

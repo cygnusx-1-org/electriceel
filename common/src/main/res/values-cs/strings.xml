@@ -782,6 +782,12 @@
     <string name="aislist_about">O AiSList (komunitní seznam, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Nahlásit kanál do AiSList</string>
     <string name="add_remove_from_home_rows">Přidat/Odebrat ze sekce Domů</string>
+    <string name="modern_who_is_watching">Kdo se dívá?</string>
+    <string name="modern_add_account">Přidat účet</string>
+    <string name="modern_watch_as_guest">Sledovat jako host</string>
+    <string name="modern_on">Zapnuto</string>
+    <string name="modern_off">Vypnuto</string>
+    <string name="modern_try_again">Zkusit znovu</string>
 </resources>
 
 

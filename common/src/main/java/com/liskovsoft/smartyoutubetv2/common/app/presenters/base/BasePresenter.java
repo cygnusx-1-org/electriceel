@@ -106,6 +106,15 @@ public abstract class BasePresenter<T> implements Presenter<T> {
         enableScreenOffIfNeeded();
     }
 
+    /**
+     * The view is destroyed after another one took its place, e.g. the activity of another skin started before the old one
+     * was gone (see Skins): its end isn't the presenter's, which already serves the new one
+     */
+    public boolean isReplacedView(Object view) {
+        Object current = mView.get();
+        return current != null && current != view;
+    }
+
     @Override
     public void onViewDestroyed() {
         // Multiple views with same presenter fix?

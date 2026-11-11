@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Cursor of the search field, dark on its white pill when focused -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <size android:width="2dp" />
+    <solid android:color="@color/modern_on_light" />
+</shape>

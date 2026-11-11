@@ -751,6 +751,12 @@
         <item quantity="one">%s ساعة</item>
         <item quantity="other">%s ساعة</item>
     </plurals>
+    <string name="modern_who_is_watching">من يشاهد؟</string>
+    <string name="modern_add_account">إضافة حساب</string>
+    <string name="modern_watch_as_guest">المشاهدة كضيف</string>
+    <string name="modern_on">مفعّل</string>
+    <string name="modern_off">معطّل</string>
+    <string name="modern_try_again">إعادة المحاولة</string>
     <plurals name="seconds">
         <item quantity="one">%s ثانية</item>
         <item quantity="other">%s ثانية</item>

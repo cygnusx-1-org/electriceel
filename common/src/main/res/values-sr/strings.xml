@@ -784,4 +784,10 @@
     <string name="aislist_about">О AiSList (листа заједнице, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Пријави канал AiSList-у</string>
     <string name="add_remove_from_home_rows">Додај/уклони са Почетне</string>
+    <string name="modern_who_is_watching">Ко гледа?</string>
+    <string name="modern_add_account">Додај налог</string>
+    <string name="modern_watch_as_guest">Гледај као гост</string>
+    <string name="modern_on">Укључено</string>
+    <string name="modern_off">Искључено</string>
+    <string name="modern_try_again">Покушај поново</string>
 </resources>

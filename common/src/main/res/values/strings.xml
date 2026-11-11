@@ -267,6 +267,10 @@
     <string name="settings_buttons_options">Buttons options</string>
     <string name="settings_scale_options">Scale options</string>
     <string name="settings_color_scheme_options">Color scheme options</string>
+    <string name="settings_skins">Skins</string>
+    <string name="skin_classic">Classic</string>
+    <string name="skin_modern">Modern</string>
+    <string name="skin_hybrid">Hybrid</string>
     <string name="git_repository">Git repository</string>
     <string name="hide_content_mixes">Mixes</string>
     <string name="hide_content_watched">Watched videos</string>
@@ -1163,4 +1167,10 @@
     <string name="storage_sync_global_desc">The settings of the device rather than of an account (remote control). Storage sync\'s own never are.</string>
     <string name="storage_sync_now">Sync now</string>
     <string name="storage_child_mode">Child mode is on: this account isn\'t synced until it\'s off</string>
+    <string name="modern_who_is_watching">Who\'s watching?</string>
+    <string name="modern_add_account">Add account</string>
+    <string name="modern_watch_as_guest">Watch as guest</string>
+    <string name="modern_on">On</string>
+    <string name="modern_off">Off</string>
+    <string name="modern_try_again">Try again</string>
 </resources>

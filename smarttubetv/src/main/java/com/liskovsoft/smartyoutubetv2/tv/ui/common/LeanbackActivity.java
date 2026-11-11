@@ -15,6 +15,7 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.smartyoutubetv2.tv.ui.common.keyhandler.DoubleBackManager2;
 import com.liskovsoft.smartyoutubetv2.tv.ui.playback.PlaybackActivity;
+import com.liskovsoft.smartyoutubetv2.tv.ui.skin.SkinRegistry;
 import com.liskovsoft.smartyoutubetv2.tv.ui.search.tags.SearchTagsActivity;
 
 /**
@@ -44,6 +45,13 @@ public abstract class LeanbackActivity extends MotherActivity {
                 new PlayerKeyTranslator(this) :
                 new GlobalKeyTranslator(this);
         mGlobalKeyTranslator.apply();
+    }
+
+    @Override
+    protected void initTheme() {
+        super.initTheme();
+        // A screen the skin has no activity of its own for (see Skin)
+        SkinRegistry.instance().getAppliedSkin().onThemeApplied(this);
     }
 
     @Override
@@ -82,7 +90,10 @@ public abstract class LeanbackActivity extends MotherActivity {
 
         mModeSyncManager.restore(this);
 
-        getViewManager().addTop(this);
+        // Replaced by the activity of another skin (see Skins)
+        if (!isFinishing()) {
+            getViewManager().addTop(this);
+        }
 
         Utils.postDelayed(mRestoreWindowFocus, WINDOW_FOCUS_CHECK_MS);
     }
@@ -144,7 +155,7 @@ public abstract class LeanbackActivity extends MotherActivity {
                     finishReally();
                     break;
             }
-        } else if (this instanceof SearchTagsActivity) {
+        } else if (isSearchScreen()) {
             switch (getGeneralData().getSearchExitShortcut()) {
                 case GeneralData.EXIT_DOUBLE_BACK:
                     mDoubleBackManager.enableDoubleBackExit(this::finishReally);
@@ -156,6 +167,13 @@ public abstract class LeanbackActivity extends MotherActivity {
         } else {
             finishReally();
         }
+    }
+
+    /**
+     * Search screens share the search exit shortcut.
+     */
+    protected boolean isSearchScreen() {
+        return this instanceof SearchTagsActivity;
     }
 
     @Override

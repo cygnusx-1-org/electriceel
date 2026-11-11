@@ -781,4 +781,10 @@
     <string name="disable_history_global">Անջատել հաշվի պատմությունը գլոբալ</string>
     <string name="client_order">YouTube կլիենտների հերթականություն</string>
     <string name="client_signed_in">%s (մուտք գործած, լավագույնը Premium-ի համար)</string>
+    <string name="modern_who_is_watching">Ո՞վ է դիտում</string>
+    <string name="modern_add_account">Ավելացնել հաշիվ</string>
+    <string name="modern_watch_as_guest">Դիտել որպես հյուր</string>
+    <string name="modern_on">Միացված</string>
+    <string name="modern_off">Անջատված</string>
+    <string name="modern_try_again">Կրկին փորձել</string>
 </resources>

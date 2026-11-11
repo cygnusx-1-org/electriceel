@@ -139,6 +139,13 @@ public class SettingsCardsFragment extends GridFragment implements SettingsCards
     }
 
     /**
+     * The activity of another skin takes the place of this one (see SettingsCardsActivity.onReplaced)
+     */
+    public void saveSelectedPosition() {
+        mPresenter.onViewSaved(getSelectedPosition());
+    }
+
+    /**
      * @return went back to the section before, the screen stays
      */
     public boolean goBack() {

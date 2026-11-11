@@ -782,4 +782,10 @@
     <string name="aislist_about">AiSList के बारे में (समुदाय सूची, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">चैनल की AiSList को रिपोर्ट करें</string>
     <string name="add_remove_from_home_rows">होम में जोड़ें/होम से हटाएँ</string>
+    <string name="modern_who_is_watching">कौन देख रहा है?</string>
+    <string name="modern_add_account">खाता जोड़ें</string>
+    <string name="modern_watch_as_guest">मेहमान के रूप में देखें</string>
+    <string name="modern_on">चालू</string>
+    <string name="modern_off">बंद</string>
+    <string name="modern_try_again">फिर से कोशिश करें</string>
 </resources>

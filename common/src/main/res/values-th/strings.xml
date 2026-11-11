@@ -780,4 +780,10 @@
     <string name="disable_history_global">ปิดประวัติของบัญชีทั้งหมด</string>
     <string name="client_order">ลำดับไคลเอ็นต์ YouTube</string>
     <string name="client_signed_in">%s (ลงชื่อเข้าใช้แล้ว เหมาะที่สุดสำหรับ Premium)</string>
+    <string name="modern_who_is_watching">ใครกำลังดูอยู่</string>
+    <string name="modern_add_account">เพิ่มบัญชี</string>
+    <string name="modern_watch_as_guest">ดูในฐานะผู้เยี่ยมชม</string>
+    <string name="modern_on">เปิด</string>
+    <string name="modern_off">ปิด</string>
+    <string name="modern_try_again">ลองอีกครั้ง</string>
 </resources>

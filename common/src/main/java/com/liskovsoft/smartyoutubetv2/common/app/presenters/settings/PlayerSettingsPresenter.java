@@ -157,17 +157,7 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
 
         List<OptionItem> options = new ArrayList<>();
 
-        options.add(UiOptionItem.from(getContext().getString(R.string.player_show_clock),
-                option -> mPlayerData.setClockEnabled(option.isSelected()),
-                mPlayerData.isClockEnabled()));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.player_show_quality_info),
-                option -> mPlayerData.setQualityInfoEnabled(option.isSelected()),
-                mPlayerData.isQualityInfoEnabled()));
-
-        options.add(UiOptionItem.from(getContext().getString(R.string.player_show_quality_info_bitrate),
-                option -> mPlayerTweaksData.setQualityInfoBitrateEnabled(option.isSelected()),
-                mPlayerTweaksData.isQualityInfoBitrateEnabled()));
+        // No clock and quality info options: the controls show neither (see PlaybackTransportRowPresenter)
 
         options.add(UiOptionItem.from(getContext().getString(R.string.player_ui_on_next),
                 option -> mPlayerTweaksData.setPlayerUiOnNextEnabled(option.isSelected()),

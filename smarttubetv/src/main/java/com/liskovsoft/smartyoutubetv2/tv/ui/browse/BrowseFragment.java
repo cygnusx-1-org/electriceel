@@ -457,7 +457,10 @@ public class BrowseFragment extends BrowseSupportFragment implements BrowseView 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mBrowsePresenter.onViewDestroyed();
+        // The activity of another skin may have taken its place already (see Skins)
+        if (!mBrowsePresenter.isReplacedView(this)) {
+            mBrowsePresenter.onViewDestroyed();
+        }
     }
 
     @Override

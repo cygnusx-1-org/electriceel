@@ -31,10 +31,16 @@ import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.service.YouTubeServiceManager;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 public class ViewManager {
+    /**
+     * Marks the intent of an activity coming back in an old theme (see skipStaleSnapshot)
+     */
+    private static final String EXTRA_THEME_CHANGED = "theme_changed";
     private static final String TAG = ViewManager.class.getSimpleName();
     @SuppressLint("StaticFieldLeak")
     private static ViewManager sInstance;
@@ -91,6 +97,42 @@ public class ViewManager {
 
     public void unregister(Class<?> viewClass) {
         mViewMapping.remove(viewClass);
+    }
+
+    /**
+     * Before the activities of another skin are registered (see Skins): a parent of the old ones would match the new ones too
+     * when they extend them
+     */
+    public void unregisterAll() {
+        mViewMapping.clear();
+        mParentMapping.clear();
+    }
+
+    /**
+     * The activities of another skin show the same views (see Skins): the ones to go back to are the new ones
+     *
+     * @param replacements the new activity of each old one
+     */
+    public void replaceActivities(Map<Class<? extends Activity>, Class<? extends Activity>> replacements) {
+        for (int i = 0; i < mActivityStack.size(); i++) {
+            Class<? extends Activity> replacement = replacements.get(mActivityStack.get(i));
+
+            if (replacement != null) {
+                mActivityStack.set(i, replacement);
+            }
+        }
+
+        // The new one may be in the stack already
+        Set<Class<? extends Activity>> added = new HashSet<>();
+        for (int i = mActivityStack.size() - 1; i >= 0; i--) {
+            if (!added.add(mActivityStack.get(i))) {
+                mActivityStack.remove(i);
+            }
+        }
+
+        if (mDefaultTop != null && replacements.containsKey(mDefaultTop)) {
+            mDefaultTop = replacements.get(mDefaultTop);
+        }
     }
 
     public Class<? extends Activity> getActivity(Class<?> viewClass) {
@@ -161,6 +203,7 @@ public class ViewManager {
                 try {
                     Log.d(TAG, "Launching parent activity: " + parentActivity.getSimpleName());
                     Intent intent = new Intent(activity, parentActivity);
+                    skipStaleSnapshot(intent, parentActivity);
 
                     safeStartActivity(activity, intent);
                 } catch (ActivityNotFoundException e) {
@@ -205,8 +248,21 @@ public class ViewManager {
 
         // Fix: Calling startActivity() from outside of an Activity  context requires the FLAG_ACTIVITY_NEW_TASK flag
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        skipStaleSnapshot(intent, activityClass);
 
         safeStartActivity(mContext, intent);
+    }
+
+    /**
+     * An activity coming back in an old skin or color scheme (picked since it was hidden): Android 11 shows the screenshot of
+     * its task while it comes back (taken in the old colors, e.g. Hybrid's blue for half a second before Modern's grey on the
+     * Shield). An intent with extras makes it skip that screenshot (ActivityRecord#allowTaskSnapshot): the screen before
+     * stays until the activity draws, in the new colors (see MotherActivity#recreateIfThemeOrLocaleChanged).
+     */
+    private static void skipStaleSnapshot(Intent intent, Class<?> activityClass) {
+        if (MotherActivity.hasStaleInstance(activityClass)) {
+            intent.putExtra(EXTRA_THEME_CHANGED, true);
+        }
     }
 
     private boolean doThrottle() {

@@ -780,4 +780,10 @@
     <string name="aislist_about">AiSListについて（コミュニティリスト、CC BY-NC 4.0）</string>
     <string name="report_ai_channel">チャンネルをAiSListに報告</string>
     <string name="add_remove_from_home_rows">ホームに追加または削除</string>
+    <string name="modern_who_is_watching">視聴するのは誰ですか？</string>
+    <string name="modern_add_account">アカウントを追加</string>
+    <string name="modern_watch_as_guest">ゲストとして視聴</string>
+    <string name="modern_on">オン</string>
+    <string name="modern_off">オフ</string>
+    <string name="modern_try_again">再試行</string>
 </resources>

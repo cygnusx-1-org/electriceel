@@ -32,6 +32,8 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.HomeRowsData.Row;
 import com.liskovsoft.smartyoutubetv2.common.prefs.HomeScreenPlaylistsData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData.ColorScheme;
+import com.liskovsoft.smartyoutubetv2.common.misc.MotherActivity;
+import com.liskovsoft.smartyoutubetv2.common.misc.Skins;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
 import com.liskovsoft.smartyoutubetv2.common.utils.ClickbaitRemover;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
@@ -86,6 +88,13 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
      */
     public void showColors() {
         showCategory(R.string.settings_color_scheme_options, this::appendColorScheme);
+    }
+
+    /**
+     * The Skins card of the User interface settings: the look and navigation of the app (see Skins)
+     */
+    public void showSkins() {
+        showCategory(R.string.settings_skins, this::appendSkins);
     }
 
     /**
@@ -899,12 +908,32 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         for (ColorScheme colorScheme : colorSchemes) {
             styleOptions.add(UiOptionItem.from(
                     getContext().getString(colorScheme.nameResId),
-                    // The screens take the new colors by themselves once the settings are closed (see MotherActivity)
-                    option -> mMainUIData.setColorScheme(colorScheme),
+                    // The screen behind the panel takes the new colors at once, the others as they come back (see MotherActivity)
+                    option -> {
+                        mMainUIData.setColorScheme(colorScheme);
+                        MotherActivity.onThemePicked(getContext());
+                    },
                     colorScheme.equals(mMainUIData.getColorScheme())));
         }
 
         return styleOptions;
+    }
+
+    private void appendSkins(AppDialogPresenter settingsPresenter) {
+        List<OptionItem> options = new ArrayList<>();
+
+        for (int skinId : Skins.getSkinIds()) {
+            options.add(UiOptionItem.from(
+                    getContext().getString(Skins.getSkinNameResId(skinId)),
+                    // The screen behind the panel takes the new skin at once, the others as they come back (see MotherActivity)
+                    option -> {
+                        mMainUIData.setSkinId(skinId);
+                        MotherActivity.onThemePicked(getContext());
+                    },
+                    skinId == mMainUIData.getSkinId()));
+        }
+
+        settingsPresenter.appendRadioCategory(getContext().getString(R.string.settings_skins), options);
     }
 
     private void appendCardPreviews(AppDialogPresenter settingsPresenter) {
@@ -952,7 +981,10 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
                 mMainUIData.isUiTweakEnabled(MainUIData.UI_TWEAK_ROUNDED_CORNERS));
         
         options.add(multilineTitle);
-        options.add(multilineSubtitle);
+        // Not in a skin whose cards always show the channel and the views or the date on two lines
+        if (!Skins.getTraits().hasFixedCardSubtitle()) {
+            options.add(multilineSubtitle);
+        }
         if (Build.VERSION.SDK_INT > 19) {
             options.add(autoScrolledTitle);
         }

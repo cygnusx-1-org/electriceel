@@ -786,4 +786,10 @@
     <string name="aislist_about">O AiSList (lista społeczności, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Zgłoś kanał do AiSList</string>
     <string name="add_remove_from_home_rows">Dodaj/Usuń ze strony głównej</string>
+    <string name="modern_who_is_watching">Kto ogląda?</string>
+    <string name="modern_add_account">Dodaj konto</string>
+    <string name="modern_watch_as_guest">Oglądaj jako gość</string>
+    <string name="modern_on">Włączone</string>
+    <string name="modern_off">Wyłączone</string>
+    <string name="modern_try_again">Spróbuj ponownie</string>
 </resources>

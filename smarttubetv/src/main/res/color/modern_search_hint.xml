@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Hint of the search field: dark on its white pill when focused -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/modern_on_light_50" android:state_focused="true" />
+    <item android:color="@color/modern_white_30" />
+</selector>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- modern_badge_bg on the light text area of a focused card -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#1A000000" />
+    <corners android:radius="@dimen/modern_badge_radius" />
+</shape>

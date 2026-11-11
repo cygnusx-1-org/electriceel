@@ -1,0 +1,10 @@
+<!-- Material Symbols Rounded (high_quality, filled), Apache License 2.0: the HQ sign of the classic icon (lb_ic_hq) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+  <path
+      android:fillColor="#FFFFFFFF"
+      android:pathData="M590 600 v30 q0 13 8.5 21.5 T620 660 q13 0 21.5 -8.5 T650 630 v-30 h30 q17 0 28.5 -11.5 T720 560 v-160 q0 -17 -11.5 -28.5 T680 360 H560 q-17 0 -28.5 11.5 T520 400 v160 q0 17 11.5 28.5 T560 600 h30Zm-290 -80 h80 v50 q0 13 8.5 21.5 T410 600 q13 0 21.5 -8.5 T440 570 v-180 q0 -13 -8.5 -21.5 T410 360 q-13 0 -21.5 8.5 T380 390 v70 h-80 v-70 q0 -13 -8.5 -21.5 T270 360 q-13 0 -21.5 8.5 T240 390 v180 q0 13 8.5 21.5 T270 600 q13 0 21.5 -8.5 T300 570 v-50Zm280 20 v-120 h80 v120 h-80ZM160 800 q-33 0 -56.5 -23.5 T80 720 v-480 q0 -33 23.5 -56.5 T160 160 h640 q33 0 56.5 23.5 T880 240 v480 q0 33 -23.5 56.5 T800 800 H160Z"/>
+</vector>

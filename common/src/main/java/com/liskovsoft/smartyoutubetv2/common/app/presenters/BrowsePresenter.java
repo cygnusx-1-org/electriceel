@@ -46,6 +46,7 @@ import com.liskovsoft.smartyoutubetv2.common.misc.HiddenVideoResolver;
 import com.liskovsoft.smartyoutubetv2.common.misc.HomeRowOrderer;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager.AccountChangeListener;
+import com.liskovsoft.smartyoutubetv2.common.misc.Skins;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AccountsData;
 import com.liskovsoft.smartyoutubetv2.common.misc.AiSListManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.VideoCategoryManager;
@@ -97,6 +98,11 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
     private final Map<VideoGroup, String> mAddedHomeRowChannelIds = Collections.synchronizedMap(new IdentityHashMap<>());
     private final Runnable mRefreshSection = this::refresh;
     private final Runnable mUpdateSections = this::updateSections;
+    /**
+     * The section shows the videos of one of its channels: a load error doesn't reload the whole section, in a skin that keeps
+     * it (see SkinTraits)
+     */
+    private boolean mIsChannelContent;
     private BrowseSection mCurrentSection;
     private Video mCurrentVideo;
     private long mLastUpdateTimeMs = -1;
@@ -887,6 +893,8 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
     }
 
     private void updateSection(BrowseSection section) {
+        mIsChannelContent = false;
+
         switch (section.getType()) {
             case BrowseSection.TYPE_GRID:
             case BrowseSection.TYPE_SHORTS_GRID:
@@ -1347,6 +1355,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
             return;
         }
 
+        mIsChannelContent = Skins.getTraits().keepsSectionOnChannelError();
         updateVideoGrid(mCurrentSection, ChannelUploadsPresenter.instance(getContext()).obtainUploadsObservable(item), 1, false);
     }
 
@@ -1647,7 +1656,7 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
 
             getView().showError(errorFragmentData);
 
-            if (Utils.fixRetrofitErrors(getContext(), error)) {
+            if (Utils.fixRetrofitErrors(getContext(), error) || mIsChannelContent) {
                 return;
             }
 

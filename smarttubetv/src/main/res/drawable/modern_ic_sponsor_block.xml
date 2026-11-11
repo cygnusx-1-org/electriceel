@@ -1,0 +1,14 @@
+<!-- Material Symbols Rounded (shield, play_arrow), Apache License 2.0: the shield with a play sign of the classic icon
+     (action_content_block). SponsorBlock off -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+  <path
+      android:fillColor="#FFFFFFFF"
+      android:pathData="M467 875 q-6 -1 -12 -3 -135 -45 -215 -166.5 T160 444 v-189 q0 -25 14.5 -45 t37.5 -29 l240 -90 q14 -5 28 -5 t28 5 l240 90 q23 9 37.5 29 t14.5 45 v189 q0 140 -80 261.5 T505 872 q-6 2 -12 3 t-13 1 q-7 0 -13 -1Zm13 -79 q104 -33 172 -132 t68 -220 v-189 l-240 -90 -240 90 v189 q0 121 68 220 t172 132Zm0 -316Z"/>
+  <path
+      android:fillColor="#FFFFFFFF"
+      android:pathData="M398.75 553.5 v-207 q0 -8.5 6 -14.25 t14 -5.75 q2.5 0 5.25 0.75 T429.25 329.5 l163 103.5 q4.5 3 6.75 7.5 t2.25 9.5 q0 5 -2.25 9.5 T592.25 467 L429.25 570.5 q-2.5 1.5 -5.25 2.25 T418.75 573.5 q-8 0 -14 -5.75 T398.75 553.5Z"/>
+</vector>

@@ -782,4 +782,10 @@
     <string name="aislist_about">درباره AiSList (فهرست جامعه، CC BY-NC 4.0)</string>
     <string name="report_ai_channel">گزارش کانال به AiSList</string>
     <string name="add_remove_from_home_rows">افزودن/حذف از خانه</string>
+    <string name="modern_who_is_watching">چه کسی تماشا می‌کند؟</string>
+    <string name="modern_add_account">افزودن حساب</string>
+    <string name="modern_watch_as_guest">تماشا به عنوان مهمان</string>
+    <string name="modern_on">روشن</string>
+    <string name="modern_off">خاموش</string>
+    <string name="modern_try_again">تلاش دوباره</string>
 </resources>

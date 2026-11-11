@@ -789,4 +789,10 @@
     <string name="aislist_about">Об AiSList (список сообщества, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Пожаловаться на канал в AiSList</string>
     <string name="add_remove_from_home_rows">Добавить/Удалить с Главной</string>
+    <string name="modern_who_is_watching">Кто смотрит?</string>
+    <string name="modern_add_account">Добавить аккаунт</string>
+    <string name="modern_watch_as_guest">Смотреть как гость</string>
+    <string name="modern_on">Вкл.</string>
+    <string name="modern_off">Выкл.</string>
+    <string name="modern_try_again">Повторить</string>
 </resources>

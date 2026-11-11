@@ -782,4 +782,10 @@
     <string name="aislist_about">Teave AiSListi kohta (kogukonna loend, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Teata kanalist AiSListile</string>
     <string name="add_remove_from_home_rows">Lisa/Eemalda Avalehelt</string>
+    <string name="modern_who_is_watching">Kes vaatab?</string>
+    <string name="modern_add_account">Lisa konto</string>
+    <string name="modern_watch_as_guest">Vaata külalisena</string>
+    <string name="modern_on">Sees</string>
+    <string name="modern_off">Väljas</string>
+    <string name="modern_try_again">Proovi uuesti</string>
 </resources>

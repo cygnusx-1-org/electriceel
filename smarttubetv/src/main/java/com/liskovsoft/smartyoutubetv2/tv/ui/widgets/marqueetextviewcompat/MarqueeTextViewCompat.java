@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.text.Layout;
 import android.text.TextUtils.TruncateAt;
@@ -151,7 +152,34 @@ public class MarqueeTextViewCompat extends TextView {
         // When executing the parent constructor, if AttributeSet contains textSize,
         // setTextSize will be called first, and mTextView is not initialized yet
         if (mTextView != null) {
-            mTextView.setTextSize(size);
+            // In the unit given (setTextSize(float) would read a pixel size as sp: the scrolling text far bigger)
+            mTextView.setTextSize(unit, size);
+            if (!isLayoutRequested()) {
+                requestLayout();
+            }
+        }
+    }
+
+    /**
+     * The scrolling text in the same font (e.g. not bold when the title isn't)
+     */
+    @Override
+    public void setTypeface(@Nullable Typeface tf) {
+        super.setTypeface(tf);
+        // The parent constructor sets it before mTextView exists
+        if (mTextView != null) {
+            mTextView.setTypeface(tf);
+            if (!isLayoutRequested()) {
+                requestLayout();
+            }
+        }
+    }
+
+    @Override
+    public void setTypeface(@Nullable Typeface tf, int style) {
+        super.setTypeface(tf, style);
+        if (mTextView != null) {
+            mTextView.setTypeface(tf, style);
             if (!isLayoutRequested()) {
                 requestLayout();
             }

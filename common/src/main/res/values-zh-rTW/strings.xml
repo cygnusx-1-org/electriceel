@@ -780,4 +780,10 @@
     <string name="aislist_about">關於 AiSList（社群清單，CC BY-NC 4.0）</string>
     <string name="report_ai_channel">向 AiSList 檢舉頻道</string>
     <string name="add_remove_from_home_rows">新增至首頁或從中移除</string>
+    <string name="modern_who_is_watching">誰在觀看？</string>
+    <string name="modern_add_account">新增帳戶</string>
+    <string name="modern_watch_as_guest">以訪客身分觀看</string>
+    <string name="modern_on">開啟</string>
+    <string name="modern_off">關閉</string>
+    <string name="modern_try_again">重試</string>
 </resources>

@@ -10,6 +10,7 @@ import androidx.preference.SwitchPreference;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionCategory;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
+import com.liskovsoft.smartyoutubetv2.common.misc.Skins;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.smartyoutubetv2.tv.R;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.ChatPreference;
@@ -35,6 +36,10 @@ public class AppPreferenceManager {
     private final Map<OptionItem, List<Preference>> mDependents = new HashMap<>();
     // A preference -> the items it requires, any one of them enables it
     private final Map<Preference, OptionItem[]> mRequirements = new HashMap<>();
+    // The current value of a list under its title, in a skin that shows it (see SkinTraits)
+    private final boolean mShowValues;
+    // The preferences whose summary is their value, not a summary of their own
+    private final Set<Preference> mValueSummaries = new HashSet<>();
 
     public static class ListPreferenceData {
         public final CharSequence[] entries;
@@ -57,6 +62,7 @@ public class AppPreferenceManager {
     public AppPreferenceManager(Context context, Runnable onChange) {
         mContext = context;
         mOnChange = onChange;
+        mShowValues = Skins.getTraits().showsListValuesAsSummary();
     }
 
     public Preference createPreference(OptionCategory category) {
@@ -398,10 +404,13 @@ public class AppPreferenceManager {
         pref.setEntryValues(prefData.values);
         pref.setValue(prefData.defaultValue);
 
+        showValue(pref, prefData.defaultValue != null ? titleOf(category.options, prefData.defaultValue) : null);
+
         pref.setOnPreferenceChangeListener((preference, newValue) -> {
             for (OptionItem optionItem : category.options) {
                 if (newValue.equals(optionItem.toString())) {
                     optionItem.onSelect(true);
+                    showValue(preference, optionItem.getTitle());
                     break;
                 }
             }
@@ -420,6 +429,10 @@ public class AppPreferenceManager {
         pref.setEntries(prefData.entries);
         pref.setEntryValues(prefData.values);
         pref.setValues(prefData.defaultValues);
+
+        if (category.type == OptionCategory.TYPE_CHECKBOX_LIST) {
+            showValue(pref, selectedTitles(category.options));
+        }
 
         pref.setOnPreferenceChangeListener((preference, newValue) -> {
             if (newValue instanceof Set && hasSelectAllItem(category.options)) {
@@ -475,6 +488,10 @@ public class AppPreferenceManager {
 
                         item.onSelect(isSelected);
 
+                        if (category.type == OptionCategory.TYPE_CHECKBOX_LIST) {
+                            showValue(preference, selectedTitles(category.options));
+                        }
+
                         return true;
                     }
                 }
@@ -482,6 +499,38 @@ public class AppPreferenceManager {
 
             return false;
         });
+    }
+
+    private void showValue(Preference pref, CharSequence value) {
+        // Never over a summary of its own (e.g. a description)
+        if (!mShowValues || (pref.getSummary() != null && !mValueSummaries.contains(pref))) {
+            return;
+        }
+
+        pref.setSummary(value);
+        mValueSummaries.add(pref);
+    }
+
+    private static CharSequence titleOf(List<OptionItem> items, String value) {
+        for (OptionItem item : items) {
+            if (value.equals(item.toString())) {
+                return item.getTitle();
+            }
+        }
+
+        return null;
+    }
+
+    private CharSequence selectedTitles(List<OptionItem> items) {
+        List<CharSequence> titles = new ArrayList<>();
+
+        for (OptionItem item : items) {
+            if (item.isSelected()) {
+                titles.add(item.getTitle());
+            }
+        }
+
+        return titles.isEmpty() ? mContext.getString(R.string.modern_off) : TextUtils.join(", ", titles);
     }
 
     public ListPreferenceData createListPreferenceData(List<OptionItem> items) {

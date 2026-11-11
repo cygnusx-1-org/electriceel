@@ -42,6 +42,7 @@ import com.liskovsoft.smartyoutubetv2.tv.ui.playback.PlaybackActivity;
 import com.liskovsoft.smartyoutubetv2.tv.ui.qrcode.QrCodeActivity;
 import com.liskovsoft.smartyoutubetv2.tv.ui.releasenotes.ReleaseNotesActivity;
 import com.liskovsoft.smartyoutubetv2.tv.ui.search.tags.SearchTagsActivity;
+import com.liskovsoft.smartyoutubetv2.tv.ui.skin.SkinRegistry;
 import com.liskovsoft.smartyoutubetv2.tv.ui.settingscards.SettingsCardsActivity;
 import com.liskovsoft.smartyoutubetv2.tv.ui.signin.SignInActivity;
 import com.liskovsoft.smartyoutubetv2.tv.ui.webbrowser.WebBrowserActivity;
@@ -128,26 +129,30 @@ public class MainApplication extends MultiDexApplication implements Configuratio
         return new Configuration.Builder().build();
     }
 
+    /**
+     * The classic activity of each view. The skin picked registers its own (see SkinRegistry).
+     */
     private void setupViewManager() {
-        ViewManager viewManager = ViewManager.instance(this);
+        SkinRegistry registry = SkinRegistry.instance();
 
         Class<? extends AppDialogActivity> dialogClass = getDialogClass();
 
-        viewManager.setRoot(BrowseActivity.class);
-        viewManager.register(SplashView.class, SplashActivity.class); // no parent, because it's root activity
-        viewManager.register(BrowseView.class, BrowseActivity.class); // no parent, because it's root activity
-        viewManager.register(PlaybackView.class, PlaybackActivity.class, BrowseActivity.class);
-        viewManager.register(AppDialogView.class, dialogClass, BrowseActivity.class);
-        viewManager.register(SearchView.class, SearchTagsActivity.class, BrowseActivity.class);
-        viewManager.register(SignInView.class, SignInActivity.class, BrowseActivity.class);
-        viewManager.register(AddDeviceView.class, AddDeviceActivity.class, BrowseActivity.class);
-        viewManager.register(ChannelView.class, ChannelActivity.class, BrowseActivity.class);
-        viewManager.register(ChannelUploadsView.class, ChannelUploadsActivity.class, BrowseActivity.class);
-        viewManager.register(WebBrowserView.class, WebBrowserActivity.class, BrowseActivity.class);
-        viewManager.register(QrCodeView.class, QrCodeActivity.class, BrowseActivity.class);
-        viewManager.register(KeywordWordsView.class, KeywordWordsActivity.class, BrowseActivity.class);
-        viewManager.register(ReleaseNotesView.class, ReleaseNotesActivity.class, BrowseActivity.class);
-        viewManager.register(SettingsCardsView.class, SettingsCardsActivity.class, BrowseActivity.class);
+        registry.setClassicRoot(BrowseActivity.class);
+        registry.addView(SplashView.class, SplashActivity.class, true); // no parent, because it's root activity
+        registry.addView(BrowseView.class, BrowseActivity.class, true); // no parent, because it's root activity
+        registry.addView(PlaybackView.class, PlaybackActivity.class, false);
+        registry.addView(AppDialogView.class, dialogClass, false);
+        registry.addView(SearchView.class, SearchTagsActivity.class, false);
+        registry.addView(SignInView.class, SignInActivity.class, false);
+        registry.addView(AddDeviceView.class, AddDeviceActivity.class, false);
+        registry.addView(ChannelView.class, ChannelActivity.class, false);
+        registry.addView(ChannelUploadsView.class, ChannelUploadsActivity.class, false);
+        registry.addView(WebBrowserView.class, WebBrowserActivity.class, false);
+        registry.addView(QrCodeView.class, QrCodeActivity.class, false);
+        registry.addView(KeywordWordsView.class, KeywordWordsActivity.class, false);
+        registry.addView(ReleaseNotesView.class, ReleaseNotesActivity.class, false);
+        registry.addView(SettingsCardsView.class, SettingsCardsActivity.class, false);
+        registry.init(this);
     }
 
     /**

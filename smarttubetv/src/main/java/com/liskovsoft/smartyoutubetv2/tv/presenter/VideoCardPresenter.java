@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.WeakHashMap;
 import androidx.annotation.Nullable;
@@ -172,13 +173,8 @@ public class VideoCardPresenter extends LongClickPresenter {
         cardView.setContentText(getContentText(context, video, cardView.isSelected()));
         // Count progress that very close to zero. E.g. when user closed video immediately.
         cardView.setProgress(video.percentWatched > 0 && video.percentWatched < 1 ? 1 : Math.round(video.percentWatched));
-        cardView.setBadgeText(
-                video.hasNewContent ? context.getString(R.string.badge_new_content) :
-                video.isLive ? context.getString(R.string.badge_live) :
-                video.isShorts ? context.getString(R.string.header_shorts).toUpperCase() :
-                video.badge
-        );
-        cardView.setBadgeColor(video.hasNewContent || video.isLive || video.isUpcoming ?
+        cardView.setBadgeText(getBadgeText(context, video));
+        cardView.setBadgeColor(isBadgeHighlighted(video) ?
                 ContextCompat.getColor(context, R.color.dark_red) : ContextCompat.getColor(context, R.color.black));
 
         if (mCardPreviewType != MainUIData.CARD_PREVIEW_DISABLED) {
@@ -268,9 +264,32 @@ public class VideoCardPresenter extends LongClickPresenter {
      * The "Streamed" marker takes the word off the date ("Streamed • 5 hours ago").
      */
     private static CharSequence getContentText(Context context, Video video, boolean selected) {
-        CharSequence secondTitle = video.isStreamedMarked ? CompactInfo.removeStreamed(video.getSecondTitle()) : video.getSecondTitle();
-        CharSequence text = video.isShorts ? CompactInfo.compact(secondTitle) : secondTitle;
+        return addMarks(context, video, getSecondTitle(video), selected);
+    }
 
+    /**
+     * The second title without the markers: shortened for a short, without the "Streamed" word its marker says instead
+     */
+    public static CharSequence getSecondTitle(Video video) {
+        CharSequence secondTitle = video.isStreamedMarked ? CompactInfo.removeStreamed(video.getSecondTitle()) : video.getSecondTitle();
+        return video.isShorts ? CompactInfo.compact(secondTitle) : secondTitle;
+    }
+
+    /**
+     * Only the markers of the video ("AI • Collab • Streamed"), null when it has none (e.g. for the cards of another skin)
+     *
+     * @param selected the card has a light background: the markers take their darker shade
+     */
+    @Nullable
+    public static CharSequence getMarks(Context context, Video video, boolean selected) {
+        CharSequence marks = addMarks(context, video, null, selected);
+        return TextUtils.isEmpty(marks) ? null : marks;
+    }
+
+    /**
+     * The text after the markers of the video, in the order of the settings
+     */
+    private static CharSequence addMarks(Context context, Video video, CharSequence text, boolean selected) {
         if (video.isStreamedMarked) {
             text = addMark(context, text, R.string.streamed_label, StreamedData.instance(context).getMarkColor(), selected);
         }
@@ -311,6 +330,31 @@ public class VideoCardPresenter extends LongClickPresenter {
     }
 
     /**
+     * The badge on the image: new content, live, a short (not in the Shorts section, where every card is one), else the
+     * video's own (its duration)
+     */
+    public static String getBadgeText(Context context, Video video) {
+        return video.hasNewContent ? context.getString(R.string.badge_new_content) :
+                video.isLive ? context.getString(R.string.badge_live) :
+                video.isShorts && !video.belongsToShorts() ? context.getString(R.string.header_shorts).toUpperCase(Locale.getDefault()) :
+                video.badge;
+    }
+
+    /**
+     * The badge stands out (dark red in the classic look) for new content, a live or an upcoming video
+     */
+    public static boolean isBadgeHighlighted(Video video) {
+        return video.hasNewContent || video.isLive || video.isUpcoming;
+    }
+
+    /**
+     * The urls the card images are tried from, and the ones that aren't there, of all the cards (of every skin)
+     */
+    public static CardImageUrls getImageUrls() {
+        return sImageUrls;
+    }
+
+    /**
      * In the order of the settings: each marker goes before the text, so the last category comes first
      *
      * @param categoryMarks bits by the index of the filter (see CategoryFilterData.all)
@@ -330,7 +374,7 @@ public class VideoCardPresenter extends LongClickPresenter {
     /**
      * @param markColor the saved ARGB color of the marker or {@link AiSListFilterData#MARK_COLOR_OFF} (the card text color)
      */
-    static CharSequence addMark(Context context, CharSequence secondTitle, int markResId, int markColor, boolean selected) {
+    public static CharSequence addMark(Context context, CharSequence secondTitle, int markResId, int markColor, boolean selected) {
         SpannableString mark = new SpannableString(context.getString(markResId));
         mark.setSpan(new StyleSpan(Typeface.BOLD), 0, mark.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
@@ -469,7 +513,10 @@ public class VideoCardPresenter extends LongClickPresenter {
         }
     };
 
-    private static boolean isNotFound(@Nullable GlideException e) {
+    /**
+     * The url isn't there (404): the next one is tried right away from now on (see CardImageUrls)
+     */
+    public static boolean isNotFound(@Nullable GlideException e) {
         if (e == null) {
             return false;
         }

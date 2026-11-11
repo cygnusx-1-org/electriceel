@@ -39,12 +39,19 @@ public class PlaybackActivity extends LeanbackActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_playback);
+        setContentView(getContentLayoutId());
         Fragment fragment =
                 getSupportFragmentManager().findFragmentByTag(getString(R.string.playback_tag));
         if (fragment instanceof PlaybackFragment) {
             mPlaybackFragment = (PlaybackFragment) fragment;
         }
+    }
+
+    /**
+     * Layout that hosts the playback fragment.
+     */
+    protected int getContentLayoutId() {
+        return R.layout.fragment_playback;
     }
 
     @Override
@@ -327,4 +334,10 @@ public class PlaybackActivity extends LeanbackActivity {
     //    return getGeneralData().getBackgroundPlaybackShortcut() == GeneralData.BACKGROUND_PLAYBACK_SHORTCUT_BACK ||
     //            getGeneralData().getBackgroundPlaybackShortcut() == GeneralData.BACKGROUND_PLAYBACK_SHORTCUT_HOME_BACK;
     //}
+
+    @Override
+    protected boolean isThemedBehindPanel() {
+        // The video stays visible under the open settings: the new theme once they're closed
+        return false;
+    }
 }

@@ -99,7 +99,10 @@ public class SearchTagsFragment extends SearchTagsFragmentBase {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mSearchPresenter.onViewDestroyed();
+        // The activity of another skin may have taken its place already (see Skins)
+        if (!mSearchPresenter.isReplacedView(this)) {
+            mSearchPresenter.onViewDestroyed();
+        }
     }
 
     @Override

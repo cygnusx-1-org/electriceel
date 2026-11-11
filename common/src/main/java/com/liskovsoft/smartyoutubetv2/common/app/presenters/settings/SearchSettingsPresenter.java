@@ -11,6 +11,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.ATVBridgePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.AmazonBridgePresenter;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.Skins;
 import com.liskovsoft.smartyoutubetv2.common.prefs.SearchData;
 
 import java.util.ArrayList;
@@ -54,9 +55,12 @@ public class SearchSettingsPresenter extends BasePresenter<Void> {
                 option -> mSearchData.setKeyboardAutoShowEnabled(option.isSelected()),
                 mSearchData.isKeyboardAutoShowEnabled()));
 
-        options.add(UiOptionItem.from(getContext().getString(R.string.keyboard_fix),
-                option -> mSearchData.setKeyboardFixEnabled(option.isSelected()),
-                mSearchData.isKeyboardFixEnabled()));
+        // Not in a skin whose search has its own on-screen keyboard: the workaround for the system keyboard doesn't apply there
+        if (!Skins.getTraits().hasOwnSearchKeyboard()) {
+            options.add(UiOptionItem.from(getContext().getString(R.string.keyboard_fix),
+                    option -> mSearchData.setKeyboardFixEnabled(option.isSelected()),
+                    mSearchData.isKeyboardFixEnabled()));
+        }
 
         options.add(UiOptionItem.from(getContext().getString(R.string.typing_corrections),
                 option -> mSearchData.setTypingCorrectionDisabled(option.isSelected()),

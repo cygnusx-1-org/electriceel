@@ -48,6 +48,10 @@
         <item name="android:windowContentOverlay">@null</item>
     </style>
     <style name="App.Theme.Leanback.Browse" parent="Theme.Leanback.Browse">
+        <!-- No starting window: Android 11 and older draw it from the manifest theme, before the color scheme is known (a
+             grey screen between two of the scheme's color). The screen before stays until this one draws, in its colors.
+             The screens the app starts with keep it (App.Theme.Leanback.Browse.Launch). -->
+        <item name="android:windowDisablePreview">true</item>
         <item name="android:windowBackground">@color/shelf_background_dark</item>
         <item name="brandColor">@color/fastlane_background_dark</item>
         <item name="brandAccentColor">@color/fastlane_background</item>
@@ -71,6 +75,11 @@
         <item tools:targetApi="18" name="android:windowOverscan">true</item>
         <item name="android:windowContentOverlay">@null</item>
     </style>
+
+    <!-- The screens the app starts with (launcher, links, TV launcher rows): their starting window shows at once -->
+    <style name="App.Theme.Leanback.Browse.Launch">
+        <item name="android:windowDisablePreview">false</item>
+    </style>
     <style name="App.Theme.Leanback.GuidedStep" parent="Theme.Leanback.GuidedStep">
         <item name="android:windowBackground">@color/shelf_background_dark</item>
         <item name="shelfBackground">@color/shelf_background_dark</item>
@@ -84,6 +93,20 @@
     <!-- AppDialogFragment style -->
     <style name="App.Theme.Leanback.Preferences.Base" parent="Theme.Leanback">
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Leanback</item>
+        <!-- Values kept equal to the original layouts; the modern interface overrides them -->
+        <item name="modernPrefPanelBackground">@color/lb_preference_decor_list_background</item>
+        <item name="modernPrefTitleBackground">?attr/defaultBrandColor</item>
+        <item name="modernPrefItemTextColor">@color/lb_preference_item_primary_text_color</item>
+        <item name="modernPrefRadioButton">?android:attr/listChoiceIndicatorSingle</item>
+        <item name="modernPrefCheckBox">?android:attr/listChoiceIndicatorMultiple</item>
+        <item name="modernPrefIconTint">@null</item>
+        <item name="modernPrefRadioButtonStyle">?android:attr/radioButtonStyle</item>
+        <item name="modernPrefCheckBoxStyle">?android:attr/checkboxStyle</item>
+        <item name="modernPrefChatBubble">@color/comments_bg</item>
+        <item name="modernPrefChatBubbleFocused">@color/comments_bg_pressed</item>
+        <item name="modernPrefDuplicateState">false</item>
+        <item name="modernPrefCheckMarginStart">-7dp</item>
+        <item name="modernPrefRadioMarginStart">-6dp</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <!-- AppDialogFragment background dimming -->

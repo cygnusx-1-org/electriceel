@@ -68,7 +68,10 @@ public class ChannelUploadsFragment extends VideoGridFragment implements Channel
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mChannelUploadsPresenter.onViewDestroyed();
+        // The activity of another skin may have taken its place already (see Skins)
+        if (!mChannelUploadsPresenter.isReplacedView(this)) {
+            mChannelUploadsPresenter.onViewDestroyed();
+        }
     }
 
     public void onFinish() {

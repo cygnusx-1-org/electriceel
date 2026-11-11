@@ -2,6 +2,7 @@ package com.liskovsoft.smartyoutubetv2.tv.ui.playback;
 
 import android.media.session.PlaybackState;
 import android.os.Build.VERSION;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -17,6 +18,7 @@ import android.view.ViewStub;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.leanback.media.PlayerAdapter;
 import androidx.leanback.app.RowsSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.ClassPresenterSelector;
@@ -44,6 +46,7 @@ import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.util.Util;
+import com.google.android.exoplayer2.video.VideoListener;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItemFormatInfo;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.mylogger.Log;
@@ -75,7 +78,9 @@ import com.liskovsoft.smartyoutubetv2.tv.presenter.CardHold;
 import com.liskovsoft.smartyoutubetv2.tv.presenter.CustomListRowPresenter;
 import com.liskovsoft.smartyoutubetv2.tv.presenter.ShortsCardPresenter;
 import com.liskovsoft.smartyoutubetv2.tv.presenter.VideoCardPresenter;
+import com.liskovsoft.smartyoutubetv2.tv.presenter.base.LongClickPresenter;
 import com.liskovsoft.smartyoutubetv2.tv.presenter.base.OnItemLongPressedListener;
+import com.liskovsoft.smartyoutubetv2.tv.util.ViewUtil;
 import com.liskovsoft.smartyoutubetv2.tv.ui.browse.video.GridFragmentHelper;
 import com.liskovsoft.smartyoutubetv2.tv.ui.common.LeanbackActivity;
 import com.liskovsoft.smartyoutubetv2.tv.ui.common.UriBackgroundManager;
@@ -113,8 +118,9 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
     private PlaybackPresenter mPlaybackPresenter;
     private ArrayObjectAdapter mRowsAdapter;
     private CustomListRowPresenter mRowPresenter;
-    private VideoCardPresenter mCardPresenter;
-    private ShortsCardPresenter mShortsPresenter;
+    private LongClickPresenter mCardPresenter;
+    private LongClickPresenter mShortsPresenter;
+    private LongClickPresenter mChaptersPresenter;
     private Map<Integer, VideoGroupObjectAdapter> mVideoGroupAdapters;
     private final RowContinuation mRowContinuation = new RowContinuation();
     private ExoPlayerController mExoPlayerController;
@@ -195,8 +201,16 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
      */
     private void updatePlayerBackground() {
         if (isOverlayShown()) {
-            setBackgroundResource(isSuggestionsShown() ? R.drawable.player_background_suggestions : R.drawable.player_background_controls);
+            setBackgroundResource(isSuggestionsShown() ? getSuggestionsBackgroundResId() : getControlsBackgroundResId());
         }
+    }
+
+    protected int getControlsBackgroundResId() {
+        return R.drawable.player_background_controls;
+    }
+
+    protected int getSuggestionsBackgroundResId() {
+        return R.drawable.player_background_suggestions;
     }
 
     // NOTE: depending of SDK version Start/Stop may be called with delay (SDK_INT > 23) or not called at all (PIP/Dialogs)!
@@ -491,10 +505,22 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
 
         CustomOverridesRenderersFactory renderersFactory = new CustomOverridesRenderersFactory(getContext());
         mPlayer = mPlayerInitializer.createPlayer(getContext(), renderersFactory, trackSelector);
+        mPlayer.addVideoListener(new VideoListener() {
+            @Override
+            public void onRenderedFirstFrame() {
+                PlaybackFragment.this.onRenderedFirstFrame();
+            }
+        });
 
         mExoPlayerController.setPlayer(mPlayer);
         mExoPlayerController.setVideoRenderer(renderersFactory.getVideoRenderer());
         mExoPlayerController.setAudioClockInfo(renderersFactory.getAudioClockInfo());
+    }
+
+    /**
+     * The video surface shows the first frame of the current source.
+     */
+    protected void onRenderedFirstFrame() {
     }
 
     private void createPlayerGlue() {
@@ -520,7 +546,7 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
         });
 
         OnActionClickedListener playerActionListener = new PlayerActionListener();
-        mPlayerGlue = new VideoPlayerGlue(getContext(), playerAdapter, playerActionListener); // NOTE: possible context memory leak
+        mPlayerGlue = onCreatePlayerGlue(getContext(), playerAdapter, playerActionListener); // NOTE: possible context memory leak
         mPlayerGlue.setHost(new SurfacePlaybackFragmentGlueHost(this));
         mPlayerGlue.setSeekEnabled(true);
         mPlayerGlue.setControlsOverlayAutoHideEnabled(false); // don't show controls on some player events like play/pause/end
@@ -530,6 +556,10 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
         mIsUIAnimationsEnabled = getPlayerTweaksData().isUIAnimationsEnabled();
 
         mExoPlayerController.setPlayerView(mPlayerGlue);
+    }
+
+    protected VideoPlayerGlue onCreatePlayerGlue(Context context, PlayerAdapter playerAdapter, OnActionClickedListener actionListener) {
+        return new VideoPlayerGlue(context, playerAdapter, actionListener);
     }
 
     private void createSubtitleManager() {
@@ -746,7 +776,14 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
     private void initPresenters() {
         // Shared by the rows and their cards, so all bound together shows together
         CardHold imageHold = new CardHold();
-        mRowPresenter = new CustomListRowPresenter() {
+        mRowPresenter = new CustomListRowPresenter(getRowFocusZoomFactor(), isRowFocusDimmerEnabled()) {
+            @Override
+            protected RowPresenter.ViewHolder createRowViewHolder(ViewGroup parent) {
+                RowPresenter.ViewHolder holder = super.createRowViewHolder(parent);
+                onRowViewHolderCreated(holder);
+                return holder;
+            }
+
             @Override
             protected void onBindRowViewHolder(RowPresenter.ViewHolder holder, Object item) {
                 super.onBindRowViewHolder(holder, item);
@@ -768,11 +805,55 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
         };
         mRowPresenter.enableImageHold(imageHold);
         mRowPresenter.enableChildRoundedCorners(getMainUIData().isUiTweakEnabled(MainUIData.UI_TWEAK_ROUNDED_CORNERS));
+        onRowPresenterCreated(mRowPresenter);
 
-        mCardPresenter = new VideoCardPresenter();
-        mShortsPresenter = new ShortsCardPresenter();
-        mCardPresenter.enableImageHold(imageHold);
-        mShortsPresenter.enableImageHold(imageHold);
+        mCardPresenter = onCreateCardPresenter(imageHold);
+        mShortsPresenter = onCreateShortsPresenter(imageHold);
+        mChaptersPresenter = onCreateChaptersPresenter(imageHold);
+    }
+
+    protected int getRowFocusZoomFactor() {
+        return ViewUtil.FOCUS_ZOOM_FACTOR;
+    }
+
+    protected boolean isRowFocusDimmerEnabled() {
+        return ViewUtil.FOCUS_DIMMER_ENABLED;
+    }
+
+    /**
+     * Called once the suggestions row presenter is created, before any row is bound.
+     */
+    protected void onRowPresenterCreated(ListRowPresenter presenter) {
+        // NOP
+    }
+
+    /**
+     * Called for every suggestions row view holder.
+     */
+    protected void onRowViewHolderCreated(RowPresenter.ViewHolder holder) {
+        // NOP
+    }
+
+    /**
+     * @param imageHold shared by the rows and their cards, so all bound together shows together (see CardHold)
+     */
+    protected LongClickPresenter onCreateCardPresenter(CardHold imageHold) {
+        VideoCardPresenter presenter = new VideoCardPresenter();
+        presenter.enableImageHold(imageHold);
+        return presenter;
+    }
+
+    protected LongClickPresenter onCreateShortsPresenter(CardHold imageHold) {
+        ShortsCardPresenter presenter = new ShortsCardPresenter();
+        presenter.enableImageHold(imageHold);
+        return presenter;
+    }
+
+    /**
+     * Presenter of the chapters row. Null to use the card presenter.
+     */
+    protected LongClickPresenter onCreateChaptersPresenter(CardHold imageHold) {
+        return null;
     }
 
     private void setupEventListeners() {
@@ -780,6 +861,9 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
         setOnItemViewSelectedListener(new ItemViewSelectedListener());
         mCardPresenter.setOnItemViewLongPressedListener(new ItemViewLongPressedListener());
         mShortsPresenter.setOnItemViewLongPressedListener(new ItemViewLongPressedListener());
+        if (mChaptersPresenter != null) {
+            mChaptersPresenter.setOnItemViewLongPressedListener(new ItemViewLongPressedListener());
+        }
     }
 
     private final class ItemViewLongPressedListener implements OnItemLongPressedListener {
@@ -1480,7 +1564,8 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
             HeaderItem rowHeader = new HeaderItem(group.getTitle());
             int videoGroupId = group.getId(); // Create unique int from category.
 
-            VideoGroupObjectAdapter videoGroupAdapter = new VideoGroupObjectAdapter(group, group.isShorts() ? mShortsPresenter : mCardPresenter);
+            LongClickPresenter presenter = group.isShorts() ? mShortsPresenter : group.isChapters() && mChaptersPresenter != null ? mChaptersPresenter : mCardPresenter;
+            VideoGroupObjectAdapter videoGroupAdapter = new VideoGroupObjectAdapter(group, presenter);
 
             mVideoGroupAdapters.put(videoGroupId, videoGroupAdapter);
 

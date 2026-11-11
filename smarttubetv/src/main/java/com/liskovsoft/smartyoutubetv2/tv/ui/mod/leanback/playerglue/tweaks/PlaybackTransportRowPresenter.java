@@ -443,6 +443,9 @@ public class PlaybackTransportRowPresenter extends PlaybackRowPresenter {
             mEndingTimeFormat = rootView.getContext().getString(com.liskovsoft.smartyoutubetv2.tv.R.string.player_ending_time);
             mRemainingTimeFormat = rootView.getContext().getString(com.liskovsoft.smartyoutubetv2.tv.R.string.player_remaining_time);
             mAdditionalInfo = (ViewGroup) rootView.findViewById(com.liskovsoft.smartyoutubetv2.tv.R.id.additional_info);
+            // No quality info (resolution, fps, codec) or date and time lines in the controls, in every skin
+            mQualityInfo.setVisibility(View.GONE);
+            mDateTime.setVisibility(View.GONE);
             mTimeInfo = (ViewGroup) rootView.findViewById(com.liskovsoft.smartyoutubetv2.tv.R.id.time_info);
             mTopEdge = (ViewGroup) rootView.findViewById(com.liskovsoft.smartyoutubetv2.tv.R.id.top_edge);
             mTopEdge.setOnFocusChangeListener((v, hasFocus) -> {
@@ -790,23 +793,18 @@ public class PlaybackTransportRowPresenter extends PlaybackRowPresenter {
             }
         }
 
+        /**
+         * The controls show no quality info (resolution, fps, codec): the line stays hidden
+         */
         void setQualityInfo(String content) {
-            if (content != null) {
-                if (mPlayerData.isQualityInfoEnabled()) {
-                    mQualityInfo.setText(content);
-                    mQualityInfo.setVisibility(View.VISIBLE);
-                } else {
-                    mQualityInfo.setVisibility(View.GONE);
-                }
-            }
+            mQualityInfo.setVisibility(View.GONE);
         }
 
+        /**
+         * The controls show no date and time line: it stays hidden
+         */
         void setDateVisibility(boolean isVisible) {
-            if (mPlayerData.isClockEnabled()) {
-                mDateTime.setVisibility(View.VISIBLE);
-            } else {
-                mDateTime.setVisibility(View.GONE);
-            }
+            mDateTime.setVisibility(View.GONE);
         }
 
         void setSeekPreviewTitle(String title) {
@@ -934,6 +932,24 @@ public class PlaybackTransportRowPresenter extends PlaybackRowPresenter {
         }
     };
 
+    private int mRowLayoutId = com.liskovsoft.smartyoutubetv2.tv.R.layout.lb_playback_transport_controls_row;
+
+    /**
+     * Replace the row and control bar layouts. Views are bound by id, so a layout must keep the original ids.
+     */
+    public void setLayouts(int rowLayoutId, int controlBarLayoutId) {
+        mRowLayoutId = rowLayoutId;
+        mPlaybackControlsPresenter.setLayoutResourceId(controlBarLayoutId);
+        mSecondaryControlsPresenter.setLayoutResourceId(controlBarLayoutId);
+    }
+
+    /**
+     * Max number of controls of the secondary bar (default 12).
+     */
+    public void setMaxSecondaryControls(int maxControls) {
+        mSecondaryControlsPresenter.setMaxControls(maxControls);
+    }
+
     public PlaybackTransportRowPresenter() {
         setHeaderPresenter(null);
         setSelectEffectEnabled(false);
@@ -1057,8 +1073,7 @@ public class PlaybackTransportRowPresenter extends PlaybackRowPresenter {
 
     @Override
     protected RowPresenter.ViewHolder createRowViewHolder(ViewGroup parent) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(
-                com.liskovsoft.smartyoutubetv2.tv.R.layout.lb_playback_transport_controls_row, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(mRowLayoutId, parent, false);
         ViewHolder vh = new ViewHolder(v, mDescriptionPresenter);
         initRow(vh);
         return vh;

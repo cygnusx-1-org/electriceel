@@ -3,7 +3,10 @@ package com.liskovsoft.smartyoutubetv2.common.prefs;
 import android.annotation.SuppressLint;
 import com.liskovsoft.smartyoutubetv2.common.prefs.common.PendingSave;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Build;
+import android.text.TextUtils;
 
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.smartyoutubetv2.common.R;
@@ -130,6 +133,12 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
             MENU_ITEM_CREATE_LOCAL_PLAYLIST, MENU_ITEM_TOGGLE_HISTORY, MENU_ITEM_CLEAR_HISTORY, MENU_ITEM_UPDATE_CHECK
     };
     public static final long UI_TWEAK_DEFAULT = UI_TWEAK_ROUNDED_CORNERS;
+    /**
+     * The look and navigation of the app (User interface > Skin, see SkinRegistry of the app). Persisted: never change or reuse one.
+     */
+    public static final int SKIN_CLASSIC = 0;
+    public static final int SKIN_MODERN = 1;
+    public static final int SKIN_HYBRID = 2;
     @SuppressLint("StaticFieldLeak")
     private static MainUIData sInstance;
     private final Context mContext;
@@ -163,6 +172,7 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
     private boolean mIsUnlocalizedTitlesEnabled;
     private long mUiTweaks;
     private boolean mIsShortsDateEnabled;
+    private int mSkinId;
 
     private MainUIData(Context context) {
         mContext = context;
@@ -494,6 +504,18 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
         persistState();
     }
 
+    /**
+     * The skin picked, of this account. The one the app shows can lag behind it (see Skins.getAppliedSkinId).
+     */
+    public int getSkinId() {
+        return mSkinId;
+    }
+
+    public void setSkinId(int skinId) {
+        mSkinId = skinId;
+        persistState();
+    }
+
     public boolean isUiTweakEnabled(long uiTweaks) {
         return (mUiTweaks & uiTweaks) == uiTweaks;
     }
@@ -605,6 +627,12 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
         mIsUnlocalizedTitlesEnabled = Helpers.parseBoolean(split, 22, false);
         mUiTweaks = Helpers.parseLong(split, 23, UI_TWEAK_DEFAULT);
         mIsShortsDateEnabled = Helpers.parseBoolean(split, 24, false);
+        // 25 - 31: restoreMenus
+        // New users get the hybrid skin: an account without settings in an install that was never updated (saved at once below,
+        // so an update keeps it). An existing install keeps its look: classic for settings saved before there were skins and for
+        // the ones never saved (the defaults of an account that changed none).
+        boolean isNewUser = TextUtils.isEmpty(data) && isFirstInstall(mContext);
+        mSkinId = Helpers.parseInt(split, 32, isNewUser ? SKIN_HYBRID : SKIN_CLASSIC);
 
         int idx = -1;
         for (Long menuItem : MENU_ITEM_DEFAULT_ORDER) {
@@ -632,6 +660,22 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
         updateDefaultValues();
 
         restoreMenus(split);
+
+        if (isNewUser) {
+            mPersistStateInt.post();
+        }
+    }
+
+    /**
+     * Installed and never updated since
+     */
+    private static boolean isFirstInstall(Context context) {
+        try {
+            PackageInfo info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            return info.firstInstallTime == info.lastUpdateTime;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
     }
 
     /**
@@ -780,7 +824,8 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
                 Helpers.mergeList(mMenuItemsOrderedByMenu.get(MENU_HISTORY)),
                 Helpers.mergeList(mMenuItemsOrderedByMenu.get(MENU_PLAYLISTS)),
                 Helpers.mergeList(mMenuItemsOrderedByMenu.get(MENU_SIDEBAR)),
-                true)); // the subscription group item placed (see restoreMenus)
+                true, // the subscription group item placed (see restoreMenus)
+                mSkinId));
     }
 
     public static class ColorScheme {

@@ -6,16 +6,20 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.os.Build.VERSION;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.KeyCharacterMap.UnavailableException;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.Lifecycle;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.helpers.KeyHelpers;
 import com.liskovsoft.sharedutils.locale.LocaleContextWrapper;
@@ -38,8 +42,11 @@ import com.r0adkll.slidr.model.SlidrListener;
 import com.r0adkll.slidr.model.SlidrPosition;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 public class MotherActivity extends FragmentActivity {
     private static final String TAG = MotherActivity.class.getSimpleName();
@@ -49,6 +56,8 @@ public class MotherActivity extends FragmentActivity {
     protected static boolean sIsInPipMode;
     private ScreensaverManager mScreensaverManager;
     // Make static in case Don't keep activities enabled in Developer settings
+    // The activities alive, so the one behind the settings panel takes a picked theme at once (see onThemePicked)
+    private static final Set<MotherActivity> sInstances = Collections.newSetFromMap(new WeakHashMap<>());
     private static List<OnPermissions> mOnPermissions;
     private static List<OnResult> mOnResults;
     private long mLastKeyDownTime;
@@ -57,8 +66,13 @@ public class MotherActivity extends FragmentActivity {
     private boolean mIsFullscreenModeEnabled;
     private boolean mIsBackPressed;
     private int mColorSchemeId;
+    private int mSkinId;
     private Locale mLocale;
-    private final Runnable mRecreateIfThemeOrLocaleChanged = this::recreateIfThemeOrLocaleChanged;
+    private final Runnable mRecreateIfThemeOrLocaleChanged = () -> recreateIfThemeOrLocaleChanged(false);
+    /**
+     * Stopped (hidden) since it was last resumed: false while it was only paused, visible behind the settings panel
+     */
+    private boolean mWasHidden;
     // Posted, so the data classes have restored the new profile's settings before the check.
     // A field, because AppPrefs holds its listeners weakly.
     private final ProfileChangeListener mOnProfileChanged = () -> Utils.post(mRecreateIfThemeOrLocaleChanged);
@@ -86,7 +100,10 @@ public class MotherActivity extends FragmentActivity {
         mIsOculusQuestFixEnabled = PlayerTweaksData.instance(this).isOculusQuestFixEnabled();
         mIsFullscreenModeEnabled = GeneralData.instance(this).isFullscreenModeEnabled();
 
+        sInstances.add(this);
+
         initDpi();
+        mSkinId = Skins.getAppliedSkinId();
         initTheme();
         mColorSchemeId = MainUIData.instance(this).getColorScheme().id;
 
@@ -181,6 +198,25 @@ public class MotherActivity extends FragmentActivity {
         return KeyHelpers.isMenuKey(keyCode) || throttleKeyDown(keyCode) || result;
     }
 
+    /**
+     * The activity of another skin takes its place (see Skins), before it starts: what it shows (e.g. the focused item) can be
+     * kept for it, as before a recreation
+     */
+    public void onReplaced() {
+        // NOP
+    }
+
+    /**
+     * Finishes without starting another view, e.g. when the activity of another skin took its place (see Skins)
+     */
+    public void finishReplaced() {
+        try {
+            super.finish();
+        } catch (Exception e) {
+            // TextView not attached to window manager (IllegalArgumentException)
+        }
+    }
+
     public void finishReally() {
         try {
             //if (VERSION.SDK_INT >= 21 && getViewManager().getTopView() != null) { // remain root activity in recents
@@ -261,7 +297,8 @@ public class MotherActivity extends FragmentActivity {
         // Restore this activity's screensaver policy after returning to the foreground.
         mScreensaverManager.resume();
 
-        recreateIfThemeOrLocaleChanged();
+        recreateIfThemeOrLocaleChanged(true);
+        mWasHidden = false;
         // Switching the account (e.g. the account button on Home) changes the profile without pausing this activity
         AppPrefs.instance(this).addListener(mOnProfileChanged);
     }
@@ -273,20 +310,158 @@ public class MotherActivity extends FragmentActivity {
      * Recreated in place rather than restarting the app, so the screen doesn't go blank. Activities below the top one
      * are recreated as they come back (onResume).
      */
-    private void recreateIfThemeOrLocaleChanged() {
+    /**
+     * @param isResumed called as it comes back (onResume), not for a profile switched under it
+     */
+    private void recreateIfThemeOrLocaleChanged(boolean isResumed) {
         if (isFinishing() || !isRecreatedOnThemeOrLocaleChange()) {
             return;
         }
 
-        boolean isColorSchemeChanged = MainUIData.instance(this).getColorScheme().id != mColorSchemeId;
-        boolean isLocaleChanged = mLocale != null && !mLocale.equals(getLocale(this));
+        // A skin is more than a theme: the activities differ (see Skins)
+        Skins.applyPickedSkin(this);
+        boolean isSkinChanged = Skins.getAppliedSkinId() != mSkinId;
 
-        if (!isColorSchemeChanged && !isLocaleChanged) {
+        if (isSkinChanged && Skins.replace(this)) {
+            Log.d(TAG, "Skin changed. Replaced %s", getClass().getSimpleName());
             return;
         }
 
-        Log.d(TAG, "Color scheme or locale changed. Recreating %s...", getClass().getSimpleName());
+        if (!isThemeOrLocaleStale()) {
+            return;
+        }
+
+        showNewThemeBackground();
+
+        if (isResumed && !mWasHidden && isRestartedInPlace() && restartInPlace()) {
+            return;
+        }
+
+        Log.d(TAG, "Color scheme, skin or locale changed. Recreating %s...", getClass().getSimpleName());
         recreate();
+    }
+
+    /**
+     * Visible behind the settings panel until it closed: recreate() would leave the screen blank for a few frames (the
+     * window goes before the new one draws, Android 11). A new instance of this activity takes its place instead: the
+     * screen stays as it is (the new theme's background, see showNewThemeBackground) until the new one has drawn.
+     *
+     * @return false when it couldn't be started (recreated then)
+     */
+    private boolean restartInPlace() {
+        Log.d(TAG, "Color scheme, skin or locale changed. Restarting %s...", getClass().getSimpleName());
+
+        // What it shows (e.g. the focused card) is kept for the new instance, as when the activity of another skin replaces it
+        onReplaced();
+
+        Intent intent = new Intent(this, getClass());
+
+        if (getIntent() != null && getIntent().getExtras() != null) {
+            intent.putExtras(getIntent().getExtras());
+        }
+
+        // singleInstance: the task of this one is cleared, so a new instance is created rather than this one brought back
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        try {
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+        } catch (RuntimeException e) { // ActivityNotFoundException, SecurityException
+            Log.e(TAG, "Can't restart %s: %s", getClass().getSimpleName(), e.getMessage());
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * The window shows before the recreated activity does: it shows the background of the new theme (e.g. the grey of
+     * Modern after Hybrid's blue), not the content in the old colors, which would flash between the two.
+     */
+    private void showNewThemeBackground() {
+        // The new theme on this instance too (it's recreated next), for its window background
+        initTheme();
+
+        TypedArray window = obtainStyledAttributes(new int[] {android.R.attr.windowBackground});
+        Drawable background = window.getDrawable(0);
+        window.recycle();
+
+        if (background != null) {
+            getWindow().setBackgroundDrawable(background);
+        }
+
+        View content = findViewById(android.R.id.content);
+
+        if (content != null) {
+            content.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    /**
+     * A skin or a color scheme was picked in the settings panel. The screen visible behind the panel would show its old
+     * colors once the panel closes, until it's recreated (a flip of the background, e.g. Hybrid's blue to Modern's grey):
+     * it shows the new theme's background now, behind the panel, and is recreated as it comes back (onResume). Not
+     * recreated now: a relaunch under the panel shows a blank frame, and Android 11 shows the panel again for a moment
+     * when going back from that screen. Only when no activity has to be replaced: a skin with other activities (Classic)
+     * is applied as the screens come back.
+     */
+    public static void onThemePicked(Context context) {
+        if (!Skins.isPickedSkinInPlace(context)) {
+            return;
+        }
+
+        Skins.applyPickedSkin(context);
+
+        for (MotherActivity activity : new ArrayList<>(sInstances)) {
+            // Started, not resumed: visible behind the panel
+            if (activity.getLifecycle().getCurrentState() == Lifecycle.State.STARTED && !activity.isFinishing()
+                    && activity.isRecreatedOnThemeOrLocaleChange() && activity.isThemedBehindPanel()
+                    && activity.isThemeOrLocaleStale()) {
+                Log.d(TAG, "Theme picked. The new background behind the panel for %s", activity.getClass().getSimpleName());
+                activity.showNewThemeBackground();
+            }
+        }
+    }
+
+    /**
+     * Override when a new instance of this activity shows the same as this one (it keeps what it shows in onReplaced): it
+     * takes this one's place after the theme changed under the settings panel, rather than a recreation (see
+     * restartInPlace). Others are recreated, keeping their saved state.
+     */
+    protected boolean isRestartedInPlace() {
+        return false;
+    }
+
+    /**
+     * Override to keep this activity as it is while it's visible behind the settings panel (e.g. the player and its video)
+     */
+    protected boolean isThemedBehindPanel() {
+        return true;
+    }
+
+    /**
+     * An activity of this class is alive in an old skin, color scheme or language: it's recreated as it comes back
+     */
+    public static boolean hasStaleInstance(Class<?> activityClass) {
+        for (MotherActivity activity : new ArrayList<>(sInstances)) {
+            if (activity.getClass() == activityClass && !activity.isFinishing() && activity.isRecreatedOnThemeOrLocaleChange()
+                    && activity.isThemeOrLocaleStale()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * The skin, the color scheme or the language is no longer the one this activity was created with
+     */
+    private boolean isThemeOrLocaleStale() {
+        boolean isSkinChanged = Skins.getAppliedSkinId() != mSkinId;
+        boolean isColorSchemeChanged = MainUIData.instance(this).getColorScheme().id != mColorSchemeId;
+        boolean isLocaleChanged = mLocale != null && !mLocale.equals(getLocale(this));
+
+        return isSkinChanged || isColorSchemeChanged || isLocaleChanged;
     }
 
     /**
@@ -295,6 +470,12 @@ public class MotherActivity extends FragmentActivity {
      */
     protected boolean isRecreatedOnThemeOrLocaleChange() {
         return true;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mWasHidden = true;
     }
 
     @Override
@@ -311,6 +492,8 @@ public class MotherActivity extends FragmentActivity {
 
     @Override
     protected void onDestroy() {
+        sInstances.remove(this);
+
         if (mScreensaverManager != null) {
             mScreensaverManager.cleanup();
         }

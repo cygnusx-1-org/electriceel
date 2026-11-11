@@ -6,6 +6,7 @@ import com.liskovsoft.smartyoutubetv2.common.R;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.SettingsCardsPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
+import com.liskovsoft.smartyoutubetv2.common.misc.Skins;
 import com.liskovsoft.smartyoutubetv2.common.prefs.HomeScreenPlaylistsData;
 
 import java.util.ArrayList;
@@ -49,6 +50,11 @@ public class MainUISectionSettingsPresenter extends BasePresenter<Void> implemen
                 () -> MainUISettingsPresenter.instance(context).showHome(), R.drawable.settings_home_rows));
         items.add(new SettingsItem(context.getString(R.string.sidebar),
                 () -> MainUISettingsPresenter.instance(context).showSidebar(), R.drawable.settings_sections));
+        // Nothing to pick from with one skin
+        if (Skins.getSkinIds().size() > 1) {
+            items.add(new SettingsItem(context.getString(R.string.settings_skins),
+                    () -> MainUISettingsPresenter.instance(context).showSkins(), R.drawable.settings_skin));
+        }
         if (HomeScreenPlaylistsData.isSupported(context)) {
             items.add(new SettingsItem(context.getString(R.string.home_screen_channels),
                     () -> MainUISettingsPresenter.instance(context).showHomeScreenChannels(), R.drawable.settings_home_screen_channels));

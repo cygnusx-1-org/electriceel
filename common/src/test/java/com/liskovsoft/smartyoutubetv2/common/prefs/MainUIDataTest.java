@@ -1,5 +1,9 @@
 package com.liskovsoft.smartyoutubetv2.common.prefs;
 
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+
 import com.liskovsoft.mediaserviceinterfaces.oauth.Account;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.providers.ContextMenuManager;
@@ -14,6 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLooper;
 
@@ -33,6 +38,21 @@ public class MainUIDataTest {
     private static final Account SECOND_ACCOUNT = TestAccounts.SECOND;
     private static final int[] CARD_MENUS = {MainUIData.MENU_VIDEOS, MainUIData.MENU_SUBSCRIPTIONS, MainUIData.MENU_HISTORY,
             MainUIData.MENU_PLAYLISTS};
+
+    /**
+     * The app updated since its install (the test package is a first install by default)
+     */
+    private static void setUpdated() {
+        Context context = RuntimeEnvironment.getApplication();
+        try {
+            PackageInfo info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            info.firstInstallTime = 1_000;
+            info.lastUpdateTime = 2_000;
+            Shadows.shadowOf(context.getPackageManager()).installPackage(info);
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new AssertionError(e);
+        }
+    }
 
     @Before
     public void setUp() {
@@ -137,6 +157,84 @@ public class MainUIDataTest {
         prefs.onAccountChanged(FIRST_ACCOUNT);
 
         assertEquals(picked.id, data.getColorScheme().id);
+    }
+
+    /**
+     * New users (a first install, no settings saved) get the hybrid skin, saved at once: an update keeps it
+     */
+    @Test
+    public void newUsersGetTheHybridSkin() {
+        assertEquals(MainUIData.SKIN_HYBRID, getData().getSkinId());
+
+        ShadowLooper.shadowMainLooper().idle();
+        setUpdated();
+        MainUIData.resetInstanceForTesting();
+
+        assertEquals(MainUIData.SKIN_HYBRID, getData().getSkinId());
+    }
+
+    /**
+     * An updated install whose account never saved settings (all defaults) keeps the classic look
+     */
+    @Test
+    public void updatedInstallWithoutSettingsIsClassic() {
+        setUpdated();
+        MainUIData.resetInstanceForTesting();
+
+        assertEquals(MainUIData.SKIN_CLASSIC, getData().getSkinId());
+    }
+
+    /**
+     * Saved before there were skins: the look stays the one they were made with
+     */
+    @Test
+    public void settingsSavedBeforeSkinsAreClassic() {
+        getPrefs().setProfileData(DATA_KEY, oldMenuSettings(MainUIData.MENU_ITEM_DEFAULT, new ArrayList<>()));
+        MainUIData.resetInstanceForTesting();
+
+        assertEquals(MainUIData.SKIN_CLASSIC, getData().getSkinId());
+    }
+
+    @Test
+    public void skinPickedIsKept() {
+        getData().setSkinId(MainUIData.SKIN_MODERN);
+        ShadowLooper.shadowMainLooper().idle();
+        MainUIData.resetInstanceForTesting();
+
+        assertEquals(MainUIData.SKIN_MODERN, getData().getSkinId());
+    }
+
+    /**
+     * Saved after the context menus (slots 25 - 31): they're kept along with it
+     */
+    @Test
+    public void skinPickedKeepsTheMenus() {
+        getData().setMenuItemDisabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_MARK_AS_WATCHED);
+        getData().setSkinId(MainUIData.SKIN_MODERN);
+        ShadowLooper.shadowMainLooper().idle();
+        MainUIData.resetInstanceForTesting();
+
+        assertEquals(MainUIData.SKIN_MODERN, getData().getSkinId());
+        assertFalse(getData().isMenuItemEnabled(MainUIData.MENU_VIDEOS, MainUIData.MENU_ITEM_MARK_AS_WATCHED));
+    }
+
+    @Test
+    public void eachAccountHasItsOwnSkin() {
+        AppPrefs prefs = getPrefs();
+        MainUIData data = getData();
+
+        prefs.onAccountChanged(FIRST_ACCOUNT);
+        data.setSkinId(MainUIData.SKIN_MODERN);
+        ShadowLooper.shadowMainLooper().idle();
+
+        prefs.onAccountChanged(SECOND_ACCOUNT);
+
+        // A new account: the skin of new users
+        assertEquals(MainUIData.SKIN_HYBRID, data.getSkinId());
+
+        prefs.onAccountChanged(FIRST_ACCOUNT);
+
+        assertEquals(MainUIData.SKIN_MODERN, data.getSkinId());
     }
 
     @Test

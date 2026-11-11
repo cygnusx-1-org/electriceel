@@ -44,7 +44,10 @@ public class SignInFragment extends GuidedStepSupportFragment implements SignInV
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mSignInPresenter.onViewDestroyed();
+        // The activity of another skin may have taken its place already (see Skins)
+        if (!mSignInPresenter.isReplacedView(this)) {
+            mSignInPresenter.onViewDestroyed();
+        }
     }
 
     @Override

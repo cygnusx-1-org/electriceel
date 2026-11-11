@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The size of modern_ic_check: a row's title stays put whether it's the one picked or not -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <size android:width="24dp" android:height="24dp" />
+    <solid android:color="@android:color/transparent" />
+</shape>

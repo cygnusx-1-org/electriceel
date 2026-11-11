@@ -783,4 +783,10 @@
     <string name="disable_history_global">Atspējot konta vēsturi globāli</string>
     <string name="client_order">YouTube klientu secība</string>
     <string name="client_signed_in">%s (pierakstījies, labākais Premium lietotājiem)</string>
+    <string name="modern_who_is_watching">Kurš skatās?</string>
+    <string name="modern_add_account">Pievienot kontu</string>
+    <string name="modern_watch_as_guest">Skatīties kā viesim</string>
+    <string name="modern_on">Ieslēgts</string>
+    <string name="modern_off">Izslēgts</string>
+    <string name="modern_try_again">Mēģināt vēlreiz</string>
 </resources>

@@ -782,4 +782,10 @@
     <string name="aislist_about">Om AiSList (fellesskapsliste, CC BY-NC 4.0)</string>
     <string name="report_ai_channel">Rapporter kanalen til AiSList</string>
     <string name="add_remove_from_home_rows">Legg til/Fjern fra Startside</string>
+    <string name="modern_who_is_watching">Hvem ser på?</string>
+    <string name="modern_add_account">Legg til konto</string>
+    <string name="modern_watch_as_guest">Se som gjest</string>
+    <string name="modern_on">På</string>
+    <string name="modern_off">Av</string>
+    <string name="modern_try_again">Prøv igjen</string>
 </resources>

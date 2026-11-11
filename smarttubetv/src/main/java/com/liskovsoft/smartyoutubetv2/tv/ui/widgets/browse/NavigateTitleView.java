@@ -387,7 +387,7 @@ public class NavigateTitleView extends TitleView implements OnDataChange, Accoun
     /**
      * The icon of the filter, crossed out while its videos are shown
      */
-    private static int getQuickToggleIcon(int toggle, boolean isHiding) {
+    public static int getQuickToggleIcon(int toggle, boolean isHiding) {
         switch (toggle) {
             case QuickTogglePresenter.TOGGLE_OLD_VIDEOS:
                 return isHiding ? R.drawable.browse_title_old_videos_on : R.drawable.browse_title_old_videos_off;
