@@ -122,6 +122,13 @@ public final class PlaybackHealth {
      */
     private long mPlayedMs;
     private boolean mIsPlaying;
+    /**
+     * Of the format tried: the sound buffers decoded when it was reported silent, and how long it had played when the sound came
+     * back after that (see #takeSoundBackMs), -1 till then
+     */
+    private long mSoundBuffersSilent = -1;
+    private long mSoundBackMs = -1;
+    private boolean mIsSoundBackTaken;
     private long mLongestFrozenMs;
     private long mStartFrozenMs;
     private final List<long[]> mStartTrail = new ArrayList<>();
@@ -216,6 +223,10 @@ public final class PlaybackHealth {
          */
         public boolean isVideoRendered;
         public long silentMs;
+        /**
+         * Decoded with sound in them, so far (see SilenceDetector#getSoundBuffers)
+         */
+        public long soundBuffers;
         /**
          * Of the format tried (see FormatAttempts)
          */
@@ -437,7 +448,14 @@ public final class PlaybackHealth {
         }
 
         if (sample.hasAudio && !sample.isMuted && (isSilentFromStart(sample) || sample.silentMs >= LONG_SILENT_MS)) {
+            if (mSoundBuffersSilent < 0) {
+                mSoundBuffersSilent = sample.soundBuffers;
+            }
+
             report(result, KIND_AUDIO_SILENT);
+        } else if (mSoundBuffersSilent >= 0 && mSoundBackMs < 0 && sample.soundBuffers > mSoundBuffersSilent) {
+            // A sound was decoded since: the silence reported ended (e.g. a silent intro). Not a seek's: it only empties the count.
+            mSoundBackMs = sample.playedMs;
         }
 
         if (!mIsStartMeasured && mPlayedMs >= START_MS && sample.hasVideo && sample.renderedFrames >= 0 && sample.droppedFrames >= 0) {
@@ -619,6 +637,20 @@ public final class PlaybackHealth {
     }
 
     /**
+     * Once per format tried that was reported silent (see KIND_AUDIO_SILENT), when its sound came back: how long it had played then.
+     * -1 till then, and after it was taken.
+     */
+    public long takeSoundBackMs() {
+        if (mSoundBackMs < 0 || mIsSoundBackTaken) {
+            return -1;
+        }
+
+        mIsSoundBackTaken = true;
+
+        return mSoundBackMs;
+    }
+
+    /**
      * Once per format tried, when its start has played or the one before ended in its own: null till then
      */
     @Nullable
@@ -649,6 +681,9 @@ public final class PlaybackHealth {
         mCatchUpDropped = -1;
         mFrames.clear();
         mPlayedMs = 0;
+        mSoundBuffersSilent = -1;
+        mSoundBackMs = -1;
+        mIsSoundBackTaken = false;
         mLongestFrozenMs = 0;
         mStartFrozenMs = 0;
         mStartTrail.clear();

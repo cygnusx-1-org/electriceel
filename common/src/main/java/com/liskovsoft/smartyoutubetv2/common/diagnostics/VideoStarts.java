@@ -175,6 +175,11 @@ public final class VideoStarts {
     private static final LinkedHashMap<String, Long> sPlayed = new LinkedHashMap<>();
     private static final int MAX_PLAYED = 4;
     /**
+     * The video that played last, till the app loads it again (see #onReload)
+     */
+    @Nullable
+    private static String sReloadableId;
+    /**
      * Of each kind of first segment (see CHUNK_STAGES) since the player was prepared, timed or not (a start is given up after 15 s):
      * it started to load, and it loaded (see #isOneTrackStuck)
      */
@@ -454,6 +459,21 @@ public final class VideoStarts {
         if (sListener != null) {
             sListener.onStart();
         }
+    }
+
+    /**
+     * The app loads the video that played again (see VideoLoaderController#reloadVideo and #restartEngine), e.g. the error fixer after
+     * the SABR server asked it to: timed as a start of its own, how long the picture was gone and whether it came back. One still
+     * starting goes on (see #onFetch). Once per time it played: a reload that doesn't play isn't timed again (an ended live stream is
+     * reloaded every 30 s).
+     */
+    public static void onReload(@Nullable String videoId) {
+        if (videoId == null || !videoId.equals(sReloadableId) || getTimer(videoId) != null) {
+            return;
+        }
+
+        sReloadableId = null;
+        start(videoId, VideoStart.TRIGGER_RELOAD);
     }
 
     /**
@@ -872,6 +892,7 @@ public final class VideoStarts {
 
         sTimer = null;
         sScheduler.cancel(sGiveUp);
+        sReloadableId = timer.videoId;
         // The same video again: its new start
         sPlayed.remove(timer.videoId);
         sPlayed.put(timer.videoId, timer.ts);
@@ -1142,6 +1163,7 @@ public final class VideoStarts {
     static void resetForTesting() {
         sTimer = null;
         sPlayed.clear();
+        sReloadableId = null;
         Arrays.fill(sIsChunkStarted, false);
         Arrays.fill(sIsChunkDone, false);
         sPreparedMs = -1;

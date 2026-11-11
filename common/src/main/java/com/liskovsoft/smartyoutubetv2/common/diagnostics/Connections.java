@@ -89,19 +89,35 @@ public final class Connections {
          * starts the next 250 ms into one that hasn't connected yet (fast fallback).
          */
         final List<Attempt> attempts = new ArrayList<>(2);
+        /**
+         * The server's name, only to number it as the video's (see FormatAttempts#getHostNumber): it isn't recorded
+         */
+        @Nullable
+        String host;
+        /**
+         * What it agreed on with the server, once connected: e.g. HTTP/1.1, where a response closed before its end loses the connection
+         */
+        @Nullable
+        Protocol protocol;
 
         Connection(long startMs) {
             this.startMs = startMs;
         }
 
         /**
-         * E.g. "DNS 2 ms, IPv4 70 ms", "DNS 5003 ms, IPv4 68 ms", "DNS 1 ms, IPv4 timed out after 5000 ms, IPv6 70 ms". With
-         * "still going" for one that hasn't ended, after what it's at: "DNS, still going", "DNS 2 ms, IPv4, still going". Null for
-         * nothing known.
+         * E.g. "server 1, DNS 2 ms, IPv4 70 ms, h2", "DNS 5003 ms, IPv4 68 ms, http/1.1", "DNS 1 ms, IPv4 timed out after 5000 ms,
+         * IPv6 70 ms". With "still going" for one that hasn't ended, after what it's at: "DNS, still going", "DNS 2 ms, IPv4, still
+         * going". Null for nothing known.
+         *
+         * @param hostNumber of its server among the video's (see FormatAttempts#getHostNumber), -1 for one not known
          */
         @Nullable
-        String describe(boolean isGoing) {
-            List<String> parts = new ArrayList<>(attempts.size() + 2);
+        String describe(boolean isGoing, int hostNumber) {
+            List<String> parts = new ArrayList<>(attempts.size() + 4);
+
+            if (hostNumber > 0) {
+                parts.add("server " + hostNumber);
+            }
 
             if (dnsEndMs >= 0) {
                 parts.add("DNS " + (dnsEndMs - startMs) + " ms");
@@ -114,11 +130,16 @@ public final class Connections {
                 parts.add(attempt.describe());
             }
 
+            if (protocol != null) {
+                parts.add(protocol.toString());
+            }
+
             if (isGoing) {
                 parts.add(VideoStarts.DETAIL_GOING);
             }
 
-            return parts.isEmpty() ? null : TextUtils.join(", ", parts);
+            // The server alone says nothing of the connection
+            return parts.size() > (hostNumber > 0 ? 1 : 0) ? TextUtils.join(", ", parts) : null;
         }
     }
 
@@ -163,9 +184,10 @@ public final class Connections {
         private volatile Connection mConnection;
         private volatile long[] mResponse;
 
-        private void onStart() {
+        private void onStart(Call call) {
             if (mConnection == null) {
                 mConnection = add(sClock.now(), -1);
+                setHost(mConnection, call.request().url().host());
             }
         }
 
@@ -189,7 +211,7 @@ public final class Connections {
 
         @Override
         public void dnsStart(@NonNull Call call, @NonNull String domainName) {
-            onStart();
+            onStart(call);
             startDns(mConnection);
         }
 
@@ -204,7 +226,7 @@ public final class Connections {
 
         @Override
         public void connectStart(@NonNull Call call, @NonNull InetSocketAddress inetSocketAddress, @NonNull Proxy proxy) {
-            onStart();
+            onStart(call);
             startAttempt(mConnection, inetSocketAddress);
         }
 
@@ -226,6 +248,7 @@ public final class Connections {
             Connection connection = mConnection;
 
             if (connection != null) {
+                setProtocol(connection, protocol);
                 endAttempt(connection, inetSocketAddress, null);
             }
 
@@ -382,6 +405,14 @@ public final class Connections {
         connection.endMs = sClock.now();
     }
 
+    private static synchronized void setHost(Connection connection, String host) {
+        connection.host = host;
+    }
+
+    private static synchronized void setProtocol(Connection connection, @Nullable Protocol protocol) {
+        connection.protocol = protocol;
+    }
+
     private static synchronized void startDns(Connection connection) {
         connection.isDnsStarted = true;
     }
@@ -475,7 +506,8 @@ public final class Connections {
             long endMs = isGoing ? toMs : Math.min(connection.endMs, toMs);
 
             if (endMs - startMs >= 1) {
-                result.add(new VideoStart.Stage(VideoStarts.STAGE_CONNECT, connection.describe(isGoing), 1, startMs, endMs));
+                result.add(new VideoStart.Stage(VideoStarts.STAGE_CONNECT,
+                        connection.describe(isGoing, FormatAttempts.getHostNumber(connection.host)), 1, startMs, endMs));
             }
         }
 

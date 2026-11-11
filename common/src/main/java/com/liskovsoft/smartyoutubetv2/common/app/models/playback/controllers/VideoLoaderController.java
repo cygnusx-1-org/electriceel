@@ -2,12 +2,14 @@ package com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers;
 
 import android.os.Build.VERSION;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.liskovsoft.mediaserviceinterfaces.MediaItemService;
 import com.liskovsoft.mediaserviceinterfaces.ServiceManager;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaFormat;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItemFormatInfo;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItemMetadata;
+import com.liskovsoft.sharedutils.helpers.DateHelper;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.sharedutils.mylogger.Log;
@@ -52,6 +54,14 @@ public class VideoLoaderController extends BasePlayerController {
     private static final int MAX_LIVE_CLIENT_SWITCHES = 3;
     private static final int EMPTY_FORMATS_RELOAD_MS = 30_000;
     /**
+     * A premiere or a live stream that hasn't started: it has no formats yet, and that's no failure (see processFormatInfo)
+     */
+    private static final String STATUS_LIVE_STREAM_OFFLINE = "LIVE_STREAM_OFFLINE";
+    /**
+     * The longest wait between the reloads of one that starts later (see getEmptyFormatsReloadMs)
+     */
+    private static final int MAX_UPCOMING_RELOAD_MS = 10 * 60 * 1_000;
+    /**
      * Where a stopped video is left, before its end: its length is whole seconds (lengthSeconds), up to a second past its media
      * (see stopPlayback)
      */
@@ -93,6 +103,7 @@ public class VideoLoaderController extends BasePlayerController {
 
         if (video != null) {
             video.fromReload = true;
+            VideoStarts.onReload(video.videoId);
         }
 
         getMainController().onNewVideo(video);
@@ -105,6 +116,12 @@ public class VideoLoaderController extends BasePlayerController {
     };
     private final Runnable mRestartEngine = () -> {
         if (getPlayer() != null) {
+            Video video = getVideo();
+
+            if (video != null) {
+                VideoStarts.onReload(video.videoId);
+            }
+
             getPlayer().restartEngine(); // properly save position of the current track
         }
     };
@@ -496,14 +513,18 @@ public class VideoLoaderController extends BasePlayerController {
                 reloadVideo(0);
                 isRefetched = true;
             } else {
-                failure.action("reload_video").record();
+                // Not started yet: a reload when it does is all there is to do
+                if (!isUpcoming(formatInfo)) {
+                    failure.action("reload_video").record();
+                }
+
                 String reason = formatInfo.getPlayabilityReason();
                 player.setTitle(reason != null ? reason : getContext().getString(R.string.msg_no_media_retry));
                 player.showProgressBar(false);
                 mSuggestionsController.loadSuggestions(getVideo());
                 bgImageUrl = getVideo().getBackgroundUrl();
                 player.showOverlay(true);
-                reloadVideo(EMPTY_FORMATS_RELOAD_MS);
+                reloadVideo(getEmptyFormatsReloadMs(formatInfo, System.currentTimeMillis()));
             }
         }
 
@@ -544,6 +565,30 @@ public class VideoLoaderController extends BasePlayerController {
         }
 
         return client instanceof Enum ? ((Enum<?>) client).name() : client.getClientName();
+    }
+
+    /**
+     * A premiere or a live stream that hasn't started (e.g. "Premieres in 88 minutes")
+     */
+    @VisibleForTesting
+    static boolean isUpcoming(MediaItemFormatInfo formatInfo) {
+        return STATUS_LIVE_STREAM_OFFLINE.equals(formatInfo.getPlayabilityStatus());
+    }
+
+    /**
+     * Of one with no formats: every 30 s. Of a premiere or a live stream that starts later, half the time till it's to start, between
+     * 30 s and 10 min, so the reload after it starts comes 30 s after at most (E3RZYG50: "Premieres in 88 minutes" was reloaded every
+     * 30 s, ~176 times).
+     */
+    @VisibleForTesting
+    static int getEmptyFormatsReloadMs(MediaItemFormatInfo formatInfo, long nowMs) {
+        long startMs = isUpcoming(formatInfo) ? DateHelper.toUnixTimeMs(formatInfo.getStartTimestamp()) : 0;
+
+        if (startMs <= nowMs) {
+            return EMPTY_FORMATS_RELOAD_MS;
+        }
+
+        return (int) Math.max(EMPTY_FORMATS_RELOAD_MS, Math.min(MAX_UPCOMING_RELOAD_MS, (startMs - nowMs) / 2));
     }
 
     /**

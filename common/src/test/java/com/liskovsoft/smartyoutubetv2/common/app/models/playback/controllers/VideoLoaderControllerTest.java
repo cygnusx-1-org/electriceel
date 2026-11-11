@@ -262,6 +262,57 @@ public class VideoLoaderControllerTest {
     }
 
     /**
+     * E3RZYG50: "Premieres in 88 minutes" was reloaded every 30 s. Reloaded after half the time left, 10 min at most: the reload after
+     * it starts comes 30 s after at most.
+     */
+    @Test
+    public void aPremiereIsReloadedAfterHalfTheTimeLeft() {
+        long nowMs = 1_793_975_507_000L; // 2026-11-06T14:31:47Z
+        MediaItemFormatInfo inAnHour = premiere("2026-11-06T15:31:47+00:00");
+        MediaItemFormatInfo in6Minutes = premiere("2026-11-06T14:37:47+00:00");
+        MediaItemFormatInfo inAMinute = premiere("2026-11-06T14:32:47+00:00");
+
+        assertEquals(10 * 60_000, VideoLoaderController.getEmptyFormatsReloadMs(inAnHour, nowMs));
+        assertEquals(3 * 60_000, VideoLoaderController.getEmptyFormatsReloadMs(in6Minutes, nowMs));
+        assertEquals(30_000, VideoLoaderController.getEmptyFormatsReloadMs(inAMinute, nowMs));
+    }
+
+    /**
+     * Past its time (it's late), or with none, it's reloaded every 30 s, as one with no formats is
+     */
+    @Test
+    public void aPremiereWithoutTimeLeftIsReloadedEvery30Seconds() {
+        long nowMs = 1_793_975_507_000L; // 2026-11-06T14:31:47Z
+
+        assertEquals(30_000, VideoLoaderController.getEmptyFormatsReloadMs(premiere("2026-11-06T14:00:00+00:00"), nowMs));
+        assertEquals(30_000, VideoLoaderController.getEmptyFormatsReloadMs(premiere(null), nowMs));
+        assertEquals(30_000, VideoLoaderController.getEmptyFormatsReloadMs(premiere("not a time"), nowMs));
+    }
+
+    /**
+     * The start time of a video that isn't waiting to start doesn't make it wait longer
+     */
+    @Test
+    public void aVideoWithNoFormatsIsReloadedEvery30Seconds() {
+        Map<String, Object> values = new HashMap<>();
+        values.put("getPlayabilityStatus", "OK");
+        values.put("getStartTimestamp", "2026-11-06T15:31:47+00:00");
+
+        assertEquals(30_000, VideoLoaderController.getEmptyFormatsReloadMs(formatInfo(values), 1_793_975_507_000L));
+        assertFalse(VideoLoaderController.isUpcoming(formatInfo(values)));
+        assertTrue(VideoLoaderController.isUpcoming(premiere(null)));
+    }
+
+    private static MediaItemFormatInfo premiere(String startTimestamp) {
+        Map<String, Object> values = new HashMap<>();
+        values.put("getPlayabilityStatus", "LIVE_STREAM_OFFLINE");
+        values.put("getPlayabilityReason", "Premieres in 88 minutes");
+        values.put("getStartTimestamp", startTimestamp);
+
+        return formatInfo(values);
+    }
+
+    /**
      * @return where the player was sent
      */
     private static long stopPlayback(Video video, long durationMs) throws Exception {

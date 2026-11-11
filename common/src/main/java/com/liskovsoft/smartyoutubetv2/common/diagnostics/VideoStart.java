@@ -48,6 +48,10 @@ public final class VideoStart {
      * Picked from the playback queue in the player
      */
     public static final String TRIGGER_QUEUE = "queue";
+    /**
+     * The app loaded the video that played again (see VideoStarts#onReload): the error fixer, its streams expired. Timed from the reload.
+     */
+    public static final String TRIGGER_RELOAD = "reload";
 
     /**
      * It played: a frame was shown and the playback ran

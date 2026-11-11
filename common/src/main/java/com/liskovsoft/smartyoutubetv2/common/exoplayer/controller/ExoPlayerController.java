@@ -238,6 +238,7 @@ public class ExoPlayerController implements Player.EventListener {
             sample.hasAudio = mPlayer.getAudioFormat() != null;
             sample.isMuted = mIsMuted || mPlayer.getVolume() == 0;
             sample.silentMs = SilenceDetector.getSilentMs();
+            sample.soundBuffers = SilenceDetector.getSoundBuffers();
             sample.stalls = FormatAttempts.getStalls();
             sample.stallMs = FormatAttempts.getStallMs();
             sample.playedMs = FormatAttempts.getPlayedMs();
@@ -272,6 +273,12 @@ public class ExoPlayerController implements Player.EventListener {
 
             for (String kind : mHealth.onSample(sample)) {
                 recordHealthFailure(kind, sample);
+            }
+
+            long soundBackMs = mHealth.takeSoundBackMs();
+
+            if (soundBackMs >= 0) {
+                FormatAttempts.onSoundBack(soundBackMs);
             }
 
             onStartFrames(mHealth.takeStartFrames());

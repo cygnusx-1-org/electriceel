@@ -933,6 +933,95 @@ public class VideoStartsTest {
         assertFalse(json.getJSONArray("stages").getJSONObject(0).has("detail"));
     }
 
+    /**
+     * E3RZYG50: the SABR server asked for a reload 26 min in, and nothing told whether the video came back. Reloaded after it played,
+     * it's timed from the reload.
+     */
+    @Test
+    public void aReloadOfAVideoThatPlayed_isTimedFromTheReload() {
+        play(VIDEO_ID, 1_200);
+        int recorded = mFixture.recorded.size();
+
+        mFixture.at(60_000);
+        VideoStarts.onReload(VIDEO_ID);
+        VideoStarts.onFetch(VIDEO_ID);
+        playOn(61_500);
+
+        assertEquals(recorded + 1, mFixture.recorded.size());
+        VideoStart start = last();
+        assertEquals(VideoStart.TRIGGER_RELOAD, start.trigger);
+        assertEquals(VideoStart.OUTCOME_PLAYED, start.outcome);
+        assertEquals(1_500, start.totalMs);
+    }
+
+    /**
+     * Opened again after it played, a reload before it plays is that start's: its formats fetched again (see #onFetch), not a start of
+     * its own
+     */
+    @Test
+    public void aReloadBeforeItPlayed_goesOnWithTheStart() {
+        play(VIDEO_ID, 1_200);
+
+        start(VIDEO_ID);
+        mFixture.at(2_000);
+        VideoStarts.onReload(VIDEO_ID);
+        VideoStarts.onFetch(VIDEO_ID);
+        playOn(3_000);
+
+        VideoStart start = last();
+        assertEquals(VideoStart.TRIGGER_OPEN, start.trigger);
+        assertEquals(3_000, start.totalMs);
+    }
+
+    /**
+     * A premiere opened early, reloaded every 30 s, never played: no start for each reload
+     */
+    @Test
+    public void aVideoThatNeverPlayed_isntTimedOnReload() {
+        start(VIDEO_ID);
+        VideoStarts.abandon(VideoStart.OUTCOME_UNPLAYABLE);
+        int recorded = mFixture.recorded.size();
+
+        mFixture.at(30_000);
+        VideoStarts.onReload(VIDEO_ID);
+
+        assertNull(VideoStarts.snapshot());
+        assertEquals(recorded, mFixture.recorded.size());
+    }
+
+    /**
+     * An ended live stream that played is reloaded every 30 s: the first reload is timed, the ones after it aren't till it plays again
+     */
+    @Test
+    public void aReloadThatDidntPlay_isntTimedAgain() {
+        play(VIDEO_ID, 1_200);
+
+        mFixture.at(60_000);
+        VideoStarts.onReload(VIDEO_ID);
+        VideoStarts.onFetch(VIDEO_ID);
+        VideoStarts.abandon(VideoStart.OUTCOME_UNPLAYABLE);
+        int recorded = mFixture.recorded.size();
+        assertEquals(VideoStart.TRIGGER_RELOAD, last().trigger);
+
+        mFixture.at(90_000);
+        VideoStarts.onReload(VIDEO_ID);
+
+        assertNull(VideoStarts.snapshot());
+        assertEquals(recorded, mFixture.recorded.size());
+    }
+
+    /**
+     * Only the video that played last: another one's reload is for a video the user left
+     */
+    @Test
+    public void anotherVideosReload_isntTimed() {
+        play(VIDEO_ID, 1_200);
+
+        VideoStarts.onReload("otherVideoId");
+
+        assertNull(VideoStarts.snapshot());
+    }
+
     private void start(String videoId) {
         mFixture.at(0);
         VideoStarts.start(videoId, VideoStart.TRIGGER_OPEN);

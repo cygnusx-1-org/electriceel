@@ -22,6 +22,10 @@ public final class SilenceDetector implements TeeAudioProcessor.AudioBufferSink 
     private volatile int mChannelCount;
     private volatile int mEncoding = C.ENCODING_INVALID;
     private volatile long mSilentFrames;
+    /**
+     * Of PCM with sound in it, since the app started: unlike the silence's length, a flush (a seek, a new format) doesn't change it
+     */
+    private volatile long mSoundBuffers;
 
     private SilenceDetector() {
     }
@@ -40,6 +44,13 @@ public final class SilenceDetector implements TeeAudioProcessor.AudioBufferSink 
         int sampleRateHz = sInstance.mSampleRateHz;
 
         return sampleRateHz > 0 ? sInstance.mSilentFrames * 1_000 / sampleRateHz : 0;
+    }
+
+    /**
+     * The decoded buffers that had sound in them so far: more than before, a sound was decoded since
+     */
+    public static long getSoundBuffers() {
+        return sInstance.mSoundBuffers;
     }
 
     /**
@@ -80,7 +91,12 @@ public final class SilenceDetector implements TeeAudioProcessor.AudioBufferSink 
             return;
         }
 
-        mSilentFrames = isSilent ? mSilentFrames + frames : 0;
+        if (isSilent) {
+            mSilentFrames += frames;
+        } else {
+            mSilentFrames = 0;
+            mSoundBuffers++;
+        }
     }
 
     private static boolean isSilent16Bit(ByteBuffer data) {

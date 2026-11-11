@@ -11,9 +11,12 @@ import com.google.android.exoplayer2.upstream.TransferListener;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.io.IOException;
@@ -45,6 +48,8 @@ public class ConnectionsTest {
     private static final InetAddress IPV4 = address(new byte[] {(byte) 142, (byte) 250, 1, 1});
     private static final InetAddress IPV6 = address(new byte[] {0x26, 0x07, (byte) 0xf8, (byte) 0xb0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1});
     private final AtomicLong mNow = new AtomicLong();
+    @Rule
+    public TemporaryFolder mFolder = new TemporaryFolder();
     /**
      * Not run: the listener is told what OkHttp would tell it
      */
@@ -239,9 +244,51 @@ public class ConnectionsTest {
 
         assertEquals(1, stages.size());
         assertEquals(VideoStarts.STAGE_CONNECT, stages.get(0).name);
-        assertEquals("DNS 2 ms, IPv4 68 ms", stages.get(0).detail);
+        assertEquals("DNS 2 ms, IPv4 68 ms, http/1.1", stages.get(0).detail);
         assertEquals(1_000, stages.get(0).startMs);
         assertEquals(1_070, stages.get(0).endMs);
+    }
+
+    /**
+     * VP4G86E9: each first segment of a SABR start connected again, 100-350 ms, and nothing said to which server or why. The
+     * server's number is the video's (as its attempts' hosts), and the protocol tells HTTP/1.1, which loses a connection whose
+     * response was closed before its end, from HTTP/2.
+     */
+    @Test
+    public void aConnectSaysItsServerAndProtocol() throws IOException {
+        PlayerFailureLog.useForTesting(mFolder.getRoot());
+        FormatAttempts.resetForTesting();
+        FormatAttempts.onNewVideo(RuntimeEnvironment.getApplication(), "oL_NZPsIf0c");
+        FormatAttempts.onRequest("rr2---sn-other.googlevideo.com");
+        FormatAttempts.onRequest(HOST);
+
+        try {
+            Call call = new OkHttpClient().newCall(new Request.Builder().url("https://" + HOST + "/videoplayback?sabr=1").build());
+            EventListener listener = Connections.LISTENER.create(call);
+            mNow.set(1_000);
+            listener.connectStart(call, new InetSocketAddress(IPV4, 443), Proxy.NO_PROXY);
+            mNow.set(1_100);
+            listener.connectEnd(call, new InetSocketAddress(IPV4, 443), Proxy.NO_PROXY, Protocol.HTTP_2);
+
+            assertEquals("server 2, IPv4 100 ms, h2", Connections.take(500, 3_000).get(0).detail);
+        } finally {
+            FormatAttempts.resetForTesting();
+            PlayerFailureLog.useForTesting(null);
+        }
+    }
+
+    /**
+     * A server the video's segments weren't asked of (e.g. the connection is the first request's, made before it's told): no number
+     */
+    @Test
+    public void aConnectToAServerNotAskedHasNoNumber() throws IOException {
+        EventListener listener = Connections.LISTENER.create(mCall);
+        mNow.set(1_000);
+        listener.connectStart(mCall, new InetSocketAddress(IPV4, 443), Proxy.NO_PROXY);
+        mNow.set(1_050);
+        listener.connectEnd(mCall, new InetSocketAddress(IPV4, 443), Proxy.NO_PROXY, Protocol.HTTP_2);
+
+        assertEquals("IPv4 50 ms, h2", Connections.take(500, 3_000).get(0).detail);
     }
 
     /**
@@ -266,7 +313,7 @@ public class ConnectionsTest {
         List<VideoStart.Stage> stages = Connections.take(500, 7_000);
 
         assertEquals(1, stages.size());
-        assertEquals("DNS 3 ms, IPv4 timed out after 5000 ms, IPv6 70 ms", stages.get(0).detail);
+        assertEquals("DNS 3 ms, IPv4 timed out after 5000 ms, IPv6 70 ms, http/1.1", stages.get(0).detail);
         assertEquals(1_000, stages.get(0).startMs);
         assertEquals(6_073, stages.get(0).endMs);
     }
@@ -282,7 +329,7 @@ public class ConnectionsTest {
         mNow.set(6_070);
         listener.connectEnd(mCall, new InetSocketAddress(IPV4, 443), Proxy.NO_PROXY, Protocol.HTTP_1_1);
 
-        assertEquals("DNS 5003 ms, IPv4 67 ms", Connections.take(500, 7_000).get(0).detail);
+        assertEquals("DNS 5003 ms, IPv4 67 ms, http/1.1", Connections.take(500, 7_000).get(0).detail);
     }
 
     /**

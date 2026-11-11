@@ -4,6 +4,7 @@ import android.text.TextUtils;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Format;
@@ -274,7 +275,7 @@ public class DashManifestParser2 {
         //UrlTemplate initializationTemplate = UrlTemplate.compile(format.getOtfInitUrl()); // ?
         UrlTemplate initializationTemplate = null; // ?
 
-        RangedUri initialization = parseRangedUrl(format.getSourceUrl(), format.getInit());
+        RangedUri initialization = getLiveInitialization(format);
 
         List<SegmentTimelineElement> timeline = parseSegmentTimeline(offsetUnits, segmentDurationUnits, segmentCount);
 
@@ -288,6 +289,20 @@ public class DashManifestParser2 {
                 timeline,
                 initializationTemplate,
                 mediaTemplate);
+    }
+
+    /**
+     * None without an init range: the format's URL alone is answered with the newest whole segment, a second segment loaded before the
+     * first one played (3.2 MB, 1.7 s of a 4K start). Each segment starts with its init (ftyp, moov), so the first one played sets up
+     * the extractor (see DefaultDashChunkSource#getNextChunk).
+     */
+    @Nullable
+    private RangedUri getLiveInitialization(MediaFormat format) {
+        if (TextUtils.isEmpty(format.getInit()) && format.getSourceUrl() == null) {
+            return null;
+        }
+
+        return parseRangedUrl(format.getSourceUrl(), format.getInit());
     }
 
     private SegmentList parseSegmentList(MediaFormat format) {

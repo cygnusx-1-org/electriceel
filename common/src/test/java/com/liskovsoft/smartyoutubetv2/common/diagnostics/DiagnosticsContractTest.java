@@ -148,7 +148,7 @@ public class DiagnosticsContractTest {
 
         assertEquals(new HashSet<>(Arrays.asList(VideoStart.TRIGGER_OPEN, VideoStart.TRIGGER_INTENT, VideoStart.TRIGGER_COLD_INTENT,
                 VideoStart.TRIGGER_REMOTE, VideoStart.TRIGGER_NEXT, VideoStart.TRIGGER_PREVIOUS, VideoStart.TRIGGER_SUGGESTION,
-                VideoStart.TRIGGER_AUTOPLAY, VideoStart.TRIGGER_QUEUE)), schemaTriggers);
+                VideoStart.TRIGGER_AUTOPLAY, VideoStart.TRIGGER_QUEUE, VideoStart.TRIGGER_RELOAD)), schemaTriggers);
     }
 
     /**

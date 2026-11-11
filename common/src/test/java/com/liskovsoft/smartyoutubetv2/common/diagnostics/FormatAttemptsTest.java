@@ -107,6 +107,40 @@ public class FormatAttemptsTest {
         assertTrue(details.isNull("recentThroughputKbps"));
     }
 
+    /**
+     * VP4G86E9 #1: reported silent, then the sound came back. Its failure tells how long it had played by then, as the formats
+     * written after it are its own (see PlayerFailureLog#mergeFormats).
+     */
+    @Test
+    public void theSoundComingBackIsTheFailedAttempts() throws Exception {
+        FormatAttempts.onNewVideo(getContext(), "oL_NZPsIf0c");
+        FormatAttempts.onTracks(VP9_4K, FormatItem.AUDIO_HQ_MP4A);
+        FormatAttempts.onStreamFailed(false);
+        failure("oL_NZPsIf0c").record();
+
+        FormatAttempts.onSoundBack(25_300);
+        FormatAttempts.onSoundBack(40_000); // once
+        FormatAttempts.end(getContext());
+
+        JSONObject attempt = mLog.readAll().get(0).getJSONObject("formats").getJSONArray("attempted").getJSONObject(0);
+
+        assertEquals(25_300, attempt.getLong("soundBackMs"));
+        assertEquals(FormatAttempts.STATUS_FAILED, attempt.getString("audioStatus"));
+    }
+
+    /**
+     * Never silent, or silent to its end: nothing to tell
+     */
+    @Test
+    public void anAttemptWhoseSoundDidntComeBackHasNoTime() throws Exception {
+        FormatAttempts.onNewVideo(getContext(), "video");
+        FormatAttempts.onTracks(VP9_4K, FormatItem.AUDIO_HQ_MP4A);
+        failure("video").record();
+        FormatAttempts.end(getContext());
+
+        assertFalse(mLog.readAll().get(0).getJSONObject("formats").getJSONArray("attempted").getJSONObject(0).has("soundBackMs"));
+    }
+
     @Test
     public void aFailureEndsWithTheLastFormatTried() throws Exception {
         FormatAttempts.onNewVideo(getContext(), "first");

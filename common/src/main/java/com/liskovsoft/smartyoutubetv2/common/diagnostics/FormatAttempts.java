@@ -161,6 +161,11 @@ public final class FormatAttempts {
         String audioDecoder;
         int droppedFrames;
         long playedMs;
+        /**
+         * Reported silent (see PlaybackHealth#KIND_AUDIO_SILENT), how long it had played when the sound came back: -1 for one that
+         * wasn't, or whose sound didn't come back
+         */
+        long soundBackMs = -1;
         int stalls;
         long stallMs;
         long loadedBytes;
@@ -295,6 +300,16 @@ public final class FormatAttempts {
         if (last != null && last.source == sSource) {
             addHost(last.hosts, index + 1);
         }
+    }
+
+    /**
+     * The number of a server among the ones the video's segments were asked of (see sHosts), -1 for another (e.g. not asked yet).
+     * On the player's thread, as the requests are.
+     */
+    public static int getHostNumber(@Nullable String host) {
+        int index = host != null ? sHosts.indexOf(host) : -1;
+
+        return index >= 0 ? index + 1 : -1;
     }
 
     private static void useSource(Attempt attempt) {
@@ -588,6 +603,23 @@ public final class FormatAttempts {
     }
 
     /**
+     * The sound of the one tried last came back after it was reported silent (see PlaybackHealth#takeSoundBackMs): a silent intro
+     * comes back in seconds, a silence that lasts till another format is tried doesn't
+     *
+     * @param playedMs how long it had played then
+     */
+    public static void onSoundBack(long playedMs) {
+        Attempt last = getLast();
+
+        if (last == null || last.audio == null || last.soundBackMs >= 0) {
+            return;
+        }
+
+        last.soundBackMs = playedMs;
+        sIsChangedSinceFailure = true;
+    }
+
+    /**
      * The audio's clock moved on while it played (it's the player's clock): its sound is output
      */
     public static void onAudioPlayed() {
@@ -853,6 +885,11 @@ public final class FormatAttempts {
         result.put("audioDecoder", nullable(attempt.audioDecoder));
         result.put("droppedFrames", attempt.droppedFrames);
         result.put("playedMs", playedMs);
+
+        if (attempt.soundBackMs >= 0) {
+            result.put("soundBackMs", attempt.soundBackMs);
+        }
+
         result.put("stalls", attempt.stalls);
         result.put("stallMs", stallMs);
         // Bits per millisecond are kilobits per second

@@ -147,6 +147,71 @@ public class PlaybackHealthTest {
         assertFalse(PlaybackHealth.isSilentFromStart(mSample));
     }
 
+    /**
+     * VP4G86E9 #1: silent for its first 16 s, then 11 min more of it before another format was tried, which had sound. When the sound
+     * came back is what tells a silent intro from a stream with none.
+     */
+    @Test
+    public void theSoundComingBackAfterSilenceIsTold() {
+        mSample.playedMs = 16_300;
+        mSample.silentMs = PlaybackHealth.SILENT_MS + 800;
+        mSample.soundBuffers = 4;
+        tick(2_000, 2_000, 480, 0);
+        assertEquals(PlaybackHealth.KIND_AUDIO_SILENT, mFound.get(0));
+        assertEquals(-1, mHealth.takeSoundBackMs());
+
+        // Still silent
+        mSample.playedMs = 18_300;
+        mSample.silentMs += 2_000;
+        tick(2_000, 2_000, 540, 0);
+        assertEquals(-1, mHealth.takeSoundBackMs());
+
+        // A sound decoded
+        mSample.playedMs = 20_300;
+        mSample.silentMs = 300;
+        mSample.soundBuffers = 5;
+        tick(2_000, 2_000, 600, 0);
+        assertEquals(20_300, mHealth.takeSoundBackMs());
+
+        // Once
+        assertEquals(-1, mHealth.takeSoundBackMs());
+        mSample.soundBuffers = 9;
+        tick(2_000, 2_000, 660, 0);
+        assertEquals(-1, mHealth.takeSoundBackMs());
+    }
+
+    /**
+     * A seek, or another track, starts the silence's count over: no sound was decoded
+     */
+    @Test
+    public void aSeekAfterSilenceIsntTheSoundComingBack() {
+        mSample.playedMs = 16_300;
+        mSample.silentMs = PlaybackHealth.SILENT_MS + 800;
+        mSample.soundBuffers = 4;
+        tick(2_000, 2_000, 480, 0);
+        assertEquals(PlaybackHealth.KIND_AUDIO_SILENT, mFound.get(0));
+
+        mSample.playedMs = 18_300;
+        mSample.silentMs = 0;
+        tick(2_000, 2_000, 540, 0);
+
+        assertEquals(-1, mHealth.takeSoundBackMs());
+    }
+
+    /**
+     * Not reported silent: sound decoded isn't news
+     */
+    @Test
+    public void soundWithoutSilenceReportedIsntTold() {
+        mSample.playedMs = 2_000;
+        mSample.soundBuffers = 10;
+        tick(2_000, 2_000, 60, 0);
+        mSample.soundBuffers = 20;
+        tick(2_000, 2_000, 120, 0);
+
+        assertEquals(-1, mHealth.takeSoundBackMs());
+    }
+
     @Test
     public void silenceFromTheStartIsTheStreams() {
         mSample.playedMs = PlaybackHealth.SILENT_MS + PlaybackHealth.SILENT_START_SLACK_MS;
