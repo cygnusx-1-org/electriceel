@@ -7,6 +7,7 @@ import com.google.android.exoplayer2.source.sabr.parser.SabrStream;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrReloadPlayerError;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.PoTokenError;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrBackoffError;
+import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrProtocolError;
 import com.google.android.exoplayer2.source.sabr.parser.misc.SabrExtractorInput;
 import com.liskovsoft.sharedutils.mylogger.Log;
 
@@ -36,7 +37,8 @@ public class SabrMatroskaAdapter extends MatroskaExtractor {
         try {
             extractorInput.init(input);
             result = super.read(extractorInput, seekPosition);
-        } catch (SabrReloadPlayerError | SabrBackoffError | PoTokenError e) {
+        } catch (SabrReloadPlayerError | SabrBackoffError | PoTokenError | SabrProtocolError e) {
+            // Swallowed below, a SabrProtocolError ended the chunk as if it had loaded, empty, and the app never heard of it
             Log.e(TAG, "Propagating SABR control signal: %s", e.getMessage());
             throw e;
         } catch (Exception e) {

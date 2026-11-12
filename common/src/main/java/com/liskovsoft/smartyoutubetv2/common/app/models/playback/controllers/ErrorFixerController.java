@@ -14,6 +14,7 @@ import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer.DecoderErrorE
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer.DecoderInitializationException;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.PoTokenError;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrBackoffError;
+import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrProtocolError;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrReloadPlayerError;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.UnknownPartError;
 import com.google.android.exoplayer2.source.sabr.parser.parts.PoTokenStatusSabrPart.PoTokenStatus;
@@ -62,6 +63,10 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
      * Stalled long again within this: the quality is lowered rather than reloading again
      */
     private static final long REPEATED_STALL_MS = 3 * 60 * 1_000;
+    /**
+     * Refused again within this after its player response was fetched again: the fresh one didn't help
+     */
+    private static final long REPEATED_SABR_ERROR_MS = 3 * 60 * 1_000;
     private static final long AUDIO_PLAYED_MS = 1_000;
     private static final int UNPLAYABLE_RELOAD_MS = 30_000;
     private static final long AUDIO_PLAYED_CHECK_MS = 2_000;
@@ -85,6 +90,11 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
      */
     private String mNetworkErrorVideoId;
     private int mNetworkErrorReloads;
+    /**
+     * The last SabrError fixed, and when (see applySabrProtocolErrorAction)
+     */
+    private String mSabrProtocolErrorVideoId;
+    private long mSabrProtocolErrorTimeMs;
     /**
      * The video reloaded once for a first segment that never came (see runLongBufferingAction)
      */
@@ -385,6 +395,10 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
             return;
         }
 
+        if (applySabrProtocolErrorAction(error, failure)) {
+            return;
+        }
+
         applyEngineErrorAction(type, rendererIndex, error, failure);
     }
 
@@ -483,6 +497,41 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
             YouTubeServiceManager.instance().switchNextClientNow();
         }
 
+        mVideoLoaderController.reloadVideo();
+
+        return true;
+    }
+
+    /**
+     * SABR's server refused the request with a SabrError (see SabrProtocolError), e.g. sabr.malformed_config: the player response's
+     * ustreamer config no longer applies, and every request after it is refused. Sent again, the request gets the same answer: the
+     * player response is fetched again, with the same client. Refused again soon after, the fresh one didn't help: the next client
+     * right away. Not its poToken first (see YouTubeServiceManager#switchNextClient): that one may be reset again a minute later, so
+     * a client refused each time after that was never left.<br/>
+     * Not reset when it plays: a refused player response plays what it loaded before.
+     */
+    private boolean applySabrProtocolErrorAction(Throwable error, PlayerFailure failure) {
+        Throwable cause = error.getCause();
+        Video video = getVideo();
+
+        if (!(cause instanceof SabrProtocolError) || video == null) {
+            return false;
+        }
+
+        long nowMs = SystemClock.elapsedRealtime();
+
+        if (Helpers.equals(video.videoId, mSabrProtocolErrorVideoId) && nowMs - mSabrProtocolErrorTimeMs <= REPEATED_SABR_ERROR_MS) {
+            MessageHelpers.showLongMessage(getContext(), cause.getMessage());
+            failure.action("switch_next_client_now");
+            YouTubeServiceManager.instance().switchNextClientNow();
+        } else {
+            failure.action("refetch_player");
+            YouTubeServiceManager.instance().reloadPlayerResponse(video.videoId, null);
+        }
+
+        mSabrProtocolErrorVideoId = video.videoId;
+        mSabrProtocolErrorTimeMs = nowMs;
+        failure.action("reload_video");
         mVideoLoaderController.reloadVideo();
 
         return true;

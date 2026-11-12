@@ -10,12 +10,14 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.source.sabr.parser.SabrStream;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.PoTokenError;
+import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrProtocolError;
 import com.google.android.exoplayer2.source.sabr.parser.models.VideoSelector;
 import com.google.android.exoplayer2.source.sabr.parser.parts.PoTokenStatusSabrPart.PoTokenStatus;
 import com.google.android.exoplayer2.source.sabr.parser.ump.UMPPartId;
 import com.google.android.exoplayer2.source.sabr.protos.misc.FormatId;
 import com.google.android.exoplayer2.source.sabr.protos.videostreaming.FormatInitializationMetadata;
 import com.google.android.exoplayer2.source.sabr.protos.videostreaming.MediaHeader;
+import com.google.android.exoplayer2.source.sabr.protos.videostreaming.SabrError;
 import com.google.android.exoplayer2.source.sabr.protos.videostreaming.StreamProtectionStatus;
 import com.google.android.exoplayer2.source.sabr.protos.videostreaming.StreamProtectionStatus.Status;
 import com.google.android.exoplayer2.source.sabr.protos.videostreaming.StreamerContext.ClientInfo;
@@ -57,6 +59,37 @@ public class SabrExtractorInputTest {
         assertEquals(C.RESULT_END_OF_INPUT, read(null, Status.ATTESTATION_PENDING));
         assertEquals(C.RESULT_END_OF_INPUT, read(PO_TOKEN, Status.OK));
         assertEquals(C.RESULT_END_OF_INPUT, read(null, Status.OK));
+    }
+
+    /**
+     * The server refused the request (e.g. its ustreamer config no longer applies): the load fails with what it said
+     */
+    @Test
+    public void aSabrErrorFailsTheLoad() throws Exception {
+        SabrExtractorInput input = new SabrExtractorInput(newStream());
+        input.init(new FakeExtractorInput.Builder().setData(sabrErrorResponse()).build());
+
+        try {
+            input.read(new byte[1], 0, 1);
+            fail("No SabrProtocolError");
+        } catch (SabrProtocolError e) {
+            assertEquals("sabr.malformed_config", e.type);
+            assertEquals(2, e.action);
+            assertEquals(400, e.statusCode);
+        }
+    }
+
+    /**
+     * A response that has only a SabrError, as the server sends it
+     */
+    public static byte[] sabrErrorResponse() throws Exception {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        part(out, UMPPartId.SABR_ERROR, SabrError.newBuilder()
+                .setType("sabr.malformed_config")
+                .setAction(2)
+                .setError(com.google.android.exoplayer2.source.sabr.protos.videostreaming.Error.newBuilder().setStatusCode(400))
+                .build().toByteArray());
+        return out.toByteArray();
     }
 
     /**

@@ -5,6 +5,7 @@ import android.os.Looper;
 import android.os.SystemClock;
 
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.PoTokenError;
+import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrProtocolError;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrReloadPlayerError;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.UnknownPartError;
 import com.google.android.exoplayer2.source.sabr.parser.parts.PoTokenStatusSabrPart.PoTokenStatus;
@@ -183,6 +184,54 @@ public class ErrorFixerControllerTest {
 
         assertEquals(1, ShadowToast.shownToastCount());
         assertEquals("SABR server requested a player response reload. Attempt: 2", ShadowToast.getTextOfLatestToast());
+    }
+
+    /**
+     * SABR's server refused the request (e.g. sabr.malformed_config: its ustreamer config no longer applies): the player response is
+     * fetched again with the same client, without a word. Refused again soon after, even though it played in between: the next
+     * client, and it's told.
+     */
+    @Test
+    public void aSabrErrorFetchesThePlayerResponseAgainThenSwitchesTheClient() throws Exception {
+        TestController controller = new TestController(video("tJsJJnhQjro"));
+        controller.onPlay();
+
+        controller.onEngineError(PlayerEventListener.ERROR_TYPE_SOURCE, PlayerEventListener.RENDERER_INDEX_UNKNOWN,
+                new UnexpectedLoaderException(new SabrProtocolError("sabr.malformed_config", 2, SabrProtocolError.UNSET)));
+
+        assertEquals(0, ShadowToast.shownToastCount());
+
+        controller.onPlay();
+        controller.onEngineError(PlayerEventListener.ERROR_TYPE_SOURCE, PlayerEventListener.RENDERER_INDEX_UNKNOWN,
+                new UnexpectedLoaderException(new SabrProtocolError("sabr.malformed_config", 2, SabrProtocolError.UNSET)));
+
+        assertEquals(1, ShadowToast.shownToastCount());
+        assertEquals("SABR Protocol Error: sabr.malformed_config, action 2", ShadowToast.getTextOfLatestToast());
+
+        List<JSONObject> events = mLog.readAll();
+
+        assertEquals(2, events.size());
+        assertEquals(Arrays.asList("refetch_player", "reload_video"), getActions(events.get(0)));
+        assertEquals(Arrays.asList("switch_next_client_now", "reload_video"), getActions(events.get(1)));
+    }
+
+    /**
+     * Refused again long after the player response was fetched again: that one played, so it's fetched again rather than the
+     * client switched
+     */
+    @Test
+    public void aSabrErrorLongAfterTheLastFetchesThePlayerResponseAgain() throws Exception {
+        TestController controller = new TestController(video("tJsJJnhQjro"));
+        controller.onPlay();
+
+        controller.onEngineError(PlayerEventListener.ERROR_TYPE_SOURCE, PlayerEventListener.RENDERER_INDEX_UNKNOWN,
+                new UnexpectedLoaderException(new SabrProtocolError("sabr.malformed_config", 2, SabrProtocolError.UNSET)));
+        org.robolectric.shadows.ShadowSystemClock.advanceBy(4, java.util.concurrent.TimeUnit.MINUTES);
+        controller.onPlay();
+        controller.onEngineError(PlayerEventListener.ERROR_TYPE_SOURCE, PlayerEventListener.RENDERER_INDEX_UNKNOWN,
+                new UnexpectedLoaderException(new SabrProtocolError("sabr.malformed_config", 2, SabrProtocolError.UNSET)));
+
+        assertEquals(Arrays.asList("refetch_player", "reload_video"), getActions(mLog.readAll().get(1)));
     }
 
     /**

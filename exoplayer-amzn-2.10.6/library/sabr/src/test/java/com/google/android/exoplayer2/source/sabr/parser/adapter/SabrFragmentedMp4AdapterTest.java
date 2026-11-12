@@ -20,7 +20,10 @@ import com.google.android.exoplayer2.extractor.ExtractorInput;
 import com.google.android.exoplayer2.extractor.ExtractorOutput;
 import com.google.android.exoplayer2.extractor.PositionHolder;
 import com.google.android.exoplayer2.source.sabr.parser.SabrStream;
+import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrProtocolError;
+import com.google.android.exoplayer2.source.sabr.parser.misc.SabrExtractorInputTest;
 import com.google.android.exoplayer2.source.sabr.protos.videostreaming.StreamerContext.ClientInfo;
+import com.google.android.exoplayer2.testutil.FakeExtractorInput;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.HttpDataSource.HttpDataSourceException;
 import com.google.android.exoplayer2.upstream.HttpDataSource.InvalidResponseCodeException;
@@ -79,6 +82,14 @@ public class SabrFragmentedMp4AdapterTest {
     @Test
     public void propagatesAParserError() throws Exception {
         assertReadFails(new ParserException("broken part"));
+    }
+
+    /**
+     * The server refused the request: the load fails with it, as in SabrMatroskaAdapter
+     */
+    @Test(expected = SabrProtocolError.class)
+    public void propagatesASabrError() throws Exception {
+        adapter.read(new FakeExtractorInput.Builder().setData(SabrExtractorInputTest.sabrErrorResponse()).build(), new PositionHolder());
     }
 
     private void assertReadFails(IOException error) throws Exception {

@@ -3,6 +3,7 @@ package com.liskovsoft.smartyoutubetv2.common.exoplayer.errors;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.PoTokenError;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrBackoffError;
+import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrProtocolError;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrReloadPlayerError;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.mylogger.Log;
@@ -44,6 +45,12 @@ public class SabrDefaultLoadErrorHandlingPolicy extends DashDefaultLoadErrorHand
         // The server won't send media past its grace period with this poToken. Retrying with the same one is pointless.
         if (cause instanceof PoTokenError) {
             Log.e(TAG, "Attestation required: " + ((PoTokenError) cause).status + ", errorCount: " + errorCount);
+            return C.TIME_UNSET; // fatal, no retry. Propagate to ErrorFixerController
+        }
+
+        // The server refused the request with a SabrError. The same request gets the same answer.
+        if (cause instanceof SabrProtocolError) {
+            Log.e(TAG, cause.getMessage() + ", errorCount: " + errorCount);
             return C.TIME_UNSET; // fatal, no retry. Propagate to ErrorFixerController
         }
 

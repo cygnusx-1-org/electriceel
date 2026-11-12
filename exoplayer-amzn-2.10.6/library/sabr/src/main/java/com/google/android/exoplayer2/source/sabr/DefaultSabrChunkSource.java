@@ -33,6 +33,7 @@ import com.google.android.exoplayer2.source.sabr.parser.SabrStream;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.PoTokenError;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrReloadPlayerError;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrBackoffError;
+import com.google.android.exoplayer2.source.sabr.parser.exceptions.SabrProtocolError;
 import com.google.android.exoplayer2.source.sabr.parser.models.AudioSelector;
 import com.google.android.exoplayer2.source.sabr.parser.models.CaptionSelector;
 import com.google.android.exoplayer2.source.sabr.parser.models.FormatSelector;
@@ -507,7 +508,8 @@ public class DefaultSabrChunkSource implements SabrChunkSource {
         // retry the very same request at full speed. Let it fall through to the
         // LoadErrorHandlingPolicy, which stashes the token and fails the load.
         Throwable cause = e.getCause();
-        if (cause instanceof SabrReloadPlayerError || cause instanceof SabrBackoffError || cause instanceof PoTokenError) {
+        if (cause instanceof SabrReloadPlayerError || cause instanceof SabrBackoffError || cause instanceof PoTokenError
+                || cause instanceof SabrProtocolError) {
             Log.e(TAG, "SABR control signal, letting the error policy decide: " + cause.getMessage());
             return false;
         }
