@@ -7,10 +7,14 @@
   
 <!-- <img width="100" src="https://github.com/cygnusx-1-org/electriceel/blob/master/smarttubetv/src/ststable/res/mipmap-nodpi/app_icon.png" alt="logo"/> -->
 
-![The app collage 1](./images/collage1.png)
-![The app collage 2](./images/collage2.png)
-![The app collage 3](./images/collage3.png)
-![The app collage 4](./images/collage4.png)
+![The app collage 1](./images/collage14.png)
+![The app collage 2](./images/collage15.png)
+![The app collage 3](./images/collage16.png)
+![The app collage 4](./images/collage17.png)
+![The app collage 5](./images/collage18.png)
+![The app collage 6](./images/collage19.png)
+![The app collage 7](./images/collage20.png)
+![The app collage 8](./images/collage21.png)
 
 Electric Eel is a fork of [SmartTube](https://github.com/yuliskov/SmartTube), and a free and open-source media client for Android TVs and TV boxes.
 
