@@ -4,6 +4,7 @@ import android.os.Build.VERSION;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.google.android.exoplayer2.source.sabr.ValidatedNetwork;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaFormat;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItemFormatInfo;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItemMetadata;
@@ -65,6 +66,18 @@ public class VideoLoaderController extends BasePlayerController {
      * (see stopPlayback)
      */
     static final long STOP_BEFORE_END_MS = 1_000;
+    /**
+     * Of the video's media left to play, when the formats of the one its end opens are fetched (see prefetchNextIfNeeded)
+     */
+    @VisibleForTesting
+    static final long PREFETCH_BEFORE_END_MS = 20_000;
+    /**
+     * What the end of a video does, of the videos (see getEndStep): opens the next one, the previous one, or stays with it (repeats it,
+     * stops, closes…)
+     */
+    private static final int END_NEXT = 0;
+    private static final int END_PREVIOUS = 1;
+    private static final int END_STAY = 2;
     private final Playlist mPlaylist;
     private Video mPendingVideo;
     private SuggestionsController mSuggestionsController;
@@ -76,6 +89,12 @@ public class VideoLoaderController extends BasePlayerController {
      */
     private Observable<MediaItemFormatInfo> mPrefetchedFormatInfo;
     private String mPrefetchVideoId;
+    /**
+     * The fetch of the formats of the video the end opens, ahead of it (see prefetchNext): one at a time, never disposed (that would
+     * cancel its request, and its client would be thought to fail). Its video, once per load of the video playing.
+     */
+    private Disposable mNextPrefetchAction;
+    private String mNextPrefetchVideoId;
     private Disposable mMusicAutoplayAction;
     /**
      * Where the formats in use are from and how they're played (see PlayerFailure#source), of the video in mFormatVideoId
@@ -134,6 +153,7 @@ public class VideoLoaderController extends BasePlayerController {
             getPlayer().showProgressBar(true);
         }
     };
+    private final Runnable mPrefetchNext = this::prefetchNextIfNeeded;
 
     public VideoLoaderController() {
         mPlaylist = Playlist.instance();
@@ -264,6 +284,8 @@ public class VideoLoaderController extends BasePlayerController {
 
         if (getPlayer() == null || video == null || video.isLive || !isFormatOfVideo() || mStreamsExpireTimeMs <= 0
                 || System.currentTimeMillis() < mStreamsExpireTimeMs - MediaItemFormatInfo.STREAMS_EXPIRE_MARGIN_MS) {
+            // Not with a reload: its fetch would wait for the prefetch
+            prefetchNextIfNeeded();
             return;
         }
 
@@ -272,6 +294,16 @@ public class VideoLoaderController extends BasePlayerController {
         mStreamsExpireTimeMs = 0;
         YouTubeServiceManager.instance().reloadPlayerResponse(video.videoId, null);
         reloadVideo(0);
+    }
+
+    @Override
+    public void onSeekEnd() {
+        prefetchNextIfNeeded();
+    }
+
+    @Override
+    public void onSpeedChanged(float speed) {
+        prefetchNextIfNeeded();
     }
 
     @Override
@@ -361,6 +393,8 @@ public class VideoLoaderController extends BasePlayerController {
         //getPlayer().showProgressBar(true);
         Utils.post(mShowProgressBar);
         disposeActions();
+        // Its own next video, or the same one fetched again (e.g. a reload dropped it, see FormatInfoWrapper#invalidateCache)
+        mNextPrefetchVideoId = null;
 
         if (mPrefetchedFormatInfo == null || !Helpers.equals(video.videoId, mPrefetchVideoId)) {
             VideoStarts.onFetch(video.videoId); // a prefetch was timed when it started
@@ -749,7 +783,7 @@ public class VideoLoaderController extends BasePlayerController {
     private void disposeActions() {
         MediaServiceManager.instance().disposeActions();
         RxHelper.disposeActions(mFormatInfoAction, mMusicAutoplayAction);
-        Utils.removeCallbacks(mReloadVideo, mLoadNext, mRestartEngine, mMetadataSync);
+        Utils.removeCallbacks(mReloadVideo, mLoadNext, mRestartEngine, mMetadataSync, mPrefetchNext);
     }
 
     public void restartEngine() {
@@ -782,18 +816,21 @@ public class VideoLoaderController extends BasePlayerController {
     }
 
     private void applyPlaybackModeInt(Video video, int playbackMode) {
+        int step = getEndStep(video, playbackMode);
+
+        if (step == END_NEXT) {
+            loadNext(VideoStart.TRIGGER_AUTOPLAY);
+            return;
+        }
+
+        if (step == END_PREVIOUS) {
+            onPreviousClicked();
+            return;
+        }
+
         switch (playbackMode) {
             case PlayerConstants.PLAYBACK_MODE_REVERSE_LIST:
-                if (video.hasPlaylist() || video.belongsToChannelUploads() || video.belongsToChannel()) {
-                    VideoGroup group = video.getGroup();
-                    if (group != null && group.indexOf(video) != 0) { // stop after first
-                        onPreviousClicked();
-                    }
-                    break;
-                }
-            case PlayerConstants.PLAYBACK_MODE_ALL:
-            case PlayerConstants.PLAYBACK_MODE_SHUFFLE:
-                loadNext(VideoStart.TRIGGER_AUTOPLAY);
+                // The first video of its list or channel: stops after it
                 break;
             case PlayerConstants.PLAYBACK_MODE_ONE:
                 if (VERSION.SDK_INT <= 19) {
@@ -809,38 +846,52 @@ public class VideoLoaderController extends BasePlayerController {
                 break;
             case PlayerConstants.PLAYBACK_MODE_CLOSE:
                 // Close player if suggestions not shown
-                // Except when playing from queue
-                if (mPlaylist.getNext() != null && !getPlayerTweaksData().isQueueRespectsPlaybackMode()) {
-                    loadNext(VideoStart.TRIGGER_AUTOPLAY);
-                } else {
-                    AppDialogPresenter dialog = getAppDialogPresenter();
-                    if (!getPlayer().isSuggestionsShown() && (!dialog.isDialogShown() || dialog.isOverlay())) {
-                        dialog.closeDialog();
-                        getPlayer().finishReally();
-                    }
+                AppDialogPresenter dialog = getAppDialogPresenter();
+                if (!getPlayer().isSuggestionsShown() && (!dialog.isDialogShown() || dialog.isOverlay())) {
+                    dialog.closeDialog();
+                    getPlayer().finishReally();
                 }
                 break;
             case PlayerConstants.PLAYBACK_MODE_PAUSE:
                 // Stop player after each video.
-                // Except when playing from queue
-                if (mPlaylist.getNext() != null && !getPlayerTweaksData().isQueueRespectsPlaybackMode()) {
-                    loadNext(VideoStart.TRIGGER_AUTOPLAY);
-                } else {
-                    stopPlayback();
-                }
+                stopPlayback();
                 break;
             case PlayerConstants.PLAYBACK_MODE_LIST:
-                // if video has a playlist load next or restart playlist
-                if (video.hasNextPlaylist() || mPlaylist.getNext() != null) {
-                    loadNext(VideoStart.TRIGGER_AUTOPLAY);
-                } else {
-                    //restartPlaylistIfNeeded();
-                    stopPlayback();
-                }
+                // The end of the playlist
+                //restartPlaylistIfNeeded();
+                stopPlayback();
                 break;
             default:
                 Log.e(TAG, "Undetected repeat mode " + playbackMode);
                 break;
+        }
+    }
+
+    /**
+     * Whether the end of the video in the mode opens another video (see applyPlaybackModeInt): END_NEXT, END_PREVIOUS, or END_STAY
+     * for what the mode does with this one (repeats it, stops, closes…)
+     */
+    private int getEndStep(Video video, int playbackMode) {
+        switch (playbackMode) {
+            case PlayerConstants.PLAYBACK_MODE_REVERSE_LIST:
+                if (video.hasPlaylist() || video.belongsToChannelUploads() || video.belongsToChannel()) {
+                    VideoGroup group = video.getGroup();
+                    // stop after first
+                    return group != null && group.indexOf(video) != 0 ? END_PREVIOUS : END_STAY;
+                }
+                return END_NEXT;
+            case PlayerConstants.PLAYBACK_MODE_ALL:
+            case PlayerConstants.PLAYBACK_MODE_SHUFFLE:
+                return END_NEXT;
+            case PlayerConstants.PLAYBACK_MODE_CLOSE:
+            case PlayerConstants.PLAYBACK_MODE_PAUSE:
+                // Except when playing from queue
+                return mPlaylist.getNext() != null && !getPlayerTweaksData().isQueueRespectsPlaybackMode() ? END_NEXT : END_STAY;
+            case PlayerConstants.PLAYBACK_MODE_LIST:
+                // if video has a playlist load next
+                return video.hasNextPlaylist() || mPlaylist.getNext() != null ? END_NEXT : END_STAY;
+            default:
+                return END_STAY;
         }
     }
 
@@ -869,14 +920,114 @@ public class VideoLoaderController extends BasePlayerController {
         }
 
         // The next video may have changed meanwhile (e.g. added to the queue)
-        Video next = mSuggestionsController.getNext();
-
-        if (next == null || !VideoCategoryManager.instance(getContext()).isMusic(next.videoId)) {
+        if (!isNextMusic()) {
             Log.d(TAG, "Music autoplay: the next video isn't music, the playback mode of the other videos applies");
             playbackMode = getPlayerData().getPlaybackMode();
         }
 
         applyPlaybackModeInt(video, playbackMode);
+    }
+
+    /**
+     * The category of the next video is known, and it's music (see applyMusicPlaybackMode)
+     */
+    private boolean isNextMusic() {
+        Video next = mSuggestionsController.getNext();
+
+        return next != null && VideoCategoryManager.instance(getContext()).isMusic(next.videoId);
+    }
+
+    /**
+     * The video the end of this one opens by itself, as applyPlaybackMode decides it now: null for none (e.g. it repeats, stops after
+     * it, or nothing's known to come next yet). A music video with Music autoplay goes on in the mode of the music videos only to
+     * music, with the category of the next video known by now (see resolveMusicCategory). Not an embed's: it's a card's preview.
+     */
+    @Nullable
+    private Video getVideoAtEnd() {
+        Video video = getVideo();
+
+        if (video == null || isEmbedPlayer()) {
+            return null;
+        }
+
+        int playbackMode = getPlaybackMode();
+
+        if (isNextVideoMode(video, playbackMode) && MusicAutoplayManager.isMusicVideo(getContext(), video) && !isNextMusic()) {
+            playbackMode = getPlayerData().getPlaybackMode();
+        }
+
+        switch (getEndStep(video, playbackMode)) {
+            case END_NEXT:
+                return mSuggestionsController.getNext();
+            case END_PREVIOUS:
+                return mSuggestionsController.getPrevious();
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * About 20 s of the video before its end (in real time, at its speed), the formats of the one the end opens are fetched: that video
+     * starts without a fetch (see FormatInfoWrapper#prefetchFormatInfo). Looked at again when the time left changes (it plays again, a
+     * seek, the speed), and when the next video may have (the metadata, the category of the next video). Only while it plays: not over
+     * a video that starts or buffers.
+     */
+    private void prefetchNextIfNeeded() {
+        Utils.removeCallbacks(mPrefetchNext);
+
+        PlaybackView player = getPlayer();
+        Video video = getVideo();
+
+        if (player == null || video == null || video.isLive || !player.isPlaying()) {
+            return;
+        }
+
+        long durationMs = player.getDurationMs();
+
+        if (durationMs <= 0) {
+            return;
+        }
+
+        float speed = player.getSpeed() > 0 ? player.getSpeed() : 1.0f;
+        long untilMs = (long) ((durationMs - player.getPositionMs() - PREFETCH_BEFORE_END_MS) / speed);
+
+        if (untilMs > 0) {
+            Utils.postDelayed(mPrefetchNext, untilMs);
+            return;
+        }
+
+        prefetchNext(getVideoAtEnd());
+    }
+
+    /**
+     * One at a time: when it's done, the video at the end is looked at again, it may have changed meanwhile (e.g. one added to the
+     * queue). Once per video while this one plays: one that failed is fetched by its start, as without it.
+     * Not while offline, nor when a poToken would be made: its WebView runs on the main thread mostly, the start of the video makes it.
+     */
+    private void prefetchNext(@Nullable Video next) {
+        Video video = getVideo();
+
+        if (next == null || next.videoId == null || !next.hasVideo() || next.isLive || next.isUpcoming || video == null
+                || next.videoId.equals(video.videoId) || next.videoId.equals(mNextPrefetchVideoId)
+                || RxHelper.isAnyActionRunning(mNextPrefetchAction) || !isPrefetchAllowed()) {
+            return;
+        }
+
+        Log.d(TAG, "Fetching the formats of the video the end opens: %s", next.videoId);
+        mNextPrefetchVideoId = next.videoId;
+        mNextPrefetchAction = RxHelper.execute(getPrefetchObserve(next.videoId),
+                error -> Log.e(TAG, "Can't fetch the formats of the next video: %s", error.getMessage()),
+                this::prefetchNextIfNeeded);
+    }
+
+    @VisibleForTesting
+    boolean isPrefetchAllowed() {
+        return ValidatedNetwork.isAvailable() && !YouTubeServiceManager.instance().isPoTokenToMake();
+    }
+
+    @VisibleForTesting
+    Observable<Void> getPrefetchObserve(String videoId) {
+        return YouTubeServiceManager.instance().getMediaItemService().prefetchFormatInfoObserve(videoId);
     }
 
     /**
@@ -912,6 +1063,8 @@ public class VideoLoaderController extends BasePlayerController {
                     }
 
                     updateRepeatButton();
+                    // The mode that applies at its end may be another one now
+                    prefetchNextIfNeeded();
 
                     // The metadata came before the video was known to be music, with another mode (see onMetadata)
                     if (Helpers.equals(item.videoId, current.videoId) && current.playlistInfo != null && !current.isShuffled &&
@@ -1014,6 +1167,7 @@ public class VideoLoaderController extends BasePlayerController {
     public void onMetadata(MediaItemMetadata metadata) {
         initRandomNext();
         resolveMusicCategory(mSuggestionsController.getNext());
+        prefetchNextIfNeeded();
     }
 
     private void initRandomNext() {
@@ -1095,16 +1249,6 @@ public class VideoLoaderController extends BasePlayerController {
             } else {
                 getPlayer().setAspectRatio(getPlayerData().getAspectRatio());
             }
-        }
-    }
-
-    private void preloadNextVideoIfNeeded() {
-        if (isEmbedPlayer() || getPlayer() == null || getVideo() == null || getVideo().isLive) {
-            return;
-        }
-
-        if (getPlayer().getDurationMs() - getPlayer().getPositionMs() < 50_000) {
-            MediaServiceManager.instance().loadFormatInfo(mSuggestionsController.getNext(), formatInfo -> {});
         }
     }
 }
