@@ -20,7 +20,6 @@
         <item name="modernLogo">@mipmap/app_logo_semi_red</item>
         <item name="modernPlayerScrimControls">@drawable/modern_player_scrim_controls</item>
         <item name="modernPlayerScrimSuggestions">@drawable/modern_player_scrim_suggestions</item>
-        <item name="modernChannelScrim">@drawable/modern_channel_scrim</item>
     </style>
 
     <style name="ThemeOverlay.Modern.Scheme.Oled">
@@ -29,7 +28,6 @@
         <item name="modernLogo">@null</item>
         <item name="modernPlayerScrimControls">@drawable/modern_player_scrim_controls_oled</item>
         <item name="modernPlayerScrimSuggestions">@drawable/modern_player_scrim_suggestions_oled</item>
-        <item name="modernChannelScrim">@drawable/modern_channel_scrim_oled</item>
     </style>
 
     <!-- The hybrid skin (see HybridSkin): behind the cards the background of the classic screens in the scheme -->

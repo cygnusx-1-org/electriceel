@@ -15,7 +15,6 @@
         <item name="modernLogo">@mipmap/app_logo_semi_red</item>
         <item name="modernPlayerScrimControls">@drawable/modern_player_scrim_controls</item>
         <item name="modernPlayerScrimSuggestions">@drawable/modern_player_scrim_suggestions</item>
-        <item name="modernChannelScrim">@drawable/modern_channel_scrim</item>
         <item name="android:windowBackground">?attr/modernBackground</item>
         <item name="android:colorBackground">?attr/modernBackground</item>
         <!-- Drawn by the background manager over the window -->

@@ -36,7 +36,7 @@ import com.liskovsoft.smartyoutubetv2.tv.ui.modern.common.ModernTheme;
 import com.liskovsoft.smartyoutubetv2.tv.ui.modern.widgets.ModernCardPresenter;
 
 /**
- * Channel page: channel artwork in the background, header with actions, shelves below.
+ * Channel page: header with actions, shelves below, on the background of the skin.
  */
 public class ModernChannelFragment extends Fragment implements ChannelView {
     private LinearLayout mActions;
@@ -44,7 +44,6 @@ public class ModernChannelFragment extends Fragment implements ChannelView {
     private CrashRestorer mCrashRestorer;
     private View mPage;
     private View mHeader;
-    private ImageView mArt;
     private ImageView mAvatar;
     private TextView mName;
     private TextView mInfo;
@@ -69,7 +68,6 @@ public class ModernChannelFragment extends Fragment implements ChannelView {
         View root = inflater.inflate(R.layout.modern_channel, container, false);
         mPage = root.findViewById(R.id.modern_channel_page);
         mHeader = root.findViewById(R.id.modern_channel_header);
-        mArt = root.findViewById(R.id.modern_channel_art);
         mAvatar = root.findViewById(R.id.modern_channel_avatar);
         mName = root.findViewById(R.id.modern_channel_name);
         mInfo = root.findViewById(R.id.modern_channel_info);
@@ -171,7 +169,6 @@ public class ModernChannelFragment extends Fragment implements ChannelView {
 
         if (mFirstVideo == null && videoGroup != null && !videoGroup.isEmpty()) {
             mFirstVideo = videoGroup.get(0);
-            Glide.with(this).load(mFirstVideo.getCardImageUrl()).into(mArt);
         }
 
         updateHeader();
@@ -193,7 +190,6 @@ public class ModernChannelFragment extends Fragment implements ChannelView {
     public void clear() {
         mFirstVideo = null;
         mRows.clear();
-        mArt.setImageDrawable(null);
     }
 
     // Internal
@@ -258,7 +254,6 @@ public class ModernChannelFragment extends Fragment implements ChannelView {
         if (mPage.getTranslationY() != target) {
             mPage.animate().translationY(target).setDuration(ModernTheme.ANIM_SCROLL_MS).setInterpolator(ModernTheme.scrollInterpolator());
             mHeader.animate().alpha(inRows ? 0f : 1f).setDuration(ModernTheme.ANIM_FAST_MS);
-            mArt.animate().alpha(inRows ? 0.4f : 1f).setDuration(ModernTheme.ANIM_SCROLL_MS);
         }
     }
 

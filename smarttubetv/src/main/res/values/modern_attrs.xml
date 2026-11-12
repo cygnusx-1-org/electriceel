@@ -28,5 +28,4 @@
     <attr name="modernLogo" format="reference" />
     <attr name="modernPlayerScrimControls" format="reference" />
     <attr name="modernPlayerScrimSuggestions" format="reference" />
-    <attr name="modernChannelScrim" format="reference" />
 </resources>
