@@ -502,7 +502,8 @@ public class VideoGroup {
      * (e.g. "More music" of a music row, or of "Listen again" with Hide watched videos from Home)
      */
     public boolean hasOnlyHiddenVideos() {
-        if (mHiddenVideoCount == 0 || isEmpty()) {
+        // Not isEmpty(): a row left with the continuation button only is one of these, dropped rather than continued (see BrowsePresenter)
+        if (mHiddenVideoCount == 0 || mVideos == null || mVideos.isEmpty()) {
             return false;
         }
 
@@ -515,9 +516,12 @@ public class VideoGroup {
         return true;
     }
 
+    /**
+     * A row with nothing but the continuation button at its end is empty too: it isn't shown (see MultipleRowsFragment#update)
+     */
     public boolean isEmpty() {
         try {
-            return mVideos == null || mVideos.isEmpty();
+            return mVideos == null || mVideos.isEmpty() || (mVideos.size() == 1 && mVideos.get(0).isContinuation());
         } catch (ConcurrentModificationException e) {
             e.printStackTrace();
         }

@@ -6,7 +6,6 @@ import androidx.annotation.Nullable;
 
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItemFormatInfo;
 import com.liskovsoft.sharedutils.rx.RxHelper;
-import com.liskovsoft.youtubeapi.service.YouTubeServiceManager;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
@@ -44,7 +43,7 @@ public final class FormatInfoPrefetcher {
         cancel();
 
         mVideoId = videoId;
-        mPending = YouTubeServiceManager.instance().getMediaItemService().getFormatInfoObserve(videoId).cache();
+        mPending = MediaServiceManager.getFormatInfoObserve(videoId).cache();
         mAction = mPending.subscribe(
                 formatInfo -> {
                     if (videoId.equals(mVideoId)) {

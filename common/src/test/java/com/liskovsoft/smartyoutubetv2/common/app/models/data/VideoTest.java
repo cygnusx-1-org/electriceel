@@ -1,13 +1,18 @@
 package com.liskovsoft.smartyoutubetv2.common.app.models.data;
 
 import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
+import com.liskovsoft.mediaserviceinterfaces.data.MediaItemFormatInfo;
+import com.liskovsoft.mediaserviceinterfaces.data.MediaItemMetadata;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -82,6 +87,85 @@ public class VideoTest {
         assertNull(channel.findPlaylistId());
         assertNull(prefixOnly.findPlaylistId());
         assertNull(new Video().findPlaylistId());
+    }
+
+    /**
+     * The playability reason is the title of an unplayable video: the metadata that comes after (see SuggestionsController) keeps it
+     */
+    @Test
+    public void unplayableVideoKeepsItsReasonAsTitle() {
+        Video video = createVideo(createGroup(MediaGroup.TYPE_HOME));
+        video.title = "Video";
+
+        video.sync(formatInfo(true, "Video unavailable"));
+        video.sync(metadata("Title of the video"));
+
+        assertEquals("Video unavailable", video.getTitleFull());
+    }
+
+    @Test
+    public void playableVideoTakesTheTitleOfItsMetadata() {
+        Video video = createVideo(createGroup(MediaGroup.TYPE_HOME));
+        video.title = "Video";
+
+        video.sync(formatInfo(false, null));
+        video.sync(metadata("Title of the video"));
+
+        assertEquals("Title of the video", video.getTitleFull());
+    }
+
+    /**
+     * Unplayable without a reason: nothing to keep
+     */
+    @Test
+    public void unplayableVideoWithoutReasonTakesTheTitleOfItsMetadata() {
+        Video video = createVideo(createGroup(MediaGroup.TYPE_HOME));
+        video.title = "Video";
+
+        video.sync(formatInfo(true, null));
+        video.sync(metadata("Title of the video"));
+
+        assertEquals("Title of the video", video.getTitleFull());
+    }
+
+    private static MediaItemFormatInfo formatInfo(boolean isUnplayable, String reason) {
+        Map<String, Object> values = new HashMap<>();
+        values.put("isUnplayable", isUnplayable);
+        values.put("getPlayabilityReason", reason);
+
+        return stub(MediaItemFormatInfo.class, values);
+    }
+
+    private static MediaItemMetadata metadata(String title) {
+        Map<String, Object> values = new HashMap<>();
+        values.put("getTitle", title);
+
+        return stub(MediaItemMetadata.class, values);
+    }
+
+    /**
+     * By method name; the defaults (false, 0, null) for the others
+     */
+    private static <T> T stub(Class<T> type, Map<String, Object> values) {
+        return type.cast(Proxy.newProxyInstance(type.getClassLoader(), new Class<?>[]{type}, (proxy, method, args) -> {
+            if (values.containsKey(method.getName())) {
+                return values.get(method.getName());
+            }
+
+            Class<?> returned = method.getReturnType();
+
+            if (returned == boolean.class) {
+                return false;
+            } else if (returned == int.class) {
+                return 0;
+            } else if (returned == long.class) {
+                return 0L;
+            } else if (returned == float.class) {
+                return 0f;
+            }
+
+            return null;
+        }));
     }
 
     private static VideoGroup createGroup(int type) {

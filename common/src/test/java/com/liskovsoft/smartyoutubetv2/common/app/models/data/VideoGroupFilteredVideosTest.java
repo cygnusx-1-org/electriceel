@@ -48,6 +48,18 @@ public class VideoGroupFilteredVideosTest {
         assertTrue(listenAgain.hasOnlyHiddenVideos());
     }
 
+    /**
+     * Left with the continuation button only, it's dropped like a row left with a card, not continued as an empty one
+     * (see BrowsePresenter)
+     */
+    @Test
+    public void rowLeftWithTheContinuationButtonOnlyHasOnlyHiddenVideos() {
+        VideoGroup row = createGroup(new TestMediaGroup(5, VideoGroupContinuationTest.createContinuation()));
+
+        assertTrue(row.isEmpty());
+        assertTrue(row.hasOnlyHiddenVideos());
+    }
+
     @Test
     public void rowWithAVideoLeftIsKept() {
         assertFalse(createGroup(new TestMediaGroup(4, createVideo(), createCard())).hasOnlyHiddenVideos());

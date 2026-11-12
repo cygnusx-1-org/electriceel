@@ -627,6 +627,13 @@ public final class Video {
     }
 
     /**
+     * The button at the end of the rows of Home (and of the sections loaded by the same API): a channel without an image
+     */
+    public boolean isContinuation() {
+        return isChannel() && cardImageUrl == null && belongsToHomeLikeSection();
+    }
+
+    /**
      * Special type of channels that work as playlist
      */
     public boolean isPlaylistAsChannel() {
@@ -854,9 +861,11 @@ public final class Video {
             isLiveEnd = true;
         }
 
+        // NOTE: Skip unplayable to preserve the error message (the playability reason, see sync(MediaItemFormatInfo))
         // NOTE: Skip upcoming (no media) because default title more informative (e.g. has scheduled time).
         // NOTE: Upcoming videos metadata wrongly reported as live
-        if (!isUpcoming || metadataTitle == null) {
+        boolean keepExistingTitle = metadataTitle != null && (isUnplayable || isUpcoming);
+        if (!keepExistingTitle) {
             metadataTitle = metadata.getTitle();
         }
         metadataSecondTitle = metadata.getSecondTitle();

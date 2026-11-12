@@ -4,8 +4,6 @@ import android.os.Build.VERSION;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
-import com.liskovsoft.mediaserviceinterfaces.MediaItemService;
-import com.liskovsoft.mediaserviceinterfaces.ServiceManager;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaFormat;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItemFormatInfo;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItemMetadata;
@@ -415,9 +413,7 @@ public class VideoLoaderController extends BasePlayerController {
     }
 
     private static Observable<MediaItemFormatInfo> getFormatInfoObserve(String videoId) {
-        ServiceManager service = YouTubeServiceManager.instance();
-        MediaItemService mediaItemManager = service.getMediaItemService();
-        return mediaItemManager.getFormatInfoObserve(videoId);
+        return MediaServiceManager.getFormatInfoObserve(videoId);
     }
 
     private void processFormatInfo(MediaItemFormatInfo formatInfo) {

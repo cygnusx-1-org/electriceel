@@ -286,6 +286,19 @@ public class MediaServiceManager implements OnAccountChange {
         YouTubeServiceManager.instance().warmUpPlayback(null);
     }
 
+    /**
+     * The formats of a video to play. In Child mode they're fetched without the account, so a video only a signed in adult may watch
+     * (18+) isn't played (see ServiceManager#allowRestrictedVideos).
+     */
+    public static Observable<MediaItemFormatInfo> getFormatInfoObserve(String videoId) {
+        ServiceManager service = YouTubeServiceManager.instance();
+        Context context = GlobalPreferences.context();
+
+        service.allowRestrictedVideos(context == null || !GeneralData.instance(context).isChildModeEnabled());
+
+        return service.getMediaItemService().getFormatInfoObserve(videoId);
+    }
+
     public void loadFormatInfo(Video item, OnFormatInfo onFormatInfo) {
         if (item == null) {
             return;
@@ -293,7 +306,7 @@ public class MediaServiceManager implements OnAccountChange {
 
         RxHelper.disposeActions(mFormatInfoAction);
 
-        Observable<MediaItemFormatInfo> observable = mItemService.getFormatInfoObserve(item.videoId);
+        Observable<MediaItemFormatInfo> observable = getFormatInfoObserve(item.videoId);
 
         mFormatInfoAction = observable
                 .subscribe(
