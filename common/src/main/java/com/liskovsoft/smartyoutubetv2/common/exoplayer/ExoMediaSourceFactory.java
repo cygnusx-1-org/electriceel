@@ -82,6 +82,7 @@ public class ExoMediaSourceFactory {
 
     public ExoMediaSourceFactory(Context context) {
         mContext = context;
+        ValidatedNetworkState.install(context);
     }
 
     public MediaSource fromSabrFormatInfo(MediaItemFormatInfo formatInfo) {
@@ -439,17 +440,24 @@ public class ExoMediaSourceFactory {
         return new DefaultDashChunkSource.Factory(new LiveSegmentPrefetcher(getMediaDataSourceFactory()), MAX_SEGMENTS_PER_LOAD);
     }
 
+    /**
+     * A host that doesn't answer is left for the ones the YouTube app falls back to (see GoogleVideoFallback)
+     */
     private DataSource.Factory getDashMediaDataSourceFactory() {
         if (mDashMediaDataSourceFactory == null) {
-            mDashMediaDataSourceFactory = buildDataSourceFactory(USE_BANDWIDTH_METER, DASH_READ_TIMEOUT_MS);
+            mDashMediaDataSourceFactory = GoogleVideoFallbackDataSource.wrap(buildDataSourceFactory(USE_BANDWIDTH_METER, DASH_READ_TIMEOUT_MS));
         }
 
         return mDashMediaDataSourceFactory;
     }
 
+    /**
+     * Of the live streams, HLS and progressive URLs. A host that doesn't answer is left as the formats' (see
+     * getDashMediaDataSourceFactory). Not SABR's (see getSabrMediaDataSourceFactory).
+     */
     private DataSource.Factory getMediaDataSourceFactory() {
         if (mMediaDataSourceFactory == null) {
-            mMediaDataSourceFactory = buildDataSourceFactory(USE_BANDWIDTH_METER);
+            mMediaDataSourceFactory = GoogleVideoFallbackDataSource.wrap(buildDataSourceFactory(USE_BANDWIDTH_METER));
         }
 
         return mMediaDataSourceFactory;

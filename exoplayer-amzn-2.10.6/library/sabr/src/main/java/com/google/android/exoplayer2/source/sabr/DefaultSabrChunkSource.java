@@ -516,6 +516,12 @@ public class DefaultSabrChunkSource implements SabrChunkSource {
             return false;
         }
         if (!(chunk instanceof SingleSampleMediaChunk) && isEndpointConnectionFailure(chunk, e)) {
+            if (!ValidatedNetwork.isAvailable()) {
+                // Offline: the failure says nothing about the media network, don't leave it or mark it failed
+                Log.w(TAG, "No validated network, keeping the SABR media network");
+                return false;
+            }
+
             if (manifest.maybeUseNextCdn(chunk.dataSpec.uri.toString())) {
                 Log.w(TAG, "Retrying SABR request on an alternate media network");
                 resetSampleDeduplicator(); // the chunk is discarded with its samples
