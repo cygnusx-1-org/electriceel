@@ -852,7 +852,7 @@ public class VideoGroup {
     /**
      * The section of a subscription group (see BrowseSection.isChannelGroup) or its row added to Home
      */
-    private boolean isChannelGroup() {
+    public boolean isChannelGroup() {
         return mAddedHomeRowType == Row.TYPE_CHANNEL_GROUP || (getSection() != null && getSection().isChannelGroup());
     }
 

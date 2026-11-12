@@ -768,6 +768,15 @@ public final class Video {
         return belongsToGroup(MediaGroup.TYPE_SUBSCRIPTIONS);
     }
 
+    /**
+     * A card of a subscription group: of its section or of its row of Home (see VideoGroup.isChannelGroup)
+     */
+    public boolean belongsToSubscriptionGroup() {
+        VideoGroup group = getGroup(); // read once: a weak reference
+
+        return group != null && group.isChannelGroup();
+    }
+
     public boolean belongsToHistory() {
         return belongsToGroup(MediaGroup.TYPE_HISTORY);
     }

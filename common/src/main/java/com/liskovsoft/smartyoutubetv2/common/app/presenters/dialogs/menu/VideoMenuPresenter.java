@@ -192,9 +192,10 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
     /**
      * The menu of the card (see MainUIData.MENU_VIDEOS...), by where it is. The section of the sidebar shown counts as where
      * when the browse view is on top: it's where the items of the History and the Playlists sections show up.
+     * A subscription group is a part of the Subscriptions, as Notifications are.
      */
     static int getCardMenu(Video video, boolean isHistorySection, boolean isPlaylistsSection) {
-        if (video.belongsToSubscriptions() || video.belongsToNotifications()) {
+        if (video.belongsToSubscriptions() || video.belongsToSubscriptionGroup() || video.belongsToNotifications()) {
             return MainUIData.MENU_SUBSCRIPTIONS;
         }
 
@@ -378,31 +379,35 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
             return;
         }
 
-        if (!ChannelPresenter.canOpenChannel(mVideo)) {
+        // A special type of channels that work as playlist is opened with Open playlist (see appendOpenPlaylistButton)
+        if (!ChannelPresenter.canOpenChannel(mVideo) || mVideo.isPlaylistAsChannel()) {
             return;
         }
 
-        // Prepare to special type of channels that work as playlist
         mDialogPresenter.appendSingleButton(
-                UiOptionItem.from(getContext().getString(
-                        mVideo.isPlaylistAsChannel() ? R.string.open_playlist : R.string.open_channel), optionItem -> {
+                UiOptionItem.from(getContext().getString(R.string.open_channel), optionItem -> {
                     MediaServiceManager.chooseChannelPresenter(getContext(), mVideo);
                     mDialogPresenter.closeDialog();
                 }));
     }
 
     private void appendOpenPlaylistButton() {
-        if (!mIsOpenPlaylistButtonEnabled) {
+        if (!mIsOpenPlaylistButtonEnabled || mVideo == null) {
+            return;
+        }
+
+        // Special type of channels that work as playlist (e.g. the cards of the Playlists section): opened as a channel
+        if (mVideo.isPlaylistAsChannel() && ChannelPresenter.canOpenChannel(mVideo)) {
+            mDialogPresenter.appendSingleButton(
+                    UiOptionItem.from(getContext().getString(R.string.open_playlist), optionItem -> {
+                        MediaServiceManager.chooseChannelPresenter(getContext(), mVideo);
+                        mDialogPresenter.closeDialog();
+                    }));
             return;
         }
 
         // Check view to allow open playlist in grid
-        if (mVideo == null || !mVideo.hasPlaylist() || (getViewManager().getTopView() == ChannelUploadsView.class && mVideo.belongsToSamePlaylistGroup())) {
-            return;
-        }
-
-        // Prepare to special type of channels that work as playlist
-        if (mVideo.isPlaylistAsChannel() && ChannelPresenter.canOpenChannel(mVideo)) {
+        if (!mVideo.hasPlaylist() || (getViewManager().getTopView() == ChannelUploadsView.class && mVideo.belongsToSamePlaylistGroup())) {
             return;
         }
 
@@ -422,13 +427,15 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
     private void appendNotInterestedButton() {
         FeedbackEndpoint feedbackEndpoint = getFeedbackEndpoint();
 
-        // The own token of a card of Subscriptions is its removal from there (see getFeedbackEndpoint)
+        boolean isSubscriptionsFeed = isSubscriptionsFeedCard();
+
+        // The own token of a card of Subscriptions or of a subscription group isn't "Not interested" (see getFeedbackEndpoint)
         if (mVideo == null || mVideo.mediaItem == null
-                || (feedbackEndpoint == null && (mVideo.belongsToSubscriptions() || mVideo.mediaItem.getFeedbackToken() == null))) {
+                || (feedbackEndpoint == null && (isSubscriptionsFeed || mVideo.mediaItem.getFeedbackToken() == null))) {
             return;
         }
 
-        if ((!mVideo.belongsToHomeLikeSection() && !mVideo.belongsToShorts() && !mVideo.belongsToSubscriptions())
+        if ((!mVideo.belongsToHomeLikeSection() && !mVideo.belongsToShorts() && !isSubscriptionsFeed)
                 || !mIsNotInterestedButtonEnabled) {
             return;
         }
@@ -480,9 +487,14 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
     }
 
     /**
-     * Marked "Not interested" in Subscriptions: YouTube takes it out of the feed too, with the card's own feedback (YouTube's Hide)
+     * Marked "Not interested" in Subscriptions: YouTube takes it out of the feed too, with the card's own feedback (YouTube's Hide).
+     * In a subscription group it stays gone too, hidden as with Hide (see hideFromSubscriptionGroups).
      */
     private void removeFromSubscriptionsFeed() {
+        if (hideFromSubscriptionGroups(getContext(), mVideo)) {
+            return;
+        }
+
         if (mVideo == null || !mVideo.belongsToSubscriptions() || mVideo.mediaItem == null || mVideo.mediaItem.getFeedbackToken() == null) {
             return;
         }
@@ -491,8 +503,34 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
     }
 
     /**
+     * A subscription group is the uploads of its channels, which YouTube's feedback leaves as they are: the video is hidden from the
+     * groups (their sections and their rows of Home, as one) the way Hide does it (see HiddenVideosData). Shown again from Unhide.
+     * @return the video is a card of a subscription group
+     */
+    static boolean hideFromSubscriptionGroups(Context context, Video video) {
+        VideoGroup group = video != null ? video.getGroup() : null; // read once: a weak reference
+
+        if (group == null || !group.isChannelGroup()) {
+            return false;
+        }
+
+        // No title: the groups are one row of Unhide (see getHiddenVideosSectionTitle)
+        HiddenVideosData.instance(context).hide(group.getHiddenVideosSection(), null, video);
+
+        return true;
+    }
+
+    /**
+     * A card of Subscriptions, of a subscription group or of their rows of Home
+     */
+    private boolean isSubscriptionsFeedCard() {
+        return mVideo != null && (mVideo.belongsToSubscriptions() || mVideo.belongsToSubscriptionGroup());
+    }
+
+    /**
      * The sections loaded like Home (e.g. Gaming) don't send the feedback, so their videos get the one of the Home context menu.
-     * So do the videos of Subscriptions: their own feedback is the removal from there (see removeFromSubscriptionsFeed).
+     * So do the videos of Subscriptions, whose own feedback is the removal from there (see removeFromSubscriptionsFeed), and of the
+     * subscription groups, which are of the channels' playlists.
      * Not the playlists: their video id is the first video's, so the feedback would be about it.
      */
     private FeedbackEndpoint getFeedbackEndpoint() {
@@ -503,7 +541,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
         MediaItem mediaItem = mVideo.mediaItem;
         boolean isHomeFeedback = mVideo.hasVideo() && mediaItem.getType() == MediaItem.TYPE_VIDEO;
 
-        if (mVideo.belongsToSubscriptions()) {
+        if (isSubscriptionsFeedCard()) {
             return isHomeFeedback ? mMediaItemService.getHomeFeedbackEndpoint(mVideo.videoId) : null;
         }
 
@@ -1223,8 +1261,8 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
         MainUIData mainUIData = MainUIData.instance(getContext());
 
         mIsOpenChannelUploadsButtonEnabled = true;
-        mIsOpenPlaylistButtonEnabled = true;
         mIsReturnToBackgroundVideoEnabled = true;
+        mIsOpenPlaylistButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_OPEN_PLAYLIST);
         mIsOpenChannelButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_OPEN_CHANNEL);
         mIsAddToRecentPlaylistButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_RECENT_PLAYLIST);
         mIsAddToPlaybackQueueButtonEnabled = mainUIData.isMenuItemEnabled(mMenu, MainUIData.MENU_ITEM_ADD_TO_QUEUE);

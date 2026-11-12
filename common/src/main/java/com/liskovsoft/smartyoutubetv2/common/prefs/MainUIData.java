@@ -111,7 +111,7 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
     };
     // The context menus, each with its own items and their order. The one of a card is by where it is (see VideoMenuPresenter.getCardMenu).
     public static final int MENU_VIDEOS = 0; // the cards of the other places: Home, Search, the channels, the player...
-    public static final int MENU_SUBSCRIPTIONS = 1; // the cards of Subscriptions, the section or its row of Home, and of Notifications
+    public static final int MENU_SUBSCRIPTIONS = 1; // Subscriptions, the subscription groups (sections or rows of Home) and Notifications
     public static final int MENU_HISTORY = 2;
     public static final int MENU_PLAYLISTS = 3;
     public static final int MENU_SIDEBAR = 4; // a section of the sidebar
