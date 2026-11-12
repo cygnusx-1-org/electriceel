@@ -753,7 +753,7 @@ public class PlayerTweaksData implements ProfileChangeListener {
         mScreenOffDimmingPercents = Helpers.parseInt(split, 37, 100);
         mIsBootScreenOffEnabled = Helpers.parseBoolean(split, 38, false);
         mIsPlayerUiOnNextEnabled = Helpers.parseBoolean(split, 39, false);
-        mIsPlayerAutoVolumeEnabled = Helpers.parseBoolean(split, 40, true);
+        mIsPlayerAutoVolumeEnabled = Helpers.parseBoolean(split, 40, false);
         mIsSyncRowButtonIndexEnabled = Helpers.parseBoolean(split, 41, true);
         mIsUnsafeAudioFormatsEnabled = Helpers.parseBoolean(split, 42, true);
         //mIsHighBitrateFormatsEnabled = Helpers.parseBoolean(split, 43, false);
