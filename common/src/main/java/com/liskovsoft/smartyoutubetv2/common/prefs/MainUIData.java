@@ -61,7 +61,7 @@ public class MainUIData extends DataChangeBase implements ProfileChangeListener 
     public static final long MENU_ITEM_CLEAR_HISTORY = 1 << 22;
     public static final long MENU_ITEM_UPDATE_CHECK = 1 << 23;
     public static final long MENU_ITEM_OPEN_CHANNEL = 1 << 24;
-    // Hide, the app's own (see HiddenVideosData). Was the Hide of Subscriptions and Notifications only: saved by its bit, as it was.
+    // Hide (local), the app's own (see HiddenVideosData). Was the Hide of Subscriptions and Notifications only: saved by its bit, as it was.
     public static final long MENU_ITEM_HIDE = 1 << 25;
     public static final long MENU_ITEM_PLAY_VIDEO_INCOGNITO = 1 << 26;
     public static final long MENU_ITEM_MARK_AS_WATCHED = 1 << 27;

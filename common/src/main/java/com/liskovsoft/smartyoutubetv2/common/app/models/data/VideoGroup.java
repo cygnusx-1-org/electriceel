@@ -72,7 +72,6 @@ public class VideoGroup {
     private boolean mIsChannelRow; // every item is a channel (see MediaGroup.isChannelRow), kept by the pages added later
     private boolean mIsSearchTopicRow; // every item is a topic that opens a search (see MediaGroup.isSearchTopicRow), kept by the pages added later
     private int mAddedHomeRowType = -1; // a row added to Home (see HomeRowsData.Row.type), kept by the pages added later
-    private int mHiddenFromSection = MediaGroup.TYPE_UNDEFINED; // a row of the Unhide section: where its videos were hidden from
     public boolean isQueue;
 
     public static VideoGroup from(BrowseSection section) {
@@ -615,7 +614,7 @@ public class VideoGroup {
     }
 
     /**
-     * Hidden from the section with the Hide of the context menu (see HiddenVideosData)
+     * Hidden with the Hide (local) of the context menu, from whichever section (see HiddenVideosData)
      */
     private boolean isHiddenWithMenu(Video video) {
         // No context before the app is initialized (GlobalPreferences)
@@ -646,9 +645,10 @@ public class VideoGroup {
     }
 
     /**
-     * The section a video is hidden from with the context menu (see HiddenVideosData): the sidebar section, all the subscription
-     * groups as one (their sections and their rows of Home), Subscriptions for its row of Home too, then search, the channel pages
-     * or the player's suggestions. MediaGroup.TYPE_UNDEFINED elsewhere (e.g. a playlist page).
+     * The section a video is hidden in with the context menu, its row of the Unhide section (see HiddenVideosData): the sidebar
+     * section, all the subscription groups as one (their sections and their rows of Home), Subscriptions for its row of Home too,
+     * then search, the channel pages or the player's suggestions. MediaGroup.TYPE_UNDEFINED elsewhere (e.g. a playlist page), where
+     * nothing is hidden.
      */
     public int getHiddenVideosSection() {
         if (isChannelGroup()) {
@@ -669,17 +669,6 @@ public class VideoGroup {
 
         // Search, a channel page, otherwise none
         return getFilterSectionId();
-    }
-
-    /**
-     * A row of the Unhide section: the section its videos were hidden from (see HiddenVideosData), otherwise MediaGroup.TYPE_UNDEFINED
-     */
-    public int getHiddenFromSection() {
-        return mHiddenFromSection;
-    }
-
-    public void setHiddenFromSection(int sectionId) {
-        mHiddenFromSection = sectionId;
     }
 
     /**

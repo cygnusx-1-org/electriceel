@@ -21,9 +21,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * The videos hidden with the Hide of the context menu, each from the section it was hidden in (see VideoGroup.getHiddenVideosSection):
- * a sidebar section, all the subscription groups as one (SectionFilterData.SECTION_CHANNEL_GROUPS), search, the channel pages or
- * the player's suggestions. Kept on the device, shown again from the Unhide section.<br/>
+ * The videos hidden with the Hide (local) of the context menu: kept on the device, not on the account of YouTube. Hidden from every
+ * section (see isSupportedSection), shown again from the Unhide section.<br/>
+ * Each is kept with the section it was hidden in (see VideoGroup.getHiddenVideosSection), its row of the Unhide section: a sidebar
+ * section, all the subscription groups as one (SectionFilterData.SECTION_CHANNEL_GROUPS), search, the channel pages or the player's
+ * suggestions.<br/>
  * Each account has its own. Not settings: copying the settings of another account leaves them alone (see AppPrefs.copyProfileData).
  */
 public class HiddenVideosData implements ProfileChangeListener {
@@ -62,31 +64,20 @@ public class HiddenVideosData implements ProfileChangeListener {
             this.title = title;
             this.video = video;
         }
-
-        boolean is(int sectionId, String videoId) {
-            return this.sectionId == sectionId && videoId.equals(video.videoId);
-        }
     }
 
     /**
-     * The entries, the oldest first, and the ids of their videos by the section
+     * The entries, the oldest first, one a video, and the ids of their videos
      */
     private static final class Snapshot {
         final List<Entry> entries;
-        final Map<Integer, Set<String>> videoIds = new HashMap<>();
+        final Set<String> videoIds = new HashSet<>();
 
         Snapshot(List<Entry> entries) {
             this.entries = Collections.unmodifiableList(entries);
 
             for (Entry entry : entries) {
-                Set<String> ids = videoIds.get(entry.sectionId);
-
-                if (ids == null) {
-                    ids = new HashSet<>();
-                    videoIds.put(entry.sectionId, ids);
-                }
-
-                ids.add(entry.video.videoId);
+                videoIds.add(entry.video.videoId);
             }
         }
     }
@@ -109,8 +100,8 @@ public class HiddenVideosData implements ProfileChangeListener {
     }
 
     /**
-     * A video can be hidden from it. Not from the Unhide section, the local lists (e.g. the playback queue) or a place that's
-     * no section (e.g. a playlist page).
+     * A video can be hidden from it, and the hidden ones are left out of it. Not the Unhide section, the local lists (e.g. the
+     * playback queue) or a place that's no section (e.g. a playlist page).
      */
     public static boolean isSupportedSection(int sectionId) {
         switch (sectionId) {
@@ -126,19 +117,17 @@ public class HiddenVideosData implements ProfileChangeListener {
         }
     }
 
+    /**
+     * Hidden from whichever section, it's left out of every one (see isSupportedSection)
+     */
     public boolean isHidden(int sectionId, String videoId) {
-        if (videoId == null) {
-            return false;
-        }
-
-        Set<String> ids = mSnapshot.videoIds.get(sectionId);
-
-        return ids != null && ids.contains(videoId);
+        return videoId != null && isSupportedSection(sectionId) && mSnapshot.videoIds.contains(videoId);
     }
 
     /**
-     * A card of its own is kept, as the video was shown: the Unhide section shows it as it was.
-     * Hidden again, it's the newest. Past {@link #MAX_VIDEOS}, the ones hidden first are shown again.
+     * A card of its own is kept, as the video was shown: the Unhide section shows it as it was, in the row of the section.
+     * Hidden again, it's the newest, in the row of the section it's hidden from now. Past {@link #MAX_VIDEOS}, the ones hidden first
+     * are shown again.
      * @param title the section's, kept for a section without a title of its own (e.g. a pinned channel), or null
      */
     public void hide(int sectionId, @Nullable String title, Video video) {
@@ -147,7 +136,7 @@ public class HiddenVideosData implements ProfileChangeListener {
         }
 
         List<Entry> entries = new ArrayList<>(mSnapshot.entries);
-        removeEntry(entries, sectionId, video.videoId);
+        removeEntry(entries, video.videoId);
         entries.add(new Entry(sectionId, title, createCard(video)));
 
         while (entries.size() > MAX_VIDEOS) {
@@ -157,13 +146,16 @@ public class HiddenVideosData implements ProfileChangeListener {
         update(entries);
     }
 
-    public void unhide(int sectionId, String videoId) {
-        if (videoId == null || !isHidden(sectionId, videoId)) {
+    /**
+     * Shown again in every section
+     */
+    public void unhide(String videoId) {
+        if (videoId == null || !mSnapshot.videoIds.contains(videoId)) {
             return;
         }
 
         List<Entry> entries = new ArrayList<>(mSnapshot.entries);
-        removeEntry(entries, sectionId, videoId);
+        removeEntry(entries, videoId);
         update(entries);
     }
 
@@ -187,12 +179,9 @@ public class HiddenVideosData implements ProfileChangeListener {
             Integer newId = sectionIds.get(entry.sectionId);
 
             if (newId != null) {
-                // Hidden from the new one too: one entry, the newest
-                removeEntry(entries, newId, entry.video.videoId);
                 entries.add(new Entry(newId, entry.title, entry.video));
                 isChanged = true;
             } else {
-                removeEntry(entries, entry.sectionId, entry.video.videoId);
                 entries.add(entry);
             }
         }
@@ -282,9 +271,9 @@ public class HiddenVideosData implements ProfileChangeListener {
         }
     }
 
-    private static void removeEntry(List<Entry> entries, int sectionId, String videoId) {
+    private static void removeEntry(List<Entry> entries, String videoId) {
         for (int i = entries.size() - 1; i >= 0; i--) {
-            if (entries.get(i).is(sectionId, videoId)) {
+            if (videoId.equals(entries.get(i).video.videoId)) {
                 entries.remove(i);
             }
         }
@@ -315,7 +304,8 @@ public class HiddenVideosData implements ProfileChangeListener {
         List<String> sectionIds = Helpers.parseStrList(split, 0);
         String[] titles = Helpers.parseArray(split, 1);
         String[] cards = Helpers.parseArray(split, 2);
-        List<Entry> entries = new ArrayList<>();
+        // By the video: saved before a video was hidden from every section, it may be there for more than one. The newest is kept.
+        Map<String, Entry> entries = new LinkedHashMap<>();
 
         for (int i = 0; i < sectionIds.size(); i++) {
             Video video = cards != null && i < cards.length ? Video.fromString(cards[i]) : null;
@@ -325,10 +315,11 @@ public class HiddenVideosData implements ProfileChangeListener {
             }
 
             String title = titles != null && i < titles.length ? Helpers.parseStr(titles[i]) : null;
-            entries.add(new Entry(Helpers.parseInt(sectionIds.get(i)), title, video));
+            entries.remove(video.videoId); // the newest goes last
+            entries.put(video.videoId, new Entry(Helpers.parseInt(sectionIds.get(i)), title, video));
         }
 
-        mSnapshot = new Snapshot(entries);
+        mSnapshot = new Snapshot(new ArrayList<>(entries.values()));
     }
 
     /**

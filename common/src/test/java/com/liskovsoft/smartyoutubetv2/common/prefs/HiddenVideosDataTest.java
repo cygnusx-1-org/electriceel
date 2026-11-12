@@ -2,6 +2,7 @@ package com.liskovsoft.smartyoutubetv2.common.prefs;
 
 import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItem;
+import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.prefs.HiddenVideosData.Section;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
@@ -52,19 +53,26 @@ public class HiddenVideosDataTest {
         assertTrue(data.getSections().isEmpty());
     }
 
+    /**
+     * Local to the device, not to the section
+     */
     @Test
-    public void videoIsHiddenOnlyFromItsSection() {
+    public void videoIsHiddenFromEverySection() {
         HiddenVideosData data = getData();
 
         data.hide(MediaGroup.TYPE_HOME, null, createVideo("video1"));
 
-        assertTrue(data.isHidden(MediaGroup.TYPE_HOME, "video1"));
-        assertFalse(data.isHidden(MediaGroup.TYPE_SUBSCRIPTIONS, "video1"));
-        assertFalse(data.isHidden(MediaGroup.TYPE_HOME, "video2"));
+        int[] sections = {MediaGroup.TYPE_HOME, MediaGroup.TYPE_SUBSCRIPTIONS, MediaGroup.TYPE_HISTORY, MediaGroup.TYPE_SEARCH,
+                MediaGroup.TYPE_CHANNEL, MediaGroup.TYPE_SUGGESTIONS, SectionFilterData.SECTION_CHANNEL_GROUPS, PINNED_CHANNEL};
+
+        for (int sectionId : sections) {
+            assertTrue("section " + sectionId, data.isHidden(sectionId, "video1"));
+            assertFalse("section " + sectionId, data.isHidden(sectionId, "video2"));
+        }
     }
 
     /**
-     * The Unhide section itself, the local lists and a place that's no section
+     * The Unhide section itself, the local lists and a place that's no section: nothing is hidden from them, nor left out of them
      */
     @Test
     public void unsupportedSectionsHideNothing() {
@@ -81,6 +89,13 @@ public class HiddenVideosDataTest {
         }
 
         assertTrue(data.isEmpty());
+
+        data.hide(MediaGroup.TYPE_HOME, null, createVideo("video1"));
+
+        for (int sectionId : sections) {
+            assertFalse("section " + sectionId, data.isHidden(sectionId, "video1"));
+        }
+
         assertTrue(HiddenVideosData.isSupportedSection(SectionFilterData.SECTION_CHANNEL_GROUPS));
         assertTrue(HiddenVideosData.isSupportedSection(MediaGroup.TYPE_SEARCH));
         assertTrue(HiddenVideosData.isSupportedSection(PINNED_CHANNEL));
@@ -97,21 +112,78 @@ public class HiddenVideosDataTest {
     }
 
     @Test
-    public void unhideShowsItAgainOnlyInItsSection() {
+    public void unhideShowsItAgainEverywhere() {
         HiddenVideosData data = getData();
 
         data.hide(MediaGroup.TYPE_HOME, null, createVideo("video1"));
-        data.hide(MediaGroup.TYPE_SEARCH, null, createVideo("video1"));
+        data.hide(MediaGroup.TYPE_HOME, null, createVideo("video2"));
 
-        data.unhide(MediaGroup.TYPE_HOME, "video1");
+        data.unhide("video1");
+        data.unhide("video3");
+        data.unhide(null);
 
         assertFalse(data.isHidden(MediaGroup.TYPE_HOME, "video1"));
-        assertTrue(data.isHidden(MediaGroup.TYPE_SEARCH, "video1"));
+        assertFalse(data.isHidden(MediaGroup.TYPE_SEARCH, "video1"));
+        assertTrue(data.isHidden(MediaGroup.TYPE_SEARCH, "video2"));
 
-        data.unhide(MediaGroup.TYPE_SEARCH, "video1");
-        data.unhide(MediaGroup.TYPE_SEARCH, null);
+        data.unhide("video2");
 
         assertTrue(data.isEmpty());
+    }
+
+    /**
+     * One row of the Unhide section has it: the one of the section it was hidden from last
+     */
+    @Test
+    public void hiddenAgainFromAnotherSectionMovesToItsRow() {
+        HiddenVideosData data = getData();
+
+        data.hide(MediaGroup.TYPE_HOME, null, createVideo("video1"));
+        data.hide(MediaGroup.TYPE_HOME, null, createVideo("video2"));
+        data.hide(PINNED_CHANNEL, "Climbing channel", createVideo("video1"));
+
+        for (HiddenVideosData current : Arrays.asList(data, getDataReadAgain())) {
+            List<Section> sections = current.getSections();
+
+            assertEquals(2, sections.size());
+            assertEquals(MediaGroup.TYPE_HOME, sections.get(0).sectionId);
+            assertEquals(Collections.singletonList("video2"), getIds(sections.get(0)));
+            assertEquals(PINNED_CHANNEL, sections.get(1).sectionId);
+            assertEquals(Collections.singletonList("video1"), getIds(sections.get(1)));
+        }
+
+        getData().unhide("video1");
+
+        assertEquals(1, getData().getSections().size());
+        assertFalse(getData().isHidden(MediaGroup.TYPE_HOME, "video1"));
+    }
+
+    /**
+     * Saved while each section had its own, a video can be there for more than one: it's one, in the row it was hidden from last
+     */
+    @Test
+    public void videoSavedForMoreThanOneSectionIsRestoredOnce() {
+        List<Integer> sectionIds = Arrays.asList(MediaGroup.TYPE_SEARCH, MediaGroup.TYPE_HOME, MediaGroup.TYPE_SEARCH);
+        List<String> titles = Arrays.asList(null, null, null);
+        List<String> cards = Arrays.asList(createVideo("video1").toString(), createVideo("video2").toString(),
+                createVideo("video1").toString());
+        getPrefs().setProfileData(HiddenVideosData.HIDDEN_VIDEOS_DATA, Helpers.mergeData(Helpers.mergeList(sectionIds),
+                Helpers.mergeList(titles), Helpers.mergeList(cards)));
+        HiddenVideosData.resetInstanceForTesting();
+
+        HiddenVideosData data = getData();
+        List<Section> sections = data.getSections();
+
+        assertEquals(2, sections.size());
+        assertEquals(MediaGroup.TYPE_HOME, sections.get(0).sectionId);
+        assertEquals(Collections.singletonList("video2"), getIds(sections.get(0)));
+        assertEquals(MediaGroup.TYPE_SEARCH, sections.get(1).sectionId);
+        assertEquals(Collections.singletonList("video1"), getIds(sections.get(1)));
+
+        data.unhide("video1");
+
+        assertFalse(data.isHidden(MediaGroup.TYPE_SEARCH, "video1"));
+        assertEquals(1, data.getSections().size());
     }
 
     /**
@@ -285,8 +357,7 @@ public class HiddenVideosDataTest {
     }
 
     /**
-     * A pinned section whose id changed (see SidebarService.normalizeGroupIds) takes its hidden videos; one hidden from both is
-     * one, the newest
+     * A pinned section whose id changed (see SidebarService.normalizeGroupIds) takes its row of the Unhide section
      */
     @Test
     public void hiddenVideosGoWithTheirSectionsNewId() {
@@ -295,26 +366,27 @@ public class HiddenVideosDataTest {
 
         data.hide(PINNED_CHANNEL, "Climbing", createVideo("video1"));
         data.hide(PINNED_CHANNEL, "Climbing", createVideo("video2"));
-        data.hide(newSection, "Climbing again", createVideo("video2"));
+        data.hide(newSection, "Climbing again", createVideo("video4"));
         data.hide(MediaGroup.TYPE_HOME, null, createVideo("video3"));
 
         data.moveSections(Collections.singletonMap(PINNED_CHANNEL, newSection));
 
         for (HiddenVideosData current : Arrays.asList(data, getDataReadAgain())) {
-            assertFalse(current.isHidden(PINNED_CHANNEL, "video1"));
-            assertTrue(current.isHidden(newSection, "video1"));
-            assertTrue(current.isHidden(newSection, "video2"));
-            assertTrue(current.isHidden(MediaGroup.TYPE_HOME, "video3"));
-
+            List<Integer> sectionIds = new ArrayList<>();
             Section moved = null;
+
             for (Section section : current.getSections()) {
+                sectionIds.add(section.sectionId);
+
                 if (section.sectionId == newSection) {
                     moved = section;
                 }
             }
 
-            assertEquals(Arrays.asList("video2", "video1"), getIds(moved));
+            assertEquals(Arrays.asList(newSection, MediaGroup.TYPE_HOME), sectionIds);
+            assertEquals(Arrays.asList("video4", "video2", "video1"), getIds(moved));
             assertEquals("Climbing again", moved.title);
+            assertTrue(current.isHidden(MediaGroup.TYPE_HOME, "video1"));
         }
     }
 
