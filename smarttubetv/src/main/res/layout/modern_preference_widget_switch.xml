@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The switch of a SwitchPreference row of the modern skin: preference_widget_switch of the library, but with the focus of
+     the row (modern_preference), to be drawn dark on the white pill (Modern.Pref.Switch) -->
+<Switch xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/switch_widget"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:duplicateParentState="true"
+    android:focusable="false"
+    android:clickable="false"
+    android:background="@null" />

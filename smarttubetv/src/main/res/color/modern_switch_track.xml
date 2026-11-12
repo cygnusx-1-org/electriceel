@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Track of the switches of the panels (Modern.Pref.Switch): the framework's switch_track_material with the accent of
+     the scheme instead of the colorControlActivated, and off dark on the white pill of the focused row. The track's
+     shape keeps its own transparency. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false" android:color="?android:attr/colorForeground"
+        android:alpha="?android:attr/disabledAlpha" />
+    <item android:state_checked="true" android:color="?attr/modernAccent" />
+    <item android:state_focused="true" android:color="@color/modern_on_light" />
+    <item android:color="?android:attr/colorForeground" />
+</selector>

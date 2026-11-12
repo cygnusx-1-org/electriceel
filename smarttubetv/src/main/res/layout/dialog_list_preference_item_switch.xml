@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!-- A checked list entry shown as a switch (e.g. "Everything"). Same paddings and text block as
-     leanback_list_preference_item_multi so the row height matches the checkbox rows. -->
+     leanback_list_preference_item_multi so the row height matches the checkbox rows, and the same skin
+     attributes, so the focused row of the modern skin is readable. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/container"
     android:layout_width="match_parent"
@@ -17,22 +18,26 @@
     <LinearLayout android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:duplicateParentState="?attr/modernPrefDuplicateState"
         android:orientation="vertical">
         <Space android:layout_width="0dp" android:layout_height="@dimen/lb_preference_item_text_space_top" />
         <TextView
             android:id="@android:id/title"
+            android:duplicateParentState="?attr/modernPrefDuplicateState"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/lb_preference_item_primary_text_margin_bottom"
             android:fontFamily="sans-serif"
-            android:textColor="@color/lb_preference_item_primary_text_color"
+            android:textColor="?attr/modernPrefItemTextColor"
             android:textSize="@dimen/lb_preference_item_primary_text_size"/>
         <Space android:layout_width="0dp" android:layout_height="@dimen/lb_preference_item_text_space_bottom" />
     </LinearLayout>
 
-    <!-- The same widget as SwitchPreference (preference_widget_switch) -->
+    <!-- The same widget as SwitchPreference (preference_widget_switch, modern_preference_widget_switch). The modern
+         skin's switch takes the focus of the row, to be drawn dark on the white pill (Modern.Pref.Switch). -->
     <Switch
         android:id="@+id/button"
+        android:duplicateParentState="?attr/modernPrefDuplicateState"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:focusable="false"

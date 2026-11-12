@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Thumb of the switches of the panels (Modern.Pref.Switch): the framework's colors (switch_thumb_material_anim)
+     but on in the accent of the scheme instead of the colorAccent, and off dark on the white pill of the focused row -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false" android:color="@color/modern_switch_thumb_disabled" />
+    <item android:state_checked="true" android:color="?attr/modernAccent" />
+    <item android:state_focused="true" android:color="@color/modern_text_on_light_secondary" />
+    <item android:color="@color/modern_switch_thumb_off" />
+</selector>

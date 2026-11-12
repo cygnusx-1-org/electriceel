@@ -53,6 +53,14 @@
         <item name="android:background">@null</item>
     </style>
 
+    <!-- The switches of the panels (SwitchPreference rows and the toggles of the lists, see
+         dialog_list_preference_item_switch): on in the accent of the scheme, as the framework draws them in the
+         colorAccent, which is white in the panels and vanishes on the white pill of the focused row -->
+    <style name="Modern.Pref.Switch" parent="android:Widget.Material.CompoundButton.Switch">
+        <item name="android:thumbTint">@color/modern_switch_thumb</item>
+        <item name="android:trackTint">@color/modern_switch_track</item>
+    </style>
+
     <style name="Modern.Player.RowHeader" parent="Widget.Leanback.Row.Header">
         <item name="android:textSize">@dimen/modern_shelf_header_size</item>
         <item name="android:fontFamily">sans-serif-medium</item>
@@ -106,6 +114,7 @@
         <item name="modernPrefIconTint">@color/modern_pill_text</item>
         <item name="modernPrefRadioButtonStyle">@style/Modern.Pref.RadioButton</item>
         <item name="modernPrefCheckBoxStyle">@style/Modern.Pref.CheckBox</item>
+        <item name="android:switchStyle">@style/Modern.Pref.Switch</item>
         <item name="modernPrefChatBubble">@color/modern_white_10</item>
         <item name="modernPrefChatBubbleFocused">@color/modern_white_20</item>
         <item name="modernPrefDuplicateState">true</item>
@@ -143,6 +152,7 @@
 
     <style name="Modern.Preference.Switch" parent="LeanbackPreference.SwitchPreference">
         <item name="android:layout">@layout/modern_preference</item>
+        <item name="android:widgetLayout">@layout/modern_preference_widget_switch</item>
     </style>
 
     <style name="Modern.Preference.SwitchCompat" parent="LeanbackPreference.SwitchPreferenceCompat">
