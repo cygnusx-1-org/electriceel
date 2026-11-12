@@ -737,7 +737,7 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
     }
 
     /**
-     * The app's own, kept on the device (see HiddenVideosData): hidden from the section it's in, shown again from the Unhide section.
+     * The app's own, kept on the device (see HiddenVideosData): hidden from every section, shown again from the Unhide section.
      * There it's Unhide, whatever the menu has: that's what the section is for.
      */
     private void appendHideButton() {
@@ -750,11 +750,9 @@ public class VideoMenuPresenter extends BaseMenuPresenter {
         HiddenVideosData data = HiddenVideosData.instance(getContext());
 
         if (mVideo.belongsToHiddenVideos()) {
-            int sectionId = group.getHiddenFromSection();
-
             mDialogPresenter.appendSingleButton(
                     UiOptionItem.from(getContext().getString(R.string.unhide), optionItem -> {
-                        data.unhide(sectionId, mVideo.videoId);
+                        data.unhide(mVideo.videoId);
                         if (mCallback != null) {
                             mCallback.onItemAction(mVideo, VideoMenuCallback.ACTION_REMOVE);
                         }

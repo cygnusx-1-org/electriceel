@@ -962,7 +962,6 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
             VideoGroup row = VideoGroup.from(new ArrayList<>(hidden.videos), section, -1);
             row.setId(row.hashCode());
             row.setTitle(getHiddenVideosRowTitle(hidden));
-            row.setHiddenFromSection(hidden.sectionId);
             getView().updateSection(row);
         }
 

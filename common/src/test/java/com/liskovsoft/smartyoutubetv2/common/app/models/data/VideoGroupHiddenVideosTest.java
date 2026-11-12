@@ -26,14 +26,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
- * The videos hidden with the Hide of the context menu, each from the section it was hidden in (see HiddenVideosData)
+ * The videos hidden with the Hide (local) of the context menu: from every section, whichever it was hidden in (see HiddenVideosData)
  */
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 28)
 public class VideoGroupHiddenVideosTest {
     private static final BrowseSection HOME = new BrowseSection(MediaGroup.TYPE_HOME, "Home", BrowseSection.TYPE_ROW, 0);
     private HiddenVideosData mData;
-    private final List<Integer> mHiddenSections = new ArrayList<>();
     private final List<String> mHiddenIds = new ArrayList<>();
     private int mVideoCount;
 
@@ -47,25 +46,25 @@ public class VideoGroupHiddenVideosTest {
     @After
     public void tearDown() {
         // Kept by the instance past the test
-        for (int i = 0; i < mHiddenSections.size(); i++) {
-            mData.unhide(mHiddenSections.get(i), mHiddenIds.get(i));
+        for (String videoId : mHiddenIds) {
+            mData.unhide(videoId);
         }
 
         Utils.sHandler.removeCallbacksAndMessages(null);
     }
 
     @Test
-    public void hiddenVideoIsLeftOutOfItsSectionOnly() {
+    public void hiddenVideoIsLeftOutOfEverySection() {
         Video video = createVideo();
         hide(MediaGroup.TYPE_HOME, video);
 
         assertEquals(0, createSection(MediaGroup.TYPE_HOME, copy(video)).getSize());
-        assertEquals(1, createSection(MediaGroup.TYPE_SUBSCRIPTIONS, copy(video)).getSize());
-        assertEquals(1, createPage(MediaGroup.TYPE_SEARCH, copy(video)).getSize());
+        assertEquals(0, createSection(MediaGroup.TYPE_SUBSCRIPTIONS, copy(video)).getSize());
+        assertEquals(0, createPage(MediaGroup.TYPE_SEARCH, copy(video)).getSize());
     }
 
     @Test
-    public void everySectionHasItsOwn() {
+    public void hiddenFromAnySectionIsLeftOutOfTheOthers() {
         int[] sections = {MediaGroup.TYPE_HOME, MediaGroup.TYPE_SHORTS, MediaGroup.TYPE_GAMING, MediaGroup.TYPE_SUBSCRIPTIONS,
                 MediaGroup.TYPE_HISTORY, MediaGroup.TYPE_WATCH_LATER, MediaGroup.TYPE_NOTIFICATIONS, MediaGroup.TYPE_USER_PLAYLISTS,
                 MediaGroup.TYPE_CHANNEL_UPLOADS, "Pinned channel".hashCode()};
@@ -75,15 +74,16 @@ public class VideoGroupHiddenVideosTest {
             hide(sectionId, video);
 
             assertEquals("section " + sectionId, 0, createSection(sectionId, copy(video)).getSize());
-            assertEquals("section " + sectionId, 1, createSection(MediaGroup.TYPE_MUSIC, copy(video)).getSize());
+            assertEquals("section " + sectionId, 0, createSection(MediaGroup.TYPE_MUSIC, copy(video)).getSize());
+            assertEquals("section " + sectionId, 0, createPage(MediaGroup.TYPE_SUGGESTIONS, copy(video)).getSize());
         }
     }
 
     /**
-     * Search, a channel page, the player's suggestions: each a place of its own
+     * Search, a channel page, the player's suggestions: hidden there, it's left out of the sections too
      */
     @Test
-    public void pagesHaveTheirOwn() {
+    public void pagesHideFromEverySection() {
         int[] types = {MediaGroup.TYPE_SEARCH, MediaGroup.TYPE_CHANNEL, MediaGroup.TYPE_SUGGESTIONS};
 
         for (int type : types) {
@@ -96,21 +96,27 @@ public class VideoGroupHiddenVideosTest {
             page.add(copy(video));
 
             assertEquals("type " + type, 0, page.getSize());
+            assertEquals("type " + type, 0, createSection(MediaGroup.TYPE_HOME, copy(video)).getSize());
         }
     }
 
     /**
-     * E.g. a playlist page: no section to hide a video from
+     * E.g. a playlist page: no section to hide a video from, and the hidden ones are kept
      */
     @Test
     public void playlistPageIsNoSection() {
         assertEquals(MediaGroup.TYPE_UNDEFINED, createPage(MediaGroup.TYPE_USER_PLAYLISTS).getHiddenVideosSection());
         assertFalse(HiddenVideosData.isSupportedSection(createPage(MediaGroup.TYPE_USER_PLAYLISTS).getHiddenVideosSection()));
+
+        Video video = createVideo();
+        hide(MediaGroup.TYPE_HOME, video);
+
+        assertEquals(1, createPage(MediaGroup.TYPE_USER_PLAYLISTS, copy(video)).getSize());
     }
 
     /**
-     * The subscription groups are one: their sections and their rows of Home. The Subscriptions row of Home is Subscriptions.
-     * The other rows of Home are Home's.
+     * The row of the Unhide section: the subscription groups are one, their sections and their rows of Home. The Subscriptions row of
+     * Home is Subscriptions. The other rows of Home are Home's. Hidden from one, it's left out of all of them.
      */
     @Test
     public void rowsOfHomeAreTheirSections() {
@@ -131,7 +137,7 @@ public class VideoGroupHiddenVideosTest {
 
         assertEquals(0, climbing.getSize());
         assertEquals(0, cookingRow.getSize());
-        assertEquals(1, youTubeRow.getSize());
+        assertEquals(0, youTubeRow.getSize());
     }
 
     /**
@@ -160,7 +166,7 @@ public class VideoGroupHiddenVideosTest {
     }
 
     /**
-     * The rows already shown let it go (see VideoGroupObjectAdapter.removeNotInterested)
+     * The rows already shown let it go (see VideoGroupObjectAdapter.removeNotInterested), whichever section they're of
      */
     @Test
     public void shownVideoIsRemovedOnceHidden() {
@@ -169,11 +175,12 @@ public class VideoGroupHiddenVideosTest {
         VideoGroup subscriptions = createSection(MediaGroup.TYPE_SUBSCRIPTIONS, copy(video));
 
         assertFalse(home.isRemovedWithMenu(home.get(0)));
+        assertFalse(subscriptions.isRemovedWithMenu(subscriptions.get(0)));
 
         hide(MediaGroup.TYPE_HOME, video);
 
         assertTrue(home.isRemovedWithMenu(home.get(0)));
-        assertFalse(subscriptions.isRemovedWithMenu(subscriptions.get(0)));
+        assertTrue(subscriptions.isRemovedWithMenu(subscriptions.get(0)));
     }
 
     /**
@@ -202,17 +209,14 @@ public class VideoGroupHiddenVideosTest {
 
         BrowseSection unhide = new BrowseSection(MediaGroup.TYPE_HIDDEN_VIDEOS, "Unhide", BrowseSection.TYPE_ROW, 0);
         VideoGroup row = VideoGroup.from(mData.getSections().get(0).videos, unhide, -1);
-        row.setHiddenFromSection(MediaGroup.TYPE_HOME);
 
         assertEquals(1, row.getSize());
         assertTrue(row.get(0).belongsToHiddenVideos());
-        assertEquals(MediaGroup.TYPE_HOME, row.getHiddenFromSection());
         assertFalse(row.isRemovedWithMenu(row.get(0)));
     }
 
     private void hide(int sectionId, Video video) {
         mData.hide(sectionId, null, video);
-        mHiddenSections.add(sectionId);
         mHiddenIds.add(video.videoId);
     }
 
