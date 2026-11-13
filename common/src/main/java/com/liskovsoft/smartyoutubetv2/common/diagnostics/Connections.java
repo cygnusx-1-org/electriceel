@@ -8,9 +8,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.Format;
+import com.google.android.exoplayer2.source.chunk.Chunk;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
+import com.google.android.exoplayer2.upstream.Loader;
+import com.google.android.exoplayer2.upstream.ParsingLoadable;
 import com.google.android.exoplayer2.upstream.TransferListener;
+import com.google.android.exoplayer2.util.MimeTypes;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -36,8 +42,8 @@ import okhttp3.Protocol;
  * The connections the player's OkHttp client opened, from the name's lookup to the connection being ready (with the lookup's time and
  * each address tried in their detail), and its requests that waited long for their answer, from being sent to its first byte. A
  * segment that took long with no response in its time was slow to come, one with a long response waited for the server. The other
- * engines' requests are timed whole, from being made to their answer's headers, connect included (see timeOpenings). Any thread:
- * OkHttp's and the loaders'.
+ * engines' requests are timed whole, from being made to their answer's headers, connect included (see timeOpenings). Each names the
+ * load it's of, e.g. the video's init chunk (see describeLoad). Any thread: OkHttp's and the loaders'.
  */
 public final class Connections {
     /**
@@ -58,12 +64,25 @@ public final class Connections {
      */
     static final String FAILURE_CANCELLED = "cancelled";
     /**
-     * For the client of the player only: the API's connections aren't the video's
+     * Of a load (see describeLoad): the format's header, after its track, e.g. "video init chunk"
      */
-    public static final EventListener.Factory LISTENER = call -> new Listener();
+    static final String LOAD_INIT_CHUNK = "init chunk";
+    /**
+     * Of a load (see describeLoad): a segment of the media, after its track, e.g. "audio chunk"
+     */
+    static final String LOAD_CHUNK = "chunk";
+    /**
+     * Of a load (see describeLoad): a DASH manifest or an HLS playlist
+     */
+    static final String LOAD_MANIFEST = "manifest";
+    /**
+     * For the client of the player only: the API's connections aren't the video's. Each call is made on the thread of the load it's
+     * of (e.g. OkHttpDataSource#open), and its listener with it: that's when the load is known.
+     */
+    public static final EventListener.Factory LISTENER = call -> new Listener(describeLoad(Loader.getCurrentLoadable()));
     private static final ArrayDeque<Connection> sConnections = new ArrayDeque<>();
-    private static final ArrayDeque<long[]> sResponses = new ArrayDeque<>(); // {sent, first byte}, first byte -1 waiting for it
-    private static final ArrayDeque<long[]> sOpenings = new ArrayDeque<>(); // {made, headers}, headers -1 waiting for them
+    private static final ArrayDeque<TimedRequest> sResponses = new ArrayDeque<>();
+    private static final ArrayDeque<TimedRequest> sOpenings = new ArrayDeque<>();
     @VisibleForTesting
     static VideoStarts.Clock sClock = SystemClock::elapsedRealtime;
 
@@ -78,6 +97,11 @@ public final class Connections {
     @VisibleForTesting
     static final class Connection {
         final long startMs;
+        /**
+         * Of the call that opened it (see describeLoad), null for one not known
+         */
+        @Nullable
+        final String load;
         long endMs = -1;
         boolean isDnsStarted;
         /**
@@ -100,24 +124,32 @@ public final class Connections {
         @Nullable
         Protocol protocol;
 
-        Connection(long startMs) {
+        Connection(long startMs, @Nullable String load) {
             this.startMs = startMs;
+            this.load = load;
         }
 
         /**
-         * E.g. "server 1, DNS 2 ms, IPv4 70 ms, h2", "DNS 5003 ms, IPv4 68 ms, http/1.1", "DNS 1 ms, IPv4 timed out after 5000 ms,
-         * IPv6 70 ms". With "still going" for one that hasn't ended, after what it's at: "DNS, still going", "DNS 2 ms, IPv4, still
-         * going". Null for nothing known.
+         * E.g. "video init chunk, server 1, DNS 2 ms, IPv4 70 ms, h2", "audio chunk, DNS 5003 ms, IPv4 68 ms, http/1.1", "DNS 1 ms,
+         * IPv4 timed out after 5000 ms, IPv6 70 ms" (its load not known). With "still going" for one that hasn't ended, after what
+         * it's at: "DNS, still going", "DNS 2 ms, IPv4, still going". Null for nothing known.
          *
          * @param hostNumber of its server among the video's (see FormatAttempts#getHostNumber), -1 for one not known
          */
         @Nullable
         String describe(boolean isGoing, int hostNumber) {
-            List<String> parts = new ArrayList<>(attempts.size() + 4);
+            List<String> parts = new ArrayList<>(attempts.size() + 5);
+
+            if (load != null) {
+                parts.add(load);
+            }
 
             if (hostNumber > 0) {
                 parts.add("server " + hostNumber);
             }
+
+            // Its load and its server say nothing of the connection itself
+            int named = parts.size();
 
             if (dnsEndMs >= 0) {
                 parts.add("DNS " + (dnsEndMs - startMs) + " ms");
@@ -138,8 +170,31 @@ public final class Connections {
                 parts.add(VideoStarts.DETAIL_GOING);
             }
 
-            // The server alone says nothing of the connection
-            return parts.size() > (hostNumber > 0 ? 1 : 0) ? TextUtils.join(", ", parts) : null;
+            return parts.size() > named ? TextUtils.join(", ", parts) : load;
+        }
+    }
+
+    /**
+     * A request that waited for its answer: a response (from being sent to its first byte) or an opening (from being made to its
+     * answer's headers). Its end changes under the class's lock.
+     */
+    @VisibleForTesting
+    static final class TimedRequest {
+        final long startMs;
+        /**
+         * -1 while it waits
+         */
+        long endMs;
+        /**
+         * Of the load it's of (see describeLoad), null for one not known
+         */
+        @Nullable
+        final String load;
+
+        TimedRequest(long startMs, long endMs, @Nullable String load) {
+            this.startMs = startMs;
+            this.endMs = endMs;
+            this.load = load;
         }
     }
 
@@ -181,12 +236,21 @@ public final class Connections {
      * Of a call. Its dead ends count: they're the time it took to connect.
      */
     private static final class Listener extends EventListener {
+        /**
+         * Of the call (see describeLoad), null for one not known
+         */
+        @Nullable
+        private final String mLoad;
         private volatile Connection mConnection;
-        private volatile long[] mResponse;
+        private volatile TimedRequest mResponse;
+
+        Listener(@Nullable String load) {
+            mLoad = load;
+        }
 
         private void onStart(Call call) {
             if (mConnection == null) {
-                mConnection = add(sClock.now(), -1);
+                mConnection = add(sClock.now(), -1, mLoad);
                 setHost(mConnection, call.request().url().host());
             }
         }
@@ -201,7 +265,7 @@ public final class Connections {
         }
 
         private void onResponseEnd() {
-            long[] response = mResponse;
+            TimedRequest response = mResponse;
 
             if (response != null) {
                 end(response);
@@ -261,7 +325,7 @@ public final class Connections {
         @Override
         public void requestHeadersStart(@NonNull Call call) {
             onResponseEnd();
-            mResponse = addResponse(sClock.now(), -1);
+            mResponse = addResponse(sClock.now(), -1, mLoad);
         }
 
         /**
@@ -296,8 +360,8 @@ public final class Connections {
     }
 
     @VisibleForTesting
-    static synchronized Connection add(long startMs, long endMs) {
-        Connection connection = new Connection(startMs);
+    static synchronized Connection add(long startMs, long endMs, @Nullable String load) {
+        Connection connection = new Connection(startMs, load);
         connection.endMs = endMs;
         sConnections.addLast(connection);
 
@@ -309,8 +373,8 @@ public final class Connections {
     }
 
     @VisibleForTesting
-    static synchronized long[] addResponse(long sentMs, long firstByteMs) {
-        long[] response = {sentMs, firstByteMs};
+    static synchronized TimedRequest addResponse(long sentMs, long firstByteMs, @Nullable String load) {
+        TimedRequest response = new TimedRequest(sentMs, firstByteMs, load);
         sResponses.addLast(response);
 
         if (sResponses.size() > MAX_RESPONSES) {
@@ -343,7 +407,8 @@ public final class Connections {
 
         @Override
         public long open(DataSpec dataSpec) throws IOException {
-            long[] opening = isNetwork(dataSpec) ? addOpening(sClock.now(), -1) : null;
+            // Made on the thread of the load it's of
+            TimedRequest opening = isNetwork(dataSpec) ? addOpening(sClock.now(), -1, describeLoad(Loader.getCurrentLoadable())) : null;
 
             try {
                 return mDataSource.open(dataSpec);
@@ -386,8 +451,8 @@ public final class Connections {
     }
 
     @VisibleForTesting
-    static synchronized long[] addOpening(long madeMs, long headersMs) {
-        long[] opening = {madeMs, headersMs};
+    static synchronized TimedRequest addOpening(long madeMs, long headersMs, @Nullable String load) {
+        TimedRequest opening = new TimedRequest(madeMs, headersMs, load);
         sOpenings.addLast(opening);
 
         if (sOpenings.size() > MAX_RESPONSES) {
@@ -397,8 +462,8 @@ public final class Connections {
         return opening;
     }
 
-    private static synchronized void end(long[] entry) {
-        entry[1] = sClock.now();
+    private static synchronized void end(TimedRequest request) {
+        request.endMs = sClock.now();
     }
 
     private static synchronized void end(Connection connection) {
@@ -520,19 +585,78 @@ public final class Connections {
     /**
      * The ones that waited long (see MIN_RESPONSE_MS)
      */
-    private static void addRequests(List<VideoStart.Stage> result, ArrayDeque<long[]> requests, String name, long fromMs, long toMs) {
-        for (long[] request : requests) {
+    private static void addRequests(List<VideoStart.Stage> result, ArrayDeque<TimedRequest> requests, String name, long fromMs,
+                                    long toMs) {
+        for (TimedRequest request : requests) {
             // Made before, it's of the source before (e.g. the video before's)
-            if (request[0] < fromMs) {
+            if (request.startMs < fromMs) {
                 continue;
             }
 
-            boolean isGoing = request[1] < 0;
-            long endMs = isGoing ? toMs : Math.min(request[1], toMs);
+            boolean isGoing = request.endMs < 0;
+            long endMs = isGoing ? toMs : Math.min(request.endMs, toMs);
 
-            if (endMs - request[0] >= MIN_RESPONSE_MS) {
-                result.add(new VideoStart.Stage(name, isGoing ? VideoStarts.DETAIL_GOING : null, 1, request[0], endMs));
+            if (endMs - request.startMs >= MIN_RESPONSE_MS) {
+                result.add(new VideoStart.Stage(name, describeRequest(request.load, isGoing), 1, request.startMs, endMs));
             }
+        }
+    }
+
+    /**
+     * E.g. "audio init chunk", "audio init chunk, still going", "still going" (its load not known). Null for nothing known.
+     */
+    @Nullable
+    private static String describeRequest(@Nullable String load, boolean isGoing) {
+        if (!isGoing) {
+            return load;
+        }
+
+        return load != null ? load + ", " + VideoStarts.DETAIL_GOING : VideoStarts.DETAIL_GOING;
+    }
+
+    /**
+     * Which of the player's loads a request is of, e.g. "video init chunk", "audio chunk", "subtitle chunk", "manifest": told by its
+     * loader's thread, which it's made on (see Loader#getCurrentLoadable). Null for a request made elsewhere (e.g. on a prefetch's
+     * thread) or of another load (e.g. a progressive stream's, whose one request is all of it).
+     */
+    @VisibleForTesting
+    @Nullable
+    static String describeLoad(@Nullable Loader.Loadable loadable) {
+        if (loadable instanceof Chunk) {
+            Chunk chunk = (Chunk) loadable;
+            String kind = chunk.type == C.DATA_TYPE_MEDIA_INITIALIZATION ? LOAD_INIT_CHUNK : LOAD_CHUNK;
+            String track = trackOf(chunk.trackFormat);
+
+            return track != null ? track + " " + kind : kind;
+        }
+
+        return loadable instanceof ParsingLoadable ? LOAD_MANIFEST : null;
+    }
+
+    /**
+     * "video", "audio", "subtitle", null for one not known (e.g. a muxed stream's)
+     */
+    @Nullable
+    private static String trackOf(@Nullable Format format) {
+        if (format == null) {
+            return null;
+        }
+
+        int trackType = MimeTypes.getTrackType(format.sampleMimeType);
+
+        if (trackType == C.TRACK_TYPE_UNKNOWN) {
+            trackType = MimeTypes.getTrackType(format.containerMimeType);
+        }
+
+        switch (trackType) {
+            case C.TRACK_TYPE_VIDEO:
+                return "video";
+            case C.TRACK_TYPE_AUDIO:
+                return "audio";
+            case C.TRACK_TYPE_TEXT:
+                return "subtitle";
+            default:
+                return null;
         }
     }
 

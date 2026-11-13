@@ -66,9 +66,12 @@ public final class VideoStarts {
     static final String STAGE_VIDEO_INIT_CHUNK = "video init chunk";
     static final String STAGE_AUDIO_INIT_CHUNK = "audio init chunk";
     static final String STAGE_LOADING_HELD = "loading held";
+    /**
+     * A new connection of the player, its detail the load that made it first, e.g. "video init chunk" (see Connections)
+     */
     static final String STAGE_CONNECT = "connect";
     /**
-     * A request of the player, from being sent to the first byte of its answer (see Connections)
+     * A request of the player, from being sent to the first byte of its answer, its detail the load it's of (see Connections)
      */
     static final String STAGE_RESPONSE = "response";
     /**

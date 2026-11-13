@@ -50,9 +50,7 @@ public class VideoMenuPresenterTest {
     public void tearDown() {
         // Kept by the instance past the test
         for (String videoId : mHiddenIds) {
-            mHiddenVideosData.unhide(SectionFilterData.SECTION_CHANNEL_GROUPS, videoId);
-            mHiddenVideosData.unhide(MediaGroup.TYPE_SUBSCRIPTIONS, videoId);
-            mHiddenVideosData.unhide(MediaGroup.TYPE_HOME, videoId);
+            mHiddenVideosData.unhide(videoId);
         }
 
         Utils.sHandler.removeCallbacksAndMessages(null);

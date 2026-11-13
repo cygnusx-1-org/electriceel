@@ -52,6 +52,10 @@ public class DiagnosticsReportTest {
     private String mSavedProxyUri;
     private String mSavedLanguage;
     private String mSavedCountry;
+    private String mSavedLastId;
+    private long mSavedLastTime;
+    private long mSavedLastFailureTs;
+    private long mSavedLastStartTs;
 
     @Rule
     public TemporaryFolder mFolder = new TemporaryFolder();
@@ -69,6 +73,10 @@ public class DiagnosticsReportTest {
         mSavedProxyUri = AppPrefs.instance(getContext()).getWebProxyUri();
         mSavedLanguage = getGlobalPrefs().getPreferredLanguage();
         mSavedCountry = getGlobalPrefs().getPreferredCountry();
+        mSavedLastId = getDebuggingData().getLastSubmissionId();
+        mSavedLastTime = getDebuggingData().getLastSubmissionTime();
+        mSavedLastFailureTs = getDebuggingData().getLastSubmittedFailureTs();
+        mSavedLastStartTs = getDebuggingData().getLastSubmittedStartTs();
 
         // Cronet can't load under Robolectric
         tweaks.setPlayerDataSource(PlayerTweaksData.PLAYER_DATA_SOURCE_OKHTTP);
@@ -86,7 +94,25 @@ public class DiagnosticsReportTest {
         getDebuggingData().setVideoIdsIncluded(mSavedVideoIds);
         AppPrefs.instance(getContext()).setWebProxyUri(mSavedProxyUri);
         setLocale(mSavedLanguage, mSavedCountry);
+        getDebuggingData().setLastSubmission(mSavedLastId, mSavedLastFailureTs, mSavedLastStartTs, mSavedLastTime);
         Utils.sHandler.removeCallbacksAndMessages(null);
+    }
+
+    /**
+     * HPJAY28M came with nothing: a first submission (null) or one after a submission that took it all couldn't be told apart, nor
+     * the device's submissions linked but by its time zone
+     */
+    @Test
+    public void theSubmissionBeforeIsGiven() throws Exception {
+        getDebuggingData().setLastSubmission(null, 0, 0, 0);
+
+        assertTrue(build(null, 0, Collections.emptyList()).isNull("previousSubmission"));
+
+        getDebuggingData().setLastSubmission("Q447CKS5", NOW - 60_000, NOW - 30_000, NOW - 259_200_000);
+        JSONObject previous = build(null, 0, Collections.emptyList()).getJSONObject("previousSubmission");
+
+        assertEquals("Q447CKS5", previous.getString("id"));
+        assertEquals("2026-10-11T17:46:40Z", previous.getString("submittedAt"));
     }
 
     /**

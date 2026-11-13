@@ -67,6 +67,7 @@ public final class DiagnosticsReport {
         try {
             result.put("schema", SCHEMA);
             result.put("submittedAt", formatUtc(nowMs));
+            result.put("previousSubmission", buildPreviousSubmission(debuggingData));
 
             JSONObject app = new JSONObject();
             app.put("package", context.getPackageName());
@@ -142,6 +143,24 @@ public final class DiagnosticsReport {
         }
 
         return result;
+    }
+
+    /**
+     * The one sent before this from the app's data (see DataSubmitter#submit), what this one follows: an empty one after it had
+     * nothing new, the first (null) had nothing yet. A backup restored brings the last of the install it was made on.
+     */
+    private static Object buildPreviousSubmission(DebuggingData debuggingData) throws JSONException {
+        String id = debuggingData.getLastSubmissionId();
+
+        if (id == null) {
+            return JSONObject.NULL;
+        }
+
+        JSONObject previous = new JSONObject();
+        previous.put("id", id);
+        previous.put("submittedAt", formatUtc(debuggingData.getLastSubmissionTime()));
+
+        return previous;
     }
 
     /**

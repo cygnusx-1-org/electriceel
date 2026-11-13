@@ -188,10 +188,24 @@ public final class Loader implements LoaderErrorThrower {
     }
   }
 
+  /**
+   * MOD: what each loader's thread is loading now (see getCurrentLoadable)
+   */
+  private static final ThreadLocal<Loadable> currentLoadable = new ThreadLocal<>();
+
   private final ExecutorService downloadExecutorService;
 
   private LoadTask<? extends Loadable> currentTask;
   private IOException fatalError;
+
+  /**
+   * MOD: the loadable this thread is loading, null when it isn't a loader's thread or loads nothing now. A load makes its requests
+   * on its loader's thread (e.g. an HTTP data source's call), so diagnostics can tell which load a request is of.
+   */
+  @Nullable
+  public static Loadable getCurrentLoadable() {
+    return currentLoadable.get();
+  }
 
   /**
    * @param threadName A name for the loader's thread.
@@ -390,9 +404,11 @@ public final class Loader implements LoaderErrorThrower {
         executorThread = Thread.currentThread();
         if (!canceled) {
           TraceUtil.beginSection("load:" + loadable.getClass().getSimpleName());
+          currentLoadable.set(loadable);
           try {
             loadable.load();
           } finally {
+            currentLoadable.remove();
             TraceUtil.endSection();
           }
         }

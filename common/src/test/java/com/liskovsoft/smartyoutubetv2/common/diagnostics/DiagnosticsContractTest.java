@@ -8,6 +8,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.listener.PlayerEventListener;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.ExoFormatItem;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
+import com.liskovsoft.smartyoutubetv2.common.prefs.DebuggingData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
 import com.liskovsoft.youtubeapi.videoinfo.V2.ClientAttempts;
 
@@ -53,6 +54,10 @@ public class DiagnosticsContractTest {
     private PlayerFailureLog mLog;
     private VideoStartLog mVideoStarts;
     private int mSavedEngine;
+    private String mSavedLastId;
+    private long mSavedLastTime;
+    private long mSavedLastFailureTs;
+    private long mSavedLastStartTs;
 
     @Before
     public void setUp() {
@@ -64,6 +69,11 @@ public class DiagnosticsContractTest {
         // Cronet can't load under Robolectric
         mSavedEngine = PlayerTweaksData.instance(getContext()).getPlayerDataSource();
         PlayerTweaksData.instance(getContext()).setPlayerDataSource(PlayerTweaksData.PLAYER_DATA_SOURCE_OKHTTP);
+        DebuggingData debuggingData = DebuggingData.instance(getContext());
+        mSavedLastId = debuggingData.getLastSubmissionId();
+        mSavedLastTime = debuggingData.getLastSubmissionTime();
+        mSavedLastFailureTs = debuggingData.getLastSubmittedFailureTs();
+        mSavedLastStartTs = debuggingData.getLastSubmittedStartTs();
     }
 
     @After
@@ -76,6 +86,7 @@ public class DiagnosticsContractTest {
         VideoStartLog.useForTesting(null);
         VideoStarts.resetForTesting();
         PlayerTweaksData.instance(getContext()).setPlayerDataSource(mSavedEngine);
+        DebuggingData.instance(getContext()).setLastSubmission(mSavedLastId, mSavedLastFailureTs, mSavedLastStartTs, mSavedLastTime);
     }
 
     /**
@@ -89,6 +100,8 @@ public class DiagnosticsContractTest {
         VideoStarts.sClock = () -> 94_000;
         recordEveryKind();
         recordVideoStarts();
+        // One was sent before: the submission it follows
+        DebuggingData.instance(getContext()).setLastSubmission("Q447CKS5", 0, 0, System.currentTimeMillis() - 60_000);
 
         JSONObject report = DiagnosticsReport.build(getContext(), account(), 2, mLog.readAll(), mVideoStarts.readAll(),
                 System.currentTimeMillis());
@@ -96,8 +109,8 @@ public class DiagnosticsContractTest {
         assertEquals(Collections.emptyList(), validator.validate(report));
 
         // It's all there: a part missing would pass unchecked
-        for (String part : Arrays.asList("schema", "submittedAt", "app", "system", "device", "playbackStats", "playerFailures",
-                "videoStarts")) {
+        for (String part : Arrays.asList("schema", "submittedAt", "previousSubmission", "app", "system", "device", "playbackStats",
+                "playerFailures", "videoStarts")) {
             assertTrue(part, report.has(part));
         }
 
