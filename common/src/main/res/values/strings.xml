@@ -751,6 +751,7 @@
     <string name="player_ending_time">Ends at %s</string>
     <string name="badge_new_content">NEW CONTENT</string>
     <string name="badge_live">LIVE</string>
+    <string name="add_device_view_error">Couldn\'t get the pairing code</string>
     <string name="add_device_view_description">To link the device enter this code on your phone\'s YouTube app in section Settings/Watch on TV\nNOTE: This only works with the Gboard keyboard!</string>
     <string name="playback_controls_repeat_pause">Repeat Pause</string>
     <string name="playback_controls_repeat_list">Repeat List</string>
