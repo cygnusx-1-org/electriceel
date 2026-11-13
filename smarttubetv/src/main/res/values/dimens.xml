@@ -169,4 +169,12 @@
     <dimen name="qr_code_url_text_size">24sp</dimen>
     <!-- The QR code of sign-in: the width of the guidance icon (Widget.Leanback.GuidanceIconStyle), so it isn't scaled -->
     <dimen name="sign_in_qr_code_size">140dp</dimen>
+    <!-- The end screen cards over the video (EndScreenView) -->
+    <dimen name="end_screen_corner_radius">6dp</dimen>
+    <dimen name="end_screen_focus_stroke">3dp</dimen>
+    <dimen name="end_screen_padding">6dp</dimen>
+    <dimen name="end_screen_title_text_size">14sp</dimen>
+    <dimen name="end_screen_badge_text_size">12sp</dimen>
+    <dimen name="end_screen_badge_padding">3dp</dimen>
+    <dimen name="end_screen_label_gap">4dp</dimen>
 </resources>

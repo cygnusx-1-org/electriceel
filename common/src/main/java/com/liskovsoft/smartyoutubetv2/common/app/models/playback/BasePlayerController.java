@@ -12,6 +12,7 @@ import com.liskovsoft.mediaserviceinterfaces.ContentService;
 import com.liskovsoft.mediaserviceinterfaces.MediaItemService;
 import com.liskovsoft.mediaserviceinterfaces.NotificationsService;
 import com.liskovsoft.mediaserviceinterfaces.SignInService;
+import com.liskovsoft.mediaserviceinterfaces.data.EndScreenItem;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItemMetadata;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
@@ -121,6 +122,11 @@ public abstract class BasePlayerController implements PlayerEventListener {
 
     @Override
     public void onSuggestionItemClicked(Video item) {
+        // NOP
+    }
+
+    @Override
+    public void onEndScreenItemClicked(EndScreenItem item) {
         // NOP
     }
 

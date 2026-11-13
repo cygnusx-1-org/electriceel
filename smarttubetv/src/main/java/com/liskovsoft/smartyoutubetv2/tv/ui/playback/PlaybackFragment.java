@@ -47,6 +47,7 @@ import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.video.VideoListener;
+import com.liskovsoft.mediaserviceinterfaces.data.EndScreenItem;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItemFormatInfo;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.mylogger.Log;
@@ -67,6 +68,7 @@ import com.liskovsoft.smartyoutubetv2.common.exoplayer.other.SubtitleManager;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.versions.renderer.CustomOverridesRenderersFactory;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.versions.selector.RestoreTrackSelector;
+import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
@@ -93,6 +95,7 @@ import com.liskovsoft.smartyoutubetv2.tv.ui.playback.other.VideoPlayerGlue;
 import com.liskovsoft.smartyoutubetv2.tv.ui.playback.other.VideoPlayerGlue.OnActionClickedListener;
 import com.liskovsoft.smartyoutubetv2.tv.ui.playback.previewtimebar.StoryboardSeekDataProvider;
 import com.liskovsoft.smartyoutubetv2.tv.ui.widgets.chat.LiveChatView;
+import com.liskovsoft.smartyoutubetv2.tv.ui.widgets.endscreen.EndScreenView;
 import com.liskovsoft.smartyoutubetv2.tv.ui.widgets.startgraph.StartGraphView;
 import com.liskovsoft.smartyoutubetv2.tv.ui.widgets.time.DateTimeView;
 import com.liskovsoft.smartyoutubetv2.tv.ui.widgets.time.EndingTimeView;
@@ -101,8 +104,10 @@ import com.liskovsoft.googlecommon.common.helpers.YouTubeHelper;
 
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Plays selected video, loads playlist and related videos, and delegates playback to
@@ -138,6 +143,10 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
     private Boolean mIsControlsShownPreviously;
     private Video mPendingFocus;
     private String mSelectedVideoId;
+    private EndScreenView mEndScreen;
+    private boolean mHasEndScreen;
+    // Down handled by the end screen: their up is too
+    private final Set<Integer> mEndScreenKeys = new HashSet<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -184,6 +193,10 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
         // We should use internal progress manager because it's used in many places like Exo engine etc.
         // ProgressBar.setRootView already called at this moment.
         ProgressBarManager.setup(getProgressBarManager(), (ViewGroup) root);
+
+        mEndScreen = root.findViewById(R.id.end_screen);
+        mEndScreen.setFrameView(root.findViewById(R.id.surface_root));
+        mEndScreen.setListener(item -> mPlaybackPresenter.onEndScreenItemClicked(item));
 
         return root;
     }
@@ -318,6 +331,74 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
             // Fix partially disappeared buttons after exit from PIP???
             notifyPlaybackRowChanged();
         }
+
+        updateEndScreen(isControlsOverlayVisible());
+    }
+
+    /**
+     * Keys of the end screen, before the player's: up while its cards show and the controls don't moves the focus to them (unless up is
+     * set to change the speed or the volume, or to skip videos). Then they get the arrows, OK and back until they're left (see
+     * EndScreenView); other keys (e.g. play/pause) still go to the player.
+     *
+     * @return true if consumed
+     */
+    public boolean dispatchEndScreenKey(KeyEvent event) {
+        int keyCode = event.getKeyCode();
+
+        if (event.getAction() == KeyEvent.ACTION_UP) {
+            return mEndScreenKeys.remove(keyCode);
+        }
+
+        if (event.getAction() != KeyEvent.ACTION_DOWN) {
+            return false;
+        }
+
+        // A press whose up went to another screen (e.g. OK opened a channel): this one's up is the player's
+        if (event.getRepeatCount() == 0) {
+            mEndScreenKeys.remove(keyCode);
+        }
+
+        if (mEndScreen == null || !mEndScreen.hasCards()) {
+            return false;
+        }
+
+        boolean handled;
+
+        if (mEndScreen.isActive()) {
+            handled = mEndScreen.onActiveKeyDown(event);
+        } else {
+            handled = keyCode == KeyEvent.KEYCODE_DPAD_UP && !isControlsOverlayVisible() && !isDpadUpRemapped() && mEndScreen.enter();
+        }
+
+        if (handled) {
+            mEndScreenKeys.add(keyCode);
+        }
+
+        return handled;
+    }
+
+    private boolean isDpadUpRemapped() {
+        int action = GeneralData.instance(getContext()).getDpadUpDownAction();
+
+        return action == GeneralData.ACTION_SPEED_UP_DOWN || action == GeneralData.ACTION_VOLUME_UP_DOWN
+                || getPlayerTweaksData().isQuickSkipVideosAltEnabled();
+    }
+
+    /**
+     * The cards show over the video, not over the controls or in PIP
+     */
+    private void updateEndScreen(boolean isControlsVisible) {
+        if (mEndScreen == null) {
+            return;
+        }
+
+        boolean show = mHasEndScreen && !isControlsVisible && !isInPIPMode();
+
+        if (!show) {
+            mEndScreen.exit();
+        }
+
+        mEndScreen.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
     }
 
     @Override
@@ -1063,6 +1144,17 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
     }
 
     @Override
+    public void setEndScreen(@Nullable List<EndScreenItem> items) {
+        if (mEndScreen == null) {
+            return;
+        }
+
+        mHasEndScreen = items != null && !items.isEmpty();
+        mEndScreen.setItems(items);
+        updateEndScreen(isControlsOverlayVisible());
+    }
+
+    @Override
     public void updateEndingTime() {
         if (getView() != null) {
             EndingTimeView endingTime = getView().findViewById(R.id.global_ending_time);
@@ -1380,6 +1472,7 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
     @Override
     public void showControlsOverlay(boolean runAnimation) {
         super.showControlsOverlay(mIsUIAnimationsEnabled);
+        updateEndScreen(true);
 
         // Do throttle. Called so many times. Rely on boxing because initial state is unknown.
         if (mIsControlsShownPreviously != null && mIsControlsShownPreviously) {
@@ -1402,6 +1495,7 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
     @Override
     public void hideControlsOverlay(boolean runAnimation) {
         super.hideControlsOverlay(mIsUIAnimationsEnabled);
+        updateEndScreen(false);
 
         // Do throttle. Called so many times. Rely on boxing because initial state is unknown.
         if (mIsControlsShownPreviously != null && !mIsControlsShownPreviously) {
@@ -1798,6 +1892,13 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
                 // Shown again by the bug button
                 showStartGraph(null);
             }
+        }
+
+        if (show) {
+            updateEndScreen(isControlsOverlayVisible());
+        } else if (mEndScreen != null) {
+            mEndScreen.exit();
+            mEndScreen.setVisibility(View.INVISIBLE);
         }
     }
 

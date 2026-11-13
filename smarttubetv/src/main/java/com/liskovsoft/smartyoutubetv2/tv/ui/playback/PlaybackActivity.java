@@ -64,11 +64,33 @@ public class PlaybackActivity extends LeanbackActivity {
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+        if (dispatchEndScreenKey(event)) {
+            return true;
+        }
+
         if (mPlaybackFragment != null) {
             mPlaybackFragment.onDispatchKeyEvent(event);
         }
 
         return super.dispatchKeyEvent(event);
+    }
+
+    /**
+     * The keys of the end screen cards, before the player's and the key translator's (see PlaybackFragment#dispatchEndScreenKey)
+     *
+     * @return true if consumed
+     */
+    protected boolean dispatchEndScreenKey(KeyEvent event) {
+        if (mPlaybackFragment == null || !mPlaybackFragment.dispatchEndScreenKey(event)) {
+            return false;
+        }
+
+        // A key like any other: the screen doesn't dim meanwhile (see MotherActivity#dispatchKeyEvent)
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+            getScreensaverManager().enable();
+        }
+
+        return true;
     }
 
     @Override

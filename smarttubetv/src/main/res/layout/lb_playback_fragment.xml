@@ -30,6 +30,12 @@
         android:layout_height="match_parent"
         android:paddingLeft="150sp"
         android:paddingRight="150sp"/>
+    <!-- Over the video, under the controls: hidden while they show (see PlaybackFragment.updateEndScreen) -->
+    <com.liskovsoft.smartyoutubetv2.tv.ui.widgets.endscreen.EndScreenView
+        android:id="@+id/end_screen"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible"/>
 
     <LinearLayout
         android:id="@+id/live_chat_wrapper"

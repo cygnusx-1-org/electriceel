@@ -83,6 +83,7 @@ public class VideoLoaderController extends BasePlayerController {
     private SuggestionsController mSuggestionsController;
     private ErrorFixerController mErrorFixerController;
     private CensoredWordsController mCensoredWordsController;
+    private EndScreenController mEndScreenController;
     private Disposable mFormatInfoAction;
     /**
      * Fetched while the engine starts (see prefetchFormatInfo), for the video in mPrefetchVideoId
@@ -164,6 +165,7 @@ public class VideoLoaderController extends BasePlayerController {
         mSuggestionsController = getController(SuggestionsController.class);
         mErrorFixerController = getController(ErrorFixerController.class);
         mCensoredWordsController = getController(CensoredWordsController.class);
+        mEndScreenController = getController(EndScreenController.class);
     }
 
     @Override
@@ -470,6 +472,7 @@ public class VideoLoaderController extends BasePlayerController {
         boolean isRefetched = false;
 
         mCensoredWordsController.onFormatInfo(getVideo(), formatInfo);
+        mEndScreenController.onFormatInfo(getVideo(), formatInfo);
 
         // Fix stretched video for a couple milliseconds (before the onVideoSizeChanged gets called)
         applyAspectRatio(formatInfo);

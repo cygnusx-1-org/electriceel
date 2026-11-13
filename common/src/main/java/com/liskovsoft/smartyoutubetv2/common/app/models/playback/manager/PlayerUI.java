@@ -2,6 +2,7 @@ package com.liskovsoft.smartyoutubetv2.common.app.models.playback.manager;
 
 import androidx.annotation.Nullable;
 
+import com.liskovsoft.mediaserviceinterfaces.data.EndScreenItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.VideoGroup;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.SeekBarSegment;
@@ -44,6 +45,10 @@ public interface PlayerUI {
     void setTitle(String title);
     void showProgressBar(boolean show);
     void setSeekBarSegments(List<SeekBarSegment> segments);
+    /**
+     * The cards of the end screen on the screen now (see EndScreenController). Null hides them.
+     */
+    void setEndScreen(@Nullable List<EndScreenItem> items);
     void updateEndingTime();
     void setChatReceiver(ChatReceiver chatReceiver);
 }
