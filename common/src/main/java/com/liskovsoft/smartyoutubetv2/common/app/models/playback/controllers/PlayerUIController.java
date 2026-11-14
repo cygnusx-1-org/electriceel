@@ -37,6 +37,8 @@ import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStarts;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.track.SubtitleTrack;
 import com.liskovsoft.smartyoutubetv2.common.misc.ChildModeManager;
+import com.liskovsoft.smartyoutubetv2.common.misc.DescriptionTimestamps;
+import com.liskovsoft.smartyoutubetv2.common.misc.DescriptionTimestamps.Timestamp;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MusicAutoplayManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.PlayerKeyTranslator;
@@ -546,6 +548,53 @@ public class PlayerUIController extends BasePlayerController {
         dialogPresenter.showDialog(title);
     }
 
+    /**
+     * The time codes of the description, a line each: the one playing is selected, and one selected is played from
+     */
+    private void onTimestampsClicked() {
+        if (!mIsMetadataLoaded) {
+            MessageHelpers.showMessage(getContext(), R.string.wait_data_loading);
+            return;
+        }
+
+        Video video = getVideo();
+
+        if (video == null || getPlayer() == null) {
+            return;
+        }
+
+        List<Timestamp> timestamps = DescriptionTimestamps.parse(video.description, getPlayer().getDurationMs());
+
+        if (timestamps.isEmpty()) {
+            MessageHelpers.showMessage(getContext(), R.string.timestamps_not_found);
+            return;
+        }
+
+        AppDialogPresenter dialogPresenter = getAppDialogPresenter();
+        Timestamp current = DescriptionTimestamps.current(timestamps, getPlayer().getPositionMs());
+        List<OptionItem> options = new ArrayList<>();
+
+        for (Timestamp timestamp : timestamps) {
+            options.add(UiOptionItem.from(timestamp.text, optionItem -> {
+                dialogPresenter.closeDialog();
+
+                if (getPlayer() != null) {
+                    // As a chapter does (see PlaybackPresenter.setPosition)
+                    getPlayer().setPositionMs(timestamp.positionMs);
+                    getPlayer().setPlayWhenReady(true);
+                    getPlayer().showOverlay(false);
+                }
+            }, timestamp == current));
+        }
+
+        // Only once there's a dialog: the hooks stay until a dialog closes, so the next one (e.g. a suggestion's menu) would get them
+        fitVideoIntoDialog();
+
+        dialogPresenter.appendRadioCategory(getContext().getString(R.string.action_timestamps), options);
+
+        dialogPresenter.showDialog(video.getTitle());
+    }
+
     private void onShareLink() {
         fitVideoIntoDialog();
 
@@ -644,6 +693,8 @@ public class PlayerUIController extends BasePlayerController {
             onShareLink();
         } else if (buttonId == R.id.action_info) {
             onVideoInfoClicked();
+        } else if (buttonId == R.id.action_timestamps) {
+            onTimestampsClicked();
         } else if (buttonId == R.id.action_pip) {
             onPipClicked();
         } else if (buttonId == R.id.action_search) {

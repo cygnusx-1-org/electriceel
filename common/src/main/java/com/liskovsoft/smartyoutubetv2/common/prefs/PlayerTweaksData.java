@@ -46,12 +46,23 @@ public class PlayerTweaksData implements ProfileChangeListener {
     public static final int PLAYER_BUTTON_AFR = 1 << 26;
     public static final int PLAYER_BUTTON_VIDEO_FLIP = 1 << 27;
     public static final int PLAYER_BUTTON_NEXT_FRAME = 1 << 28;
-    // NOTE: 1 << 30 marks the old format (see updateDefaultValues)
+    public static final int PLAYER_BUTTON_TIMESTAMPS = 1 << 29;
+    // NOTE: 1 << 30 marks the old format (see updateDefaultValues). 1 << 3 may still be on in the old values. So 1 << 29 is the last
+    // one free: another button needs a second field.
     public static final int PLAYER_BUTTON_DEFAULT = PLAYER_BUTTON_SEARCH | PLAYER_BUTTON_PIP | PLAYER_BUTTON_SCREEN_DIMMING | PLAYER_BUTTON_VIDEO_SPEED |
             PLAYER_BUTTON_VIDEO_STATS | PLAYER_BUTTON_OPEN_CHANNEL | PLAYER_BUTTON_SUBTITLES | PLAYER_BUTTON_SUBSCRIBE |
             PLAYER_BUTTON_LIKE | PLAYER_BUTTON_DISLIKE | PLAYER_BUTTON_ADD_TO_PLAYLIST | PLAYER_BUTTON_PLAY_PAUSE |
             PLAYER_BUTTON_REPEAT_MODE | PLAYER_BUTTON_NEXT | PLAYER_BUTTON_PREVIOUS | PLAYER_BUTTON_HIGH_QUALITY |
-            PLAYER_BUTTON_VIDEO_INFO | PLAYER_BUTTON_CHAT | PLAYER_BUTTON_CONTENT_BLOCK;
+            PLAYER_BUTTON_VIDEO_INFO | PLAYER_BUTTON_CHAT | PLAYER_BUTTON_CONTENT_BLOCK | PLAYER_BUTTON_TIMESTAMPS;
+    /**
+     * The buttons on by default that came after the buttons were first saved: the saved ones don't have them (see addNewDefaultButtons)
+     */
+    private static final int PLAYER_BUTTONS_NEW_DEFAULT = PLAYER_BUTTON_TIMESTAMPS;
+    /**
+     * Which of {@link #PLAYER_BUTTONS_NEW_DEFAULT} were turned on already. Kept apart from {@link #VIDEO_PLAYER_TWEAKS_DATA}: SmartTube
+     * adds its values at the end of that one.
+     */
+    static final String PLAYER_BUTTONS_ADDED_DATA = "player_buttons_added_data";
     public static final int DNS_TYPE_SYSTEM = GlobalPreferences.DNS_TYPE_SYSTEM;
     public static final int DNS_TYPE_IPV4 = GlobalPreferences.DNS_TYPE_IPV4;
     public static final int DNS_TYPE_GOOGLE = GlobalPreferences.DNS_TYPE_GOOGLE;
@@ -778,6 +789,7 @@ public class PlayerTweaksData implements ProfileChangeListener {
         mIsQueueRespectsPlaybackMode = Helpers.parseBoolean(split, 60, false);
 
         updateDefaultValues();
+        addNewDefaultButtons();
     }
 
     public void persistNow() {
@@ -815,6 +827,29 @@ public class PlayerTweaksData implements ProfileChangeListener {
         }
     }
 
+    /**
+     * A button on by default that came after the account's buttons were saved is turned on, once: turned off afterwards, it stays
+     * off. The buttons not saved yet are the defaults, which have it already.
+     */
+    private void addNewDefaultButtons() {
+        int added = Helpers.parseInt(mPrefs.getProfileData(PLAYER_BUTTONS_ADDED_DATA), 0);
+        int newButtons = PLAYER_BUTTONS_NEW_DEFAULT & ~added;
+
+        if (newButtons == 0) {
+            return;
+        }
+
+        int buttons = mPlayerButtons | newButtons;
+
+        // Saved before it's marked as added: cut short in between, it's turned on again next time
+        if (buttons != mPlayerButtons) {
+            mPlayerButtons = buttons;
+            persistDataInt();
+        }
+
+        mPrefs.setProfileData(PLAYER_BUTTONS_ADDED_DATA, String.valueOf(added | newButtons));
+    }
+
     @Override
     public void onProfileChanged() {
         mPersistDataInt.cancel();
@@ -831,5 +866,12 @@ public class PlayerTweaksData implements ProfileChangeListener {
         if (keys.contains(VIDEO_PLAYER_TWEAKS_DATA)) {
             onProfileChanged();
         }
+    }
+
+    /**
+     * The next instance reads the saved values again
+     */
+    static void resetInstanceForTesting() {
+        sInstance = null;
     }
 }

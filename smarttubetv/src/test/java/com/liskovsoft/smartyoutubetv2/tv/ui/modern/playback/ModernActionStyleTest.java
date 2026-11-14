@@ -45,4 +45,16 @@ public class ModernActionStyleTest {
         int subscription = ModernActionStyle.startOrder(R.id.action_subscribe);
         org.junit.Assert.assertTrue(avatar < description && description < subscription);
     }
+
+    /**
+     * The time codes of the description: next to the description, a table of contents icon
+     */
+    @Test
+    public void timestamps_nextToTheDescription() {
+        assertEquals(ModernActionStyle.GROUP_LEFT, ModernActionStyle.groupOf(R.id.action_timestamps, false));
+        assertEquals(R.drawable.modern_ic_timestamps, ModernActionStyle.iconOf(R.id.action_timestamps, false));
+        assertEquals(R.drawable.modern_ic_timestamps, ModernActionStyle.iconOf(R.id.action_timestamps, true));
+        assertEquals(ModernActionStyle.startOrder(R.id.action_info) + 1, ModernActionStyle.startOrder(R.id.action_timestamps));
+        assertEquals(ModernActionStyle.startOrder(R.id.action_timestamps) + 1, ModernActionStyle.startOrder(R.id.action_subscribe));
+    }
 }
