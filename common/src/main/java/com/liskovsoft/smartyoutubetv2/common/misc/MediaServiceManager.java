@@ -65,6 +65,10 @@ public class MediaServiceManager implements OnAccountChange {
     private final GroupFiller mGroupFiller = new GroupFiller();
     private final List<AccountChangeListener> mAccountListeners = new CopyOnWriteArrayList<>();
     private boolean mIsPlaybackWarmedUp;
+    /**
+     * By the first section's load, before its videos were shown (see #warmUpPlaybackOnLoad)
+     */
+    private boolean mIsPlaybackWarmUpStarted;
     private long mWarmUpTimeMs;
 
     public interface OnMetadata {
@@ -251,8 +255,25 @@ public class MediaServiceManager implements OnAccountChange {
     }
 
     /**
+     * Once per run and account, when the first section begins to load: what the formats of the run's first video wait for is got ready
+     * meanwhile (see ServiceManager#warmUpPlayback), not once its videos are shown. On a slow device (a Realtek box) a new player's
+     * load ran longer than the section's, and a video opened meanwhile was given up 15 s in. The videos shown then check the languages
+     * that subtitles translate to (see #warmUpPlaybackIfNeeded).
+     */
+    public void warmUpPlaybackOnLoad() {
+        if (mIsPlaybackWarmUpStarted || mIsPlaybackWarmedUp) {
+            return;
+        }
+
+        mIsPlaybackWarmUpStarted = true;
+        mWarmUpTimeMs = SystemClock.elapsedRealtime();
+        YouTubeServiceManager.instance().warmUpPlayback(null);
+    }
+
+    /**
      * Once per run and account, when the first videos are shown: the first one opened needn't wait for what the formats of the run's first
-     * video wait for (see ServiceManager#warmUpPlayback)
+     * video wait for (see ServiceManager#warmUpPlayback). With the one started by the section's load still running, only the video's
+     * subtitle languages are checked.
      */
     public void warmUpPlaybackIfNeeded(VideoGroup group) {
         if (mIsPlaybackWarmedUp || group == null || group.isEmpty()) {
@@ -272,13 +293,16 @@ public class MediaServiceManager implements OnAccountChange {
     }
 
     /**
-     * Back after a long time (the poToken lives some hours, and is only made again by a fetch): the next video needn't wait for it. Not
-     * sooner than WARM_UP_AGAIN_MS after the last time: it may fail again, and runs on the main thread mostly.
+     * Back after a long time (the poToken lives some hours, and is only made again by a fetch; the player's data is refreshed by a
+     * fetch too): the next video needn't wait for them. Not sooner than WARM_UP_AGAIN_MS after the last time: it may fail again, and the
+     * poToken's runs on the main thread mostly.
      */
     public void warmUpPlaybackIfExpired() {
         long nowMs = SystemClock.elapsedRealtime();
+        ServiceManager service = YouTubeServiceManager.instance();
 
-        if (!mIsPlaybackWarmedUp || nowMs - mWarmUpTimeMs < WARM_UP_AGAIN_MS || !YouTubeServiceManager.instance().isPoTokenToMake()) {
+        if (!mIsPlaybackWarmedUp && !mIsPlaybackWarmUpStarted || nowMs - mWarmUpTimeMs < WARM_UP_AGAIN_MS
+                || !service.isPoTokenToMake() && !service.isPlayerDataToRefresh()) {
             return;
         }
 
@@ -541,6 +565,7 @@ public class MediaServiceManager implements OnAccountChange {
     public void onAccountChanged(Account account) {
         // Its poToken was reset with the account: made again when the account's videos are shown, not by the first one opened
         mIsPlaybackWarmedUp = false;
+        mIsPlaybackWarmUpStarted = false;
 
         for (AccountChangeListener listener : mAccountListeners) {
             listener.onAccountChanged(account);

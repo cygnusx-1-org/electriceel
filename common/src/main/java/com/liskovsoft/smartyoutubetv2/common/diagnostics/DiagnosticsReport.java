@@ -13,6 +13,8 @@ import com.liskovsoft.sharedutils.helpers.AppInfoHelpers;
 import com.liskovsoft.sharedutils.okhttp.OkHttpManager;
 import com.liskovsoft.smartyoutubetv2.common.BuildConfig;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.manager.PlayerConstants;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.track.SubtitleTrack;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.prefs.DebuggingData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
@@ -235,6 +237,7 @@ public final class DiagnosticsReport {
         autoFrameRate.put("pauseMs", playerData.getAfrPauseMs());
         settings.put("autoFrameRate", autoFrameRate);
 
+        settings.put("subtitles", buildSubtitleSettings(playerData));
         settings.put("playbackMode", getPlaybackModeName(playerData.getPlaybackMode()));
         settings.put("youtubeClientsOrder", new JSONArray(serviceData.getClientOrder()));
         settings.put("currentClient", YouTubeServiceManager.getCurrentClientName());
@@ -244,6 +247,25 @@ public final class DiagnosticsReport {
         settings.put("country", nullable(emptyToNull(localeManager.getCountry())));
 
         return settings;
+    }
+
+    /**
+     * Whether the videos play with subtitles, and auto-translated ones (their requests are the ones YouTube answers 429 too many
+     * requests the most): a 429 of a track load can be told apart from the media's
+     */
+    @VisibleForTesting
+    static JSONObject buildSubtitleSettings(PlayerData playerData) throws JSONException {
+        JSONObject subtitles = new JSONObject();
+        boolean isPerChannel = playerData.isSubtitlesPerChannelEnabled();
+        // Per channel: the channels it's on for play the last one chosen
+        FormatItem format = isPerChannel ? playerData.getLastSubtitleFormat() : playerData.getFormat(FormatItem.TYPE_SUBTITLE);
+        boolean isEnabled = format != null && !FormatItem.SUBTITLE_NONE.equals(format);
+
+        subtitles.put("enabled", isEnabled);
+        subtitles.put("perChannel", isPerChannel);
+        subtitles.put("autoTranslated", isEnabled && SubtitleTrack.isAuto(format.getLanguage()));
+
+        return subtitles;
     }
 
     private static JSONObject buildSystem() throws JSONException {

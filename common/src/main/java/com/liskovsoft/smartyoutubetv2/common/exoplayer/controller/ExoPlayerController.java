@@ -196,10 +196,10 @@ public class ExoPlayerController implements Player.EventListener {
     /**
      * To the player failure log: ExoPlayer retries the segment, a fatal one comes again as an engine error
      */
-    private void onHttpError(int responseCode, String track, @Nullable Format failed, boolean switched) {
+    private void onHttpError(int responseCode, String track, @Nullable String host, @Nullable Format failed, boolean switched) {
         PlayerFailure failure = PlayerFailure.create(mContext, PlayerFailure.KIND_TRACK_LOAD_ERROR)
                 .video(getVideo())
-                .http(responseCode, track, failed);
+                .http(responseCode, track, host, failed);
 
         if (mPlayer != null) {
             failure.position(mPlayer.getCurrentPosition(), mPlayer.getDuration());
@@ -209,8 +209,8 @@ public class ExoPlayerController implements Player.EventListener {
             failure.action("select_other_codec");
 
             // Given up on: ExoPlayer retries the segments of one it hasn't
-            if (!"other".equals(track)) {
-                FormatAttempts.onStreamFailed("video".equals(track));
+            if (PlayerFailure.TRACK_AUDIO.equals(track) || PlayerFailure.TRACK_VIDEO.equals(track)) {
+                FormatAttempts.onStreamFailed(PlayerFailure.TRACK_VIDEO.equals(track));
             }
         }
 
@@ -724,6 +724,8 @@ public class ExoPlayerController implements Player.EventListener {
         }
 
         PlayerCommands.onState(playbackState, getPositionMs());
+        // Before the start may finish below (see VideoStarts#onPlaying)
+        VideoStarts.onPlayerState(Player.STATE_READY == playbackState, playWhenReady);
 
         boolean isPlayPressed = Player.STATE_READY == playbackState && playWhenReady;
         boolean isPausePressed = Player.STATE_READY == playbackState && !playWhenReady;
@@ -767,7 +769,7 @@ public class ExoPlayerController implements Player.EventListener {
             mFrameStepper.onSeek();
             // Any seek (SponsorBlock, chapters, remote, not only the UI's): its buffering comes before onSeekProcessed and isn't a stall
             FormatAttempts.onSeek();
-            mHealth.onInterrupted(PlaybackHealth.RESUMED_BY_SEEK);
+            mHealth.onSeek(SystemClock.elapsedRealtime());
         }
 
         mRangeMuter.onSeek();

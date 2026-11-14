@@ -509,10 +509,19 @@ public class VideoStateController extends BasePlayerController {
         }
 
         FormatItem result = getPlayerData().getFormat(FormatItem.TYPE_SUBTITLE);
+        Video video = getPlayer().getVideo();
 
         if (getPlayerData().isSubtitlesPerChannelEnabled()) {
-            result = getPlayerData().isSubtitlesPerChannelEnabled(getPlayer().getVideo().channelId)
+            result = getPlayerData().isSubtitlesPerChannelEnabled(video != null ? video.channelId : null)
                     ? getPlayerData().getLastSubtitleFormat() : FormatItem.SUBTITLE_NONE;
+        }
+
+        // Off for this video by the error fixer (e.g. their server answered 429 too many requests). Another video's: back on for good,
+        // the same video opened again later too.
+        if (video != null && getPlayerData().isSubtitlesOffFor(video.videoId)) {
+            result = FormatItem.SUBTITLE_NONE;
+        } else if (video != null) {
+            getPlayerData().setSubtitlesOffFor(null);
         }
 
         getPlayer().setFormat(result);

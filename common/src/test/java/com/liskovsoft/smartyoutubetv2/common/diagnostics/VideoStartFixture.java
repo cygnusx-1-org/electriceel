@@ -1,6 +1,9 @@
 package com.liskovsoft.smartyoutubetv2.common.diagnostics;
 
 import com.liskovsoft.youtubeapi.videoinfo.V2.FetchStages;
+import com.liskovsoft.youtubeapi.videoinfo.V2.WarmUps;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +34,14 @@ final class VideoStartFixture {
      * Of the player not loading, in ms since T0: {startMs, endMs}
      */
     final List<long[]> loadHolds = new ArrayList<>();
+    /**
+     * The run's warm-ups (see VideoStarts#sWarmUps), on the clock
+     */
+    final List<WarmUps.Run> warmUps = new ArrayList<>();
+    /**
+     * Where the device is at (see VideoStarts#sState)
+     */
+    JSONObject state;
 
     /**
      * VideoStarts reset to it: its clock, the player's engine, fetch stages, recorder and listener
@@ -83,6 +94,8 @@ final class VideoStartFixture {
             return result;
         };
         VideoStarts.sRecorder = recorded::add;
+        VideoStarts.sWarmUps = () -> new ArrayList<>(warmUps);
+        VideoStarts.sState = () -> state;
         VideoStarts.setListener(new VideoStarts.Listener() {
             @Override
             public void onStart() {

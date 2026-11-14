@@ -1,6 +1,7 @@
 package com.liskovsoft.smartyoutubetv2.tv.ui.adddevice;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -44,6 +45,15 @@ public class AddDeviceFragment extends GuidedStepSupportFragment implements AddD
     }
 
     private void setTitle(String userCode) {
+        if (getContext() == null || getGuidanceStylist().getTitleView() == null) {
+            return;
+        }
+
+        if (TextUtils.isEmpty(userCode)) {
+            // No code: an error in words, not the exception text or "User Code is loading…"
+            userCode = getString(R.string.add_device_view_error);
+        }
+
         getGuidanceStylist().getTitleView().setText(userCode);
     }
 

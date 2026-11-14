@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Build.VERSION;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.android.exoplayer2.text.CaptionStyleCompat;
 import com.liskovsoft.sharedutils.helpers.DeviceHelpers;
@@ -52,6 +53,11 @@ public class PlayerData extends DataChangeBase implements PlayerConstants, Profi
     private int mBackgroundMode;
     private FormatItem mVideoFormat;
     private FormatItem mTempVideoFormat;
+    /**
+     * See #setSubtitlesOffFor
+     */
+    @Nullable
+    private String mSubtitlesOffVideoId;
     private FormatItem mAudioFormat;
     private FormatItem mTempAudioFormat;
     private boolean mIsSoundOff;
@@ -401,10 +407,26 @@ public class PlayerData extends DataChangeBase implements PlayerConstants, Profi
             case FormatItem.TYPE_SUBTITLE:
                 setLastSubtitleFormat(format);
                 mSubtitleFormat = format;
+                // The user's choice: over the error fixer's for the video
+                mSubtitlesOffVideoId = null;
                 break;
         }
-        
+
         persistState();
+    }
+
+    /**
+     * The error fixer turned the subtitles off for the video only (e.g. their server answered 429 too many requests, for now): its
+     * reloads play without them, the next video with the user's. Kept while the app runs, not saved.
+     *
+     * @param videoId null for none
+     */
+    public void setSubtitlesOffFor(@Nullable String videoId) {
+        mSubtitlesOffVideoId = videoId;
+    }
+
+    public boolean isSubtitlesOffFor(@Nullable String videoId) {
+        return videoId != null && videoId.equals(mSubtitlesOffVideoId);
     }
 
     public void setTempVideoFormat(FormatItem format) {

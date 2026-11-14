@@ -11,6 +11,7 @@ import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
 import com.liskovsoft.smartyoutubetv2.common.prefs.DebuggingData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
 import com.liskovsoft.youtubeapi.videoinfo.V2.ClientAttempts;
+import com.liskovsoft.youtubeapi.videoinfo.V2.WarmUps;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -140,7 +141,16 @@ public class DiagnosticsContractTest {
                 AppExits.KIND_APP_EXIT)), kinds);
         // The E-AC3 that failed and the AAC that played
         assertEquals(2, report.getJSONObject("playbackStats").getJSONArray("formats").length());
-        assertEquals(4, report.getJSONArray("videoStarts").length());
+        assertEquals(5, report.getJSONArray("videoStarts").length());
+        // The run's first start's warm-ups, where a start that never played had the device, one paused: checked too
+        String starts = report.getJSONArray("videoStarts").toString();
+        assertTrue(starts.contains("\"warmUps\""));
+        assertTrue(starts.contains("\"availMemMb\""));
+        assertTrue(starts.contains("\"" + VideoStart.OUTCOME_PAUSED + "\""));
+        // A load's track by its type, its server's domain, and the subtitles' settings
+        assertTrue(failures.toString().contains("\"" + PlayerFailure.TRACK_TEXT + "\""));
+        assertTrue(failures.toString().contains("\"host\""));
+        assertTrue(report.getJSONObject("app").getJSONObject("settings").has("subtitles"));
         // A resume: where it started, with what, and the frames decoded to get there
         assertTrue(report.getJSONArray("videoStarts").toString().contains("\"positionMs\""));
         assertTrue(report.getJSONArray("videoStarts").toString().contains("\"" + VideoStarts.STAGE_TO_POSITION + "\""));
@@ -227,6 +237,14 @@ public class DiagnosticsContractTest {
         // What the server made of the poToken, in the buffering
         VideoStarts.sProtection = (videoId, fromMs, toMs) -> Collections.singletonList(
                 new VideoStart.Stage(VideoStarts.STAGE_PROTECTION, PoTokenStatus.OK.name(), 1, fromMs + 400, fromMs + 400));
+        // The run's first: the warm-ups before it, one done and one still going
+        fixture.warmUps.add(new WarmUps.Run(VideoStartFixture.T0 - 9_400, VideoStartFixture.T0 - 6_100, Arrays.asList(
+                new WarmUps.Step("player data", VideoStartFixture.T0 - 9_400, VideoStartFixture.T0 - 6_950, "ready"),
+                new WarmUps.Step("poToken", VideoStartFixture.T0 - 6_950, VideoStartFixture.T0 - 6_100, "got"))));
+        fixture.warmUps.add(new WarmUps.Run(VideoStartFixture.T0 + 100, WarmUps.OPEN, Collections.singletonList(
+                new WarmUps.Step("translation languages", VideoStartFixture.T0 + 100, WarmUps.OPEN, null))));
+        // The device's, as a start that never played has it
+        VideoStarts.sState = () -> DeviceCapabilities.buildStartState(getContext());
         fixture.slowStart();
         VideoStarts.sProtection = (videoId, fromMs, toMs) -> Collections.emptyList();
         VideoStarts.onFrames(new PlaybackHealth.StartFrames(VideoStartFixture.VIDEO_ID, 10_000, 40, 120, 1, 4_500,
@@ -255,6 +273,19 @@ public class DiagnosticsContractTest {
         fixture.at(52_700);
         VideoStarts.onFirstFrame(new VideoStarts.FirstFrame(41_200, "3840x2160 vp09 60fps", 25_000, 297, VideoStartFixture.T0 + 51_000));
         VideoStarts.onPlaying(true);
+
+        // Ready and paused when its time was up
+        fixture.at(60_000);
+        VideoStarts.start("paused", VideoStart.TRIGGER_SUGGESTION);
+        VideoStarts.onFetch("paused");
+        fixture.at(61_100);
+        VideoStarts.onFormats("paused", "TV");
+        VideoStarts.onPrepare();
+        fixture.at(63_300);
+        VideoStarts.onFirstFrame();
+        VideoStarts.onPlayerState(true, false);
+        fixture.at(75_000);
+        fixture.fireGiveUp();
     }
 
     /**
@@ -272,7 +303,7 @@ public class DiagnosticsContractTest {
 
         // Waiting is a look at a start going on: never recorded
         assertEquals(new HashSet<>(Arrays.asList(VideoStart.OUTCOME_PLAYED, VideoStart.OUTCOME_GAVE_UP, VideoStart.OUTCOME_LEFT,
-                VideoStart.OUTCOME_REPLACED, VideoStart.OUTCOME_UNPLAYABLE)), schemaOutcomes);
+                VideoStart.OUTCOME_REPLACED, VideoStart.OUTCOME_UNPLAYABLE, VideoStart.OUTCOME_PAUSED)), schemaOutcomes);
     }
 
     private void recordEveryKind() throws Exception {
@@ -330,6 +361,12 @@ public class DiagnosticsContractTest {
                 .position(30_000, 212_000)
                 .http(404, "audio", null)
                 .action("select_other_codec")
+                .record();
+        // A subtitle's, with its server's domain
+        PlayerFailure.create(getContext(), PlayerFailure.KIND_TRACK_LOAD_ERROR)
+                .video(video)
+                .position(31_000, 212_000)
+                .http(429, PlayerFailure.TRACK_TEXT, PlayerFailure.describeHost("www.youtube.com"), null)
                 .record();
         PlayerFailure.create(getContext(), PlayerFailure.KIND_STALL).video(video).playback(40_000, 212_000, true)
                 .action("reload_video").record();

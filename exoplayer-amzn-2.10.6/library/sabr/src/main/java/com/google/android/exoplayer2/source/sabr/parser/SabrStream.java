@@ -100,6 +100,7 @@ public class SabrStream {
     @Nullable private volatile IOException responseError;
     @Nullable private static volatile BackoffListener backoffListener;
     @Nullable private static volatile ProtectionStatusListener protectionStatusListener;
+    @Nullable private static volatile RedirectListener redirectListener;
     @Nullable private final String videoId;
     /**
      * The last one told for this stream (see ProtectionStatusListener)
@@ -128,6 +129,21 @@ public class SabrStream {
 
     public static void setProtectionStatusListener(@Nullable ProtectionStatusListener listener) {
         protectionStatusListener = listener;
+    }
+
+    /**
+     * Told the URL the server sends the stream to from now on (see SabrRedirect), e.g. for the app to connect to its host ahead of the
+     * next request, which otherwise opens a connection of its own. On the loader's thread, while the response that said so is read.
+     */
+    public interface RedirectListener {
+        /**
+         * @param fromUrl the stream's URL before, null for none
+         */
+        void onRedirect(@Nullable String fromUrl, String toUrl);
+    }
+
+    public static void setRedirectListener(@Nullable RedirectListener listener) {
+        redirectListener = listener;
     }
 
     private static class NoSegmentsTracker {
@@ -478,7 +494,18 @@ public class SabrStream {
             return;
         }
 
+        String fromUrl = this.url;
         setUrl(sabrRedirect.getRedirectUrl());
+        RedirectListener listener = redirectListener;
+
+        if (listener != null) {
+            try {
+                listener.onRedirect(fromUrl, this.url);
+            } catch (RuntimeException e) {
+                // The stream goes on without it
+                Log.e(TAG, "Redirect listener failed: %s", e.getMessage());
+            }
+        }
     }
 
     private FormatInitializedSabrPart processFormatInitializationMetadata(UMPPart part) {
