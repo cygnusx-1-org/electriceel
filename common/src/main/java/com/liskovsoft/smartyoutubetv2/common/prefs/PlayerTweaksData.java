@@ -47,22 +47,34 @@ public class PlayerTweaksData implements ProfileChangeListener {
     public static final int PLAYER_BUTTON_VIDEO_FLIP = 1 << 27;
     public static final int PLAYER_BUTTON_NEXT_FRAME = 1 << 28;
     public static final int PLAYER_BUTTON_TIMESTAMPS = 1 << 29;
-    // NOTE: 1 << 30 marks the old format (see updateDefaultValues). 1 << 3 may still be on in the old values. So 1 << 29 is the last
-    // one free: another button needs a second field.
-    public static final int PLAYER_BUTTON_DEFAULT = PLAYER_BUTTON_SEARCH | PLAYER_BUTTON_PIP | PLAYER_BUTTON_SCREEN_DIMMING | PLAYER_BUTTON_VIDEO_SPEED |
+    // NOTE: 1 << 30 marks the old format (see updateDefaultValues). 1 << 3 may still be on in the old values. 1 << 31 is the sign. So
+    // the buttons after 1 << 29 are in the second field, from 1L << 32 (see PLAYER_BUTTONS2_DATA).
+    public static final long PLAYER_BUTTON_VIDEO_LINKS = 1L << 32;
+    public static final long PLAYER_BUTTON_DEFAULT = PLAYER_BUTTON_SEARCH | PLAYER_BUTTON_PIP | PLAYER_BUTTON_SCREEN_DIMMING | PLAYER_BUTTON_VIDEO_SPEED |
             PLAYER_BUTTON_VIDEO_STATS | PLAYER_BUTTON_OPEN_CHANNEL | PLAYER_BUTTON_SUBTITLES | PLAYER_BUTTON_SUBSCRIBE |
             PLAYER_BUTTON_LIKE | PLAYER_BUTTON_DISLIKE | PLAYER_BUTTON_ADD_TO_PLAYLIST | PLAYER_BUTTON_PLAY_PAUSE |
             PLAYER_BUTTON_REPEAT_MODE | PLAYER_BUTTON_NEXT | PLAYER_BUTTON_PREVIOUS | PLAYER_BUTTON_HIGH_QUALITY |
-            PLAYER_BUTTON_VIDEO_INFO | PLAYER_BUTTON_CHAT | PLAYER_BUTTON_CONTENT_BLOCK | PLAYER_BUTTON_TIMESTAMPS;
+            PLAYER_BUTTON_VIDEO_INFO | PLAYER_BUTTON_CHAT | PLAYER_BUTTON_CONTENT_BLOCK | PLAYER_BUTTON_TIMESTAMPS | PLAYER_BUTTON_VIDEO_LINKS;
     /**
-     * The buttons on by default that came after the buttons were first saved: the saved ones don't have them (see addNewDefaultButtons)
+     * The buttons on by default that came after the buttons were first saved: the saved ones don't have them (see addNewDefaultButtons).
+     * Not Video links: the second field came with it, so a saved one has it already (turned off, if it's off). Its mark isn't synced,
+     * so with it here an account's off from another device would be turned on again where the account wasn't loaded yet.
      */
-    private static final int PLAYER_BUTTONS_NEW_DEFAULT = PLAYER_BUTTON_TIMESTAMPS;
+    private static final long PLAYER_BUTTONS_NEW_DEFAULT = PLAYER_BUTTON_TIMESTAMPS;
     /**
-     * Which of {@link #PLAYER_BUTTONS_NEW_DEFAULT} were turned on already. Kept apart from {@link #VIDEO_PLAYER_TWEAKS_DATA}: SmartTube
-     * adds its values at the end of that one.
+     * Which of the first field's {@link #PLAYER_BUTTONS_NEW_DEFAULT} were turned on already. Kept apart from
+     * {@link #VIDEO_PLAYER_TWEAKS_DATA}: SmartTube adds its values at the end of that one.
      */
     static final String PLAYER_BUTTONS_ADDED_DATA = "player_buttons_added_data";
+    /**
+     * The second field of the buttons, from 1L << 32: the first is an int of {@link #VIDEO_PLAYER_TWEAKS_DATA}, which SmartTube shares
+     */
+    static final String PLAYER_BUTTONS2_DATA = "player_buttons2_data";
+    /**
+     * Which of the second field's {@link #PLAYER_BUTTONS_NEW_DEFAULT} were turned on already. Not with the first field's: a version
+     * before the second field reads that one as an int.
+     */
+    static final String PLAYER_BUTTONS2_ADDED_DATA = "player_buttons2_added_data";
     public static final int DNS_TYPE_SYSTEM = GlobalPreferences.DNS_TYPE_SYSTEM;
     public static final int DNS_TYPE_IPV4 = GlobalPreferences.DNS_TYPE_IPV4;
     public static final int DNS_TYPE_GOOGLE = GlobalPreferences.DNS_TYPE_GOOGLE;
@@ -84,6 +96,10 @@ public class PlayerTweaksData implements ProfileChangeListener {
     private boolean mIsPlaybackNotificationsDisabled;
     private boolean mIsTunneledPlaybackEnabled;
     private int mPlayerButtons;
+    /**
+     * The second field of the buttons (see {@link #PLAYER_BUTTONS2_DATA}), shifted down by 32
+     */
+    private int mPlayerButtons2;
     private boolean mIsAltPresetsEnabled;
     private boolean mIsRememberPositionOfShortVideosEnabled;
     private boolean mIsRememberPositionOfLiveVideosEnabled;
@@ -288,18 +304,34 @@ public class PlayerTweaksData implements ProfileChangeListener {
         persistData();
     }
 
-    public boolean isPlayerButtonEnabled(int menuItems) {
-        return (mPlayerButtons & menuItems) == menuItems;
+    public boolean isPlayerButtonEnabled(long menuItems) {
+        return (getPlayerButtons() & menuItems) == menuItems;
     }
 
-    public void setPlayerButtonEnabled(int playerButtons) {
-        mPlayerButtons |= playerButtons;
+    public void setPlayerButtonEnabled(long playerButtons) {
+        setPlayerButtons(getPlayerButtons() | playerButtons);
         persistData();
     }
 
-    public void setPlayerButtonDisabled(int playerButtons) {
-        mPlayerButtons &= ~playerButtons;
+    public void setPlayerButtonDisabled(long playerButtons) {
+        setPlayerButtons(getPlayerButtons() & ~playerButtons);
         persistData();
+    }
+
+    /**
+     * Both fields of the buttons, the second from 1L << 32
+     */
+    private long getPlayerButtons() {
+        return toLong(mPlayerButtons, mPlayerButtons2);
+    }
+
+    private void setPlayerButtons(long playerButtons) {
+        mPlayerButtons = (int) playerButtons;
+        mPlayerButtons2 = (int) (playerButtons >>> 32);
+    }
+
+    private static long toLong(int first, int second) {
+        return (first & 0xFFFFFFFFL) | ((long) second << 32);
     }
 
     public int getPlayerDataSource() {
@@ -735,7 +767,7 @@ public class PlayerTweaksData implements ProfileChangeListener {
         mIsHlsStreamsForced = Helpers.parseBoolean(split, 10, false);
         mIsPlaybackNotificationsDisabled = Helpers.parseBoolean(split, 11, false);
         mIsTunneledPlaybackEnabled = Helpers.parseBoolean(split, 12, false);
-        mPlayerButtons = Helpers.parseInt(split, 13, PLAYER_BUTTON_DEFAULT);
+        mPlayerButtons = Helpers.parseInt(split, 13, (int) PLAYER_BUTTON_DEFAULT);
         // Buffering fix was there.
         mIsAltPresetsEnabled = Helpers.parseBoolean(split, 15, false);
         mIsRememberPositionOfShortVideosEnabled = Helpers.parseBoolean(split, 16, false);
@@ -788,6 +820,9 @@ public class PlayerTweaksData implements ProfileChangeListener {
         mIsAudioTimeStretchingEnabled = Helpers.parseBoolean(split, 59, true);
         mIsQueueRespectsPlaybackMode = Helpers.parseBoolean(split, 60, false);
 
+        mPlayerButtons2 = Helpers.parseInt(Helpers.splitData(mPrefs.getProfileData(PLAYER_BUTTONS2_DATA)), 0,
+                (int) (PLAYER_BUTTON_DEFAULT >>> 32));
+
         updateDefaultValues();
         addNewDefaultButtons();
     }
@@ -817,6 +852,7 @@ public class PlayerTweaksData implements ProfileChangeListener {
                 null, mIsAudioFocusEnabled, mIsDontResizeVideoToFitDialogEnabled, mIsSuggestionsHorizontallyScrolled,
                 mIsQuickSkipShortsAltEnabled, mIsQuickSkipVideosAltEnabled, mIsAudioTimeStretchingEnabled, mIsQueueRespectsPlaybackMode
                 ));
+        mPrefs.setProfileData(PLAYER_BUTTONS2_DATA, Helpers.mergeData(mPlayerButtons2));
     }
 
     private void updateDefaultValues() {
@@ -832,22 +868,31 @@ public class PlayerTweaksData implements ProfileChangeListener {
      * off. The buttons not saved yet are the defaults, which have it already.
      */
     private void addNewDefaultButtons() {
-        int added = Helpers.parseInt(mPrefs.getProfileData(PLAYER_BUTTONS_ADDED_DATA), 0);
-        int newButtons = PLAYER_BUTTONS_NEW_DEFAULT & ~added;
+        long added = toLong(Helpers.parseInt(mPrefs.getProfileData(PLAYER_BUTTONS_ADDED_DATA), 0),
+                Helpers.parseInt(mPrefs.getProfileData(PLAYER_BUTTONS2_ADDED_DATA), 0));
+        long newButtons = PLAYER_BUTTONS_NEW_DEFAULT & ~added;
 
         if (newButtons == 0) {
             return;
         }
 
-        int buttons = mPlayerButtons | newButtons;
+        long buttons = getPlayerButtons() | newButtons;
 
         // Saved before it's marked as added: cut short in between, it's turned on again next time
-        if (buttons != mPlayerButtons) {
-            mPlayerButtons = buttons;
+        if (buttons != getPlayerButtons()) {
+            setPlayerButtons(buttons);
             persistDataInt();
         }
 
-        mPrefs.setProfileData(PLAYER_BUTTONS_ADDED_DATA, String.valueOf(added | newButtons));
+        added |= newButtons;
+
+        if ((int) newButtons != 0) {
+            mPrefs.setProfileData(PLAYER_BUTTONS_ADDED_DATA, String.valueOf((int) added));
+        }
+
+        if ((int) (newButtons >>> 32) != 0) {
+            mPrefs.setProfileData(PLAYER_BUTTONS2_ADDED_DATA, String.valueOf((int) (added >>> 32)));
+        }
     }
 
     @Override
@@ -863,7 +908,7 @@ public class PlayerTweaksData implements ProfileChangeListener {
 
     @Override
     public void onProfileDataSynced(Set<String> keys) {
-        if (keys.contains(VIDEO_PLAYER_TWEAKS_DATA)) {
+        if (keys.contains(VIDEO_PLAYER_TWEAKS_DATA) || keys.contains(PLAYER_BUTTONS2_DATA)) {
             onProfileChanged();
         }
     }

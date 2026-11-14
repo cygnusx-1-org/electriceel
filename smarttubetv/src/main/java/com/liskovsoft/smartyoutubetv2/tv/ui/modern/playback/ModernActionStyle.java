@@ -10,7 +10,7 @@ import java.util.Map;
  * Placement and icons of the player actions in the modern controls row.
  */
 public final class ModernActionStyle {
-    /** Left side, in the start pill (avatar, description, timestamps, subscription, auto-play, next frame). */
+    /** Left side, in the start pill (avatar, description, timestamps, video links, subscription, auto-play, next frame). */
     public static final int GROUP_LEFT = 0;
     /** Social actions, in the pill of the side that keeps the two pills closest in width: after the left group or before
      * the other group. */
@@ -29,8 +29,8 @@ public final class ModernActionStyle {
     private static final Map<Integer, Integer> PLAYBACK_MODE_ICONS = new HashMap<>();
 
     static {
-        group(GROUP_LEFT, R.id.action_channel, R.id.action_info, R.id.action_timestamps, R.id.action_subscribe, R.id.action_repeat,
-                R.id.action_next_frame);
+        group(GROUP_LEFT, R.id.action_channel, R.id.action_info, R.id.action_timestamps, R.id.action_video_links, R.id.action_subscribe,
+                R.id.action_repeat, R.id.action_next_frame);
         group(GROUP_SOCIAL, R.id.action_thumbs_up, R.id.action_thumbs_down, R.id.action_chat, R.id.action_playlist_add,
                 R.id.action_share, R.id.action_playback_queue);
 
@@ -64,6 +64,8 @@ public final class ModernActionStyle {
         icon(R.id.action_next_frame, R.drawable.modern_ic_next_frame, R.drawable.modern_ic_next_frame);
         // The time codes of the description (Electric Eel): a table of contents
         icon(R.id.action_timestamps, R.drawable.modern_ic_timestamps, R.drawable.modern_ic_timestamps);
+        // The links of the description to other videos (Electric Eel): a stack of videos
+        icon(R.id.action_video_links, R.drawable.modern_ic_video_links, R.drawable.modern_ic_video_links);
 
         PLAYBACK_MODE_ICONS.put(PlayerConstants.PLAYBACK_MODE_CLOSE, R.drawable.modern_ic_repeat_off);
         PLAYBACK_MODE_ICONS.put(PlayerConstants.PLAYBACK_MODE_ONE, R.drawable.modern_ic_repeat_one);
@@ -95,7 +97,7 @@ public final class ModernActionStyle {
     }
 
     /**
-     * Order of the start group: avatar, description, timestamps, subscription, auto-play, next frame.
+     * Order of the start group: avatar, description, timestamps, video links, subscription, auto-play, next frame.
      */
     public static int startOrder(int actionId) {
         if (actionId == R.id.action_channel) {
@@ -107,16 +109,19 @@ public final class ModernActionStyle {
         if (actionId == R.id.action_timestamps) {
             return 2;
         }
-        if (actionId == R.id.action_subscribe) {
+        if (actionId == R.id.action_video_links) {
             return 3;
         }
-        if (actionId == R.id.action_repeat) {
+        if (actionId == R.id.action_subscribe) {
             return 4;
         }
-        if (actionId == R.id.action_next_frame) {
+        if (actionId == R.id.action_repeat) {
             return 5;
         }
-        return 6;
+        if (actionId == R.id.action_next_frame) {
+            return 6;
+        }
+        return 7;
     }
 
     /**

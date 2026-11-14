@@ -4,4 +4,5 @@
     <string name="header_subscriptions">Подписки</string>
     <string name="header_history">История</string>
     <string name="recommended">Рекомендации</string>
+    <string name="settings_description">Видео в Electric Eel</string>
 </resources>

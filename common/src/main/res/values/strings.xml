@@ -180,7 +180,7 @@
     <string name="subscribe_to_channel">Subscribe to the channel</string>
     <string name="wait_data_loading">Please wait while data is loading…</string>
     <string name="auto_frame_rate_pause">Auto Frame Rate (pause when switching)</string>
-    <string name="auto_frame_rate_applying">Applying auto frame rate %sx%s\@%s</string>
+    <string name="auto_frame_rate_applying">Applying auto frame rate %1$sx%2$s\@%3$s</string>
     <string name="audio_shift">Audio delay</string>
     <string name="player_remember_speed">Remember speed</string>
     <string name="mark_channel_as_watched">Mark as watched</string>
@@ -635,9 +635,9 @@
     <string name="proxy_credentials_invalid">Invalid username or password.</string>
     <string name="proxy_test_aborted">Test aborted, please fix proxy settings first.</string>
     <string name="proxy_application_aborted">Please correct proxy settings first.</string>
-    <string name="proxy_test_start">Test #%d: %s …</string>
-    <string name="proxy_test_error">Error #%d: %s</string>
-    <string name="proxy_test_status">Status #%d: %s %d %s</string>
+    <string name="proxy_test_start">Test #%1$d: %2$s …</string>
+    <string name="proxy_test_error">Error #%1$d: %2$s</string>
+    <string name="proxy_test_status">Status #%1$d: %2$s %3$d %4$s</string>
     <string name="openvpn_config_address_hint">Config file address (*.ovpn)</string>
     <string name="enable_openvpn">Use OpenVPN</string>
     <string name="openvpn_settings_title">OpenVPN Settings</string>
@@ -652,6 +652,8 @@
     <string name="action_next_frame">Next frame</string>
     <string name="action_timestamps">Timestamps</string>
     <string name="timestamps_not_found">No timestamps in the description</string>
+    <string name="action_video_links">Video links</string>
+    <string name="video_links_not_found">No video links in the description</string>
     <string name="subtitle_system">System style (Android settings &gt; Accessibility)</string>
     <string name="subtitle_scale">Subtitle scale</string>
     <string name="audio_sync_fix_desc">An alternative way to synchronize audio/video. It\'s considered obsolete, but in some cases, may help.</string>
@@ -967,7 +969,7 @@
     <string name="prefer_ipv4">Prefer IPv4 DNS</string>
     <string name="prefer_ipv4_desc">Could fix situations when the app isn\'t working at all.\nNote. May cause hangs and crashes (especially on Android 8 devices or Dune HD)</string>
     <string name="ipv6_test">IPv6 connectivity test</string>
-    <string name="ipv6_test_desc">Checks IPv6 once per app run. When it doesn\'t connect, only IPv4 is used until the app restarts, so a broken IPv6 network doesn\'t stall loading.\nWarning: then the player uses OkHttp, whatever the network engine is set to, and the engine options are greyed out.</string>
+    <string name="ipv6_test_desc">Once per app run. If IPv6 fails, IPv4 alone is used until restart so loading can\'t stall, and the player uses OkHttp.</string>
     <string name="long_press_for_settings">LONG PRESS FOR SETTINGS</string>
     <string name="long_press_for_options">LONG PRESS FOR OPTIONS</string>
     <string name="device_specific_backup">Backup for this device only</string>

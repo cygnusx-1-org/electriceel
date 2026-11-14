@@ -2,4 +2,6 @@
     <string name="header_subscriptions">Suscripciones</string>
     <string name="header_history">Historial</string>
     <string name="recommended">Recomendados</string>
+    <string name="search_hint">Buscar vídeos</string>
+    <string name="settings_description">Vídeos de Electric Eel</string>
 </resources>
