@@ -51,6 +51,7 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.SponsorBlockData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
+import com.liskovsoft.youtubeapi.common.helpers.AppClient;
 import com.liskovsoft.youtubeapi.service.YouTubeMediaItemService;
 import com.liskovsoft.youtubeapi.playlist.impl.YouTubePlaylistInfo;
 
@@ -931,6 +932,15 @@ public class AppDialogUtil {
 
     public static OptionCategory createNetworkEngineCategory(Context context) {
         return createNetworkEngineCategory(context, () -> {});
+    }
+
+    /**
+     * The YouTube client's name, as the clients' order shows it: the ones that are signed in (TV and TV_DOWNGRADED) say so
+     *
+     * @param client e.g. TV, one of the order's (see MediaServiceData#getClientOrder)
+     */
+    public static String getClientTitle(Context context, String client) {
+        return AppClient.valueOf(client).isAuthSupported() ? context.getString(R.string.client_signed_in, client) : client;
     }
 
     public static OptionCategory createNetworkEngineCategory(Context context, Runnable onModeSelected) {

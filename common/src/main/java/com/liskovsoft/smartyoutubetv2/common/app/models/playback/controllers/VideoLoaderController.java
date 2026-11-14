@@ -117,6 +117,15 @@ public class VideoLoaderController extends BasePlayerController {
      * By video and channel: the switches a live stream took in this run (see applyKnownLiveSwitches)
      */
     private final Map<String, Integer> mLiveSwitches = new HashMap<>();
+    /**
+     * The client picked in the player for the video in mPickedClientVideoId, its formats asked of it first (see pickClient)
+     */
+    private String mPickedClient;
+    private String mPickedClientVideoId;
+    /**
+     * The formats came from another client than the one picked, said once (see showPickedClientFallback)
+     */
+    private boolean mIsPickedClientFallbackShown;
     private final Runnable mReloadVideo = () -> {
         Video video = getVideo();
 
@@ -390,6 +399,7 @@ public class VideoLoaderController extends BasePlayerController {
             return;
         }
 
+        resetPickedClient(video);
         resetLiveClientSwitch(video);
         // Fix no progress on next video (the engine may still buffering a bit)
         //getPlayer().showProgressBar(true);
@@ -420,6 +430,7 @@ public class VideoLoaderController extends BasePlayerController {
             return;
         }
 
+        resetPickedClient(video);
         resetLiveClientSwitch(video);
 
         // Its WebView runs on the main thread mostly: the player screen comes up first, the load of the video fetches them
@@ -468,6 +479,7 @@ public class VideoLoaderController extends BasePlayerController {
         mFormatClient = getClientName(formatInfo);
         mFormatProtocol = null;
         mStreamsExpireTimeMs = formatInfo.getStreamsExpireTimeMs();
+        showPickedClientFallback(formatInfo);
         // Fetched again from another client: the start goes on (see VideoStarts#onFetch)
         boolean isRefetched = false;
 
@@ -675,6 +687,65 @@ public class VideoLoaderController extends BasePlayerController {
     }
 
     /**
+     * Of the video playing: its formats are fetched again, asked of the client first and of the order's others after it, and it plays
+     * on from where it is. For this video only: another one plays on the order of the settings (see resetPickedClient).
+     *
+     * @param client e.g. WEB, one of the order's (see MediaServiceData#getClientOrder)
+     */
+    public void pickClient(String client) {
+        Video video = getVideo();
+
+        if (getPlayer() == null || video == null || video.videoId == null || client == null) {
+            return;
+        }
+
+        mPickedClient = client;
+        mPickedClientVideoId = video.videoId;
+        mIsPickedClientFallbackShown = false;
+        YouTubeServiceManager.instance().pickClient(video.videoId, client);
+        reloadVideo(0);
+    }
+
+    /**
+     * Picked for the video playing (see pickClient), null for none
+     */
+    @Nullable
+    public String getPickedClient() {
+        Video video = getVideo();
+
+        return video != null && Helpers.equals(video.videoId, mPickedClientVideoId) ? mPickedClient : null;
+    }
+
+    /**
+     * Another video than the one a client was picked for: the order's clients again, from the next one
+     */
+    private void resetPickedClient(Video video) {
+        if (mPickedClientVideoId == null || Helpers.equals(video.videoId, mPickedClientVideoId)) {
+            return;
+        }
+
+        mPickedClient = null;
+        mPickedClientVideoId = null;
+        YouTubeServiceManager.instance().clearPickedClient();
+    }
+
+    /**
+     * The client picked for the video didn't give the formats (it can't play it, or failed and was switched past): said once, with the
+     * one that did. Not when none could: the player's title says why (see processFormatInfo).
+     */
+    private void showPickedClientFallback(MediaItemFormatInfo formatInfo) {
+        String picked = getPickedClient();
+
+        if (picked == null || picked.equals(mFormatClient) || formatInfo.isUnplayable() || mIsPickedClientFallbackShown) {
+            return;
+        }
+
+        mIsPickedClientFallbackShown = true;
+        MessageHelpers.showLongMessage(getContext(), getContext().getString(R.string.msg_client_fallback, picked,
+                mFormatClient != null ? mFormatClient : "YouTube"));
+    }
+
+    /**
      * Another video than the live stream the client was switched for: the first client again, or the switch would stay for all that's
      * played till the app restarts, without what that client has (e.g. being signed in)
      */
@@ -719,11 +790,20 @@ public class VideoLoaderController extends BasePlayerController {
     private PlayerFailure newFailure(String kind, MediaItemFormatInfo formatInfo) {
         Video video = getVideo();
 
-        return PlayerFailure.create(getContext(), kind)
+        return addPickedClient(PlayerFailure.create(getContext(), kind)
                 .video(video)
                 .source(mFormatClient, null)
                 .playability(formatInfo.getPlayabilityStatus(), formatInfo.getPlayabilityReason())
-                .clientAttempts(video != null ? ClientAttempts.get(video.videoId) : null);
+                .clientAttempts(video != null ? ClientAttempts.get(video.videoId) : null));
+    }
+
+    /**
+     * The client picked in the player for the video, when there's one (see pickClient): its attempt comes first, not the order's
+     */
+    PlayerFailure addPickedClient(PlayerFailure failure) {
+        String picked = getPickedClient();
+
+        return picked != null ? failure.detail("pickedClient", picked) : failure;
     }
 
     public void reloadVideo(int delayMs) {

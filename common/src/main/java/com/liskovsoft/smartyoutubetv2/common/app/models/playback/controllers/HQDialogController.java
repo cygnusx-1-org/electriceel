@@ -10,7 +10,9 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.track.MediaTrack;
 import com.liskovsoft.smartyoutubetv2.common.utils.AppDialogUtil;
+import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -21,15 +23,18 @@ public class HQDialogController extends BasePlayerController {
     private static final String TAG = HQDialogController.class.getSimpleName();
     private static final int VIDEO_FORMATS_ID = 132;
     private static final int AUDIO_FORMATS_ID = 133;
+    private static final int CLIENT_ID = 153;
     // NOTE: using map, because same item could be changed time to time
     private final Map<Integer, OptionCategory> mCategories = new LinkedHashMap<>();
     private final Map<Integer, OptionCategory> mCategoriesInt = new LinkedHashMap<>();
     private final Set<Runnable> mHideListeners = new HashSet<>();
     private AppDialogPresenter mAppDialogPresenter;
+    private VideoLoaderController mVideoLoaderController;
 
     @Override
     public void onInit() {
         mAppDialogPresenter = AppDialogPresenter.instance(getContext());
+        mVideoLoaderController = getController(VideoLoaderController.class);
     }
 
     @Override
@@ -52,6 +57,7 @@ public class HQDialogController extends BasePlayerController {
         addPresetsCategory();
         addVideoZoomCategory();
         addNetworkEngine();
+        addClientCategory();
         addVideoBufferCategory();
         addAudioDelayCategory();
         addPitchEffectCategory();
@@ -179,6 +185,38 @@ public class HQDialogController extends BasePlayerController {
         }
         addCategoryInt(AppDialogUtil.createNetworkEngineCategory(getContext(),
                 () -> getPlayer().restartEngine()));
+    }
+
+    /**
+     * The YouTube clients in their order, the one the video's formats came from checked. Another one picked fetches them again from it,
+     * for this video only (see VideoLoaderController#pickClient).
+     */
+    private void addClientCategory() {
+        if (getPlayer() == null || getVideo() == null || mVideoLoaderController == null) {
+            return;
+        }
+
+        String current = mVideoLoaderController.getFormatClient();
+        List<OptionItem> options = new ArrayList<>();
+
+        for (String client : MediaServiceData.instance().getClientOrder()) {
+            options.add(UiOptionItem.from(AppDialogUtil.getClientTitle(getContext(), client),
+                    option -> pickClient(client), client.equals(current)));
+        }
+
+        addCategoryInt(OptionCategory.from(CLIENT_ID, OptionCategory.TYPE_RADIO_LIST, getContext().getString(R.string.player_client),
+                options));
+    }
+
+    private void pickClient(String client) {
+        // Playing from it already
+        if (mVideoLoaderController == null || client.equals(mVideoLoaderController.getFormatClient())) {
+            return;
+        }
+
+        // The video reloads: it's seen
+        mAppDialogPresenter.closeDialog();
+        mVideoLoaderController.pickClient(client);
     }
 
     private void onDialogHide() {

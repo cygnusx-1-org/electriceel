@@ -1078,6 +1078,7 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
 
         if (mVideoLoaderController != null) {
             failure.source(mVideoLoaderController.getFormatClient(), mVideoLoaderController.getFormatProtocol());
+            mVideoLoaderController.addPickedClient(failure);
         }
 
         if (getPlayer() != null) {
