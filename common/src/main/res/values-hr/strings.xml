@@ -1192,4 +1192,21 @@
     <string name="modern_on">Uključeno</string>
     <string name="modern_off">Isključeno</string>
     <string name="modern_try_again">Pokušaj ponovno</string>
+    <string name="card_desc_dearrow">Zamjenjuje naslove i minijature koji mame klikove onima koje je poslala zajednica</string>
+    <string name="card_desc_home_screen_channels">Bira koji se redovi (Povijest, Vaši popisi za reprodukciju…) prikazuju kao kanali na početnom zaslonu Android TV-a</string>
+    <string name="card_desc_filtering">Skriva ili označava suradnje, Pogledaj kasnije, emisije, prijenose uživo i predložene redove Početne</string>
+    <string name="card_desc_hide_content">Skriva Shorts, mikseve te pogledane, nadolazeće, duplicirane, stare ili videozapise koji odgovaraju ključnim riječima</string>
+    <string name="card_desc_sponsorblock">Preskače sponzore, uvode, samopromociju i druge dijelove videozapisa koje je označila zajednica</string>
+    <string name="card_desc_aislist">Skriva ili označava videozapise s kanala koje popis zajednice označava kao objavljivače sadržaja generiranog umjetnom inteligencijom</string>
+    <string name="card_desc_auto_frame_rate">Mijenja frekvenciju osvježavanja televizora prema videozapisu, kako brzi pokreti kamere ne bi trzali</string>
+    <string name="card_desc_network_engine">Bira mrežnu biblioteku koja učitava videozapise. Pokušajte drugu ako se videozapisi stalno međuspremaju ili se ne učitavaju.</string>
+    <string name="card_desc_client_order">Redoslijed kojim aplikacija isprobava YouTubeove klijente kako bi dobila streamove videozapisa, dok ga jedan ne reproducira</string>
+    <string name="card_desc_pixel_ratio">Rasteže sliku za zaslone koji nisu 16:9, poput 16:10, 4:3 ili ultraširokih</string>
+    <string name="card_desc_places">Prikazuje chat uživo i komentare lijevo od videozapisa umjesto desno</string>
+    <string name="card_desc_unlock">Dopušta formate videozapisa koje uređaj pogrešno prijavljuje kao nepodržane, poput 4K ili VP9 visoke brzine prijenosa</string>
+    <string name="card_desc_frame">Popravci za ispuštene sličice na uređajima Sony, Amazon Fire TV i Amlogic</string>
+    <string name="card_desc_fix">Zaobilazna rješenja za trzanje prijenosa uživo, pogrešan omjer slike, nedostajući Ambilight i praznu Pretplatu</string>
+    <string name="card_desc_api_keys">Vaš vlastiti ključ za YouTube Data API, potreban za automatsku reprodukciju glazbe te za skrivanje ili označavanje videozapisa po kategoriji (glazba, igre, vijesti…) na Početnoj</string>
+    <string name="card_desc_dns">Mijenja način na koji aplikacija pronalazi YouTubeove poslužitelje. Može pomoći kada se aplikacija uopće ne učitava.</string>
+    <string name="card_desc_remote_control">Uparuje telefon ili tablet kako bi njegova aplikacija YouTube mogla upravljati reprodukcijom na ovom televizoru</string>
 </resources>

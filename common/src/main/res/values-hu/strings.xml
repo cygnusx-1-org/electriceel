@@ -1175,4 +1175,21 @@
     <string name="modern_on">Be</string>
     <string name="modern_off">Ki</string>
     <string name="modern_try_again">Próbáld újra</string>
+    <string name="card_desc_dearrow">Lecseréli a kattintásvadász címeket és bélyegképeket a közösség által beküldöttekre</string>
+    <string name="card_desc_home_screen_channels">Kiválasztja, mely sorok (Előzmények, az Ön lejátszási listái…) jelenjenek meg csatornaként az Android TV kezdőképernyőjén</string>
+    <string name="card_desc_filtering">Elrejti vagy megjelöli az együttműködéseket, a Megnézendőt, a műsorokat, az élő közvetítéseket és a Főoldal javasolt sorait</string>
+    <string name="card_desc_hide_content">Elrejti a rövid klipeket, a mixeket, valamint a megnézett, közelgő, ismétlődő, régi vagy kulcsszavakra illeszkedő videókat</string>
+    <string name="card_desc_sponsorblock">Átugorja a szponzorokat, bevezetőket, önreklámot és a videók más, a közösség által megjelölt részeit</string>
+    <string name="card_desc_aislist">Elrejti vagy megjelöli azon csatornák videóit, amelyeket egy közösségi lista MI által generált tartalom közzétevőjeként jelöl meg</string>
+    <string name="card_desc_auto_frame_rate">A tévé képfrissítési gyakoriságát a videóhoz igazítja, hogy a gyors kameramozgások ne akadozzanak</string>
+    <string name="card_desc_network_engine">Kiválasztja a videókat betöltő hálózati könyvtárat. Próbáljon ki egy másikat, ha a videók pufferelnek vagy nem töltődnek be.</string>
+    <string name="card_desc_client_order">Az a sorrend, amelyben az alkalmazás kipróbálja a YouTube klienseit egy videó streamjeinek lekéréséhez, amíg valamelyik le nem játssza</string>
+    <string name="card_desc_pixel_ratio">Széthúzza a képet a nem 16:9-es képernyőkhöz, például 16:10, 4:3 vagy ultraszéles</string>
+    <string name="card_desc_places">Az élő csevegést és a hozzászólásokat a videó bal oldalán jeleníti meg a jobb helyett</string>
+    <string name="card_desc_unlock">Engedélyezi azokat a videóformátumokat, amelyeket az eszköz tévesen nem támogatottnak jelez, például a 4K-t vagy a nagy bitrátájú VP9-et</string>
+    <string name="card_desc_frame">Javítások kimaradó képkockákra Sony, Amazon Fire TV és Amlogic eszközökön</string>
+    <string name="card_desc_fix">Megoldások akadozó élő közvetítésekre, hibás képarányra, hiányzó Ambilightra és üres Feliratkozásokra</string>
+    <string name="card_desc_api_keys">Az Ön saját YouTube Data API-kulcsa, amely a zene automatikus lejátszásához, valamint a videók kategória szerinti (zene, játék, hírek…) elrejtéséhez vagy megjelöléséhez kell a Főoldalon</string>
+    <string name="card_desc_dns">Megváltoztatja, hogyan találja meg az alkalmazás a YouTube szervereit. Segíthet, ha az alkalmazás egyáltalán nem töltődik be.</string>
+    <string name="card_desc_remote_control">Párosít egy telefont vagy táblagépet, hogy annak YouTube-alkalmazása vezérelhesse a lejátszást ezen a tévén</string>
 </resources>

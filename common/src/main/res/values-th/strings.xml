@@ -1160,4 +1160,21 @@
     <string name="modern_on">เปิด</string>
     <string name="modern_off">ปิด</string>
     <string name="modern_try_again">ลองอีกครั้ง</string>
+    <string name="card_desc_dearrow">แทนที่ชื่อและภาพขนาดย่อแบบคลิกเบตด้วยรายการที่ชุมชนส่งมา</string>
+    <string name="card_desc_home_screen_channels">เลือกว่าแถวใด (ประวัติ, เพลย์ลิสต์ของคุณ…) จะแสดงเป็นช่องบนหน้าจอหลักของ Android TV</string>
+    <string name="card_desc_filtering">ซ่อนหรือทำเครื่องหมายการร่วมงาน ดูภายหลัง รายการ ไลฟ์สด และแถวที่แนะนำของหน้าแรก</string>
+    <string name="card_desc_hide_content">ซ่อน Shorts มิกซ์ และวิดีโอที่ดูแล้ว ที่กำลังจะมา ที่ซ้ำ ที่เก่า หรือที่ตรงกับคีย์เวิร์ด</string>
+    <string name="card_desc_sponsorblock">ข้ามสปอนเซอร์ อินโทร การโปรโมตตัวเอง และส่วนอื่นๆ ของวิดีโอที่ชุมชนทำเครื่องหมายไว้</string>
+    <string name="card_desc_aislist">ซ่อนหรือทำเครื่องหมายวิดีโอจากช่องที่รายชื่อของชุมชนระบุว่าโพสต์เนื้อหาที่สร้างโดย AI</string>
+    <string name="card_desc_auto_frame_rate">สลับอัตรารีเฟรชของทีวีให้ตรงกับวิดีโอ เพื่อให้การเคลื่อนกล้องเร็วๆ ไม่กระตุก</string>
+    <string name="card_desc_network_engine">เลือกไลบรารีเครือข่ายที่ใช้โหลดวิดีโอ ลองตัวอื่นหากวิดีโอบัฟเฟอร์หรือโหลดไม่ขึ้น</string>
+    <string name="card_desc_client_order">ลำดับที่แอปลองใช้ไคลเอ็นต์ของ YouTube เพื่อรับสตรีมของวิดีโอ จนกว่าจะมีตัวหนึ่งเล่นได้</string>
+    <string name="card_desc_pixel_ratio">ยืดภาพสำหรับหน้าจอที่ไม่ใช่ 16:9 เช่น 16:10, 4:3 หรืออัลตร้าไวด์</string>
+    <string name="card_desc_places">แสดงแชทสดและความคิดเห็นทางด้านซ้ายของวิดีโอแทนด้านขวา</string>
+    <string name="card_desc_unlock">อนุญาตรูปแบบวิดีโอที่อุปกรณ์รายงานผิดว่าไม่รองรับ เช่น 4K หรือ VP9 บิตเรตสูง</string>
+    <string name="card_desc_frame">การแก้ไขเฟรมตกบนอุปกรณ์ Sony, Amazon Fire TV และ Amlogic</string>
+    <string name="card_desc_fix">วิธีแก้ปัญหาไลฟ์สดกระตุก อัตราส่วนภาพผิด Ambilight หายไป และการติดตามว่างเปล่า</string>
+    <string name="card_desc_api_keys">คีย์ YouTube Data API ของคุณเอง จำเป็นสำหรับการเล่นเพลงอัตโนมัติ และการซ่อนหรือทำเครื่องหมายวิดีโอตามหมวดหมู่ (เพลง เกม ข่าว…) ในหน้าแรก</string>
+    <string name="card_desc_dns">เปลี่ยนวิธีที่แอปค้นหาเซิร์ฟเวอร์ของ YouTube อาจช่วยได้เมื่อแอปโหลดไม่ขึ้นเลย</string>
+    <string name="card_desc_remote_control">จับคู่โทรศัพท์หรือแท็บเล็ตเพื่อให้แอป YouTube บนอุปกรณ์นั้นควบคุมการเล่นบนทีวีเครื่องนี้ได้</string>
 </resources>

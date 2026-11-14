@@ -1175,4 +1175,21 @@
     <string name="modern_on">Aktiv</string>
     <string name="modern_off">Joaktiv</string>
     <string name="modern_try_again">Provo përsëri</string>
+    <string name="card_desc_dearrow">Zëvendëson titujt dhe miniaturat mashtruese me ato që ka dërguar komuniteti</string>
+    <string name="card_desc_home_screen_channels">Zgjedh cilat rreshta (Historiku, listat e tua të luajtjes…) shfaqen si kanale në ekranin bazë të Android TV</string>
+    <string name="card_desc_filtering">Fsheh ose shënon bashkëpunimet, Shiko më vonë, emisionet, transmetimet drejtpërdrejt dhe rreshtat e sugjeruar të Kryefaqes</string>
+    <string name="card_desc_hide_content">Fsheh videot e shkurtra, mikset dhe videot e shikuara, të ardhshme, të dyfishta, të vjetra ose që përputhen me fjalë kyçe</string>
+    <string name="card_desc_sponsorblock">Kapërcen sponsorët, hyrjet, vetëpromovimin dhe pjesë të tjera të videove që i ka shënuar komuniteti</string>
+    <string name="card_desc_aislist">Fsheh ose shënon videot nga kanalet që një listë e komunitetit i shënon si publikues të përmbajtjes së krijuar me IA</string>
+    <string name="card_desc_auto_frame_rate">Ndërron shpeshtësinë e rifreskimit të televizorit sipas videos, që lëvizjet e shpejta të kamerës të mos dridhen</string>
+    <string name="card_desc_network_engine">Zgjedh bibliotekën e rrjetit që ngarkon videot. Provo një tjetër nëse videot ngecin në ngarkim ose nuk ngarkohen.</string>
+    <string name="card_desc_client_order">Rendi në të cilin aplikacioni provon klientët e YouTube për të marrë transmetimet e një videoje, derisa njëri ta luajë</string>
+    <string name="card_desc_pixel_ratio">Shtrin figurën për ekranet që nuk janë 16:9, si 16:10, 4:3 ose ultra të gjera</string>
+    <string name="card_desc_places">Shfaq bisedën drejtpërdrejt dhe komentet në të majtë të videos në vend të së djathtës</string>
+    <string name="card_desc_unlock">Lejon formatet e videos që pajisja i raporton gabimisht si të pambështetura, si 4K ose VP9 me shpejtësi të lartë bitësh</string>
+    <string name="card_desc_frame">Rregullime për kuadrot e humbura në pajisjet Sony, Amazon Fire TV dhe Amlogic</string>
+    <string name="card_desc_fix">Zgjidhje për ngecjet e transmetimeve drejtpërdrejt, raport të gabuar të pamjes, Ambilight që mungon dhe Abonime bosh</string>
+    <string name="card_desc_api_keys">Çelësi yt i YouTube Data API, i nevojshëm për luajtjen automatike të muzikës dhe për të fshehur ose shënuar videot sipas kategorisë (muzikë, lojëra, lajme…) në Kryefaqe</string>
+    <string name="card_desc_dns">Ndryshon mënyrën si aplikacioni gjen serverët e YouTube. Mund të ndihmojë kur aplikacioni nuk ngarkohet fare.</string>
+    <string name="card_desc_remote_control">Çifton një telefon ose tablet që aplikacioni i tij YouTube të kontrollojë luajtjen në këtë televizor</string>
 </resources>

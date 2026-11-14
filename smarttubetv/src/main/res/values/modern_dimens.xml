@@ -104,6 +104,8 @@
     <dimen name="modern_settings_preview_icon">72dp</dimen>
     <dimen name="modern_settings_preview_circle">120dp</dimen>
     <dimen name="modern_settings_preview_title">30sp</dimen>
+    <!-- Between the title and the description of the focused card, as in a dialog page preview -->
+    <dimen name="modern_settings_preview_description_top">12dp</dimen>
 
     <!-- Player -->
     <dimen name="modern_player_margin">48dp</dimen>

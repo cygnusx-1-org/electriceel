@@ -1175,4 +1175,21 @@
     <string name="modern_on">Attivo</string>
     <string name="modern_off">Disattivo</string>
     <string name="modern_try_again">Riprova</string>
+    <string name="card_desc_dearrow">Sostituisce titoli e miniature acchiappaclic con quelli inviati dalla community</string>
+    <string name="card_desc_home_screen_channels">Sceglie quali righe (Cronologia, le tue playlist…) appaiono come canali nella schermata Home di Android TV</string>
+    <string name="card_desc_filtering">Nasconde o contrassegna collaborazioni, Guarda più tardi, programmi, dirette e le righe suggerite della Home</string>
+    <string name="card_desc_hide_content">Nasconde i video brevi, i mix e i video già visti, in arrivo, duplicati, vecchi o corrispondenti a parole chiave</string>
+    <string name="card_desc_sponsorblock">Salta sponsor, intro, autopromozione e altre parti dei video che la community ha segnalato</string>
+    <string name="card_desc_aislist">Nasconde o contrassegna i video dei canali che un elenco della community segnala come autori di contenuti generati dall\'IA</string>
+    <string name="card_desc_auto_frame_rate">Cambia la frequenza di aggiornamento del televisore in base al video, così i movimenti rapidi della telecamera non scattano</string>
+    <string name="card_desc_network_engine">Sceglie la libreria di rete che carica i video. Provane un\'altra se i video vanno in buffering o non si caricano.</string>
+    <string name="card_desc_client_order">L\'ordine in cui l\'app prova i client di YouTube per ottenere gli stream di un video, finché uno non lo riproduce</string>
+    <string name="card_desc_pixel_ratio">Allunga l\'immagine per gli schermi non 16:9, come 16:10, 4:3 o ultrawide</string>
+    <string name="card_desc_places">Mostra la chat dal vivo e i commenti a sinistra del video invece che a destra</string>
+    <string name="card_desc_unlock">Consente i formati video che il dispositivo segnala erroneamente come non supportati, come 4K o VP9 ad alto bitrate</string>
+    <string name="card_desc_frame">Correzioni per i fotogrammi persi sui dispositivi Sony, Amazon Fire TV e Amlogic</string>
+    <string name="card_desc_fix">Soluzioni per dirette a scatti, proporzioni errate, Ambilight assente e Iscrizioni vuote</string>
+    <string name="card_desc_api_keys">La tua chiave YouTube Data API, necessaria per la riproduzione automatica della musica e per nascondere o contrassegnare i video per categoria (musica, giochi, notizie…) nella Home</string>
+    <string name="card_desc_dns">Cambia il modo in cui l\'app trova i server di YouTube. Può aiutare quando l\'app non si carica affatto.</string>
+    <string name="card_desc_remote_control">Associa un telefono o un tablet in modo che la sua app YouTube possa controllare la riproduzione su questa TV</string>
 </resources>

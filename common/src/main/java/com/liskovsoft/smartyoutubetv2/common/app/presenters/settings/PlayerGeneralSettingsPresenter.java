@@ -42,17 +42,21 @@ public class PlayerGeneralSettingsPresenter extends BasePresenter<Void> implemen
         items.add(new SettingsItem(context.getString(R.string.settings_show_options),
                 () -> PlayerSettingsPresenter.instance(context).showShows(), R.drawable.settings_show));
         items.add(new SettingsItem(context.getString(R.string.settings_places),
-                () -> PlayerSettingsPresenter.instance(context).showPlaces(), R.drawable.settings_place_left));
+                () -> PlayerSettingsPresenter.instance(context).showPlaces(), R.drawable.settings_place_left)
+                .setDescription(context.getString(R.string.card_desc_places)));
         items.add(new SettingsItem(context.getString(R.string.settings_seek_options),
                 () -> PlayerSettingsPresenter.instance(context).showSeeks(), R.drawable.settings_seek));
         items.add(new SettingsItem(context.getString(R.string.settings_misc_options),
                 () -> PlayerSettingsPresenter.instance(context).showMisc(), R.drawable.settings_misc));
         items.add(new SettingsItem(context.getString(R.string.player_network_stack),
-                () -> PlayerSettingsPresenter.instance(context).showNetworkEngine(), R.drawable.settings_network_engine));
+                () -> PlayerSettingsPresenter.instance(context).showNetworkEngine(), R.drawable.settings_network_engine)
+                .setDescription(context.getString(R.string.card_desc_network_engine)));
         items.add(new SettingsItem(context.getString(R.string.client_order),
-                () -> PlayerSettingsPresenter.instance(context).showClientOrder(), R.drawable.settings_client_order));
+                () -> PlayerSettingsPresenter.instance(context).showClientOrder(), R.drawable.settings_client_order)
+                .setDescription(context.getString(R.string.card_desc_client_order)));
         items.add(new SettingsItem(context.getString(R.string.player_pixel_ratio),
-                () -> PlayerSettingsPresenter.instance(context).showPixelRatio(), R.drawable.settings_pixel_ratio));
+                () -> PlayerSettingsPresenter.instance(context).showPixelRatio(), R.drawable.settings_pixel_ratio)
+                .setDescription(context.getString(R.string.card_desc_pixel_ratio)));
         items.add(new SettingsItem(context.getString(R.string.action_repeat_mode),
                 () -> PlayerSettingsPresenter.instance(context).showPlaybackMode(), R.drawable.settings_playback_mode));
         items.add(new SettingsItem(context.getString(R.string.music_autoplay),
@@ -64,11 +68,14 @@ public class PlayerGeneralSettingsPresenter extends BasePresenter<Void> implemen
         items.add(new SettingsItem(context.getString(R.string.settings_disable_options),
                 () -> PlayerSettingsPresenter.instance(context).showDisables(), R.drawable.settings_disable));
         items.add(new SettingsItem(context.getString(R.string.settings_unlock_options),
-                () -> PlayerSettingsPresenter.instance(context).showUnlocks(), R.drawable.settings_unlock));
+                () -> PlayerSettingsPresenter.instance(context).showUnlocks(), R.drawable.settings_unlock)
+                .setDescription(context.getString(R.string.card_desc_unlock)));
         items.add(new SettingsItem(context.getString(R.string.settings_frame_options),
-                () -> PlayerSettingsPresenter.instance(context).showFrameDrops(), R.drawable.settings_frame));
+                () -> PlayerSettingsPresenter.instance(context).showFrameDrops(), R.drawable.settings_frame)
+                .setDescription(context.getString(R.string.card_desc_frame)));
         items.add(new SettingsItem(context.getString(R.string.settings_fix_options),
-                () -> PlayerSettingsPresenter.instance(context).showFixes(), R.drawable.settings_fix));
+                () -> PlayerSettingsPresenter.instance(context).showFixes(), R.drawable.settings_fix)
+                .setDescription(context.getString(R.string.card_desc_fix)));
 
         return items;
     }

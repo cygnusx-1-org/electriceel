@@ -1175,4 +1175,21 @@
     <string name="modern_on">Açık</string>
     <string name="modern_off">Kapalı</string>
     <string name="modern_try_again">Tekrar dene</string>
+    <string name="card_desc_dearrow">Tık tuzağı başlıkları ve küçük resimleri topluluğun gönderdikleriyle değiştirir</string>
+    <string name="card_desc_home_screen_channels">Hangi satırların (Geçmiş, oynatma listeleriniz…) Android TV ana ekranında kanal olarak görüneceğini seçer</string>
+    <string name="card_desc_filtering">Ortak çalışmaları, Daha sonra izle\'yi, programları, canlı yayınları ve Ana Sayfa\'nın önerilen satırlarını gizler veya işaretler</string>
+    <string name="card_desc_hide_content">Shorts\'ları, miksleri ve izlenmiş, yaklaşan, yinelenen, eski veya anahtar kelimelerle eşleşen videoları gizler</string>
+    <string name="card_desc_sponsorblock">Topluluğun işaretlediği sponsorları, girişleri, kendi tanıtımları ve videoların diğer bölümlerini atlar</string>
+    <string name="card_desc_aislist">Bir topluluk listesinin yapay zekâ ile üretilmiş içerik paylaştığını belirttiği kanalların videolarını gizler veya işaretler</string>
+    <string name="card_desc_auto_frame_rate">Hızlı kamera hareketleri takılmasın diye TV\'nin yenileme hızını videoya göre değiştirir</string>
+    <string name="card_desc_network_engine">Videoları yükleyen ağ kitaplığını seçer. Videolar arabelleğe alınıyor veya yüklenmiyorsa başka birini deneyin.</string>
+    <string name="card_desc_client_order">Uygulamanın bir videonun akışlarını almak için YouTube istemcilerini denediği sıra, biri oynatana kadar</string>
+    <string name="card_desc_pixel_ratio">16:9 olmayan ekranlar için görüntüyü uzatır; örneğin 16:10, 4:3 veya ultra geniş</string>
+    <string name="card_desc_places">Canlı sohbeti ve yorumları videonun sağı yerine solunda gösterir</string>
+    <string name="card_desc_unlock">Cihazın yanlışlıkla desteklenmiyor olarak bildirdiği video biçimlerine izin verir; örneğin 4K veya yüksek bit hızlı VP9</string>
+    <string name="card_desc_frame">Sony, Amazon Fire TV ve Amlogic cihazlarında kare atlamaları için düzeltmeler</string>
+    <string name="card_desc_fix">Canlı yayın takılmaları, yanlış en boy oranı, eksik Ambilight ve boş Abonelikler için geçici çözümler</string>
+    <string name="card_desc_api_keys">Kendi YouTube Data API anahtarınız; müzik otomatik oynatma ve Ana Sayfa\'da videoları kategoriye (müzik, oyun, haberler…) göre gizlemek veya işaretlemek için gerekir</string>
+    <string name="card_desc_dns">Uygulamanın YouTube sunucularını nasıl bulduğunu değiştirir. Uygulama hiç yüklenmediğinde yardımcı olabilir.</string>
+    <string name="card_desc_remote_control">Bir telefon veya tableti eşler, böylece üzerindeki YouTube uygulaması bu TV\'deki oynatmayı kontrol edebilir</string>
 </resources>

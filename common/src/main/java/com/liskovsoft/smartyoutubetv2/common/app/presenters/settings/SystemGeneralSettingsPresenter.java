@@ -36,7 +36,8 @@ public class SystemGeneralSettingsPresenter extends BasePresenter<Void> implemen
     public List<SettingsItem> getItems(Context context) {
         List<SettingsItem> items = new ArrayList<>();
         items.add(new SettingsItem(context.getString(R.string.api_keys),
-                () -> GeneralSettingsPresenter.instance(context).showApiKeys(), R.drawable.settings_api_keys));
+                () -> GeneralSettingsPresenter.instance(context).showApiKeys(), R.drawable.settings_api_keys)
+                .setDescription(context.getString(R.string.card_desc_api_keys)));
         items.add(new SettingsItem(context.getString(R.string.category_background_playback),
                 () -> GeneralSettingsPresenter.instance(context).showBackgroundPlayback(), R.drawable.settings_background_playback));
         items.add(new SettingsItem(context.getString(R.string.child_mode),

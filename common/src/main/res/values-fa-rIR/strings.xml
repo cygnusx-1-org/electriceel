@@ -1175,4 +1175,21 @@
     <string name="modern_on">روشن</string>
     <string name="modern_off">خاموش</string>
     <string name="modern_try_again">تلاش دوباره</string>
+    <string name="card_desc_dearrow">عنوان‌ها و تصاویر کوچک فریبنده را با مواردی که جامعه ارسال کرده جایگزین می‌کند</string>
+    <string name="card_desc_home_screen_channels">انتخاب می‌کند کدام ردیف‌ها (تاریخچه، فهرست‌های پخش شما…) به‌عنوان کانال در صفحهٔ اصلی Android TV نمایش داده شوند</string>
+    <string name="card_desc_filtering">همکاری‌ها، تماشا در آینده، برنامه‌ها، پخش‌های زنده و ردیف‌های پیشنهادی خانه را پنهان یا علامت‌گذاری می‌کند</string>
+    <string name="card_desc_hide_content">کوته ویدیوها، میکس‌ها و ویدیوهای دیده‌شده، آینده، تکراری، قدیمی یا منطبق با کلیدواژه‌ها را پنهان می‌کند</string>
+    <string name="card_desc_sponsorblock">از اسپانسرها، مقدمه‌ها، تبلیغ شخصی و بخش‌های دیگری از ویدیوها که جامعه علامت زده است رد می‌شود</string>
+    <string name="card_desc_aislist">ویدیوهای کانال‌هایی را که یک فهرست جامعه به‌عنوان منتشرکنندهٔ محتوای ساخته‌شده با هوش مصنوعی علامت زده پنهان یا علامت‌گذاری می‌کند</string>
+    <string name="card_desc_auto_frame_rate">نرخ تازه‌سازی تلویزیون را با ویدیو هماهنگ می‌کند تا حرکت‌های سریع دوربین لرزش نداشته باشند</string>
+    <string name="card_desc_network_engine">کتابخانهٔ شبکه‌ای را که ویدیوها را بارگیری می‌کند انتخاب می‌کند. اگر ویدیوها مدام بافر می‌شوند یا بارگیری نمی‌شوند، دیگری را امتحان کنید.</string>
+    <string name="card_desc_client_order">ترتیبی که برنامه کلاینت‌های YouTube را برای دریافت جریان‌های یک ویدیو امتحان می‌کند، تا یکی پخش شود</string>
+    <string name="card_desc_pixel_ratio">تصویر را برای صفحه‌هایی که 16:9 نیستند، مانند 16:10، 4:3 یا فوق‌عریض، می‌کشد</string>
+    <string name="card_desc_places">گفتگوی زنده و نظرها را به‌جای سمت راست، در سمت چپ ویدیو نشان می‌دهد</string>
+    <string name="card_desc_unlock">قالب‌های ویدیویی را که دستگاه به اشتباه پشتیبانی‌نشده اعلام می‌کند، مانند 4K یا VP9 با نرخ بیت بالا، مجاز می‌کند</string>
+    <string name="card_desc_frame">رفع افت فریم در دستگاه‌های Sony، Amazon Fire TV و Amlogic</string>
+    <string name="card_desc_fix">راه‌حل‌هایی برای لرزش پخش زنده، نسبت تصویر نادرست، نبود Ambilight و خالی بودن اشتراک‌ها</string>
+    <string name="card_desc_api_keys">کلید YouTube Data API خودتان، لازم برای پخش خودکار موسیقی و پنهان یا علامت‌گذاری کردن ویدیوها بر اساس دسته (موسیقی، بازی، اخبار…) در خانه</string>
+    <string name="card_desc_dns">نحوهٔ پیدا کردن سرورهای YouTube توسط برنامه را تغییر می‌دهد. وقتی برنامه اصلاً بارگیری نمی‌شود ممکن است کمک کند.</string>
+    <string name="card_desc_remote_control">یک تلفن یا تبلت را جفت می‌کند تا برنامهٔ YouTube آن بتواند پخش را روی این تلویزیون کنترل کند</string>
 </resources>

@@ -1205,4 +1205,21 @@
     <string name="modern_on">Włączone</string>
     <string name="modern_off">Wyłączone</string>
     <string name="modern_try_again">Spróbuj ponownie</string>
+    <string name="card_desc_dearrow">Zastępuje clickbaitowe tytuły i miniatury tymi przesłanymi przez społeczność</string>
+    <string name="card_desc_home_screen_channels">Wybiera, które rzędy (Historia, Twoje playlisty…) pojawiają się jako kanały na ekranie głównym Android TV</string>
+    <string name="card_desc_filtering">Ukrywa lub oznacza współprace, Do obejrzenia, programy, transmisje na żywo i proponowane rzędy Strony głównej</string>
+    <string name="card_desc_hide_content">Ukrywa Shorts, składanki oraz obejrzane, nadchodzące, powtórzone, stare lub pasujące do słów kluczowych filmy</string>
+    <string name="card_desc_sponsorblock">Pomija sponsorów, wstępy, autopromocję i inne fragmenty filmów oznaczone przez społeczność</string>
+    <string name="card_desc_aislist">Ukrywa lub oznacza filmy z kanałów, które lista społeczności wskazuje jako publikujące treści generowane przez AI</string>
+    <string name="card_desc_auto_frame_rate">Przełącza częstotliwość odświeżania telewizora zgodnie z filmem, aby szybkie ruchy kamery nie szarpały</string>
+    <string name="card_desc_network_engine">Wybiera bibliotekę sieciową, która wczytuje filmy. Wypróbuj inną, jeśli filmy się buforują lub nie wczytują.</string>
+    <string name="card_desc_client_order">Kolejność, w jakiej aplikacja próbuje klientów YouTube, aby uzyskać strumienie filmu, aż któryś go odtworzy</string>
+    <string name="card_desc_pixel_ratio">Rozciąga obraz dla ekranów innych niż 16:9, np. 16:10, 4:3 lub ultrapanoramicznych</string>
+    <string name="card_desc_places">Pokazuje czat na żywo i komentarze po lewej stronie filmu zamiast po prawej</string>
+    <string name="card_desc_unlock">Dopuszcza formaty wideo, które urządzenie błędnie zgłasza jako nieobsługiwane, np. 4K lub VP9 o wysokiej przepływności</string>
+    <string name="card_desc_frame">Poprawki gubionych klatek na urządzeniach Sony, Amazon Fire TV i Amlogic</string>
+    <string name="card_desc_fix">Obejścia dla zacinających się transmisji na żywo, złych proporcji obrazu, brakującego Ambilight i pustych Subskrypcji</string>
+    <string name="card_desc_api_keys">Twój własny klucz YouTube Data API, potrzebny do autoodtwarzania muzyki oraz do ukrywania lub oznaczania filmów według kategorii (muzyka, gry, wiadomości…) na Stronie głównej</string>
+    <string name="card_desc_dns">Zmienia sposób, w jaki aplikacja znajduje serwery YouTube. Może pomóc, gdy aplikacja w ogóle się nie wczytuje.</string>
+    <string name="card_desc_remote_control">Paruje telefon lub tablet, aby jego aplikacja YouTube mogła sterować odtwarzaniem na tym telewizorze</string>
 </resources>

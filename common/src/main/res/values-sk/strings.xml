@@ -1205,4 +1205,21 @@
     <string name="modern_on">Zapnuté</string>
     <string name="modern_off">Vypnuté</string>
     <string name="modern_try_again">Skúsiť znova</string>
+    <string name="card_desc_dearrow">Nahrádza návnadové názvy a miniatúry tými, ktoré poslala komunita</string>
+    <string name="card_desc_home_screen_channels">Vyberá, ktoré rady (História, vaše playlisty…) sa zobrazia ako kanály na domovskej obrazovke Android TV</string>
+    <string name="card_desc_filtering">Skrýva alebo označuje spolupráce, Pozrieť neskôr, relácie, živé prenosy a navrhované rady na stránke Domov</string>
+    <string name="card_desc_hide_content">Skrýva Shorts, mixy a pozreté, pripravované, duplicitné, staré alebo kľúčovým slovám zodpovedajúce videá</string>
+    <string name="card_desc_sponsorblock">Preskakuje sponzorov, úvody, sebapropagáciu a ďalšie časti videí, ktoré označila komunita</string>
+    <string name="card_desc_aislist">Skrýva alebo označuje videá z kanálov, ktoré komunitný zoznam označuje ako zverejňujúce obsah vytvorený umelou inteligenciou</string>
+    <string name="card_desc_auto_frame_rate">Prepína obnovovaciu frekvenciu televízora podľa videa, aby rýchle pohyby kamery nesekali</string>
+    <string name="card_desc_network_engine">Vyberá sieťovú knižnicu, ktorá načítava videá. Ak sa videá stále načítavajú do vyrovnávacej pamäte alebo sa nenačítajú, skúste inú.</string>
+    <string name="card_desc_client_order">Poradie, v ktorom aplikácia skúša klientov YouTube, aby získala streamy videa, kým ho jeden neprehrá</string>
+    <string name="card_desc_pixel_ratio">Rozťahuje obraz pre obrazovky, ktoré nie sú 16:9, napríklad 16:10, 4:3 alebo ultraširoké</string>
+    <string name="card_desc_places">Zobrazuje živý chat a komentáre vľavo od videa namiesto vpravo</string>
+    <string name="card_desc_unlock">Povoľuje formáty videa, ktoré zariadenie chybne hlási ako nepodporované, napríklad 4K alebo VP9 s vysokým dátovým tokom</string>
+    <string name="card_desc_frame">Opravy vypadávajúcich snímok na zariadeniach Sony, Amazon Fire TV a Amlogic</string>
+    <string name="card_desc_fix">Riešenia sekania živých prenosov, nesprávneho pomeru strán, chýbajúceho Ambilightu a prázdnych Odberov</string>
+    <string name="card_desc_api_keys">Váš vlastný kľúč YouTube Data API, potrebný na automatické prehrávanie hudby a na skrývanie alebo označovanie videí podľa kategórie (hudba, hry, správy…) na stránke Domov</string>
+    <string name="card_desc_dns">Mení, ako aplikácia hľadá servery YouTube. Môže pomôcť, keď sa aplikácia vôbec nenačíta.</string>
+    <string name="card_desc_remote_control">Spáruje telefón alebo tablet, aby jeho aplikácia YouTube mohla ovládať prehrávanie na tomto televízore</string>
 </resources>

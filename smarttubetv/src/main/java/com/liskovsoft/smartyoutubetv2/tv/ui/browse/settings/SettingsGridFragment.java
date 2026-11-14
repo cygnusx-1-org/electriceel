@@ -16,6 +16,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsGroup;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.BrowsePresenter;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.SettingsLinksPresenter;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.common.utils.SimpleEditDialog;
@@ -101,6 +102,11 @@ public class SettingsGridFragment extends GridFragment implements SettingsSectio
 
     private void setupEventListeners() {
         setOnItemViewClickedListener(new ItemViewClickedListener());
+        setOnItemViewSelectedListener((itemViewHolder, item, rowViewHolder, row) -> {
+            if (mCardsLayout != null) {
+                mCardsLayout.setDescription(item);
+            }
+        });
     }
 
     private void setupAdapter() {
@@ -111,6 +117,8 @@ public class SettingsGridFragment extends GridFragment implements SettingsSectio
 
         if (mSettingsAdapter == null) {
             SettingsCardPresenter gridPresenter = new SettingsCardPresenter();
+            // The addresses of the card as QR codes, without the settings password: they're public (see SettingsLinksPresenter)
+            gridPresenter.setOnCardLongPressedListener(item -> SettingsLinksPresenter.instance(getContext()).show(item));
             mSettingsAdapter = new ArrayObjectAdapter(gridPresenter);
             setAdapter(mSettingsAdapter);
         }

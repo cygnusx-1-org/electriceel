@@ -1175,4 +1175,21 @@
     <string name="modern_on">Sees</string>
     <string name="modern_off">Väljas</string>
     <string name="modern_try_again">Proovi uuesti</string>
+    <string name="card_desc_dearrow">Asendab klikipüüdjatest pealkirjad ja pisipildid kogukonna esitatutega</string>
+    <string name="card_desc_home_screen_channels">Valib, millised read (Ajalugu, sinu esitusloendid…) kuvatakse Android TV avakuval kanalitena</string>
+    <string name="card_desc_filtering">Peidab või märgib koostööd, Vaata hiljem, saated, otseülekanded ja Avalehe soovitatud read</string>
+    <string name="card_desc_hide_content">Peidab lühivideod, miksid ning vaadatud, tulevased, korduvad, vanad või märksõnadele vastavad videod</string>
+    <string name="card_desc_sponsorblock">Jätab vahele sponsorid, sissejuhatused, enesereklaami ja muud videoosad, mille kogukond on märkinud</string>
+    <string name="card_desc_aislist">Peidab või märgib videod kanalitelt, mille kogukonna loend märgib tehisintellektiga loodud sisu postitajateks</string>
+    <string name="card_desc_auto_frame_rate">Lülitab teleri värskendussageduse videoga sobivaks, et kiired kaameraliikumised ei hakiks</string>
+    <string name="card_desc_network_engine">Valib võrguteegi, mis videod laadib. Proovi teist, kui videod puhverdavad või ei laadi.</string>
+    <string name="card_desc_client_order">Järjekord, milles rakendus proovib YouTube\'i kliente video voogude saamiseks, kuni üks neist mängib</string>
+    <string name="card_desc_pixel_ratio">Venitab pilti ekraanidele, mis pole 16:9, näiteks 16:10, 4:3 või ülilaiad</string>
+    <string name="card_desc_places">Näitab otsevestlust ja kommentaare video vasakul küljel parema asemel</string>
+    <string name="card_desc_unlock">Lubab videovorminguid, mida seade ekslikult toetamatuks peab, näiteks 4K või kõrge bitikiirusega VP9</string>
+    <string name="card_desc_frame">Parandused vahelejäävatele kaadritele Sony, Amazon Fire TV ja Amlogicu seadmetes</string>
+    <string name="card_desc_fix">Lahendused otseülekannete hakkimisele, valele kuvasuhtele, puuduvale Ambilightile ja tühjadele Tellimustele</string>
+    <string name="card_desc_api_keys">Sinu enda YouTube Data API võti, mida on vaja muusika automaatesituseks ning videote peitmiseks või märkimiseks kategooria järgi (muusika, mängud, uudised…) Avalehel</string>
+    <string name="card_desc_dns">Muudab, kuidas rakendus YouTube\'i serverid leiab. Võib aidata, kui rakendus üldse ei laadi.</string>
+    <string name="card_desc_remote_control">Seob telefoni või tahvelarvuti, et selle YouTube\'i rakendus saaks selle teleri taasesitust juhtida</string>
 </resources>

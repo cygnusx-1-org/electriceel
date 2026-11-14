@@ -69,5 +69,21 @@
             android:textColor="@color/modern_text_primary"
             android:textSize="@dimen/modern_settings_preview_title"
             android:textStyle="bold" />
+
+        <!-- What the focused card is about (see SettingsItem.getDescription), as the summary of a dialog page preview. Always
+             three lines high, empty for a card without one: the icon and the title stay on the same pixels whichever card has
+             the focus. As wide as the preview less a title margin on each side, so they stay centered as before. -->
+        <TextView
+            android:id="@+id/modern_settings_preview_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/modern_settings_title_x"
+            android:layout_marginTop="@dimen/modern_settings_preview_description_top"
+            android:layout_marginEnd="@dimen/modern_settings_title_x"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:lines="3"
+            android:textColor="@color/modern_text_secondary"
+            android:textSize="@dimen/modern_dialog_page_preview_summary_size" />
     </LinearLayout>
 </merge>

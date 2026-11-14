@@ -1160,4 +1160,21 @@
     <string name="modern_on">Hidup</string>
     <string name="modern_off">Mati</string>
     <string name="modern_try_again">Cuba lagi</string>
+    <string name="card_desc_dearrow">Menggantikan tajuk dan lakaran kecil umpan klik dengan yang dihantar oleh komuniti</string>
+    <string name="card_desc_home_screen_channels">Memilih baris mana (Sejarah, senarai main anda…) yang dipaparkan sebagai saluran pada skrin utama Android TV</string>
+    <string name="card_desc_filtering">Menyembunyikan atau menandakan kolaborasi, Tonton kemudian, rancangan, strim langsung dan baris cadangan di Laman Utama</string>
+    <string name="card_desc_hide_content">Menyembunyikan Shorts, mix, dan video yang telah ditonton, akan datang, pendua, lama atau sepadan dengan kata kunci</string>
+    <string name="card_desc_sponsorblock">Melangkau penaja, intro, promosi diri dan bahagian video lain yang telah ditandakan oleh komuniti</string>
+    <string name="card_desc_aislist">Menyembunyikan atau menandakan video daripada saluran yang ditandakan oleh senarai komuniti sebagai menyiarkan kandungan janaan AI</string>
+    <string name="card_desc_auto_frame_rate">Menukar kadar segar semula TV agar sepadan dengan video, supaya pergerakan kamera yang pantas tidak tersentak</string>
+    <string name="card_desc_network_engine">Memilih pustaka rangkaian yang memuatkan video. Cuba yang lain jika video menimbal atau tidak dimuatkan.</string>
+    <string name="card_desc_client_order">Susunan apl mencuba klien YouTube untuk mendapatkan strim video, sehingga salah satunya memainkannya</string>
+    <string name="card_desc_pixel_ratio">Meregangkan gambar untuk skrin yang bukan 16:9, seperti 16:10, 4:3 atau ultralebar</string>
+    <string name="card_desc_places">Memaparkan sembang langsung dan ulasan di sebelah kiri video, bukan di sebelah kanan</string>
+    <string name="card_desc_unlock">Membenarkan format video yang tersilap dilaporkan oleh peranti sebagai tidak disokong, seperti 4K atau VP9 kadar bit tinggi</string>
+    <string name="card_desc_frame">Pembetulan untuk bingkai yang tercicir pada peranti Sony, Amazon Fire TV dan Amlogic</string>
+    <string name="card_desc_fix">Penyelesaian untuk strim langsung yang tersekat-sekat, nisbah aspek yang salah, Ambilight yang hilang dan Langganan yang kosong</string>
+    <string name="card_desc_api_keys">Kunci YouTube Data API anda sendiri, diperlukan untuk main automatik muzik dan untuk menyembunyikan atau menandakan video mengikut kategori (muzik, permainan, berita…) di Laman Utama</string>
+    <string name="card_desc_dns">Menukar cara apl mencari pelayan YouTube. Boleh membantu apabila apl langsung tidak dimuatkan.</string>
+    <string name="card_desc_remote_control">Memadankan telefon atau tablet supaya apl YouTubenya boleh mengawal main balik pada TV ini</string>
 </resources>

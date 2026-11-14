@@ -1175,4 +1175,21 @@
     <string name="modern_on">An</string>
     <string name="modern_off">Aus</string>
     <string name="modern_try_again">Erneut versuchen</string>
+    <string name="card_desc_dearrow">Ersetzt Clickbait-Titel und -Vorschaubilder durch solche, die die Community eingereicht hat</string>
+    <string name="card_desc_home_screen_channels">Wählt aus, welche Reihen (Verlauf, Ihre Playlists…) als Kanäle auf dem Android TV-Startbildschirm erscheinen</string>
+    <string name="card_desc_filtering">Blendet Kollaborationen, Später ansehen, Sendungen, Livestreams und die vorgeschlagenen Reihen von Start aus oder markiert sie</string>
+    <string name="card_desc_hide_content">Blendet Shorts, Mixe sowie angesehene, bevorstehende, doppelte, alte oder zu Stichwörtern passende Videos aus</string>
+    <string name="card_desc_sponsorblock">Überspringt Sponsoren, Intros, Eigenwerbung und andere Teile von Videos, die die Community markiert hat</string>
+    <string name="card_desc_aislist">Blendet Videos von Kanälen aus oder markiert sie, die eine Community-Liste als Verbreiter KI-generierter Inhalte führt</string>
+    <string name="card_desc_auto_frame_rate">Stellt die Bildwiederholrate des Fernsehers auf das Video ein, damit schnelle Kamerabewegungen nicht ruckeln</string>
+    <string name="card_desc_network_engine">Wählt die Netzwerkbibliothek, die Videos lädt. Probieren Sie eine andere, wenn Videos puffern oder nicht laden.</string>
+    <string name="card_desc_client_order">Die Reihenfolge, in der die App die YouTube-Clients ausprobiert, um die Streams eines Videos zu erhalten, bis einer abspielt</string>
+    <string name="card_desc_pixel_ratio">Streckt das Bild für Bildschirme, die nicht 16:9 sind, etwa 16:10, 4:3 oder Ultrawide</string>
+    <string name="card_desc_places">Zeigt den Livechat und die Kommentare links vom Video statt rechts</string>
+    <string name="card_desc_unlock">Erlaubt Videoformate, die das Gerät fälschlich als nicht unterstützt meldet, etwa 4K oder VP9 mit hoher Bitrate</string>
+    <string name="card_desc_frame">Korrekturen für ausgelassene Bilder auf Geräten von Sony, Amazon Fire TV und Amlogic</string>
+    <string name="card_desc_fix">Abhilfen für ruckelnde Livestreams, ein falsches Seitenverhältnis, fehlendes Ambilight und leere Abos</string>
+    <string name="card_desc_api_keys">Ihr eigener YouTube Data API-Schlüssel, nötig für Musik-Autoplay und um Videos auf Start nach Kategorie (Musik, Gaming, Nachrichten…) auszublenden oder zu markieren</string>
+    <string name="card_desc_dns">Ändert, wie die App die Server von YouTube findet. Kann helfen, wenn die App gar nicht lädt.</string>
+    <string name="card_desc_remote_control">Koppelt ein Smartphone oder Tablet, damit dessen YouTube-App die Wiedergabe auf diesem Fernseher steuern kann</string>
 </resources>

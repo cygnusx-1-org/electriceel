@@ -1160,4 +1160,21 @@
     <string name="modern_on">开启</string>
     <string name="modern_off">关闭</string>
     <string name="modern_try_again">重试</string>
+    <string name="card_desc_dearrow">将标题党标题和缩略图替换为社区提交的版本</string>
+    <string name="card_desc_home_screen_channels">选择哪些行（历史记录、你的播放列表…）作为频道显示在 Android TV 主屏幕上</string>
+    <string name="card_desc_filtering">隐藏或标记合作视频、稍后观看、节目、直播以及首页的推荐行</string>
+    <string name="card_desc_hide_content">隐藏短视频、合辑，以及已观看、即将推出、重复、过旧或与关键词匹配的视频</string>
+    <string name="card_desc_sponsorblock">跳过社区标记的赞助、片头、自我推广及视频的其他部分</string>
+    <string name="card_desc_aislist">隐藏或标记社区列表认定发布 AI 生成内容的频道的视频</string>
+    <string name="card_desc_auto_frame_rate">根据视频切换电视的刷新率，使快速的镜头移动不再卡顿</string>
+    <string name="card_desc_network_engine">选择加载视频的网络库。如果视频一直缓冲或无法加载，请换一个试试。</string>
+    <string name="card_desc_client_order">应用依次尝试各个 YouTube 客户端以获取视频流的顺序，直到有一个能播放</string>
+    <string name="card_desc_pixel_ratio">为非 16:9 的屏幕拉伸画面，例如 16:10、4:3 或超宽屏</string>
+    <string name="card_desc_places">将直播聊天和评论显示在视频左侧而不是右侧</string>
+    <string name="card_desc_unlock">允许设备误报为不支持的视频格式，例如 4K 或高码率 VP9</string>
+    <string name="card_desc_frame">修复 Sony、Amazon Fire TV 和 Amlogic 设备上的掉帧问题</string>
+    <string name="card_desc_fix">解决直播卡顿、宽高比错误、Ambilight 失效和订阅为空等问题的方法</string>
+    <string name="card_desc_api_keys">你自己的 YouTube Data API 密钥，用于音乐自动播放，以及在首页按类别（音乐、游戏、新闻…）隐藏或标记视频</string>
+    <string name="card_desc_dns">更改应用查找 YouTube 服务器的方式。在应用完全无法加载时可能有帮助。</string>
+    <string name="card_desc_remote_control">配对手机或平板电脑，让其上的 YouTube 应用控制这台电视上的播放</string>
 </resources>

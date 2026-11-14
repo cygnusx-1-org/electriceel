@@ -1190,4 +1190,21 @@
     <string name="modern_on">Activat</string>
     <string name="modern_off">Dezactivat</string>
     <string name="modern_try_again">Încearcă din nou</string>
+    <string name="card_desc_dearrow">Înlocuiește titlurile și miniaturile clickbait cu cele trimise de comunitate</string>
+    <string name="card_desc_home_screen_channels">Alege ce rânduri (Istoric, playlisturile dvs.…) apar ca canale pe ecranul de pornire Android TV</string>
+    <string name="card_desc_filtering">Ascunde sau marchează colaborările, Vizionează mai târziu, emisiunile, transmisiunile live și rândurile sugerate din Acasă</string>
+    <string name="card_desc_hide_content">Ascunde Shorts, mixurile și videoclipurile vizionate, viitoare, duplicate, vechi sau potrivite cu cuvinte cheie</string>
+    <string name="card_desc_sponsorblock">Sare peste sponsori, introduceri, autopromovare și alte părți ale videoclipurilor marcate de comunitate</string>
+    <string name="card_desc_aislist">Ascunde sau marchează videoclipurile de pe canalele pe care o listă a comunității le semnalează că publică conținut generat de IA</string>
+    <string name="card_desc_auto_frame_rate">Schimbă rata de reîmprospătare a televizorului după videoclip, astfel încât mișcările rapide ale camerei să nu sacadeze</string>
+    <string name="card_desc_network_engine">Alege biblioteca de rețea care încarcă videoclipurile. Încercați alta dacă videoclipurile se încarcă în buffer sau nu se încarcă.</string>
+    <string name="card_desc_client_order">Ordinea în care aplicația încearcă clienții YouTube pentru a obține fluxurile unui videoclip, până când unul îl redă</string>
+    <string name="card_desc_pixel_ratio">Întinde imaginea pentru ecranele care nu sunt 16:9, cum ar fi 16:10, 4:3 sau ultrawide</string>
+    <string name="card_desc_places">Afișează chatul live și comentariile în stânga videoclipului în loc de dreapta</string>
+    <string name="card_desc_unlock">Permite formatele video pe care dispozitivul le raportează greșit ca neacceptate, cum ar fi 4K sau VP9 cu bitrate mare</string>
+    <string name="card_desc_frame">Remedieri pentru cadrele pierdute pe dispozitivele Sony, Amazon Fire TV și Amlogic</string>
+    <string name="card_desc_fix">Soluții pentru sacadarea transmisiunilor live, un raport de aspect greșit, Ambilight lipsă și Abonamente goale</string>
+    <string name="card_desc_api_keys">Propria dvs. cheie YouTube Data API, necesară pentru redarea automată a muzicii și pentru a ascunde sau marca videoclipurile după categorie (muzică, jocuri, știri…) în Acasă</string>
+    <string name="card_desc_dns">Schimbă modul în care aplicația găsește serverele YouTube. Poate ajuta când aplicația nu se încarcă deloc.</string>
+    <string name="card_desc_remote_control">Asociază un telefon sau o tabletă, astfel încât aplicația YouTube de pe acesta să controleze redarea pe acest televizor</string>
 </resources>

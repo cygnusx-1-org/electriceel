@@ -1235,4 +1235,21 @@
     <string name="remove_from_home_rows">إزالة من الصفحة الرئيسية</string>
     <string name="added_to_home_rows">تمت الإضافة إلى الصفحة الرئيسية</string>
     <string name="removed_from_home_rows">تمت الإزالة من الصفحة الرئيسية</string>
+    <string name="card_desc_dearrow">يستبدل العناوين والصور المصغّرة المضلِّلة بأخرى قدّمها المجتمع</string>
+    <string name="card_desc_home_screen_channels">يختار الصفوف (السجل، قوائم التشغيل الخاصة بك…) التي تظهر كقنوات على الشاشة الرئيسية لـ Android TV</string>
+    <string name="card_desc_filtering">يخفي أو يميّز التعاونات و«المشاهدة لاحقًا» والعروض والبث المباشر والصفوف المقترحة في الصفحة الرئيسية</string>
+    <string name="card_desc_hide_content">يخفي Shorts والمزيجات والفيديوهات التي تمت مشاهدتها أو القادمة أو المكرّرة أو القديمة أو المطابقة لكلمات مفتاحية</string>
+    <string name="card_desc_sponsorblock">يتخطى الرعايات والمقدمات والترويج الذاتي وأجزاء أخرى من الفيديوهات حدّدها المجتمع</string>
+    <string name="card_desc_aislist">يخفي أو يميّز فيديوهات القنوات التي تصنّفها قائمة مجتمعية بأنها تنشر محتوى مولَّدًا بالذكاء الاصطناعي</string>
+    <string name="card_desc_auto_frame_rate">يغيّر معدل تحديث التلفزيون ليطابق الفيديو، فلا تتقطع حركات الكاميرا السريعة</string>
+    <string name="card_desc_network_engine">يختار مكتبة الشبكة التي تحمّل الفيديوهات. جرّب أخرى إذا كانت الفيديوهات تتوقف للتحميل أو لا تعمل.</string>
+    <string name="card_desc_client_order">الترتيب الذي يجرّب به التطبيق عملاء YouTube للحصول على بثوث الفيديو، حتى يعمل أحدها</string>
+    <string name="card_desc_pixel_ratio">يمطّ الصورة للشاشات التي ليست 16:9، مثل 16:10 أو 4:3 أو الشاشات فائقة العرض</string>
+    <string name="card_desc_places">يعرض الدردشة المباشرة والتعليقات على يسار الفيديو بدلًا من يمينه</string>
+    <string name="card_desc_unlock">يسمح بصيغ الفيديو التي يُبلغ الجهاز خطأً أنها غير مدعومة، مثل 4K أو VP9 عالي معدل البت</string>
+    <string name="card_desc_frame">إصلاحات للإطارات المفقودة على أجهزة Sony وAmazon Fire TV وAmlogic</string>
+    <string name="card_desc_fix">حلول لتقطع البث المباشر، ونسبة العرض إلى الارتفاع الخاطئة، وغياب Ambilight، وفراغ الاشتراكات</string>
+    <string name="card_desc_api_keys">مفتاح YouTube Data API الخاص بك، مطلوب للتشغيل التلقائي للموسيقى ولإخفاء الفيديوهات أو تمييزها حسب الفئة (موسيقى، ألعاب، أخبار…) في الصفحة الرئيسية</string>
+    <string name="card_desc_dns">يغيّر طريقة عثور التطبيق على خوادم YouTube. قد يساعد عندما لا يتم تحميل التطبيق إطلاقًا.</string>
+    <string name="card_desc_remote_control">يقرن هاتفًا أو جهازًا لوحيًا ليتمكن تطبيق YouTube فيه من التحكم في التشغيل على هذا التلفزيون</string>
 </resources>

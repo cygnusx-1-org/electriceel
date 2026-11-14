@@ -1175,4 +1175,21 @@
     <string name="modern_on">Activado</string>
     <string name="modern_off">Desactivado</string>
     <string name="modern_try_again">Reintentar</string>
+    <string name="card_desc_dearrow">Sustituye los títulos y miniaturas engañosos por otros que ha enviado la comunidad</string>
+    <string name="card_desc_home_screen_channels">Elige qué filas (Historial, tus listas de reproducción…) aparecen como canales en la pantalla de inicio de Android TV</string>
+    <string name="card_desc_filtering">Oculta o marca colaboraciones, Ver más tarde, programas, directos y las filas sugeridas de Inicio</string>
+    <string name="card_desc_hide_content">Oculta los Shorts, los mixes y los vídeos vistos, próximos, duplicados, antiguos o que coinciden con palabras clave</string>
+    <string name="card_desc_sponsorblock">Salta patrocinios, introducciones, autopromoción y otras partes de los vídeos que la comunidad ha marcado</string>
+    <string name="card_desc_aislist">Oculta o marca los vídeos de canales que una lista de la comunidad señala por publicar contenido generado por IA</string>
+    <string name="card_desc_auto_frame_rate">Cambia la frecuencia de actualización del televisor para que coincida con el vídeo y los movimientos rápidos de cámara no tiemblen</string>
+    <string name="card_desc_network_engine">Elige la biblioteca de red que carga los vídeos. Prueba otra si los vídeos se detienen a cargar o no cargan.</string>
+    <string name="card_desc_client_order">El orden en que la aplicación prueba los clientes de YouTube para obtener las transmisiones de un vídeo, hasta que uno lo reproduce</string>
+    <string name="card_desc_pixel_ratio">Estira la imagen para pantallas que no son 16:9, como 16:10, 4:3 o ultrapanorámicas</string>
+    <string name="card_desc_places">Muestra el chat en directo y los comentarios a la izquierda del vídeo en lugar de a la derecha</string>
+    <string name="card_desc_unlock">Permite formatos de vídeo que el dispositivo indica por error como no compatibles, como 4K o VP9 de alta tasa de bits</string>
+    <string name="card_desc_frame">Correcciones para los fotogramas perdidos en dispositivos Sony, Amazon Fire TV y Amlogic</string>
+    <string name="card_desc_fix">Soluciones para cortes en directos, una relación de aspecto incorrecta, el Ambilight ausente y las Suscripciones vacías</string>
+    <string name="card_desc_api_keys">Tu propia clave de YouTube Data API, necesaria para la reproducción automática de música y para ocultar o marcar vídeos por categoría (música, juegos, noticias…) en Inicio</string>
+    <string name="card_desc_dns">Cambia cómo la aplicación encuentra los servidores de YouTube. Puede ayudar cuando la aplicación no carga en absoluto.</string>
+    <string name="card_desc_remote_control">Vincula un teléfono o una tableta para que su aplicación de YouTube controle la reproducción en este televisor</string>
 </resources>

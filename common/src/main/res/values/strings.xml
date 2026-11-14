@@ -1180,4 +1180,23 @@
     <string name="modern_on">On</string>
     <string name="modern_off">Off</string>
     <string name="modern_try_again">Try again</string>
+    <!-- What a settings card is about, under the cards (classic skin) or under its title on the end side (modern skin):
+         for the cards whose title doesn't say it. Two lines at most in the classic skin. -->
+    <string name="card_desc_dearrow">Replaces clickbait titles and thumbnails with ones the community has submitted</string>
+    <string name="card_desc_home_screen_channels">Picks which rows (History, your playlists…) appear as channels on the Android TV home screen</string>
+    <string name="card_desc_filtering">Hides or marks collaborations, Watch later, shows, live streams and the suggested rows of Home</string>
+    <string name="card_desc_hide_content">Hides Shorts, mixes, and watched, upcoming, duplicate, old or keyword-matched videos</string>
+    <string name="card_desc_sponsorblock">Skips sponsors, intros, self-promotion and other parts of videos that the community has marked</string>
+    <string name="card_desc_aislist">Hides or marks videos from channels that a community list flags as posting AI-generated content</string>
+    <string name="card_desc_auto_frame_rate">Switches the TV\'s refresh rate to match the video, so fast camera moves don\'t judder</string>
+    <string name="card_desc_network_engine">Picks the network library that loads videos. Try another if videos buffer or won\'t load.</string>
+    <string name="card_desc_client_order">The order the app tries YouTube\'s clients in to get the streams of a video, until one plays</string>
+    <string name="card_desc_pixel_ratio">Stretches the picture for screens that aren\'t 16:9, such as 16:10, 4:3 or ultrawide</string>
+    <string name="card_desc_places">Shows the live chat and the comments on the left of the video instead of the right</string>
+    <string name="card_desc_unlock">Allows video formats the device wrongly reports as unsupported, such as 4K or high-bitrate VP9</string>
+    <string name="card_desc_frame">Fixes for dropped frames on Sony, Amazon Fire TV and Amlogic devices</string>
+    <string name="card_desc_fix">Workarounds for live stream stutter, a wrong aspect ratio, missing Ambilight and empty Subscriptions</string>
+    <string name="card_desc_api_keys">Your own YouTube Data API key, needed for music autoplay and to hide or mark videos by category (music, gaming, news…) on Home</string>
+    <string name="card_desc_dns">Changes how the app finds the servers of YouTube. Can help when the app doesn\'t load at all.</string>
+    <string name="card_desc_remote_control">Pairs a phone or tablet so its YouTube app can control the playback on this TV</string>
 </resources>

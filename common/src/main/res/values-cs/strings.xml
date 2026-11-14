@@ -1205,6 +1205,23 @@
     <string name="modern_on">Zapnuto</string>
     <string name="modern_off">Vypnuto</string>
     <string name="modern_try_again">Zkusit znovu</string>
+    <string name="card_desc_dearrow">Nahrazuje návnadové názvy a miniatury těmi, které poslala komunita</string>
+    <string name="card_desc_home_screen_channels">Vybírá, které řady (Historie, vaše playlisty…) se zobrazí jako kanály na domovské obrazovce Android TV</string>
+    <string name="card_desc_filtering">Skrývá nebo označuje spolupráce, Přehrát později, pořady, živé přenosy a navrhované řady na stránce Domů</string>
+    <string name="card_desc_hide_content">Skrývá Shorts, mixy a zhlédnutá, nadcházející, duplicitní, stará nebo klíčovým slovům odpovídající videa</string>
+    <string name="card_desc_sponsorblock">Přeskakuje sponzory, úvody, sebepropagaci a další části videí, které komunita označila</string>
+    <string name="card_desc_aislist">Skrývá nebo označuje videa z kanálů, které komunitní seznam označuje za zveřejňující obsah vytvořený umělou inteligencí</string>
+    <string name="card_desc_auto_frame_rate">Přepíná obnovovací frekvenci televizoru podle videa, aby rychlé pohyby kamery necukaly</string>
+    <string name="card_desc_network_engine">Vybírá síťovou knihovnu, která načítá videa. Pokud se videa stále načítají do vyrovnávací paměti nebo se nenačtou, zkuste jinou.</string>
+    <string name="card_desc_client_order">Pořadí, ve kterém aplikace zkouší klienty YouTube, aby získala streamy videa, dokud jeden video nepřehraje</string>
+    <string name="card_desc_pixel_ratio">Roztahuje obraz pro obrazovky, které nejsou 16:9, například 16:10, 4:3 nebo ultraširoké</string>
+    <string name="card_desc_places">Zobrazuje živý chat a komentáře vlevo od videa místo vpravo</string>
+    <string name="card_desc_unlock">Povoluje formáty videa, které zařízení chybně hlásí jako nepodporované, například 4K nebo VP9 s vysokým datovým tokem</string>
+    <string name="card_desc_frame">Opravy vypadávajících snímků na zařízeních Sony, Amazon Fire TV a Amlogic</string>
+    <string name="card_desc_fix">Řešení trhání živých přenosů, špatného poměru stran, chybějícího Ambilightu a prázdných Odběrů</string>
+    <string name="card_desc_api_keys">Váš vlastní klíč YouTube Data API, potřebný pro automatické přehrávání hudby a ke skrývání nebo označování videí podle kategorie (hudba, hry, zprávy…) na stránce Domů</string>
+    <string name="card_desc_dns">Mění, jak aplikace hledá servery YouTube. Může pomoci, když se aplikace vůbec nenačte.</string>
+    <string name="card_desc_remote_control">Spáruje telefon nebo tablet, aby jeho aplikace YouTube mohla ovládat přehrávání na této televizi</string>
 </resources>
 
 

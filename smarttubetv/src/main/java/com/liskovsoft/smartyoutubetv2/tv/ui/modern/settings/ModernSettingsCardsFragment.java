@@ -16,11 +16,13 @@ import androidx.fragment.app.Fragment;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.SettingsCardsPresenter;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.SettingsLinksPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.SettingsCardsView;
 import com.liskovsoft.smartyoutubetv2.tv.R;
 import com.liskovsoft.smartyoutubetv2.tv.ui.modern.common.ModernIcons;
 import com.liskovsoft.smartyoutubetv2.tv.ui.modern.common.ModernText;
 import com.liskovsoft.smartyoutubetv2.tv.ui.modern.common.ModernTheme;
+import com.liskovsoft.smartyoutubetv2.tv.ui.settingscards.SettingsCardLongPress;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +39,7 @@ public class ModernSettingsCardsFragment extends Fragment implements SettingsCar
     private View mPreview;
     private ImageView mPreviewIcon;
     private TextView mPreviewTitle;
+    private TextView mPreviewDescription;
     private String mCardsTitle;
     private int mSelectedPosition;
 
@@ -58,6 +61,7 @@ public class ModernSettingsCardsFragment extends Fragment implements SettingsCar
         mPreview = root.findViewById(R.id.modern_settings_preview);
         mPreviewIcon = root.findViewById(R.id.modern_settings_preview_icon);
         mPreviewTitle = root.findViewById(R.id.modern_settings_preview_title);
+        mPreviewDescription = root.findViewById(R.id.modern_settings_preview_description);
         return root;
     }
 
@@ -130,6 +134,9 @@ public class ModernSettingsCardsFragment extends Fragment implements SettingsCar
         TextView text = row.findViewById(R.id.modern_settings_row_text);
         text.setText(item.title);
         row.setOnClickListener(v -> open(item));
+        // The addresses of the card as QR codes (see SettingsLinksPresenter), in a panel titled as the one the click opens
+        SettingsCardLongPress.attach(row, () -> !item.getLinks().isEmpty()
+                && openWithTitles(() -> SettingsLinksPresenter.instance(getContext()).show(item)));
         row.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {
                 mSelectedPosition = mList.indexOfChild(v);
@@ -139,28 +146,38 @@ public class ModernSettingsCardsFragment extends Fragment implements SettingsCar
         return row;
     }
 
-    /**
-     * As the classic cards: the panel of the card is titled "<Section> - <Card>", the lists inside it "<Parent> - <List>"
-     */
     private void open(SettingsItem item) {
         if (item.onClick == null) {
             return;
         }
 
+        openWithTitles(item.onClick);
+    }
+
+    /**
+     * As the classic cards: the panel of the card is titled "<Section> - <Card>", the lists inside it "<Parent> - <List>"
+     *
+     * @return true, for the long press: it was used
+     */
+    private boolean openWithTitles(Runnable open) {
         AppDialogPresenter dialogPresenter = AppDialogPresenter.instance(getContext());
         dialogPresenter.setTitlePrefix(mCardsTitle);
         dialogPresenter.enableNestedTitles(true);
         try {
-            item.onClick.run();
+            open.run();
         } finally {
             // Only the panel opened right away
             dialogPresenter.setTitlePrefix(null);
             dialogPresenter.enableNestedTitles(false);
         }
+
+        return true;
     }
 
     private void showPreview(SettingsItem item) {
         mPreviewTitle.setText(ModernText.sentenceCase(item.title));
+        // Emptied for a card without one: its place stays
+        mPreviewDescription.setText(item.getDescription());
         int icon = ModernIcons.forSettings(item.imageResId);
 
         if (icon == 0) {

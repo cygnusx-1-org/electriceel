@@ -1204,4 +1204,21 @@
     <string name="modern_on">Įjungta</string>
     <string name="modern_off">Išjungta</string>
     <string name="modern_try_again">Bandyti dar kartą</string>
+    <string name="card_desc_dearrow">Pakeičia klaidinančius pavadinimus ir miniatiūras bendruomenės pateiktais</string>
+    <string name="card_desc_home_screen_channels">Pasirenka, kurios eilutės (Istorija, jūsų grojaraščiai…) rodomos kaip kanalai Android TV pagrindiniame ekrane</string>
+    <string name="card_desc_filtering">Slepia arba pažymi bendradarbiavimus, Žiūrėti vėliau, laidas, tiesiogines transliacijas ir siūlomas Pagrindinio eilutes</string>
+    <string name="card_desc_hide_content">Slepia Shorts, miksus ir peržiūrėtus, būsimus, pasikartojančius, senus ar raktažodžius atitinkančius vaizdo įrašus</string>
+    <string name="card_desc_sponsorblock">Praleidžia rėmėjus, įžangas, savireklamą ir kitas vaizdo įrašų dalis, kurias pažymėjo bendruomenė</string>
+    <string name="card_desc_aislist">Slepia arba pažymi vaizdo įrašus iš kanalų, kuriuos bendruomenės sąrašas nurodo kaip skelbiančius DI sukurtą turinį</string>
+    <string name="card_desc_auto_frame_rate">Pakeičia televizoriaus atnaujinimo dažnį pagal vaizdo įrašą, kad greiti kameros judesiai nestrigtų</string>
+    <string name="card_desc_network_engine">Pasirenka tinklo biblioteką, kuri įkelia vaizdo įrašus. Išbandykite kitą, jei vaizdo įrašai buferizuojami arba neįsikelia.</string>
+    <string name="card_desc_client_order">Tvarka, kuria programa bando YouTube klientus, kad gautų vaizdo įrašo srautus, kol vienas jį paleidžia</string>
+    <string name="card_desc_pixel_ratio">Ištempia vaizdą ekranams, kurie nėra 16:9, pvz., 16:10, 4:3 ar itin platiems</string>
+    <string name="card_desc_places">Rodo tiesioginį pokalbį ir komentarus kairėje vaizdo įrašo pusėje, o ne dešinėje</string>
+    <string name="card_desc_unlock">Leidžia vaizdo formatus, kuriuos įrenginys klaidingai nurodo kaip nepalaikomus, pvz., 4K ar didelės spartos VP9</string>
+    <string name="card_desc_frame">Praleistų kadrų pataisymai Sony, Amazon Fire TV ir Amlogic įrenginiuose</string>
+    <string name="card_desc_fix">Sprendimai strigančioms tiesioginėms transliacijoms, netinkamam kraštinių santykiui, trūkstamam Ambilight ir tuščioms Prenumeratoms</string>
+    <string name="card_desc_api_keys">Jūsų paties YouTube Data API raktas, reikalingas muzikos automatiniam leidimui ir vaizdo įrašams slėpti ar pažymėti pagal kategoriją (muzika, žaidimai, naujienos…) Pagrindiniame</string>
+    <string name="card_desc_dns">Keičia, kaip programa randa YouTube serverius. Gali padėti, kai programa visai neįsikelia.</string>
+    <string name="card_desc_remote_control">Susieja telefoną ar planšetę, kad jo YouTube programa galėtų valdyti atkūrimą šiame televizoriuje</string>
 </resources>

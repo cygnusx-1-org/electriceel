@@ -1208,4 +1208,21 @@
     <string name="modern_on">Увімк.</string>
     <string name="modern_off">Вимк.</string>
     <string name="modern_try_again">Спробувати ще раз</string>
+    <string name="card_desc_dearrow">Замінює клікбейтні назви та мініатюри на ті, що надіслала спільнота</string>
+    <string name="card_desc_home_screen_channels">Вибирає, які ряди (Історія, ваші плейлисти…) показуються як канали на головному екрані Android TV</string>
+    <string name="card_desc_filtering">Приховує або позначає колаборації, «Переглянути пізніше», шоу, трансляції та рекомендовані ряди Головної</string>
+    <string name="card_desc_hide_content">Приховує Shorts, мікси, а також переглянуті, майбутні, повторювані, старі або відповідні ключовим словам відео</string>
+    <string name="card_desc_sponsorblock">Пропускає спонсорів, вступи, самопіар та інші частини відео, позначені спільнотою</string>
+    <string name="card_desc_aislist">Приховує або позначає відео з каналів, які список спільноти позначає як такі, що публікують контент, створений ШІ</string>
+    <string name="card_desc_auto_frame_rate">Перемикає частоту оновлення телевізора відповідно до відео, щоб швидкі рухи камери не смикалися</string>
+    <string name="card_desc_network_engine">Вибирає мережеву бібліотеку, яка завантажує відео. Спробуйте іншу, якщо відео буферизується або не завантажується.</string>
+    <string name="card_desc_client_order">Порядок, у якому застосунок пробує клієнти YouTube, щоб отримати потоки відео, доки один із них його не відтворить</string>
+    <string name="card_desc_pixel_ratio">Розтягує зображення для екранів, що не є 16:9, як-от 16:10, 4:3 або надширокі</string>
+    <string name="card_desc_places">Показує чат трансляції та коментарі ліворуч від відео замість праворуч</string>
+    <string name="card_desc_unlock">Дозволяє формати відео, які пристрій помилково вважає непідтримуваними, як-от 4K або VP9 з високим бітрейтом</string>
+    <string name="card_desc_frame">Виправлення пропуску кадрів на пристроях Sony, Amazon Fire TV та Amlogic</string>
+    <string name="card_desc_fix">Обхідні рішення для ривків трансляцій, неправильного співвідношення сторін, відсутнього Ambilight і порожніх Підписок</string>
+    <string name="card_desc_api_keys">Ваш власний ключ YouTube Data API, потрібний для автовідтворення музики та щоб приховувати або позначати відео за категорією (музика, ігри, новини…) на Головній</string>
+    <string name="card_desc_dns">Змінює спосіб, у який застосунок знаходить сервери YouTube. Може допомогти, коли застосунок взагалі не завантажується.</string>
+    <string name="card_desc_remote_control">Поєднує телефон або планшет, щоб його застосунок YouTube міг керувати відтворенням на цьому телевізорі</string>
 </resources>

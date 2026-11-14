@@ -1175,4 +1175,21 @@
     <string name="modern_on">Päällä</string>
     <string name="modern_off">Pois</string>
     <string name="modern_try_again">Yritä uudelleen</string>
+    <string name="card_desc_dearrow">Korvaa klikkiotsikot ja -pikkukuvat yhteisön lähettämillä</string>
+    <string name="card_desc_home_screen_channels">Valitsee, mitkä rivit (Historia, soittolistasi…) näkyvät kanavina Android TV:n aloitusnäytössä</string>
+    <string name="card_desc_filtering">Piilottaa tai merkitsee yhteistyöt, Katso myöhemmin -listan, ohjelmat, suorat lähetykset ja Kodin ehdotetut rivit</string>
+    <string name="card_desc_hide_content">Piilottaa Short-videot, miksaukset sekä katsotut, tulevat, kaksoiskappaleet, vanhat tai avainsanoja vastaavat videot</string>
+    <string name="card_desc_sponsorblock">Ohittaa sponsorit, introt, oman mainonnan ja muut videoiden osat, jotka yhteisö on merkinnyt</string>
+    <string name="card_desc_aislist">Piilottaa tai merkitsee videot kanavilta, jotka yhteisön lista merkitsee tekoälyllä tuotetun sisällön julkaisijoiksi</string>
+    <string name="card_desc_auto_frame_rate">Vaihtaa television virkistystaajuuden videon mukaiseksi, jotta nopeat kameranliikkeet eivät nyi</string>
+    <string name="card_desc_network_engine">Valitsee verkkokirjaston, joka lataa videot. Kokeile toista, jos videot puskuroivat tai eivät lataudu.</string>
+    <string name="card_desc_client_order">Järjestys, jossa sovellus kokeilee YouTuben asiakasohjelmia videon striimien saamiseksi, kunnes yksi toistaa sen</string>
+    <string name="card_desc_pixel_ratio">Venyttää kuvan näytöille, jotka eivät ole 16:9, kuten 16:10, 4:3 tai ultralaajakuva</string>
+    <string name="card_desc_places">Näyttää live-chatin ja kommentit videon vasemmalla puolella oikean sijaan</string>
+    <string name="card_desc_unlock">Sallii videomuodot, jotka laite virheellisesti ilmoittaa tukemattomiksi, kuten 4K tai suuren bittinopeuden VP9</string>
+    <string name="card_desc_frame">Korjauksia pudonneisiin kuviin Sony-, Amazon Fire TV- ja Amlogic-laitteissa</string>
+    <string name="card_desc_fix">Kiertotiet suorien lähetysten nykimiseen, väärään kuvasuhteeseen, puuttuvaan Ambilightiin ja tyhjiin Tilauksiin</string>
+    <string name="card_desc_api_keys">Oma YouTube Data API -avaimesi, jota tarvitaan musiikin automaattiseen toistoon sekä videoiden piilottamiseen tai merkitsemiseen luokan mukaan (musiikki, pelit, uutiset…) Kodissa</string>
+    <string name="card_desc_dns">Muuttaa tapaa, jolla sovellus löytää YouTuben palvelimet. Voi auttaa, kun sovellus ei lataudu lainkaan.</string>
+    <string name="card_desc_remote_control">Muodostaa pariliitoksen puhelimeen tai tablettiin, jotta sen YouTube-sovellus voi ohjata toistoa tässä televisiossa</string>
 </resources>

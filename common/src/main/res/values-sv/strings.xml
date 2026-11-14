@@ -1175,4 +1175,21 @@
     <string name="modern_on">På</string>
     <string name="modern_off">Av</string>
     <string name="modern_try_again">Försök igen</string>
+    <string name="card_desc_dearrow">Ersätter clickbait-titlar och -miniatyrer med sådana som communityn har skickat in</string>
+    <string name="card_desc_home_screen_channels">Väljer vilka rader (Historik, dina spellistor…) som visas som kanaler på Android TV:s startskärm</string>
+    <string name="card_desc_filtering">Döljer eller markerar samarbeten, Titta senare, program, livesändningar och de föreslagna raderna på Hem</string>
+    <string name="card_desc_hide_content">Döljer Shorts, mixar och sedda, kommande, dubblerade, gamla eller sökordsmatchande videor</string>
+    <string name="card_desc_sponsorblock">Hoppar över sponsorer, intron, egenreklam och andra delar av videor som communityn har markerat</string>
+    <string name="card_desc_aislist">Döljer eller markerar videor från kanaler som en communitylista anger publicerar AI-genererat innehåll</string>
+    <string name="card_desc_auto_frame_rate">Byter tv:ns uppdateringsfrekvens efter videon, så att snabba kamerarörelser inte hackar</string>
+    <string name="card_desc_network_engine">Väljer nätverksbiblioteket som läser in videor. Prova ett annat om videor buffrar eller inte läses in.</string>
+    <string name="card_desc_client_order">Ordningen som appen provar YouTubes klienter i för att hämta en videos strömmar, tills en spelar upp den</string>
+    <string name="card_desc_pixel_ratio">Sträcker ut bilden för skärmar som inte är 16:9, till exempel 16:10, 4:3 eller ultrabreda</string>
+    <string name="card_desc_places">Visar livechatten och kommentarerna till vänster om videon i stället för till höger</string>
+    <string name="card_desc_unlock">Tillåter videoformat som enheten felaktigt rapporterar som ej stödda, till exempel 4K eller VP9 med hög bithastighet</string>
+    <string name="card_desc_frame">Korrigeringar för tappade bildrutor på enheter från Sony, Amazon Fire TV och Amlogic</string>
+    <string name="card_desc_fix">Lösningar för hackande livesändningar, fel bildförhållande, saknad Ambilight och tomma Prenumerationer</string>
+    <string name="card_desc_api_keys">Din egen YouTube Data API-nyckel, som behövs för automatisk musikuppspelning och för att dölja eller markera videor efter kategori (musik, spel, nyheter…) på Hem</string>
+    <string name="card_desc_dns">Ändrar hur appen hittar YouTubes servrar. Kan hjälpa när appen inte läses in alls.</string>
+    <string name="card_desc_remote_control">Parkopplar en telefon eller surfplatta så att dess YouTube-app kan styra uppspelningen på den här tv:n</string>
 </resources>

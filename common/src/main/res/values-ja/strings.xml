@@ -1160,4 +1160,21 @@
     <string name="modern_on">オン</string>
     <string name="modern_off">オフ</string>
     <string name="modern_try_again">再試行</string>
+    <string name="card_desc_dearrow">釣りタイトルやサムネイルを、コミュニティが投稿したものに置き換えます</string>
+    <string name="card_desc_home_screen_channels">どの行（履歴、再生リスト…）を Android TV のホーム画面にチャンネルとして表示するかを選びます</string>
+    <string name="card_desc_filtering">コラボ、後で見る、番組、ライブ配信、ホームのおすすめの行を非表示にするか印を付けます</string>
+    <string name="card_desc_hide_content">ショート、ミックス、視聴済み・近日公開・重複・古い・キーワードに一致する動画を非表示にします</string>
+    <string name="card_desc_sponsorblock">コミュニティが指定したスポンサー、イントロ、自己宣伝などの動画の部分をスキップします</string>
+    <string name="card_desc_aislist">コミュニティのリストが AI 生成コンテンツを投稿しているとするチャンネルの動画を非表示にするか印を付けます</string>
+    <string name="card_desc_auto_frame_rate">テレビのリフレッシュレートを動画に合わせて切り替え、速いカメラの動きがカクつかないようにします</string>
+    <string name="card_desc_network_engine">動画を読み込むネットワーク ライブラリを選びます。動画がバッファリングしたり読み込まれない場合は別のものを試してください。</string>
+    <string name="card_desc_client_order">動画のストリームを取得するためにアプリが YouTube のクライアントを試す順序（いずれかで再生できるまで）</string>
+    <string name="card_desc_pixel_ratio">16:9 以外の画面（16:10、4:3、ウルトラワイドなど）に合わせて映像を引き伸ばします</string>
+    <string name="card_desc_places">ライブチャットとコメントを動画の右ではなく左に表示します</string>
+    <string name="card_desc_unlock">デバイスが誤って非対応と報告する動画形式（4K や高ビットレートの VP9 など）を許可します</string>
+    <string name="card_desc_frame">Sony、Amazon Fire TV、Amlogic のデバイスでのフレーム落ちの修正</string>
+    <string name="card_desc_fix">ライブ配信のカクつき、誤ったアスペクト比、Ambilight が効かない、登録チャンネルが空になる問題の回避策</string>
+    <string name="card_desc_api_keys">ご自身の YouTube Data API キー。音楽の自動再生と、ホームでカテゴリ（音楽、ゲーム、ニュース…）ごとに動画を非表示にしたり印を付けたりするのに必要です</string>
+    <string name="card_desc_dns">アプリが YouTube のサーバーを見つける方法を変更します。アプリがまったく読み込まれないときに役立つことがあります。</string>
+    <string name="card_desc_remote_control">スマートフォンやタブレットをペア設定し、その YouTube アプリでこのテレビの再生を操作できるようにします</string>
 </resources>

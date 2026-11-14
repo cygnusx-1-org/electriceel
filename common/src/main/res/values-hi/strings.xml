@@ -1175,4 +1175,21 @@
     <string name="modern_on">चालू</string>
     <string name="modern_off">बंद</string>
     <string name="modern_try_again">फिर से कोशिश करें</string>
+    <string name="card_desc_dearrow">क्लिकबेट शीर्षकों और थंबनेल को समुदाय द्वारा भेजे गए शीर्षकों और थंबनेल से बदलता है</string>
+    <string name="card_desc_home_screen_channels">चुनता है कि कौन-सी पंक्तियाँ (इतिहास, आपकी प्लेलिस्ट…) Android TV होम स्क्रीन पर चैनल के रूप में दिखें</string>
+    <string name="card_desc_filtering">सहयोग, बाद में देखें, शो, लाइव स्ट्रीम और होम की सुझाई गई पंक्तियों को छिपाता या चिह्नित करता है</string>
+    <string name="card_desc_hide_content">शॉर्ट्स, मिक्स और देखे गए, आगामी, दोहराए गए, पुराने या कीवर्ड से मेल खाने वाले वीडियो छिपाता है</string>
+    <string name="card_desc_sponsorblock">प्रायोजक, इंट्रो, स्व-प्रचार और वीडियो के अन्य हिस्से छोड़ देता है जिन्हें समुदाय ने चिह्नित किया है</string>
+    <string name="card_desc_aislist">उन चैनलों के वीडियो छिपाता या चिह्नित करता है जिन्हें एक सामुदायिक सूची AI से बनी सामग्री पोस्ट करने वाला बताती है</string>
+    <string name="card_desc_auto_frame_rate">टीवी की रिफ़्रेश दर को वीडियो के अनुसार बदलता है, ताकि कैमरे की तेज़ हलचल झटके न खाए</string>
+    <string name="card_desc_network_engine">वीडियो लोड करने वाली नेटवर्क लाइब्रेरी चुनता है। अगर वीडियो बफ़र होते हैं या लोड नहीं होते, तो दूसरी आज़माएँ।</string>
+    <string name="card_desc_client_order">वह क्रम जिसमें ऐप किसी वीडियो की स्ट्रीम पाने के लिए YouTube क्लाइंट आज़माता है, जब तक कोई चल न जाए</string>
+    <string name="card_desc_pixel_ratio">उन स्क्रीन के लिए चित्र को खींचता है जो 16:9 नहीं हैं, जैसे 16:10, 4:3 या अल्ट्रावाइड</string>
+    <string name="card_desc_places">लाइव चैट और टिप्पणियों को वीडियो के दाईं ओर के बजाय बाईं ओर दिखाता है</string>
+    <string name="card_desc_unlock">उन वीडियो फ़ॉर्मैट की अनुमति देता है जिन्हें डिवाइस गलती से असमर्थित बताता है, जैसे 4K या उच्च बिटरेट VP9</string>
+    <string name="card_desc_frame">Sony, Amazon Fire TV और Amlogic डिवाइस पर छूटे फ़्रेम के लिए सुधार</string>
+    <string name="card_desc_fix">लाइव स्ट्रीम की रुकावट, गलत आस्पेक्ट रेशियो, गायब Ambilight और खाली सदस्यता के लिए उपाय</string>
+    <string name="card_desc_api_keys">आपकी अपनी YouTube Data API कुंजी, संगीत ऑटोप्ले के लिए और होम पर वीडियो को श्रेणी (संगीत, गेमिंग, समाचार…) के अनुसार छिपाने या चिह्नित करने के लिए ज़रूरी</string>
+    <string name="card_desc_dns">बदलता है कि ऐप YouTube के सर्वर कैसे ढूँढता है। जब ऐप बिल्कुल लोड न हो, तब मदद कर सकता है।</string>
+    <string name="card_desc_remote_control">किसी फ़ोन या टैबलेट को जोड़ता है ताकि उसका YouTube ऐप इस टीवी पर प्लेबैक नियंत्रित कर सके</string>
 </resources>

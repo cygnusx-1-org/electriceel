@@ -1160,4 +1160,21 @@
     <string name="modern_on">Bật</string>
     <string name="modern_off">Tắt</string>
     <string name="modern_try_again">Thử lại</string>
+    <string name="card_desc_dearrow">Thay tiêu đề và hình thu nhỏ giật tít bằng những cái do cộng đồng gửi</string>
+    <string name="card_desc_home_screen_channels">Chọn hàng nào (Lịch sử, danh sách phát của bạn…) xuất hiện dưới dạng kênh trên màn hình chính Android TV</string>
+    <string name="card_desc_filtering">Ẩn hoặc đánh dấu video hợp tác, Xem sau, chương trình, sự kiện trực tiếp và các hàng được đề xuất của Trang chủ</string>
+    <string name="card_desc_hide_content">Ẩn Shorts, danh sách kết hợp và video đã xem, sắp ra mắt, trùng lặp, cũ hoặc khớp từ khóa</string>
+    <string name="card_desc_sponsorblock">Bỏ qua nhà tài trợ, đoạn giới thiệu, tự quảng cáo và các phần khác của video mà cộng đồng đã đánh dấu</string>
+    <string name="card_desc_aislist">Ẩn hoặc đánh dấu video từ các kênh mà một danh sách cộng đồng cho là đăng nội dung do AI tạo</string>
+    <string name="card_desc_auto_frame_rate">Chuyển tần số quét của TV cho khớp với video để các chuyển động máy quay nhanh không bị giật</string>
+    <string name="card_desc_network_engine">Chọn thư viện mạng tải video. Hãy thử thư viện khác nếu video bị tải chậm hoặc không tải được.</string>
+    <string name="card_desc_client_order">Thứ tự ứng dụng thử các client của YouTube để lấy luồng của video, cho đến khi một client phát được</string>
+    <string name="card_desc_pixel_ratio">Kéo giãn hình ảnh cho màn hình không phải 16:9, như 16:10, 4:3 hoặc siêu rộng</string>
+    <string name="card_desc_places">Hiển thị trò chuyện trực tiếp và bình luận ở bên trái video thay vì bên phải</string>
+    <string name="card_desc_unlock">Cho phép các định dạng video mà thiết bị báo sai là không hỗ trợ, như 4K hoặc VP9 bitrate cao</string>
+    <string name="card_desc_frame">Bản sửa lỗi rớt khung hình trên thiết bị Sony, Amazon Fire TV và Amlogic</string>
+    <string name="card_desc_fix">Cách khắc phục sự kiện trực tiếp bị giật, tỷ lệ khung hình sai, Ambilight bị thiếu và Kênh đăng ký trống</string>
+    <string name="card_desc_api_keys">Khóa YouTube Data API của riêng bạn, cần cho tự động phát nhạc và để ẩn hoặc đánh dấu video theo danh mục (âm nhạc, trò chơi, tin tức…) trên Trang chủ</string>
+    <string name="card_desc_dns">Thay đổi cách ứng dụng tìm máy chủ của YouTube. Có thể giúp khi ứng dụng hoàn toàn không tải được.</string>
+    <string name="card_desc_remote_control">Ghép nối điện thoại hoặc máy tính bảng để ứng dụng YouTube trên đó điều khiển việc phát trên TV này</string>
 </resources>

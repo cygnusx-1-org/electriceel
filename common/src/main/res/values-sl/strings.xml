@@ -1205,4 +1205,21 @@
     <string name="modern_on">Vklopljeno</string>
     <string name="modern_off">Izklopljeno</string>
     <string name="modern_try_again">Poskusi znova</string>
+    <string name="card_desc_dearrow">Zamenja zavajajoče naslove in sličice s tistimi, ki jih je poslala skupnost</string>
+    <string name="card_desc_home_screen_channels">Izbere, katere vrstice (Zgodovina, tvoji seznami predvajanja…) se prikažejo kot kanali na začetnem zaslonu Android TV</string>
+    <string name="card_desc_filtering">Skrije ali označi sodelovanja, Za poznejši ogled, oddaje, prenose v živo in predlagane vrstice na Domov</string>
+    <string name="card_desc_hide_content">Skrije Shorts, mikse ter ogledane, prihajajoče, podvojene, stare ali s ključnimi besedami ujemajoče se videoposnetke</string>
+    <string name="card_desc_sponsorblock">Preskoči sponzorje, uvode, samopromocijo in druge dele videoposnetkov, ki jih je označila skupnost</string>
+    <string name="card_desc_aislist">Skrije ali označi videoposnetke s kanalov, ki jih seznam skupnosti označuje kot objavljalce vsebine, ustvarjene z UI</string>
+    <string name="card_desc_auto_frame_rate">Preklopi hitrost osveževanja televizorja glede na videoposnetek, da se hitri premiki kamere ne zatikajo</string>
+    <string name="card_desc_network_engine">Izbere omrežno knjižnico, ki nalaga videoposnetke. Poskusi drugo, če se videoposnetki medpomnijo ali ne naložijo.</string>
+    <string name="card_desc_client_order">Vrstni red, v katerem aplikacija preizkuša odjemalce YouTube, da dobi tokove videoposnetka, dokler ga eden ne predvaja</string>
+    <string name="card_desc_pixel_ratio">Raztegne sliko za zaslone, ki niso 16:9, na primer 16:10, 4:3 ali ultra široke</string>
+    <string name="card_desc_places">Prikaže klepet v živo in komentarje levo od videoposnetka namesto desno</string>
+    <string name="card_desc_unlock">Dovoli formate videa, ki jih naprava napačno javlja kot nepodprte, na primer 4K ali VP9 z visoko bitno hitrostjo</string>
+    <string name="card_desc_frame">Popravki izpuščenih sličic na napravah Sony, Amazon Fire TV in Amlogic</string>
+    <string name="card_desc_fix">Rešitve za zatikanje prenosov v živo, napačno razmerje stranic, manjkajoči Ambilight in prazne Naročnine</string>
+    <string name="card_desc_api_keys">Tvoj lasten ključ YouTube Data API, potreben za samodejno predvajanje glasbe ter za skrivanje ali označevanje videoposnetkov po kategoriji (glasba, igre, novice…) na Domov</string>
+    <string name="card_desc_dns">Spremeni, kako aplikacija najde strežnike YouTuba. Lahko pomaga, ko se aplikacija sploh ne naloži.</string>
+    <string name="card_desc_remote_control">Seznani telefon ali tablični računalnik, da lahko njegova aplikacija YouTube upravlja predvajanje na tem televizorju</string>
 </resources>

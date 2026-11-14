@@ -1160,4 +1160,21 @@
     <string name="modern_on">사용</string>
     <string name="modern_off">사용 안함</string>
     <string name="modern_try_again">다시 시도</string>
+    <string name="card_desc_dearrow">낚시성 제목과 썸네일을 커뮤니티가 제출한 것으로 바꿉니다</string>
+    <string name="card_desc_home_screen_channels">어떤 줄(시청 기록, 재생목록…)을 Android TV 홈 화면에 채널로 표시할지 선택합니다</string>
+    <string name="card_desc_filtering">콜라보, 나중에 볼 동영상, 프로그램, 실시간 스트림, 홈의 추천 줄을 숨기거나 표시합니다</string>
+    <string name="card_desc_hide_content">쇼츠, 믹스, 시청한 동영상, 예정된 동영상, 중복 동영상, 오래된 동영상, 키워드와 일치하는 동영상을 숨깁니다</string>
+    <string name="card_desc_sponsorblock">커뮤니티가 표시한 스폰서, 인트로, 자체 홍보 등 동영상의 일부를 건너뜁니다</string>
+    <string name="card_desc_aislist">커뮤니티 목록에서 AI 생성 콘텐츠를 올린다고 지정한 채널의 동영상을 숨기거나 표시합니다</string>
+    <string name="card_desc_auto_frame_rate">TV 화면 주사율을 동영상에 맞게 바꿔 빠른 카메라 움직임이 끊기지 않게 합니다</string>
+    <string name="card_desc_network_engine">동영상을 불러오는 네트워크 라이브러리를 선택합니다. 동영상이 버퍼링되거나 로드되지 않으면 다른 것을 사용해 보세요.</string>
+    <string name="card_desc_client_order">앱이 동영상 스트림을 가져오기 위해 YouTube 클라이언트를 시도하는 순서(하나가 재생될 때까지)</string>
+    <string name="card_desc_pixel_ratio">16:9가 아닌 화면(16:10, 4:3, 울트라와이드 등)에 맞게 화면을 늘립니다</string>
+    <string name="card_desc_places">실시간 채팅과 댓글을 동영상 오른쪽 대신 왼쪽에 표시합니다</string>
+    <string name="card_desc_unlock">기기가 잘못 지원하지 않는다고 보고하는 동영상 형식(4K, 고비트레이트 VP9 등)을 허용합니다</string>
+    <string name="card_desc_frame">Sony, Amazon Fire TV, Amlogic 기기의 프레임 드롭 수정</string>
+    <string name="card_desc_fix">실시간 스트림 끊김, 잘못된 화면비, Ambilight 미작동, 빈 구독 목록에 대한 해결 방법</string>
+    <string name="card_desc_api_keys">직접 발급한 YouTube Data API 키로, 음악 자동재생과 홈에서 카테고리(음악, 게임, 뉴스…)별로 동영상을 숨기거나 표시하는 데 필요합니다</string>
+    <string name="card_desc_dns">앱이 YouTube 서버를 찾는 방식을 바꿉니다. 앱이 전혀 로드되지 않을 때 도움이 될 수 있습니다.</string>
+    <string name="card_desc_remote_control">휴대전화나 태블릿을 페어링하여 해당 기기의 YouTube 앱으로 이 TV의 재생을 제어할 수 있게 합니다</string>
 </resources>

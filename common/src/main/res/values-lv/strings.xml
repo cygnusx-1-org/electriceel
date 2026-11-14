@@ -1189,4 +1189,21 @@
     <string name="modern_on">Ieslēgts</string>
     <string name="modern_off">Izslēgts</string>
     <string name="modern_try_again">Mēģināt vēlreiz</string>
+    <string name="card_desc_dearrow">Aizstāj klikšķu ēsmas virsrakstus un sīktēlus ar kopienas iesniegtajiem</string>
+    <string name="card_desc_home_screen_channels">Izvēlas, kuras rindas (Vēsture, jūsu atskaņošanas saraksti…) tiek rādītas kā kanāli Android TV sākuma ekrānā</string>
+    <string name="card_desc_filtering">Paslēpj vai atzīmē sadarbības, Skatīties vēlāk, raidījumus, tiešraides un Sākuma ieteiktās rindas</string>
+    <string name="card_desc_hide_content">Paslēpj Shorts, miksus un skatītos, gaidāmos, dublētos, vecos vai atslēgvārdiem atbilstošos videoklipus</string>
+    <string name="card_desc_sponsorblock">Izlaiž sponsorus, ievadus, pašreklāmu un citas videoklipu daļas, ko atzīmējusi kopiena</string>
+    <string name="card_desc_aislist">Paslēpj vai atzīmē videoklipus no kanāliem, kurus kopienas saraksts norāda kā MI ģenerēta satura publicētājus</string>
+    <string name="card_desc_auto_frame_rate">Pārslēdz televizora atsvaidzes intensitāti atbilstoši videoklipam, lai ātras kameras kustības neraustītos</string>
+    <string name="card_desc_network_engine">Izvēlas tīkla bibliotēku, kas ielādē videoklipus. Izmēģiniet citu, ja videoklipi buferējas vai neielādējas.</string>
+    <string name="card_desc_client_order">Secība, kādā lietotne izmēģina YouTube klientus, lai iegūtu videoklipa straumes, līdz kāds to atskaņo</string>
+    <string name="card_desc_pixel_ratio">Izstiepj attēlu ekrāniem, kas nav 16:9, piemēram, 16:10, 4:3 vai īpaši platiem</string>
+    <string name="card_desc_places">Rāda tiešraides tērzēšanu un komentārus videoklipa kreisajā pusē, nevis labajā</string>
+    <string name="card_desc_unlock">Atļauj video formātus, ko ierīce kļūdaini norāda kā neatbalstītus, piemēram, 4K vai augsta bitu pārraides ātruma VP9</string>
+    <string name="card_desc_frame">Izlaistu kadru labojumi Sony, Amazon Fire TV un Amlogic ierīcēs</string>
+    <string name="card_desc_fix">Risinājumi raustīgām tiešraidēm, nepareizai malu attiecībai, trūkstošam Ambilight un tukšiem Abonementiem</string>
+    <string name="card_desc_api_keys">Jūsu paša YouTube Data API atslēga, kas nepieciešama mūzikas automātiskajai atskaņošanai un lai Sākumā paslēptu vai atzīmētu videoklipus pēc kategorijas (mūzika, spēles, ziņas…)</string>
+    <string name="card_desc_dns">Maina, kā lietotne atrod YouTube serverus. Var palīdzēt, ja lietotne nemaz neielādējas.</string>
+    <string name="card_desc_remote_control">Savieno pārī tālruni vai planšetdatoru, lai tā YouTube lietotne varētu vadīt atskaņošanu šajā televizorā</string>
 </resources>

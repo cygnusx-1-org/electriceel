@@ -17,6 +17,7 @@ import androidx.leanback.widget.VerticalGridPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.SettingsCardsPresenter;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.SettingsLinksPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.SettingsCardsView;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.tv.R;
@@ -49,28 +50,48 @@ public class SettingsCardsFragment extends GridFragment implements SettingsCards
         gridPresenter.setNumberOfColumns(GridFragmentHelper.getMaxColsNum(getContext(), R.dimen.settings_card_width));
         setGridPresenter(gridPresenter);
 
-        mCardsAdapter = new ArrayObjectAdapter(new SettingsCardPresenter());
+        SettingsCardPresenter cardPresenter = new SettingsCardPresenter();
+        // The addresses of the card as QR codes (see SettingsLinksPresenter), in a panel titled as the one the click opens
+        cardPresenter.setOnCardLongPressedListener(item -> !item.getLinks().isEmpty()
+                && openWithTitles(() -> SettingsLinksPresenter.instance(getContext()).show(item)));
+        mCardsAdapter = new ArrayObjectAdapter(cardPresenter);
         setAdapter(mCardsAdapter);
 
         setOnItemViewClickedListener(new OnItemViewClickedListener() {
             @Override
             public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item, RowPresenter.ViewHolder rowViewHolder, Row row) {
                 if (item instanceof SettingsItem) {
-                    // The panel of the card is titled "<Section> - <Card>", e.g. "Player - Video". The card stays "Video".
-                    // The lists inside it "<Parent> - <List>", e.g. "General - Playback mode".
-                    AppDialogPresenter dialogPresenter = AppDialogPresenter.instance(getContext());
-                    dialogPresenter.setTitlePrefix(mTitle);
-                    dialogPresenter.enableNestedTitles(true);
-                    try {
-                        ((SettingsItem) item).onClick.run();
-                    } finally {
-                        // Only the panel opened right away
-                        dialogPresenter.setTitlePrefix(null);
-                        dialogPresenter.enableNestedTitles(false);
-                    }
+                    openWithTitles(((SettingsItem) item).onClick);
                 }
             }
         });
+
+        setOnItemViewSelectedListener((itemViewHolder, item, rowViewHolder, row) -> {
+            if (mCardsLayout != null) {
+                mCardsLayout.setDescription(item);
+            }
+        });
+    }
+
+    /**
+     * The panel of the card is titled "<Section> - <Card>", e.g. "Player - Video". The card stays "Video".
+     * The lists inside it "<Parent> - <List>", e.g. "General - Playback mode".
+     *
+     * @return true, for the long press: it was used
+     */
+    private boolean openWithTitles(Runnable open) {
+        AppDialogPresenter dialogPresenter = AppDialogPresenter.instance(getContext());
+        dialogPresenter.setTitlePrefix(mTitle);
+        dialogPresenter.enableNestedTitles(true);
+        try {
+            open.run();
+        } finally {
+            // Only the panel opened right away
+            dialogPresenter.setTitlePrefix(null);
+            dialogPresenter.enableNestedTitles(false);
+        }
+
+        return true;
     }
 
     @Override
@@ -128,7 +149,13 @@ public class SettingsCardsFragment extends GridFragment implements SettingsCards
         }
 
         // getSelectedPosition() of the grid tells the card back
-        setSelectedPosition(Math.max(0, Math.min(selectedPosition, items.size() - 1)));
+        int position = Math.max(0, Math.min(selectedPosition, items.size() - 1));
+        setSelectedPosition(position);
+
+        // The grid tells the selection after its layout, if the card at the position changed at all
+        if (mCardsLayout != null) {
+            mCardsLayout.setDescription(items.isEmpty() ? null : items.get(position));
+        }
     }
 
     @Override

@@ -45,7 +45,10 @@ public class MainUISectionSettingsPresenter extends BasePresenter<Void> implemen
         items.add(new SettingsItem(context.getString(R.string.dialog_select_country),
                 () -> LanguageSettingsPresenter.instance(context).showCountry(), R.drawable.settings_language));
         items.add(new SettingsItem(context.getString(R.string.dearrow_provider),
-                () -> DeArrowSettingsPresenter.instance(context).show(), R.drawable.settings_dearrow));
+                () -> DeArrowSettingsPresenter.instance(context).show(), R.drawable.settings_dearrow)
+                .setDescription(context.getString(R.string.card_desc_dearrow))
+                .addLink(context.getString(R.string.about_dearrow), context.getString(R.string.dearrow_provider_url))
+                .addLink(context.getString(R.string.dearrow_status), context.getString(R.string.dearrow_status_url)));
         items.add(new SettingsItem(context.getString(R.string.header_home),
                 () -> MainUISettingsPresenter.instance(context).showHome(), R.drawable.settings_home_rows));
         items.add(new SettingsItem(context.getString(R.string.sidebar),
@@ -57,7 +60,8 @@ public class MainUISectionSettingsPresenter extends BasePresenter<Void> implemen
         }
         if (HomeScreenPlaylistsData.isSupported(context)) {
             items.add(new SettingsItem(context.getString(R.string.home_screen_channels),
-                    () -> MainUISettingsPresenter.instance(context).showHomeScreenChannels(), R.drawable.settings_home_screen_channels));
+                    () -> MainUISettingsPresenter.instance(context).showHomeScreenChannels(), R.drawable.settings_home_screen_channels)
+                    .setDescription(context.getString(R.string.card_desc_home_screen_channels)));
         }
 
         return items;

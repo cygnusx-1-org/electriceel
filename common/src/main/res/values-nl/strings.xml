@@ -1175,4 +1175,21 @@
     <string name="modern_on">Aan</string>
     <string name="modern_off">Uit</string>
     <string name="modern_try_again">Opnieuw proberen</string>
+    <string name="card_desc_dearrow">Vervangt clickbait-titels en -miniaturen door exemplaren die de community heeft ingediend</string>
+    <string name="card_desc_home_screen_channels">Kiest welke rijen (Geschiedenis, je playlists…) als kanalen op het startscherm van Android TV verschijnen</string>
+    <string name="card_desc_filtering">Verbergt of markeert samenwerkingen, Later bekijken, programma\'s, livestreams en de voorgestelde rijen van Home</string>
+    <string name="card_desc_hide_content">Verbergt Shorts, mixen en bekeken, aankomende, dubbele, oude of op trefwoorden passende video\'s</string>
+    <string name="card_desc_sponsorblock">Slaat sponsors, intro\'s, zelfpromotie en andere delen van video\'s over die de community heeft gemarkeerd</string>
+    <string name="card_desc_aislist">Verbergt of markeert video\'s van kanalen die een communitylijst aanmerkt als plaatsers van door AI gegenereerde content</string>
+    <string name="card_desc_auto_frame_rate">Schakelt de verversingssnelheid van de tv naar die van de video, zodat snelle camerabewegingen niet haperen</string>
+    <string name="card_desc_network_engine">Kiest de netwerkbibliotheek die video\'s laadt. Probeer een andere als video\'s bufferen of niet laden.</string>
+    <string name="card_desc_client_order">De volgorde waarin de app de YouTube-clients probeert om de streams van een video te krijgen, totdat er één afspeelt</string>
+    <string name="card_desc_pixel_ratio">Rekt het beeld uit voor schermen die niet 16:9 zijn, zoals 16:10, 4:3 of ultrawide</string>
+    <string name="card_desc_places">Toont de livechat en de reacties links van de video in plaats van rechts</string>
+    <string name="card_desc_unlock">Staat videoformaten toe die het apparaat ten onrechte als niet ondersteund meldt, zoals 4K of VP9 met hoge bitrate</string>
+    <string name="card_desc_frame">Oplossingen voor overgeslagen frames op apparaten van Sony, Amazon Fire TV en Amlogic</string>
+    <string name="card_desc_fix">Omwegen voor haperende livestreams, een verkeerde beeldverhouding, ontbrekende Ambilight en lege Abonnementen</string>
+    <string name="card_desc_api_keys">Je eigen YouTube Data API-sleutel, nodig om muziek automatisch af te spelen en om video\'s per categorie (muziek, gaming, nieuws…) op Home te verbergen of te markeren</string>
+    <string name="card_desc_dns">Wijzigt hoe de app de servers van YouTube vindt. Kan helpen als de app helemaal niet laadt.</string>
+    <string name="card_desc_remote_control">Koppelt een telefoon of tablet zodat de YouTube-app daarop het afspelen op deze tv kan bedienen</string>
 </resources>

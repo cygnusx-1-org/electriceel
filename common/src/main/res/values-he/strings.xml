@@ -1194,4 +1194,21 @@ So, make a copy of values-he and name it values-iw. Keep both in your structure.
     <string name="modern_on">מופעל</string>
     <string name="modern_off">כבוי</string>
     <string name="modern_try_again">נסה שוב</string>
+    <string name="card_desc_dearrow">מחליף כותרות ותמונות ממוזערות מסוג קליקבייט בכאלה שהקהילה שלחה</string>
+    <string name="card_desc_home_screen_channels">בוחר אילו שורות (היסטוריה, רשימות ההשמעה שלך…) יופיעו כערוצים במסך הבית של Android TV</string>
+    <string name="card_desc_filtering">מסתיר או מסמן שיתופי פעולה, לצפייה בהמשך, תוכניות, שידורים חיים והשורות המוצעות בדף הבית</string>
+    <string name="card_desc_hide_content">מסתיר את Shorts, מיקסים וסרטונים שנצפו, עתידיים, כפולים, ישנים או כאלה שתואמים מילות מפתח</string>
+    <string name="card_desc_sponsorblock">מדלג על חסויות, פתיחים, קידום עצמי וחלקים אחרים של סרטונים שהקהילה סימנה</string>
+    <string name="card_desc_aislist">מסתיר או מסמן סרטונים מערוצים שרשימה קהילתית מסמנת כמפרסמים תוכן שנוצר בבינה מלאכותית</string>
+    <string name="card_desc_auto_frame_rate">מחליף את קצב הרענון של הטלוויזיה כך שיתאים לסרטון, כדי שתנועות מצלמה מהירות לא יקפצו</string>
+    <string name="card_desc_network_engine">בוחר את ספריית הרשת שטוענת את הסרטונים. נסה אחרת אם הסרטונים נתקעים בטעינה או לא נטענים.</string>
+    <string name="card_desc_client_order">הסדר שבו האפליקציה מנסה את לקוחות YouTube כדי לקבל את הזרמים של סרטון, עד שאחד מהם מנגן</string>
+    <string name="card_desc_pixel_ratio">מותח את התמונה למסכים שאינם 16:9, כמו 16:10, 4:3 או מסכים רחבים במיוחד</string>
+    <string name="card_desc_places">מציג את הצ\'אט החי ואת התגובות משמאל לסרטון במקום מימין</string>
+    <string name="card_desc_unlock">מאפשר פורמטים של וידאו שהמכשיר מדווח בטעות שאינם נתמכים, כמו 4K או VP9 בקצב סיביות גבוה</string>
+    <string name="card_desc_frame">תיקונים לפריימים שנופלים במכשירי Sony, Amazon Fire TV ו-Amlogic</string>
+    <string name="card_desc_fix">פתרונות עוקפים לגמגום בשידורים חיים, יחס גובה-רוחב שגוי, Ambilight חסר ומינויים ריקים</string>
+    <string name="card_desc_api_keys">מפתח YouTube Data API משלך, נדרש להפעלה אוטומטית של מוזיקה ולהסתרה או לסימון של סרטונים לפי קטגוריה (מוזיקה, משחקים, חדשות…) בדף הבית</string>
+    <string name="card_desc_dns">משנה את האופן שבו האפליקציה מוצאת את השרתים של YouTube. יכול לעזור כשהאפליקציה לא נטענת בכלל.</string>
+    <string name="card_desc_remote_control">מצמיד טלפון או טאבלט כך שאפליקציית YouTube שבו תוכל לשלוט בהפעלה בטלוויזיה הזו</string>
 </resources>

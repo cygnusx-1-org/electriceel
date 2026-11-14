@@ -14,6 +14,7 @@ import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsItem;
 import com.liskovsoft.smartyoutubetv2.common.prefs.MainUIData;
 import com.liskovsoft.smartyoutubetv2.tv.R;
+import com.liskovsoft.smartyoutubetv2.tv.ui.settingscards.SettingsCardLongPress;
 import com.liskovsoft.smartyoutubetv2.tv.util.ViewUtil;
 
 public class SettingsCardPresenter extends Presenter {
@@ -21,6 +22,21 @@ public class SettingsCardPresenter extends Presenter {
     private int mDefaultTextColor;
     private int mSelectedBackgroundColor;
     private int mSelectedTextColor;
+    private OnCardLongPressedListener mLongPressedListener;
+
+    public interface OnCardLongPressedListener {
+        /**
+         * @return the press was used: the card isn't opened (see SettingsCardLongPress)
+         */
+        boolean onCardLongPressed(SettingsItem item);
+    }
+
+    /**
+     * A long press of OK on a card, or the Menu key
+     */
+    public void setOnCardLongPressedListener(OnCardLongPressedListener listener) {
+        mLongPressedListener = listener;
+    }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent) {
@@ -79,10 +95,14 @@ public class SettingsCardPresenter extends Presenter {
             imageView.setImageDrawable(ContextCompat.getDrawable(context, settingsItem.imageResId));
             imageView.setVisibility(View.VISIBLE);
         }
+
+        SettingsCardLongPress.attach(viewHolder.view,
+                () -> mLongPressedListener != null && mLongPressedListener.onCardLongPressed(settingsItem));
     }
 
     @Override
     public void onUnbindViewHolder(ViewHolder viewHolder) {
+        SettingsCardLongPress.detach(viewHolder.view);
     }
 
     protected boolean isCardTextAutoScrollEnabled(Context context) {

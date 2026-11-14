@@ -1,10 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- The settings cards under their title, the same on every screen that has them (see SettingsCardsLayout). The grid of the
-     fragment goes under the title: it fills the screen, its padding places the cards (see Widget.Leanback.GridItems.VerticalGridView).
-     The title sits in the top padding. -->
+     fragment goes in settings_cards_grid: it fills the screen down to the description, its padding places the cards (see
+     Widget.Leanback.GridItems.VerticalGridView). The title sits in the top padding. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- The cards are cut at its bottom: none is drawn under the description -->
+        <FrameLayout
+            android:id="@+id/settings_cards_grid"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- What the focused card is about (see SettingsItem.getDescription). Always two lines high, empty for a card without
+             one, so the cards land on the same pixels whichever has the focus. Ends as far from the bottom of the screen as
+             the title starts from the top. The open sidebar slides the content right by browseRowsMarginStart without
+             narrowing it: the end margin keeps the lines on screen and the same with the sidebar open or closed (as
+             grid_message of fragment_grid). -->
+        <TextView
+            android:id="@+id/settings_cards_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="?attr/browseRowsMarginStart"
+            android:paddingStart="?attr/browsePaddingStart"
+            android:paddingEnd="?attr/browsePaddingEnd"
+            android:paddingBottom="?attr/browsePaddingTop"
+            android:lines="2"
+            android:ellipsize="end"
+            android:textAppearance="@style/TextAppearance.Leanback.Row.Header.Description" />
+    </LinearLayout>
 
     <!-- Starts where the first card starts -->
     <TextView

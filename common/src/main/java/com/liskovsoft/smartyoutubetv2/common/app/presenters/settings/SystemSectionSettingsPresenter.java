@@ -38,13 +38,16 @@ public class SystemSectionSettingsPresenter extends BasePresenter<Void> implemen
         items.add(new SettingsItem(context.getString(R.string.settings_general),
                 () -> SystemGeneralSettingsPresenter.instance(context).show(), R.drawable.settings_general));
         items.add(new SettingsItem(context.getString(R.string.settings_dns),
-                () -> GeneralSettingsPresenter.instance(context).showDns(), R.drawable.settings_dns));
+                () -> GeneralSettingsPresenter.instance(context).showDns(), R.drawable.settings_dns)
+                .setDescription(context.getString(R.string.card_desc_dns)));
         items.add(new SettingsItem(context.getString(R.string.settings_remote_control),
-                () -> RemoteControlSettingsPresenter.instance(context).show(), R.drawable.settings_cast));
+                () -> RemoteControlSettingsPresenter.instance(context).show(), R.drawable.settings_cast)
+                .setDescription(context.getString(R.string.card_desc_remote_control)));
         items.add(new SettingsItem(context.getString(R.string.app_backup_restore),
                 () -> BackupSettingsPresenter.instance(context).show(), R.drawable.settings_backup));
         items.add(new SettingsItem(context.getString(R.string.storage_sync),
-                () -> StorageSettingsPresenter.instance(context).show(), R.drawable.settings_storage_sync));
+                () -> StorageSettingsPresenter.instance(context).show(), R.drawable.settings_storage_sync)
+                .setDescription(context.getString(R.string.storage_sync_desc)));
 
         return items;
     }

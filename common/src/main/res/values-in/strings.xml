@@ -1160,4 +1160,21 @@
     <string name="modern_on">Aktif</string>
     <string name="modern_off">Nonaktif</string>
     <string name="modern_try_again">Coba lagi</string>
+    <string name="card_desc_dearrow">Mengganti judul dan thumbnail clickbait dengan yang dikirim oleh komunitas</string>
+    <string name="card_desc_home_screen_channels">Memilih baris mana (Histori, playlist Anda…) yang muncul sebagai saluran di layar utama Android TV</string>
+    <string name="card_desc_filtering">Menyembunyikan atau menandai kolaborasi, Tonton nanti, acara, siaran langsung, dan baris yang disarankan di Beranda</string>
+    <string name="card_desc_hide_content">Menyembunyikan Shorts, mix, serta video yang sudah ditonton, akan datang, duplikat, lama, atau cocok dengan kata kunci</string>
+    <string name="card_desc_sponsorblock">Melewati sponsor, intro, promosi diri, dan bagian video lain yang telah ditandai komunitas</string>
+    <string name="card_desc_aislist">Menyembunyikan atau menandai video dari saluran yang ditandai oleh daftar komunitas sebagai pengunggah konten buatan AI</string>
+    <string name="card_desc_auto_frame_rate">Mengubah kecepatan refresh TV agar sesuai dengan video, sehingga gerakan kamera yang cepat tidak tersendat</string>
+    <string name="card_desc_network_engine">Memilih pustaka jaringan yang memuat video. Coba yang lain jika video terus buffering atau tidak dimuat.</string>
+    <string name="card_desc_client_order">Urutan aplikasi mencoba klien YouTube untuk mendapatkan stream video, hingga salah satunya berhasil memutarnya</string>
+    <string name="card_desc_pixel_ratio">Meregangkan gambar untuk layar yang bukan 16:9, seperti 16:10, 4:3, atau ultrawide</string>
+    <string name="card_desc_places">Menampilkan live chat dan komentar di sebelah kiri video, bukan di kanan</string>
+    <string name="card_desc_unlock">Mengizinkan format video yang keliru dilaporkan perangkat sebagai tidak didukung, seperti 4K atau VP9 bitrate tinggi</string>
+    <string name="card_desc_frame">Perbaikan untuk frame yang hilang di perangkat Sony, Amazon Fire TV, dan Amlogic</string>
+    <string name="card_desc_fix">Solusi untuk siaran langsung yang tersendat, rasio aspek yang salah, Ambilight yang hilang, dan Subscription yang kosong</string>
+    <string name="card_desc_api_keys">Kunci YouTube Data API milik Anda sendiri, diperlukan untuk putar otomatis musik dan untuk menyembunyikan atau menandai video menurut kategori (musik, game, berita…) di Beranda</string>
+    <string name="card_desc_dns">Mengubah cara aplikasi menemukan server YouTube. Dapat membantu saat aplikasi sama sekali tidak dimuat.</string>
+    <string name="card_desc_remote_control">Menyambungkan ponsel atau tablet agar aplikasi YouTube-nya dapat mengontrol pemutaran di TV ini</string>
 </resources>

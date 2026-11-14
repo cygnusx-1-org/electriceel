@@ -10,18 +10,21 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.leanback.widget.VerticalGridView;
 
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsItem;
 import com.liskovsoft.smartyoutubetv2.tv.R;
 
 /**
- * The settings cards under their title, placed the same on every screen that has them (the Settings section, a settings section
- * on its own screen), so both land on the same pixels.<br/>
+ * The settings cards between their title and the description of the focused card, placed the same on every screen that has
+ * them (the Settings section, a settings section on its own screen), so both land on the same pixels.<br/>
+ * The description is always two lines high at the bottom of the screen, and the grid ends above it (see settings_cards).
  * Whatever the number of rows, they stay where the grid scrolls three when the second has focus: the third row ends as far from
- * the bottom of the screen as the title starts from the top, and moving between three rows doesn't scroll them. The title moves
- * up to a row spacing above them. When it reaches the top of the screen, the rows stop under it instead.
+ * the description as the title starts from the top, and moving between three rows doesn't scroll them. The title moves up to a
+ * row spacing above them. When it reaches the top of the screen, the rows stop under it instead.
  */
 public class SettingsCardsLayout {
     private final VerticalGridView mGrid;
     private final TextView mTitleView;
+    private final TextView mDescriptionView;
     private final int mDefaultRowsTop;
     private final int mDefaultTitleTop;
     private final int[] mGridLocation = new int[2];
@@ -29,20 +32,22 @@ public class SettingsCardsLayout {
     // Before the draw, so the rows and the title are drawn once, where they land
     private final ViewTreeObserver.OnPreDrawListener mOnPreDraw = () -> !update();
 
-    private SettingsCardsLayout(VerticalGridView grid, TextView titleView) {
+    private SettingsCardsLayout(VerticalGridView grid, TextView titleView, TextView descriptionView) {
         mGrid = grid;
         mTitleView = titleView;
+        mDescriptionView = descriptionView;
         mDefaultRowsTop = grid.getPaddingTop();
         mDefaultTitleTop = titleView.getPaddingTop();
     }
 
     /**
      * @param gridView the view of the grid fragment
-     * @return the view of the fragment: the grid under the title
+     * @return the view of the fragment: the grid under the title, above the description
      */
     public static View wrap(LayoutInflater inflater, @Nullable ViewGroup container, View gridView) {
-        FrameLayout root = (FrameLayout) inflater.inflate(R.layout.settings_cards, container, false);
-        root.addView(gridView, 0, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        View root = inflater.inflate(R.layout.settings_cards, container, false);
+        FrameLayout gridContainer = root.findViewById(R.id.settings_cards_grid);
+        gridContainer.addView(gridView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         return root;
     }
@@ -53,7 +58,8 @@ public class SettingsCardsLayout {
      * @param root the view made by {@link #wrap}
      */
     public static SettingsCardsLayout attach(View root, VerticalGridView grid) {
-        SettingsCardsLayout layout = new SettingsCardsLayout(grid, root.findViewById(R.id.settings_cards_title));
+        SettingsCardsLayout layout = new SettingsCardsLayout(grid, root.findViewById(R.id.settings_cards_title),
+                root.findViewById(R.id.settings_cards_description));
         grid.getViewTreeObserver().addOnPreDrawListener(layout.mOnPreDraw);
 
         return layout;
@@ -65,6 +71,14 @@ public class SettingsCardsLayout {
 
     public void setTitle(CharSequence title) {
         mTitleView.setText(title);
+    }
+
+    /**
+     * @param item the focused card, null for none: the description is emptied, its place stays
+     */
+    public void setDescription(@Nullable Object item) {
+        String description = item instanceof SettingsItem ? ((SettingsItem) item).getDescription() : null;
+        mDescriptionView.setText(description);
     }
 
     /**

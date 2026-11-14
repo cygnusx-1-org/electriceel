@@ -43,7 +43,8 @@ public class PlayerSectionSettingsPresenter extends BasePresenter<Void> implemen
         // Don't add afr support check here.
         // Users want even fake afr settings.
         items.add(new SettingsItem(context.getString(R.string.auto_frame_rate),
-                () -> AutoFrameRateSettingsPresenter.instance(context).show(), R.drawable.settings_afr));
+                () -> AutoFrameRateSettingsPresenter.instance(context).show(), R.drawable.settings_afr)
+                .setDescription(context.getString(R.string.card_desc_auto_frame_rate)));
         items.add(new SettingsItem(context.getString(R.string.subtitle_category_title),
                 () -> SubtitleSettingsPresenter.instance(context).show(), R.drawable.settings_subtitles));
 

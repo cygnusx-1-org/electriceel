@@ -1178,4 +1178,21 @@
     <string name="modern_on">ఆన్</string>
     <string name="modern_off">ఆఫ్</string>
     <string name="modern_try_again">మళ్లీ ప్రయత్నించండి</string>
+    <string name="card_desc_dearrow">క్లిక్‌బెయిట్ శీర్షికలు, థంబ్‌నెయిల్‌లను సంఘం సమర్పించిన వాటితో భర్తీ చేస్తుంది</string>
+    <string name="card_desc_home_screen_channels">ఏ వరుసలు (చరిత్ర, మీ ప్లేలిస్ట్‌లు…) Android TV హోమ్ స్క్రీన్‌లో ఛానెల్‌లుగా కనిపించాలో ఎంచుకుంటుంది</string>
+    <string name="card_desc_filtering">సహకారాలు, తర్వాత చూడండి, షోలు, లైవ్ స్ట్రీమ్‌లు మరియు హోమ్‌లోని సూచించిన వరుసలను దాచుతుంది లేదా గుర్తిస్తుంది</string>
+    <string name="card_desc_hide_content">షార్ట్స్, మిక్స్‌లు మరియు చూసిన, రాబోయే, నకిలీ, పాత లేదా కీవర్డ్‌లకు సరిపోలే వీడియోలను దాచుతుంది</string>
+    <string name="card_desc_sponsorblock">సంఘం గుర్తించిన స్పాన్సర్‌లు, ఇంట్రోలు, స్వీయ ప్రచారం మరియు వీడియోలలోని ఇతర భాగాలను దాటవేస్తుంది</string>
+    <string name="card_desc_aislist">AI రూపొందించిన కంటెంట్‌ను పోస్ట్ చేస్తున్నట్లు సంఘ జాబితా గుర్తించిన ఛానెల్‌ల వీడియోలను దాచుతుంది లేదా గుర్తిస్తుంది</string>
+    <string name="card_desc_auto_frame_rate">వేగవంతమైన కెమెరా కదలికలు తడబడకుండా ఉండేలా టీవీ రిఫ్రెష్ రేట్‌ను వీడియోకు సరిపోయేలా మారుస్తుంది</string>
+    <string name="card_desc_network_engine">వీడియోలను లోడ్ చేసే నెట్‌వర్క్ లైబ్రరీని ఎంచుకుంటుంది. వీడియోలు బఫర్ అవుతుంటే లేదా లోడ్ కాకపోతే మరొకటి ప్రయత్నించండి.</string>
+    <string name="card_desc_client_order">వీడియో స్ట్రీమ్‌లను పొందడానికి యాప్ YouTube క్లయింట్‌లను ప్రయత్నించే క్రమం, ఒకటి ప్లే అయ్యే వరకు</string>
+    <string name="card_desc_pixel_ratio">16:9 కాని స్క్రీన్‌ల కోసం చిత్రాన్ని సాగదీస్తుంది, ఉదాహరణకు 16:10, 4:3 లేదా అల్ట్రావైడ్</string>
+    <string name="card_desc_places">లైవ్ చాట్ మరియు వ్యాఖ్యలను వీడియోకు కుడి వైపు బదులుగా ఎడమ వైపు చూపుతుంది</string>
+    <string name="card_desc_unlock">పరికరం పొరపాటున మద్దతు లేనివిగా నివేదించే వీడియో ఫార్మాట్‌లను అనుమతిస్తుంది, ఉదాహరణకు 4K లేదా అధిక బిట్‌రేట్ VP9</string>
+    <string name="card_desc_frame">Sony, Amazon Fire TV మరియు Amlogic పరికరాల్లో వదిలివేసిన ఫ్రేమ్‌లకు పరిష్కారాలు</string>
+    <string name="card_desc_fix">లైవ్ స్ట్రీమ్ తడబాటు, తప్పు యాస్పెక్ట్ రేషియో, లేని Ambilight మరియు ఖాళీ చందాలకు ప్రత్యామ్నాయాలు</string>
+    <string name="card_desc_api_keys">మీ స్వంత YouTube Data API కీ, సంగీతం ఆటోప్లే కోసం మరియు హోమ్‌లో వీడియోలను వర్గం (సంగీతం, గేమింగ్, వార్తలు…) ప్రకారం దాచడానికి లేదా గుర్తించడానికి అవసరం</string>
+    <string name="card_desc_dns">యాప్ YouTube సర్వర్‌లను ఎలా కనుగొంటుందో మారుస్తుంది. యాప్ అసలు లోడ్ కానప్పుడు సహాయపడవచ్చు.</string>
+    <string name="card_desc_remote_control">ఫోన్ లేదా టాబ్లెట్‌ను జత చేస్తుంది, తద్వారా దాని YouTube యాప్ ఈ టీవీలో ప్లేబ్యాక్‌ను నియంత్రించగలదు</string>
 </resources>

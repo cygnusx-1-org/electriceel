@@ -13,6 +13,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsGroup;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.VideoGroup;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.settings.SettingsLinksPresenter;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.utils.SimpleEditDialog;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
@@ -20,6 +21,7 @@ import com.liskovsoft.smartyoutubetv2.tv.R;
 import com.liskovsoft.smartyoutubetv2.tv.ui.modern.common.ModernIcons;
 import com.liskovsoft.smartyoutubetv2.tv.ui.modern.common.ModernText;
 import com.liskovsoft.smartyoutubetv2.tv.ui.modern.common.ModernTheme;
+import com.liskovsoft.smartyoutubetv2.tv.ui.settingscards.SettingsCardLongPress;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +35,7 @@ public class ModernSettingsView extends FrameLayout implements ModernSection {
     private final LinearLayout mList;
     private final ImageView mPreviewIcon;
     private final TextView mPreviewTitle;
+    private final TextView mPreviewDescription;
     private final View mPreview;
     private final List<SettingsItem> mItems = new ArrayList<>();
     private final int mOffsetTop;
@@ -51,6 +54,7 @@ public class ModernSettingsView extends FrameLayout implements ModernSection {
         mPreview = findViewById(R.id.modern_settings_preview);
         mPreviewIcon = findViewById(R.id.modern_settings_preview_icon);
         mPreviewTitle = findViewById(R.id.modern_settings_preview_title);
+        mPreviewDescription = findViewById(R.id.modern_settings_preview_description);
     }
 
     @Override
@@ -90,6 +94,8 @@ public class ModernSettingsView extends FrameLayout implements ModernSection {
                 openWithPassword(item);
             }
         });
+        // The addresses of the category as QR codes, without the settings password: they're public (see SettingsLinksPresenter)
+        SettingsCardLongPress.attach(row, () -> SettingsLinksPresenter.instance(getContext()).show(item));
         row.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {
                 mLastIndex = mList.indexOfChild(v);
@@ -130,6 +136,8 @@ public class ModernSettingsView extends FrameLayout implements ModernSection {
 
     private void showPreview(SettingsItem item) {
         mPreviewTitle.setText(ModernText.sentenceCase(item.title));
+        // Emptied for a category without one: its place stays
+        mPreviewDescription.setText(item.getDescription());
         int icon = ModernIcons.forSettings(item.imageResId);
         // A category of Electric Eel without a modern icon: its own (white, like the modern ones)
         if (icon == 0) {
