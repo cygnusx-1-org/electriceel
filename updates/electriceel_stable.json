@@ -1,13 +1,28 @@
 {
   "package": {
     "downloadUrlList_arm64-v8a": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.70.3/ElectricEel_stable_32.70.3_arm64-v8a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.70.4/ElectricEel_stable_32.70.4_arm64-v8a.apk"
     ],
     "downloadUrlList_armeabi-v7a": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.70.3/ElectricEel_stable_32.70.3_armeabi-v7a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.70.4/ElectricEel_stable_32.70.4_armeabi-v7a.apk"
     ],
     "downloadUrlList": [
-      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.70.3/ElectricEel_stable_32.70.3_armeabi-v7a.apk"
+      "https://github.com/cygnusx-1-org/electriceel/releases/download/32.70.4/ElectricEel_stable_32.70.4_armeabi-v7a.apk"
+    ]
+  },
+  "32.70.4": {
+    "versionCode": 2458,
+    "changelog": [
+      "Implemented Add a player option to let the use pick the client #46",
+      "Implemented Add the ability for cards in Settings to have descriptions #52",
+      "Implemented Add support for end video cards #70",
+      "Implemented Make video timestamps in video description selectable #71",
+      "Implemented Make previous video links in the video description selectable #72",
+      "Fixed Remote control option does not work #74",
+      "Fixed These new skins (hybrid & modern) aren't compatible with the Arabic language #75 #76",
+      "Improved all known missing strings across all translations",
+      "Made Not interested work on subscription group cards and hide the video there",
+      "Made Hide (local) hide a video from every section, not only the one it was hidden in"
     ]
   },
   "32.70.3": {
