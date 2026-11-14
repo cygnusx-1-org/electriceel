@@ -8,11 +8,14 @@
     android:focusableInTouchMode="true"
     android:orientation="vertical">
 
+    <!-- Left to right in every language, as the badges of the classic cards: the duration at the bottom right, the watched
+         part from the left (as the seek bar of the player) -->
     <FrameLayout
         android:id="@+id/modern_card_thumb_frame"
         android:layout_width="@dimen/modern_tile_width_row"
         android:layout_height="@dimen/modern_tile_thumb_height_row"
-        android:background="@drawable/modern_thumb_placeholder">
+        android:background="@drawable/modern_thumb_placeholder"
+        android:layoutDirection="ltr">
 
         <ImageView
             android:id="@+id/modern_card_thumb"

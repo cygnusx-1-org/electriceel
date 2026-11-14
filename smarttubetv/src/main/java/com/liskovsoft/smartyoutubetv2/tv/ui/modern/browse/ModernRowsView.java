@@ -271,12 +271,11 @@ public class ModernRowsView extends FrameLayout implements ModernSection, ShelfL
             int clipRoom = getResources().getDimensionPixelSize(R.dimen.modern_tile_clip_room);
             // Hybrid skin: room below the tiles too, for the focus ring around the text area at the bottom of a card. And at
             // the end: the focused tile scrolled in at the end of the screen keeps its ring
-            mItems.setPadding(clipRoom, mItems.getPaddingTop(), mHybrid ? clipRoom : mItems.getPaddingRight(), mRingRoom);
+            mItems.setPaddingRelative(clipRoom, mItems.getPaddingTop(), mHybrid ? clipRoom : mItems.getPaddingEnd(), mRingRoom);
             ViewGroup.MarginLayoutParams itemsParams = (ViewGroup.MarginLayoutParams) mItems.getLayoutParams();
-            itemsParams.leftMargin = mContentLeft - clipRoom;
+            itemsParams.setMarginStart(mContentLeft - clipRoom);
             mItems.setLayoutParams(itemsParams);
             ViewGroup.MarginLayoutParams titleParams = (ViewGroup.MarginLayoutParams) mTitle.getLayoutParams();
-            titleParams.leftMargin = mContentLeft;
             titleParams.setMarginStart(mContentLeft);
             mTitle.setLayoutParams(titleParams);
             if (mHybrid) {

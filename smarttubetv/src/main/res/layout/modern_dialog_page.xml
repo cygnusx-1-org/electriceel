@@ -44,6 +44,7 @@
         android:maxLines="2"
         android:paddingStart="@dimen/modern_settings_row_padding"
         android:paddingEnd="@dimen/modern_settings_row_padding"
+        android:textAlignment="viewStart"
         android:textColor="@color/modern_text_primary"
         android:textSize="@dimen/modern_dialog_page_options_title_size"
         android:textStyle="bold"

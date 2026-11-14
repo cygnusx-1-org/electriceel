@@ -26,6 +26,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.AppDialogView;
 import com.liskovsoft.smartyoutubetv2.tv.R;
 import com.liskovsoft.smartyoutubetv2.tv.ui.modern.common.ModernColorScheme;
+import com.liskovsoft.smartyoutubetv2.tv.ui.modern.common.ModernRtl;
 import com.liskovsoft.smartyoutubetv2.tv.ui.modern.common.ModernText;
 import com.liskovsoft.smartyoutubetv2.tv.ui.modern.widgets.ModernOptionRow;
 
@@ -623,24 +624,25 @@ public class ModernDialogPageView extends FrameLayout implements AppDialogView {
                         showDetails(getAdapterPosition());
                     }
                 });
+                // The options are at the end side: the end key enters them (Left in a right-to-left language)
                 view.setOnKeyListener((v, keyCode, event) -> {
-                    if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                    if (keyCode == ModernRtl.endKey(v)) {
                         if (event.getAction() == KeyEvent.ACTION_DOWN) {
                             enterOptions();
                         }
                         return true;
                     }
-                    return keyCode == KeyEvent.KEYCODE_DPAD_LEFT;
+                    return keyCode == ModernRtl.startKey(v);
                 });
             } else {
                 view.setOnKeyListener((v, keyCode, event) -> {
-                    if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
+                    if (keyCode == ModernRtl.startKey(v)) {
                         if (event.getAction() == KeyEvent.ACTION_DOWN) {
                             leaveOptions();
                         }
                         return true;
                     }
-                    return keyCode == KeyEvent.KEYCODE_DPAD_RIGHT;
+                    return keyCode == ModernRtl.endKey(v);
                 });
             }
         }

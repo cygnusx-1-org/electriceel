@@ -29,6 +29,7 @@
             android:fontFamily="sans-serif-medium"
             android:includeFontPadding="false"
             android:maxLines="2"
+            android:textAlignment="viewStart"
             android:textColor="@color/modern_pill_text"
             android:textSize="@dimen/modern_rail_label_size" />
 
@@ -41,6 +42,7 @@
             android:ellipsize="end"
             android:includeFontPadding="false"
             android:maxLines="2"
+            android:textAlignment="viewStart"
             android:textColor="@color/modern_pref_summary"
             android:textSize="@dimen/modern_dialog_page_summary_size" />
     </LinearLayout>

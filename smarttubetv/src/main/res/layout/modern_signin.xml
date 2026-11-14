@@ -24,6 +24,7 @@
             android:layout_height="wrap_content"
             android:includeFontPadding="false"
             android:text="@string/modern_add_account"
+            android:textAlignment="viewStart"
             android:textColor="@color/modern_text_primary"
             android:textSize="@dimen/modern_signin_title_size"
             android:textStyle="bold" />

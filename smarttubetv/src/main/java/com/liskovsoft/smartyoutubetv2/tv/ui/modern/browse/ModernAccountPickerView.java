@@ -110,7 +110,7 @@ public class ModernAccountPickerView extends FrameLayout {
         View tile = LayoutInflater.from(getContext()).inflate(R.layout.modern_account_tile, mAccounts, false);
         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) tile.getLayoutParams();
         if (mAccounts.getChildCount() > 0) {
-            params.leftMargin = gap;
+            params.setMarginStart(gap);
         }
         mAccounts.addView(tile, params);
         return tile;

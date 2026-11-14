@@ -1,5 +1,6 @@
 package com.liskovsoft.smartyoutubetv2.tv.ui.modern.playback;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -350,6 +351,7 @@ public class ModernPlaybackFragment extends PlaybackFragment {
         return mShorts.onVideoKey(event);
     }
 
+    @SuppressLint("RtlHardcoded") // The shorts layout is left to right in every language (see modern_shorts_overlay)
     private void updateShortsMode() {
         boolean shorts = mVideo != null && (mVideo.isShorts || mVideo.belongsToShortsGroup());
         View root = getView();
@@ -370,7 +372,8 @@ public class ModernPlaybackFragment extends PlaybackFragment {
             if (shorts) {
                 params.width = getResources().getDimensionPixelSize(R.dimen.modern_shorts_video_width);
                 params.height = ViewGroup.LayoutParams.MATCH_PARENT;
-                params.gravity = Gravity.START | Gravity.TOP;
+                // At the left in every language: the shorts overlay is laid out left to right around it
+                params.gravity = Gravity.LEFT | Gravity.TOP;
                 params.leftMargin = getResources().getDimensionPixelSize(R.dimen.modern_shorts_video_left);
             } else {
                 params.width = ViewGroup.LayoutParams.MATCH_PARENT;

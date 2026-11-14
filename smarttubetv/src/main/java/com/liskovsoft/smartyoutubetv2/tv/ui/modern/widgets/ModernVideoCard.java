@@ -262,6 +262,11 @@ public class ModernVideoCard extends LinearLayout {
         mTitle.setGravity(gravity);
         mLine1.setGravity(gravity | Gravity.CENTER_VERTICAL);
         mLine2Container.setGravity(gravity | Gravity.CENTER_VERTICAL);
+        // The text at the start of the card whatever its own direction (the right in a right-to-left language), as on the
+        // classic cards: a gravity alone aligns an English title to the left in Arabic
+        int alignment = mKind == KIND_CHANNEL ? View.TEXT_ALIGNMENT_CENTER : View.TEXT_ALIGNMENT_VIEW_START;
+        mTitle.setTextAlignment(alignment);
+        mLine1.setTextAlignment(alignment);
         setTitleScrolling(false);
 
         mStackPaint.setColor(ContextCompat.getColor(getContext(), R.color.modern_white_20));

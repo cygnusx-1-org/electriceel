@@ -16,6 +16,7 @@ import androidx.leanback.widget.PresenterSelector;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.interfaces.VideoGroupPresenter;
 import com.liskovsoft.smartyoutubetv2.tv.R;
+import com.liskovsoft.smartyoutubetv2.tv.ui.modern.common.ModernRtl;
 import com.liskovsoft.smartyoutubetv2.tv.ui.modern.common.ModernSpinner;
 import com.liskovsoft.smartyoutubetv2.tv.ui.modern.common.ModernStatePage;
 import com.liskovsoft.smartyoutubetv2.tv.ui.modern.common.ModernText;
@@ -59,14 +60,14 @@ abstract class ModernSideListView extends FrameLayout implements ModernSection, 
         titleView.setTypeface(titleView.getTypeface(), Typeface.BOLD);
         titleView.setIncludeFontPadding(false);
         LayoutParams titleParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        titleParams.leftMargin = res.getDimensionPixelSize(R.dimen.modern_subs_title_left);
+        titleParams.setMarginStart(res.getDimensionPixelSize(R.dimen.modern_subs_title_left));
         titleParams.topMargin = offsetTop + res.getDimensionPixelSize(R.dimen.modern_subs_title_top);
         addView(titleView, titleParams);
 
         mColumn = new FrameLayout(context);
         mColumn.setAlpha(0f);
         LayoutParams columnParams = new LayoutParams(res.getDimensionPixelSize(R.dimen.modern_subs_column_width), LayoutParams.MATCH_PARENT);
-        columnParams.leftMargin = res.getDimensionPixelSize(R.dimen.modern_subs_column_left);
+        columnParams.setMarginStart(res.getDimensionPixelSize(R.dimen.modern_subs_column_left));
         columnParams.topMargin = offsetTop + res.getDimensionPixelSize(R.dimen.modern_subs_column_top);
         addView(mColumn, columnParams);
 
@@ -74,7 +75,7 @@ abstract class ModernSideListView extends FrameLayout implements ModernSection, 
         mDivider.setBackgroundColor(ContextCompat.getColor(context, R.color.modern_white_10));
         mDivider.setAlpha(0f);
         LayoutParams dividerParams = new LayoutParams(res.getDimensionPixelSize(R.dimen.modern_rail_divider), LayoutParams.MATCH_PARENT);
-        dividerParams.leftMargin = res.getDimensionPixelSize(R.dimen.modern_subs_divider_left);
+        dividerParams.setMarginStart(res.getDimensionPixelSize(R.dimen.modern_subs_divider_left));
         dividerParams.topMargin = columnParams.topMargin;
         addView(mDivider, dividerParams);
 
@@ -96,9 +97,9 @@ abstract class ModernSideListView extends FrameLayout implements ModernSection, 
         mSpinner = ModernSpinner.create(context);
         mSpinner.setVisibility(View.GONE);
         int spinnerSize = res.getDimensionPixelSize(R.dimen.modern_spinner_size);
-        LayoutParams spinnerParams = new LayoutParams(spinnerSize, spinnerSize, Gravity.CENTER_VERTICAL);
+        LayoutParams spinnerParams = new LayoutParams(spinnerSize, spinnerSize, Gravity.CENTER_VERTICAL | Gravity.START);
         int columnsWidth = gridWidth - gridLeft - res.getDimensionPixelSize(R.dimen.modern_tile_gap);
-        spinnerParams.leftMargin = gridLeft + (columnsWidth - spinnerSize) / 2;
+        spinnerParams.setMarginStart(gridLeft + (columnsWidth - spinnerSize) / 2);
         addView(mSpinner, spinnerParams);
 
         mGridLeft = gridLeft;
@@ -115,7 +116,7 @@ abstract class ModernSideListView extends FrameLayout implements ModernSection, 
         mState = state;
         mState.setPadding(0, 0, 0, 0);
         LayoutParams params = new LayoutParams(mColumnsWidth, LayoutParams.MATCH_PARENT);
-        params.leftMargin = mGridLeft;
+        params.setMarginStart(mGridLeft);
         params.topMargin = mGridTop;
         addView(mState, params);
         mGrid.setVisibility(View.INVISIBLE);
@@ -158,10 +159,13 @@ abstract class ModernSideListView extends FrameLayout implements ModernSection, 
 
         mCollapsed = collapsed;
         float columnAlpha = collapsed || !mColumnReady ? 0f : 1f;
-        animateTo(mColumn, collapsed ? mColumnShift : 0, columnAlpha);
-        animateTo(mDivider, collapsed ? mColumnShift : 0, columnAlpha);
-        animateTo(mGrid, collapsed ? mGridShift : 0, 1f);
-        animateTo(mSpinner, collapsed ? mGridShift : 0, 1f);
+        // The shifts are toward the start: to the right in a right-to-left language
+        float columnShift = ModernRtl.towardEnd(this, collapsed ? mColumnShift : 0);
+        float gridShift = ModernRtl.towardEnd(this, collapsed ? mGridShift : 0);
+        animateTo(mColumn, columnShift, columnAlpha);
+        animateTo(mDivider, columnShift, columnAlpha);
+        animateTo(mGrid, gridShift, 1f);
+        animateTo(mSpinner, gridShift, 1f);
     }
 
     private static void animateTo(View view, float translationX, float alpha) {
@@ -193,7 +197,7 @@ abstract class ModernSideListView extends FrameLayout implements ModernSection, 
     }
 
     /**
-     * Left from the first grid column goes to the list, not to the rail.
+     * The start key from the first grid column goes to the list, not to the rail.
      * @return true if the focus moved
      */
     public boolean onStartEdge() {

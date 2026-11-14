@@ -9,7 +9,7 @@
         android:id="@+id/modern_rail_icon"
         android:layout_width="@dimen/modern_rail_icon_size"
         android:layout_height="@dimen/modern_rail_icon_size"
-        android:layout_gravity="center_vertical"
+        android:layout_gravity="center_vertical|start"
         android:layout_marginStart="@dimen/modern_rail_icon_start"
         android:importantForAccessibility="no"
         android:scaleType="centerCrop" />
@@ -18,7 +18,7 @@
         android:id="@+id/modern_rail_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:layout_gravity="center_vertical|start"
         android:layout_marginStart="@dimen/modern_rail_label_start"
         android:layout_marginEnd="@dimen/modern_rail_icon_start"
         android:alpha="0"

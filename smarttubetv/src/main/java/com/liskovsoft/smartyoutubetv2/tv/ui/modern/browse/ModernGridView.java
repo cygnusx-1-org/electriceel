@@ -51,6 +51,8 @@ public class ModernGridView extends FrameLayout implements ModernSection {
     // The space between the columns: the tile gap, more in a grid of round channel tiles (see applyContentKind)
     private int mSpacing;
     private final int mAvailableWidth;
+    // Start of the first column (the padding at the start: the right in a right-to-left language)
+    private int mContentStart;
     private int mColumns;
     private boolean mChannelGrid;
     private int mPendingPosition = -1;
@@ -81,7 +83,8 @@ public class ModernGridView extends FrameLayout implements ModernSection {
         mGridView.setClipChildren(false);
         mGridView.setClipToPadding(false);
         int topMargin = res.getDimensionPixelSize(R.dimen.modern_tile_top_margin);
-        mGridView.setPadding(contentLeft, topMargin, 0, 0);
+        mContentStart = contentLeft;
+        mGridView.setPaddingRelative(contentLeft, topMargin, 0, 0);
         mGridView.setHorizontalSpacing(gap);
         mGridView.setVerticalSpacing(res.getDimensionPixelSize(R.dimen.modern_shelf_spacing));
         mGridView.setWindowAlignment(BaseGridView.WINDOW_ALIGN_NO_EDGE);
@@ -124,9 +127,9 @@ public class ModernGridView extends FrameLayout implements ModernSection {
         }
 
         Resources res = getResources();
-        int contentLeft = mGridView.getPaddingLeft();
+        int contentStart = mContentStart;
         int topMargin = res.getDimensionPixelSize(R.dimen.modern_tile_top_margin);
-        int width = res.getDisplayMetrics().widthPixels - contentLeft - res.getDimensionPixelSize(R.dimen.modern_grid_end_margin);
+        int width = res.getDisplayMetrics().widthPixels - contentStart - res.getDimensionPixelSize(R.dimen.modern_grid_end_margin);
 
         TextView view = new TextView(getContext());
         view.setText(message);
@@ -134,16 +137,17 @@ public class ModernGridView extends FrameLayout implements ModernSection {
         view.setTextSize(TypedValue.COMPLEX_UNIT_PX, res.getDimension(R.dimen.modern_search_field_text));
         view.setMaxLines(2);
         view.setEllipsize(TextUtils.TruncateAt.END);
+        view.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START);
         view.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
 
         LayoutParams params = new LayoutParams(width, LayoutParams.WRAP_CONTENT);
-        params.leftMargin = contentLeft;
+        params.setMarginStart(contentStart);
         params.topMargin = topMargin;
         addView(view, params);
 
         // The tiles below it: their focus ring keeps its room above the first row
         int offset = topMargin + view.getMeasuredHeight();
-        mGridView.setPadding(contentLeft, offset + topMargin, mGridView.getPaddingRight(), mGridView.getPaddingBottom());
+        mGridView.setPaddingRelative(contentStart, offset + topMargin, mGridView.getPaddingEnd(), mGridView.getPaddingBottom());
         mGridView.setWindowAlignmentOffset(offset + topMargin);
     }
 
@@ -190,7 +194,8 @@ public class ModernGridView extends FrameLayout implements ModernSection {
      * Start of the first column. Call before the first update.
      */
     public void setContentLeft(int contentLeft) {
-        mGridView.setPadding(contentLeft, mGridView.getPaddingTop(), mGridView.getPaddingRight(), mGridView.getPaddingBottom());
+        mContentStart = contentLeft;
+        mGridView.setPaddingRelative(contentLeft, mGridView.getPaddingTop(), mGridView.getPaddingEnd(), mGridView.getPaddingBottom());
     }
 
     /**

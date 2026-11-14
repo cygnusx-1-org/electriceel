@@ -13,12 +13,13 @@
         android:id="@+id/modern_settings_row_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:layout_gravity="center_vertical|start"
         android:duplicateParentState="true"
         android:ellipsize="end"
         android:fontFamily="sans-serif-medium"
         android:includeFontPadding="false"
         android:singleLine="true"
+        android:textAlignment="viewStart"
         android:textColor="@color/modern_pill_text"
         android:textSize="@dimen/modern_rail_label_size" />
 </FrameLayout>

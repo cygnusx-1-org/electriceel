@@ -28,6 +28,7 @@ import com.liskovsoft.smartyoutubetv2.tv.R;
 import com.liskovsoft.smartyoutubetv2.tv.ui.modern.browse.RailModel;
 import com.liskovsoft.smartyoutubetv2.tv.ui.modern.common.ModernColorScheme;
 import com.liskovsoft.smartyoutubetv2.tv.ui.modern.common.ModernIcons;
+import com.liskovsoft.smartyoutubetv2.tv.ui.modern.common.ModernRtl;
 import com.liskovsoft.smartyoutubetv2.tv.ui.modern.common.ModernText;
 import com.liskovsoft.smartyoutubetv2.tv.ui.modern.common.ModernTheme;
 
@@ -35,7 +36,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Left navigation rail. Collapsed it shows icons only, focused it expands and shows labels.<br/>
+ * Navigation rail at the start of the screen (the right in a right-to-left language). Collapsed it shows icons only, focused
+ * it expands and shows labels.<br/>
  * The rail has a fixed size: expanding only animates alpha and translations (no relayout per frame).<br/>
  * While collapsed it can't take focus by itself, the host enters it with {@link #focusSelected()}.
  */
@@ -285,9 +287,10 @@ public class ModernNavRail extends FrameLayout {
                 return false;
             }
 
-            // Leave the rail only to the right. Left, above the first and below the last item are dead ends.
+            // Leave the rail only toward the content. The start key (the screen edge), above the first and below the last
+            // item are dead ends.
             int index = mItems.indexOf(v);
-            return keyCode == KeyEvent.KEYCODE_DPAD_LEFT
+            return keyCode == ModernRtl.startKey(v)
                     || (keyCode == KeyEvent.KEYCODE_DPAD_UP && index == firstVisibleIndex())
                     || (keyCode == KeyEvent.KEYCODE_DPAD_DOWN && index == mItems.size() - 1);
         });

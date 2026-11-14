@@ -60,6 +60,7 @@ import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.smartyoutubetv2.tv.R;
 import com.liskovsoft.smartyoutubetv2.tv.presenter.CardHold;
 import com.liskovsoft.smartyoutubetv2.tv.ui.modern.common.ModernColorScheme;
+import com.liskovsoft.smartyoutubetv2.tv.ui.modern.common.ModernRtl;
 import com.liskovsoft.smartyoutubetv2.tv.ui.modern.common.ModernSpinner;
 import com.liskovsoft.smartyoutubetv2.tv.ui.modern.common.ModernStatePage;
 import com.liskovsoft.smartyoutubetv2.tv.ui.modern.common.ModernTheme;
@@ -451,7 +452,8 @@ public class ModernBrowseFragment extends Fragment implements BrowseView, Modern
 
     @Override
     public void onExpandChanged(float fraction) {
-        float shift = mRail.getExpandShift() * fraction;
+        // Away from the rail: toward the end of the screen
+        float shift = ModernRtl.towardEnd(mRail, mRail.getExpandShift() * fraction);
         mContent.setTranslationX(shift);
         // The clock and the logo stay at the end of the screen, only the search group follows the content
         mTopBar.findViewById(R.id.modern_top_bar_search_group).setTranslationX(shift);
@@ -475,12 +477,12 @@ public class ModernBrowseFragment extends Fragment implements BrowseView, Modern
             return false;
         }
 
-        if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && mRail.hasFocus()) {
+        if (keyCode == ModernRtl.endKey(mRail) && mRail.hasFocus()) {
             focusOnContent();
             return true;
         }
 
-        if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT && !mRail.hasFocus() && isAtStartEdge()) {
+        if (keyCode == ModernRtl.startKey(mRail) && !mRail.hasFocus() && isAtStartEdge()) {
             if (mSection instanceof ModernSideListView && ((ModernSideListView) mSection).onStartEdge()) {
                 return true;
             }
@@ -500,7 +502,7 @@ public class ModernBrowseFragment extends Fragment implements BrowseView, Modern
     }
 
     /**
-     * Left from the first column (or from the top bar) enters the rail.
+     * The start key (Left, Right in a right-to-left language) from the first column (or from the top bar) enters the rail.
      */
     private boolean isAtStartEdge() {
         View focused = getView() != null ? getView().findFocus() : null;
@@ -509,13 +511,14 @@ public class ModernBrowseFragment extends Fragment implements BrowseView, Modern
             return false;
         }
 
-        Boolean gridEdge = isAtGridEdge(focused, View.FOCUS_LEFT);
+        int startFocus = ModernRtl.startFocus(focused);
+        Boolean gridEdge = isAtGridEdge(focused, startFocus);
 
         if (gridEdge != null) {
             return gridEdge;
         }
 
-        View next = focused.focusSearch(View.FOCUS_LEFT);
+        View next = focused.focusSearch(startFocus);
         return next == null || next == focused || isInside(next, mRail);
     }
 
@@ -557,12 +560,13 @@ public class ModernBrowseFragment extends Fragment implements BrowseView, Modern
                 if (position != RecyclerView.NO_POSITION && grid.getLayoutManager() != null) {
                     boolean horizontal = grid instanceof HorizontalGridView;
 
-                    if (direction == View.FOCUS_LEFT) {
+                    if (direction == View.FOCUS_LEFT || direction == View.FOCUS_RIGHT) {
                         if (horizontal) {
                             return position == 0;
                         }
                         if (!isSingleColumn(grid)) {
-                            return child.getLeft() <= minChildLeft(grid);
+                            // The first column is at the start: the right in a right-to-left language
+                            return ModernRtl.isRtl(grid) ? child.getLeft() >= maxChildLeft(grid) : child.getLeft() <= minChildLeft(grid);
                         }
                     } else if (!horizontal) {
                         View first = grid.getLayoutManager().findViewByPosition(0);
