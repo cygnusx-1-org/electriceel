@@ -41,6 +41,24 @@ public final class PlayerFailure {
     public static final String PROTOCOL_DASH_LIVE = "dash_live";
     public static final String PROTOCOL_HLS = "hls";
     public static final String PROTOCOL_URL_LIST = "url_list";
+    /**
+     * Of an HTTP failure's load (see #http): its track, from the load's track type
+     */
+    public static final String TRACK_AUDIO = "audio";
+    public static final String TRACK_VIDEO = "video";
+    /**
+     * Subtitles
+     */
+    public static final String TRACK_TEXT = "text";
+    /**
+     * Not of a track (e.g. a manifest), or not known
+     */
+    public static final String TRACK_OTHER = "other";
+    /**
+     * The domains a server's name is told by (see #describeHost)
+     */
+    private static final String[] KNOWN_DOMAINS = {"googlevideo.com", "youtube.com"};
+    private static final String HOST_OTHER = "other";
     private static final int MAX_STACK_FRAMES = 20;
     private static final int MAX_CAUSES = 8;
     private final Context mContext;
@@ -254,16 +272,45 @@ public final class PlayerFailure {
     /**
      * A segment of the track failed with the HTTP code
      *
-     * @param track audio, video or other
+     * @param track audio, video, text or other (see TrackErrorFixer#trackOf)
      */
     public PlayerFailure http(int code, String track, @Nullable Format failed) {
+        return http(code, track, null, failed);
+    }
+
+    /**
+     * Of a server's name, its domain only: googlevideo.com (the media), youtube.com (e.g. subtitles), else other. Not the server itself:
+     * its name says where the user is. Null when not known.
+     */
+    @Nullable
+    public static String describeHost(@Nullable String host) {
+        if (host == null || host.isEmpty()) {
+            return null;
+        }
+
+        String name = host.toLowerCase(Locale.US);
+
+        for (String domain : KNOWN_DOMAINS) {
+            if (name.equals(domain) || name.endsWith("." + domain)) {
+                return domain;
+            }
+        }
+
+        return HOST_OTHER;
+    }
+
+    /**
+     * @param host of the server's name, only its domain (see #describeHost): null when not known
+     */
+    public PlayerFailure http(int code, String track, @Nullable String host, @Nullable Format failed) {
         mHttp = new JSONObject();
         mHttpCode = code;
 
         try {
             mHttp.put("code", code);
             mHttp.put("track", track);
-            putOpt(mHttp, "format", "audio".equals(track) ? describeAudio(failed) : describeVideo(failed));
+            putOpt(mHttp, "host", host);
+            putOpt(mHttp, "format", "audio".equals(track) ? describeAudio(failed) : "video".equals(track) ? describeVideo(failed) : null);
         } catch (JSONException e) {
             throw new IllegalStateException(e);
         }

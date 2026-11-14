@@ -333,6 +333,73 @@ public class PlaybackHealthTest {
         assertEquals(Collections.singletonList(PlaybackHealth.KIND_FRAME_DROPS), mFound);
     }
 
+    /**
+     * K067TC3S #19: 1440p60 VP9 dropped 44 frames and showed 32 in the 1.35 s after a seek's resume, 12 in the 47 s before. That's its
+     * decoder catching up from the new position, not frames it can't keep up with.
+     */
+    @Test
+    public void dropsOfASeeksResumeAreItsCatchUp() {
+        resumeAfterAPause(1_500);
+
+        assertTrue(mFound.isEmpty());
+
+        // Dropping on past it is frame drops again
+        for (int i = 1; i <= 4; i++) {
+            tick(500, 500, 536 + i * 10, 56 + i * 20);
+        }
+
+        assertEquals(Collections.singletonList(PlaybackHealth.KIND_FRAME_DROPS), mFound);
+    }
+
+    /**
+     * The same drops after a pause with no seek: the decoder had nothing to catch up on
+     */
+    @Test
+    public void dropsOfAPausesResumeAreFrameDrops() {
+        resumeAfterAPause(-1);
+
+        assertEquals(Collections.singletonList(PlaybackHealth.KIND_FRAME_DROPS), mFound);
+    }
+
+    /**
+     * Resumed long after the seek (e.g. paused there a while): not its catch-up
+     */
+    @Test
+    public void aResumeLongAfterASeekIsntItsCatchUp() {
+        resumeAfterAPause(PlaybackHealth.SEEK_RESUME_MS + 1);
+
+        assertEquals(Collections.singletonList(PlaybackHealth.KIND_FRAME_DROPS), mFound);
+    }
+
+    /**
+     * As #19: paused 7.5 s (the window holds little playing), sent elsewhere the given time before it plays again (-1 for not), then
+     * 44 dropped and 26 shown in 1.5 s, then none dropped
+     */
+    private void resumeAfterAPause(long seekBeforeMs) {
+        mSample.isVideoRendered = true;
+        playPastTheStart();
+        tick(2_000, 2_000, 480, 12);
+
+        mHealth.onInterrupted(PlaybackHealth.RESUMED_BY_PAUSE);
+        mSample.isPlaying = false;
+        long pausedMs = 7_500;
+
+        if (seekBeforeMs >= 0) {
+            tick(pausedMs - seekBeforeMs, 0, 480, 12);
+            mHealth.onSeek(mSample.nowMs);
+            tick(seekBeforeMs, 0, 480, 12);
+        } else {
+            tick(pausedMs, 0, 480, 12);
+        }
+
+        mSample.isPlaying = true;
+        mHealth.onResumed(mSample.nowMs);
+        tick(500, 500, 492, 24);
+        tick(500, 500, 500, 44);
+        tick(500, 500, 506, 56);
+        tick(500, 500, 536, 56);
+    }
+
     @Test
     public void aClockStillPastTheStartIsNotAFreezeOfIt() {
         mSample.isVideoRendered = true;

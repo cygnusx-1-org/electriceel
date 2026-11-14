@@ -47,6 +47,7 @@ import com.liskovsoft.smartyoutubetv2.common.exoplayer.errors.TrackErrorFixer;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.googlecommon.common.helpers.DefaultHeaders;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.other.SabrHostPrewarmer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -83,6 +84,8 @@ public class ExoMediaSourceFactory {
     public ExoMediaSourceFactory(Context context) {
         mContext = context;
         ValidatedNetworkState.install(context);
+        // The host a SABR stream is sent to is connected to while the response that said so is read
+        SabrHostPrewarmer.init(context);
     }
 
     public MediaSource fromSabrFormatInfo(MediaItemFormatInfo formatInfo) {

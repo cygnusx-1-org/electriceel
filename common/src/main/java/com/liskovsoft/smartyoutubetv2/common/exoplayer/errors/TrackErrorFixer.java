@@ -1,6 +1,7 @@
 package com.liskovsoft.smartyoutubetv2.common.exoplayer.errors;
 
 import androidx.annotation.Nullable;
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer.DecoderInitializationException;
@@ -12,6 +13,7 @@ import com.google.android.exoplayer2.upstream.HttpDataSource.InvalidResponseCode
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.mylogger.Log;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailure;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.TrackSelectorManager;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.TrackSelectorUtil;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.track.MediaTrack;
@@ -36,11 +38,12 @@ public class TrackErrorFixer extends DefaultMediaSourceEventListener {
         /**
          * A segment of a track failed with the HTTP code
          *
-         * @param track audio, video or other (e.g. subtitles)
+         * @param track audio, video, text (subtitles) or other (see #trackOf)
+         * @param host the server's domain (see PlayerFailure#describeHost), null when not known
          * @param failed the format of the track in use, when it's audio or video
          * @param switched another codec is selected instead
          */
-        void onHttpError(int responseCode, String track, @Nullable Format failed, boolean switched);
+        void onHttpError(int responseCode, String track, @Nullable String host, @Nullable Format failed, boolean switched);
     }
 
     public TrackErrorFixer(TrackSelectorManager trackSelectorManager) {
@@ -288,13 +291,45 @@ public class TrackErrorFixer extends DefaultMediaSourceEventListener {
         }
 
         InvalidResponseCodeException ex = (InvalidResponseCodeException) error;
-        String url = ex.dataSpec.uri.toString();
-        String track = url.contains("mime/audio") ? "audio" : url.contains("mime/video") ? "video" : "other";
-        MediaTrack failed = "audio".equals(track) ? getSelectedTrack(mTrackSelectorManager.getAudioTracks()) :
-                "video".equals(track) ? getSelectedTrack(mTrackSelectorManager.getVideoTracks()) : null;
+        String track = trackOf(mediaLoadData, ex.dataSpec.uri.toString());
+        MediaTrack failed = PlayerFailure.TRACK_AUDIO.equals(track) ? getSelectedTrack(mTrackSelectorManager.getAudioTracks()) :
+                PlayerFailure.TRACK_VIDEO.equals(track) ? getSelectedTrack(mTrackSelectorManager.getVideoTracks()) : null;
 
         boolean switched = fixError(error);
 
-        mOnHttpError.onHttpError(ex.responseCode, track, failed != null ? failed.format : null, switched);
+        mOnHttpError.onHttpError(ex.responseCode, track, PlayerFailure.describeHost(ex.dataSpec.uri.getHost()),
+                failed != null ? failed.format : null, switched);
+    }
+
+    /**
+     * Of a load: audio, video, text (subtitles) or other (e.g. a manifest). By the track it loads for, else its format: the URL names
+     * the mime type of a DASH segment only, so every SABR request was other, like a subtitle's. Muxed (the URL list's) is video.
+     */
+    static String trackOf(@Nullable MediaLoadData data, String url) {
+        if (data != null) {
+            switch (data.trackType) {
+                case C.TRACK_TYPE_AUDIO:
+                    return PlayerFailure.TRACK_AUDIO;
+                case C.TRACK_TYPE_VIDEO:
+                case C.TRACK_TYPE_DEFAULT:
+                    return PlayerFailure.TRACK_VIDEO;
+                case C.TRACK_TYPE_TEXT:
+                    return PlayerFailure.TRACK_TEXT;
+            }
+
+            // E.g. a sideloaded subtitle's (see SingleSampleMediaPeriod): its type is unknown, its format isn't
+            String mimeType = data.trackFormat != null ? data.trackFormat.sampleMimeType : null;
+
+            if (MimeTypes.isText(mimeType)) {
+                return PlayerFailure.TRACK_TEXT;
+            } else if (MimeTypes.isAudio(mimeType)) {
+                return PlayerFailure.TRACK_AUDIO;
+            } else if (MimeTypes.isVideo(mimeType)) {
+                return PlayerFailure.TRACK_VIDEO;
+            }
+        }
+
+        return url.contains("mime/audio") ? PlayerFailure.TRACK_AUDIO : url.contains("mime/video") ? PlayerFailure.TRACK_VIDEO
+                : PlayerFailure.TRACK_OTHER;
     }
 }

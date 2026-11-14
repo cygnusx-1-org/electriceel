@@ -1033,6 +1033,9 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
             return;
         }
 
+        // While it loads, not after: the first video's player can take longer than the section
+        MediaServiceManager.instance().warmUpPlaybackOnLoad();
+
         // Not where Home is loaded: a load of its content elsewhere (e.g. the preview of KeywordFilterSettingsPresenter) runs alongside
         if (section.getId() == MediaGroup.TYPE_HOME) {
             mAddedHomeRows.clear();
@@ -1187,6 +1190,9 @@ public class BrowsePresenter extends BasePresenter<BrowseView> implements Sectio
             getView().showProgressBar(false);
             return;
         }
+
+        // While it loads, not after: the first video's player can take longer than the section
+        MediaServiceManager.instance().warmUpPlaybackOnLoad();
 
         Disposable updateAction = HiddenVideoResolver.resolveGroup(getContext(), VideoCategoryManager.instance(getContext()).resolveGroup(group), section)
                 .subscribe(

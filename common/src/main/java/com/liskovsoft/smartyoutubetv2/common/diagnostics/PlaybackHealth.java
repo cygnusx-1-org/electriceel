@@ -65,10 +65,16 @@ public final class PlaybackHealth {
     @VisibleForTesting
     static final long START_STUCK_MS = 8_000;
     /**
-     * After the position stood still and jumped, the renderer drops what it's now late for: at most this long
+     * After the position stood still and jumped, or a seek, the renderer drops what it's now late for: at most this long
      */
     @VisibleForTesting
     static final long CATCH_UP_MS = 2_000;
+    /**
+     * Played again this soon after a seek, it's the seek's resume (see #onResumed): the buffering after it can come between, and a
+     * moment of playing before that
+     */
+    @VisibleForTesting
+    static final long SEEK_RESUME_MS = 5_000;
     public static final long START_TICK_MS = 500;
     private static final long TICK_MS = 2_000;
     /**
@@ -116,6 +122,10 @@ public final class PlaybackHealth {
     private boolean mIsStartClockStill;
     private long mCatchUpEndMs = -1;
     private long mCatchUpDropped = -1;
+    /**
+     * When it was last sent elsewhere, on the samples' clock (see #onSeek), -1 for not since the format was tried
+     */
+    private long mSeekMs = -1;
     private final ArrayDeque<long[]> mFrames = new ArrayDeque<>(); // {time, rendered, dropped}
     /**
      * Of the format tried, by the ticks
@@ -569,6 +579,22 @@ public final class PlaybackHealth {
         mResumedBy = mInterruption;
         mInterruption = null;
         mResumeTrail.clear();
+
+        // Its decoder catches up from the new position: what the renderer drops meanwhile isn't frames it can't keep up with. 1440p60
+        // VP9 dropped 44 of 76 frames in the 1.35 s after a seek's resume, 12 in the 47 s before.
+        if (mSeekMs >= 0 && nowMs - mSeekMs <= SEEK_RESUME_MS) {
+            mCatchUpEndMs = nowMs + CATCH_UP_MS;
+            mCatchUpDropped = -1;
+        }
+    }
+
+    /**
+     * Sent elsewhere (a seek of any kind): it stopped playing for it (see #onInterrupted), and the drops of its resume are its decoder
+     * catching up (see #onResumed)
+     */
+    public void onSeek(long nowMs) {
+        onInterrupted(RESUMED_BY_SEEK);
+        mSeekMs = nowMs;
     }
 
     private boolean isResuming(long nowMs) {
@@ -679,6 +705,7 @@ public final class PlaybackHealth {
         mIsStartClockStill = false;
         mCatchUpEndMs = -1;
         mCatchUpDropped = -1;
+        mSeekMs = -1;
         mFrames.clear();
         mPlayedMs = 0;
         mSoundBuffersSilent = -1;

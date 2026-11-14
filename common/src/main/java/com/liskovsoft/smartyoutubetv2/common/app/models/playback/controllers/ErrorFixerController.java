@@ -661,8 +661,8 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
 
             boolean isGeneralError = Helpers.startsWithAny(errorContent, "Response code: 429", "Response code: 500");
             if (isGeneralError && isSubtitlesEnabled()) {
-                failure.action("disable_subtitles");
-                disableSubtitles(); // Response code: 429
+                failure.action("disable_subtitles_for_video");
+                disableSubtitlesForVideo(); // Response code: 429
             } else if (isGeneralError && getPlayerTweaksData().isHighBitrateFormatsEnabled()) {
                 failure.action("disable_high_bitrate");
                 getPlayerTweaksData().setHighBitrateFormatsEnabled(false); // Response code: 429
@@ -680,8 +680,8 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
         } else if (type == PlayerEventListener.ERROR_TYPE_RENDERER && rendererIndex == PlayerEventListener.RENDERER_INDEX_SUBTITLE) {
             // "Response code: 429" (subtitle error)
             // "Response code: 500" (subtitle error)
-            failure.action("disable_subtitles");
-            disableSubtitles();
+            failure.action("disable_subtitles_for_video");
+            disableSubtitlesForVideo();
             restartEngine = false;
         } else if (type == PlayerEventListener.ERROR_TYPE_RENDERER && rendererIndex == PlayerEventListener.RENDERER_INDEX_VIDEO) {
             failure.action("temp_video_avc");
@@ -968,6 +968,20 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
     private void disableSubtitles() {
         getPlayerData().setSubtitlesPerChannelEnabled(false); // Important!
         getPlayerData().setFormat(FormatItem.SUBTITLE_NONE);
+    }
+
+    /**
+     * Off for the video only: a 429 (too many requests) or a 500 is their server's, for now. They were turned off in the settings, and
+     * one rate limit left the user without subtitles from then on. Its reloads play without them (see
+     * VideoStateController#restoreSubtitleFormat), the next video with the user's.
+     */
+    private void disableSubtitlesForVideo() {
+        Video video = getVideo();
+        getPlayerData().setSubtitlesOffFor(video != null ? video.videoId : null);
+
+        if (getPlayer() != null) {
+            getPlayer().setFormat(FormatItem.SUBTITLE_NONE);
+        }
     }
 
     private boolean isStreamEnded() {

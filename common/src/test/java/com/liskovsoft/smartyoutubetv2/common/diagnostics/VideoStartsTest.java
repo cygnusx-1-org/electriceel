@@ -1,5 +1,7 @@
 package com.liskovsoft.smartyoutubetv2.common.diagnostics;
 
+import com.liskovsoft.youtubeapi.videoinfo.V2.WarmUps;
+
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -9,6 +11,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -1114,6 +1117,162 @@ public class VideoStartsTest {
         VideoStarts.onPrepare();
         VideoStarts.onFirstFrame();
         VideoStarts.onPlaying(true);
+    }
+
+    /**
+     * K067TC3S, ow0-Y3aPrPw: a suggestion showed its first frame at 3.3 s with 54 s buffered, then waited paused; given up at 15 s as if
+     * it were stuck, it played 97 s once the user played it. Ready and paused then, it's paused, timed till it was ready.
+     */
+    @Test
+    public void aStartReadyAndPausedWhenItsTimeIsUpIsPaused() throws Exception {
+        VideoStarts.start(VIDEO_ID, VideoStart.TRIGGER_SUGGESTION);
+        VideoStarts.onFetch(VIDEO_ID);
+        mFixture.at(1_107);
+        VideoStarts.onFormats(VIDEO_ID, "TV");
+        VideoStarts.onPrepare();
+        mFixture.at(3_348);
+        VideoStarts.onFirstFrame();
+        VideoStarts.onPlayerState(true, false);
+        mFixture.state = new JSONObject().put("availMemMb", 612);
+
+        mFixture.at(VideoStarts.MAX_START_MS);
+        mFixture.fireGiveUp();
+
+        VideoStart start = last();
+
+        assertEquals(VideoStart.OUTCOME_PAUSED, start.outcome);
+        assertTrue(start.isReady());
+        assertFalse(start.isPlayed());
+        assertEquals(3_348, start.totalMs);
+        // It got ready: nothing of it was still going
+        assertStage(find(start, VideoStarts.STAGE_BUFFERING), VideoStarts.STAGE_BUFFERING, null, 0, 1_107, 3_348);
+        assertNull(start.state);
+        assertEquals("paused", start.toJson().getString("outcome"));
+        assertEquals("suggestion, first of run, TV, paused", start.describe());
+        assertNull(mFixture.giveUp);
+    }
+
+    /**
+     * Paused, then buffering again (e.g. a seek while paused): not ready when its time is up, it's given up
+     */
+    @Test
+    public void aStartPausedThenBufferingAgainIsGivenUp() {
+        VideoStarts.start(VIDEO_ID, VideoStart.TRIGGER_OPEN);
+        VideoStarts.onFetch(VIDEO_ID);
+        mFixture.at(900);
+        VideoStarts.onFormats(VIDEO_ID, "TV");
+        VideoStarts.onPrepare();
+        mFixture.at(2_000);
+        VideoStarts.onPlayerState(true, false);
+        mFixture.at(2_500);
+        VideoStarts.onPlayerState(false, false);
+
+        mFixture.at(VideoStarts.MAX_START_MS);
+        mFixture.fireGiveUp();
+
+        assertEquals(VideoStart.OUTCOME_GAVE_UP, last().outcome);
+        assertEquals(VideoStarts.MAX_START_MS, last().totalMs);
+    }
+
+    /**
+     * Paused a moment while it starts (e.g. prepared paused, then played): it played, timed till then
+     */
+    @Test
+    public void aStartPausedThenPlayedIsPlayed() {
+        VideoStarts.start(VIDEO_ID, VideoStart.TRIGGER_OPEN);
+        VideoStarts.onFetch(VIDEO_ID);
+        mFixture.at(900);
+        VideoStarts.onFormats(VIDEO_ID, "TV");
+        VideoStarts.onPrepare();
+        mFixture.at(2_000);
+        VideoStarts.onFirstFrame();
+        VideoStarts.onPlayerState(true, false);
+        mFixture.at(5_000);
+        VideoStarts.onPlayerState(true, true);
+        VideoStarts.onPlaying(true);
+
+        assertEquals(VideoStart.OUTCOME_PLAYED, last().outcome);
+        assertEquals(5_000, last().totalMs);
+    }
+
+    /**
+     * K067TC3S, 2PGGfLc5sq8: given up with its player screen, its request and its n-function load all 5 to 20 times their usual, and
+     * nothing said whether the device was starved. One that never played says where it was at; one that played doesn't.
+     */
+    @Test
+    public void aStartThatNeverPlayedHasTheDevicesState() throws Exception {
+        mFixture.state = new JSONObject().put("availMemMb", 412).put("lowMemory", true);
+        VideoStarts.start(VIDEO_ID, VideoStart.TRIGGER_OPEN);
+        VideoStarts.onFetch(VIDEO_ID);
+
+        mFixture.at(VideoStarts.MAX_START_MS);
+        mFixture.fireGiveUp();
+
+        JSONObject json = last().toJson();
+
+        assertEquals(VideoStart.OUTCOME_GAVE_UP, last().outcome);
+        assertEquals(412, json.getJSONObject("state").getInt("availMemMb"));
+        assertTrue(json.getJSONObject("state").getBoolean("lowMemory"));
+
+        VideoStart played = mFixture.slowStart();
+
+        assertNull(played.state);
+        assertFalse(played.toJson().has("state"));
+    }
+
+    /**
+     * K067TC3S, MqrcTLfOLKo: the run's first video loaded a new player itself for 12 s, and nothing said whether the warm-up had run.
+     * Its first start says which warm-ups began before it ended, in its time; the next ones say nothing of them.
+     */
+    @Test
+    public void theRunsFirstStartSaysWhichWarmUpsRan() throws Exception {
+        mFixture.warmUps.add(new WarmUps.Run(T0 - 9_400, T0 - 6_100, Arrays.asList(
+                new WarmUps.Step("player data", T0 - 9_400, T0 - 6_950, "ready"),
+                new WarmUps.Step("poToken", T0 - 6_950, T0 - 6_100, "got"))));
+        mFixture.warmUps.add(new WarmUps.Run(T0 + 100, WarmUps.OPEN, Collections.singletonList(
+                new WarmUps.Step("player data", T0 + 100, WarmUps.OPEN, null))));
+        // After it played: not its
+        mFixture.warmUps.add(new WarmUps.Run(T0 + 20_000, WarmUps.OPEN, Collections.emptyList()));
+
+        VideoStart first = mFixture.slowStart();
+
+        assertEquals(2, first.warmUps.size());
+        assertEquals(-9_400, first.warmUps.get(0).startMs);
+        assertEquals(-6_100, first.warmUps.get(0).endMs);
+        assertTrue(first.warmUps.get(1).isOpen());
+
+        JSONObject json = first.toJson();
+        JSONObject done = json.getJSONArray("warmUps").getJSONObject(0);
+        JSONObject going = json.getJSONArray("warmUps").getJSONObject(1);
+
+        assertEquals(-9_400, done.getLong("startMs"));
+        assertEquals(-6_100, done.getLong("endMs"));
+        assertEquals("player data", done.getJSONArray("steps").getJSONObject(0).getString("name"));
+        assertEquals(-6_950, done.getJSONArray("steps").getJSONObject(0).getLong("endMs"));
+        assertEquals("ready", done.getJSONArray("steps").getJSONObject(0).getString("result"));
+        assertEquals("got", done.getJSONArray("steps").getJSONObject(1).getString("result"));
+        assertEquals(100, going.getLong("startMs"));
+        assertFalse(going.has("endMs"));
+        assertFalse(going.getJSONArray("steps").getJSONObject(0).has("endMs"));
+        assertFalse(going.getJSONArray("steps").getJSONObject(0).has("result"));
+
+        VideoStart next = mFixture.slowStart();
+
+        assertFalse(next.isFirstOfRun);
+        assertNull(next.warmUps);
+        assertFalse(next.toJson().has("warmUps"));
+    }
+
+    /**
+     * None ran before the run's first video: it says so, with none
+     */
+    @Test
+    public void theRunsFirstStartWithNoWarmUpHasNone() throws Exception {
+        VideoStart first = mFixture.slowStart();
+
+        assertTrue(first.isFirstOfRun);
+        assertEquals(0, first.warmUps.size());
+        assertEquals(0, first.toJson().getJSONArray("warmUps").length());
     }
 
     private VideoStart last() {

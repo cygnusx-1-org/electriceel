@@ -90,6 +90,39 @@ public final class DeviceCapabilities {
     }
 
     /**
+     * Of a video start that never played (see VideoStart#state): the memory, of the app and the device, and the heat. On the main thread:
+     * nothing slow.
+     */
+    public static JSONObject buildStartState(Context context) {
+        JSONObject result = new JSONObject();
+
+        try {
+            Runtime runtime = Runtime.getRuntime();
+            result.put("heapUsedMb", (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024));
+            result.put("heapMaxMb", runtime.maxMemory() / (1024 * 1024));
+
+            ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+
+            if (activityManager != null) {
+                ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
+                activityManager.getMemoryInfo(memoryInfo);
+                result.put("availMemMb", memoryInfo.availMem / (1024 * 1024));
+                result.put("lowMemory", memoryInfo.lowMemory);
+            }
+
+            PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+
+            if (VERSION.SDK_INT >= 29 && powerManager != null) {
+                result.put("thermalStatus", getThermalStatusName(powerManager.getCurrentThermalStatus()));
+            }
+        } catch (JSONException | RuntimeException e) {
+            putError(result, e);
+        }
+
+        return result;
+    }
+
+    /**
      * Where the player is at, for a failure: the memory left, the network and the display mode
      */
     public static JSONObject buildState(Context context, long afrSwitchTimeMs) {

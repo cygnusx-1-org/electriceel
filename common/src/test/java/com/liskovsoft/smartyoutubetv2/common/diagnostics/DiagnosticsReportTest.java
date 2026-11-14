@@ -7,14 +7,18 @@ import com.liskovsoft.mediaserviceinterfaces.oauth.Account;
 import com.liskovsoft.sharedutils.locale.LocaleUpdater;
 import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
 import com.liskovsoft.smartyoutubetv2.common.BuildConfig;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.ExoFormatItem;
+import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
 import com.liskovsoft.smartyoutubetv2.common.prefs.AppPrefs;
 import com.liskovsoft.smartyoutubetv2.common.prefs.DebuggingData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.NetworkData;
+import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.service.YouTubeServiceManager;
 import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
+import com.liskovsoft.youtubeapi.videoinfo.models.TranslatedCaptionTrack;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -222,6 +226,38 @@ public class DiagnosticsReportTest {
 
         assertEquals("en-US", settings.getString("language"));
         assertEquals("US", settings.getString("country"));
+    }
+
+    /**
+     * K067TC3S: 429s of loads on and off for hours, and nothing said whether its videos played with (auto-translated) subtitles
+     */
+    @Test
+    public void theSubtitlesAreSaidOnAndWhetherAutoTranslated() throws Exception {
+        PlayerData playerData = PlayerData.instance(getContext());
+        FormatItem savedFormat = playerData.getFormat(FormatItem.TYPE_SUBTITLE);
+        boolean savedPerChannel = playerData.isSubtitlesPerChannelEnabled();
+
+        try {
+            playerData.setSubtitlesPerChannelEnabled(false);
+            playerData.setFormat(ExoFormatItem.fromSubtitleParams("ar" + TranslatedCaptionTrack.TRANSLATE_MARKER));
+            JSONObject subtitles = build(null, 0, Collections.emptyList()).getJSONObject("app").getJSONObject("settings")
+                    .getJSONObject("subtitles");
+
+            assertTrue(subtitles.getBoolean("enabled"));
+            assertFalse(subtitles.getBoolean("perChannel"));
+            assertTrue(subtitles.getBoolean("autoTranslated"));
+
+            playerData.setFormat(ExoFormatItem.fromSubtitleParams("ar"));
+            assertFalse(DiagnosticsReport.buildSubtitleSettings(playerData).getBoolean("autoTranslated"));
+
+            playerData.setFormat(FormatItem.SUBTITLE_NONE);
+            subtitles = DiagnosticsReport.buildSubtitleSettings(playerData);
+            assertFalse(subtitles.getBoolean("enabled"));
+            assertFalse(subtitles.getBoolean("autoTranslated"));
+        } finally {
+            playerData.setFormat(savedFormat);
+            playerData.setSubtitlesPerChannelEnabled(savedPerChannel);
+        }
     }
 
     @Test

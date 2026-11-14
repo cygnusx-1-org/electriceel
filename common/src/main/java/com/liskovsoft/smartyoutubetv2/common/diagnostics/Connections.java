@@ -76,10 +76,22 @@ public final class Connections {
      */
     static final String LOAD_MANIFEST = "manifest";
     /**
+     * Of a call made only to connect to a host ahead of the player's next request (see SabrHostPrewarmer)
+     */
+    static final String LOAD_PREWARM = "prewarm";
+
+    /**
+     * The tag of a call made only to connect ahead (see SabrHostPrewarmer): its connect is told apart from a load's
+     */
+    public enum Prewarm {
+        INSTANCE
+    }
+    /**
      * For the client of the player only: the API's connections aren't the video's. Each call is made on the thread of the load it's
      * of (e.g. OkHttpDataSource#open), and its listener with it: that's when the load is known.
      */
-    public static final EventListener.Factory LISTENER = call -> new Listener(describeLoad(Loader.getCurrentLoadable()));
+    public static final EventListener.Factory LISTENER =
+            call -> new Listener(call.request().tag(Prewarm.class) != null ? LOAD_PREWARM : describeLoad(Loader.getCurrentLoadable()));
     private static final ArrayDeque<Connection> sConnections = new ArrayDeque<>();
     private static final ArrayDeque<TimedRequest> sResponses = new ArrayDeque<>();
     private static final ArrayDeque<TimedRequest> sOpenings = new ArrayDeque<>();

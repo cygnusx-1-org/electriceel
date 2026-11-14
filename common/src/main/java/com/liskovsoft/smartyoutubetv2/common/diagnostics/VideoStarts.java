@@ -15,6 +15,7 @@ import com.google.android.exoplayer2.source.sabr.parser.SabrStream;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.videoinfo.V2.FetchStages;
+import com.liskovsoft.youtubeapi.videoinfo.V2.WarmUps;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -151,7 +152,7 @@ public final class VideoStarts {
     /**
      * A start not playing 15 s after the user's action is given up, even when nothing happens any more (e.g. a request hangs)
      */
-    private static final Runnable sGiveUp = () -> abandon(VideoStart.OUTCOME_GAVE_UP);
+    private static final Runnable sGiveUp = VideoStarts::giveUp;
     /**
      * The network engine the player uses (see Utils#getEffectiveNetworkEngine)
      */
@@ -169,6 +170,16 @@ public final class VideoStarts {
     static Recorder sRecorder = VideoStarts::save;
     @VisibleForTesting
     static FramesRecorder sFramesRecorder = VideoStarts::saveFrames;
+    /**
+     * The playback warm-ups of the run (see WarmUps in MediaServiceCore), for its first start
+     */
+    @VisibleForTesting
+    static WarmUpSource sWarmUps = WarmUps::snapshot;
+    /**
+     * Where the device is at, for a start that never played (see DeviceCapabilities#buildStartState)
+     */
+    @VisibleForTesting
+    static StateSource sState = VideoStarts::getState;
     /**
      * The application's (no activity kept), for the log of the starts
      */
@@ -303,6 +314,15 @@ public final class VideoStarts {
         void record(long ts, JSONObject frames);
     }
 
+    interface WarmUpSource {
+        List<WarmUps.Run> get();
+    }
+
+    interface StateSource {
+        @Nullable
+        JSONObject get();
+    }
+
     public interface Listener {
         /**
          * The user started a video
@@ -331,6 +351,10 @@ public final class VideoStarts {
         long prepareMs = -1;
         long firstFrameMs = -1;
         long playingMs = -1;
+        /**
+         * Since it's been ready and paused (see #onPlayerState), -1 when it isn't
+         */
+        long pausedMs = -1;
         long modeSwitchMs = -1;
         /**
          * Of its first frame (see FirstFrame)
@@ -647,6 +671,7 @@ public final class VideoStarts {
         timer.prepareMs = now;
         timer.firstFrameMs = -1;
         timer.playingMs = -1;
+        timer.pausedMs = -1;
         timer.positionMs = -1;
         timer.video = null;
         timer.videoBitrateKbps = -1;
@@ -813,6 +838,26 @@ public final class VideoStarts {
     }
 
     /**
+     * The player's state changed: ready and paused (by the user, or prepared so) still when its time is up, the start is paused, not
+     * stuck (see #giveUp). Before #onPlaying.
+     *
+     * @param isReady it can play from where it is (ExoPlayer's STATE_READY)
+     */
+    public static void onPlayerState(boolean isReady, boolean playWhenReady) {
+        Timer timer = getTimer();
+
+        if (timer == null || timer.prepareMs < 0) {
+            return;
+        }
+
+        if (!isReady || playWhenReady) {
+            timer.pausedMs = -1;
+        } else if (timer.pausedMs < 0) {
+            timer.pausedMs = sClock.now();
+        }
+    }
+
+    /**
      * The player is ready and plays
      *
      * @param hasSurface the video is shown: with none, no frame is
@@ -918,6 +963,33 @@ public final class VideoStarts {
             return;
         }
 
+        finish(timer, Math.max(timer.playingMs, timer.firstFrameMs), VideoStart.OUTCOME_PLAYED);
+    }
+
+    /**
+     * Not playing 15 s after the user's action: given up, unless it's been ready and paused since (by the user, or started so), then
+     * recorded as paused, timed till it was ready. A paused start was recorded as given up, as if it were stuck: one that showed its
+     * first frame with 54 s buffered, then played 97 s once the user played it.
+     */
+    private static void giveUp() {
+        Timer timer = sTimer;
+
+        if (timer == null) {
+            return;
+        }
+
+        if (timer.pausedMs < 0) {
+            abandon(VideoStart.OUTCOME_GAVE_UP);
+            return;
+        }
+
+        finish(timer, Math.max(timer.pausedMs, timer.firstFrameMs), VideoStart.OUTCOME_PAUSED);
+    }
+
+    /**
+     * It got ready (see VideoStart#isReady): the video plays from it, its first seconds are added to it once they're played
+     */
+    private static void finish(Timer timer, long endMs, String outcome) {
         sTimer = null;
         sScheduler.cancel(sGiveUp);
         sReloadableId = timer.videoId;
@@ -929,7 +1001,7 @@ public final class VideoStarts {
             oldest.next();
             oldest.remove();
         }
-        record(build(timer, Math.max(timer.playingMs, timer.firstFrameMs), VideoStart.OUTCOME_PLAYED));
+        record(build(timer, endMs, outcome));
     }
 
     private static void record(VideoStart start) {
@@ -971,7 +1043,9 @@ public final class VideoStarts {
      * @param endMs when it played, or was given up or looked at
      */
     private static VideoStart build(Timer timer, long endMs, String outcome) {
-        boolean isPlayed = VideoStart.OUTCOME_PLAYED.equals(outcome);
+        // Ready to play (played, or paused then): its stages ended by then
+        boolean isReady = VideoStart.OUTCOME_PLAYED.equals(outcome) || VideoStart.OUTCOME_PAUSED.equals(outcome);
+        boolean isLookedAt = VideoStart.OUTCOME_WAITING.equals(outcome);
         List<VideoStart.Stage> stages = new ArrayList<>();
         List<Group> groups = new ArrayList<>(timer.groups);
         Collections.sort(groups, (a, b) -> Long.compare(a.startMs, b.startMs));
@@ -1002,7 +1076,7 @@ public final class VideoStarts {
 
             long groupEndMs = isOpen ? endMs : group.endMs;
             // Not played, it hadn't ended
-            String detail = isOpen && !isPlayed ? (group.detail != null ? group.detail + ", " + DETAIL_GOING : DETAIL_GOING)
+            String detail = isOpen && !isReady ? (group.detail != null ? group.detail + ", " + DETAIL_GOING : DETAIL_GOING)
                     : group.detail;
             stages.add(new VideoStart.Stage(group.name, detail, 0, group.startMs - timer.t0, groupEndMs - timer.t0));
             List<VideoStart.Stage> children = new ArrayList<>(group.children);
@@ -1031,9 +1105,49 @@ public final class VideoStarts {
             stages.add(new VideoStart.Stage(STAGE_FIRST_FRAME, null, 0, frameMs, frameMs));
         }
 
+        // Whether the run's first video found ready what the warm-up was to get ready, or the warm-up never ran
+        List<VideoStart.WarmUp> warmUps = timer.isFirstOfRun && !isLookedAt ? buildWarmUps(timer, endMs) : null;
+        // E.g. starved of memory
+        JSONObject state = !isReady && !isLookedAt ? sState.get() : null;
+
         return new VideoStart(timer.ts, timer.videoId, timer.trigger, timer.isFirstOfRun, timer.sinceProcessStartMs, timer.client,
                 timer.protocol, timer.engine, timer.isCached, outcome, endMs - timer.t0, stages, timer.positionMs, timer.video,
-                timer.videoBitrateKbps);
+                timer.videoBitrateKbps, warmUps, state);
+    }
+
+    /**
+     * The warm-ups that began before the start's end: as they are now, a step that ended after it too
+     */
+    private static List<VideoStart.WarmUp> buildWarmUps(Timer timer, long endMs) {
+        List<VideoStart.WarmUp> result = new ArrayList<>();
+
+        try {
+            for (WarmUps.Run run : sWarmUps.get()) {
+                if (run.startMs > endMs) {
+                    continue;
+                }
+
+                List<VideoStart.WarmUpStep> steps = new ArrayList<>();
+
+                for (WarmUps.Step step : run.steps) {
+                    steps.add(new VideoStart.WarmUpStep(step.name, step.startMs - timer.t0,
+                            step.isOpen() ? VideoStart.WarmUp.OPEN : step.endMs - timer.t0, step.result));
+                }
+
+                result.add(new VideoStart.WarmUp(run.startMs - timer.t0, run.isOpen() ? VideoStart.WarmUp.OPEN : run.endMs - timer.t0,
+                        steps));
+            }
+        } catch (RuntimeException e) {
+            // Recorded without them
+            Log.e(TAG, "Can't read the warm-ups: %s", e.getMessage());
+        }
+
+        return result;
+    }
+
+    @Nullable
+    private static JSONObject getState() {
+        return sContext != null ? DeviceCapabilities.buildStartState(sContext) : null;
     }
 
     /**
@@ -1120,7 +1234,7 @@ public final class VideoStarts {
         Timer timer = sTimer;
 
         if (timer != null && sClock.now() - timer.t0 > MAX_START_MS) {
-            abandon(VideoStart.OUTCOME_GAVE_UP);
+            giveUp();
             return null;
         }
 
@@ -1219,5 +1333,7 @@ public final class VideoStarts {
         sProtection = ProtectionStatuses::take;
         sRecorder = VideoStarts::save;
         sFramesRecorder = VideoStarts::saveFrames;
+        sWarmUps = WarmUps::snapshot;
+        sState = VideoStarts::getState;
     }
 }

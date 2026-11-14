@@ -77,6 +77,11 @@ public final class VideoStart {
      * Its formats said it can't be played
      */
     public static final String OUTCOME_UNPLAYABLE = "unplayable";
+    /**
+     * Ready to play and paused (by the user, or started so) 15 s after the user's action, not played: timed till it was ready. It was
+     * recorded as given up, as if it were stuck.
+     */
+    public static final String OUTCOME_PAUSED = "paused";
 
     /**
      * Of a stage, by the work it times: the graph's colors
@@ -156,6 +161,93 @@ public final class VideoStart {
     }
 
     /**
+     * A playback warm-up of the run (see FormatInfoWrapper#warmUp in MediaServiceCore): what the run's first video found ready. Its
+     * times are in ms since the user's action, before it negative.
+     */
+    public static final class WarmUp {
+        /**
+         * Of a warm-up or a step still going when the start was recorded
+         */
+        public static final long OPEN = Long.MIN_VALUE;
+        public final long startMs;
+        public final long endMs;
+        public final List<WarmUpStep> steps;
+
+        public WarmUp(long startMs, long endMs, List<WarmUpStep> steps) {
+            this.startMs = startMs;
+            this.endMs = endMs;
+            this.steps = Collections.unmodifiableList(new ArrayList<>(steps));
+        }
+
+        public boolean isOpen() {
+            return endMs == OPEN;
+        }
+
+        JSONObject toJson() throws JSONException {
+            JSONObject result = new JSONObject();
+            result.put("startMs", startMs);
+
+            if (!isOpen()) {
+                result.put("endMs", endMs);
+            }
+
+            JSONArray stepArray = new JSONArray();
+
+            for (WarmUpStep step : steps) {
+                stepArray.put(step.toJson());
+            }
+
+            result.put("steps", stepArray);
+
+            return result;
+        }
+    }
+
+    /**
+     * E.g. the player data, "ready"
+     */
+    public static final class WarmUpStep {
+        public final String name;
+        public final long startMs;
+        /**
+         * {@link WarmUp#OPEN} for one still going
+         */
+        public final long endMs;
+        /**
+         * Null while it runs
+         */
+        @Nullable
+        public final String result;
+
+        public WarmUpStep(String name, long startMs, long endMs, @Nullable String result) {
+            this.name = name;
+            this.startMs = startMs;
+            this.endMs = endMs;
+            this.result = result;
+        }
+
+        public boolean isOpen() {
+            return endMs == WarmUp.OPEN;
+        }
+
+        JSONObject toJson() throws JSONException {
+            JSONObject result = new JSONObject();
+            result.put("name", name);
+            result.put("startMs", startMs);
+
+            if (!isOpen()) {
+                result.put("endMs", endMs);
+            }
+
+            if (this.result != null) {
+                result.put("result", this.result);
+            }
+
+            return result;
+        }
+    }
+
+    /**
      * Wall clock, when the user acted
      */
     public final long ts;
@@ -207,6 +299,17 @@ public final class VideoStart {
      * Its bitrate, -1 when not known
      */
     public final int videoBitrateKbps;
+    /**
+     * Of the run's first start: the warm-ups that began before it ended, the oldest first, empty for none. Null for the other starts.
+     */
+    @Nullable
+    public final List<WarmUp> warmUps;
+    /**
+     * Of a start that never played: where the device was at then (its memory, see DeviceCapabilities#buildStartState). Null for one that
+     * played, or when not known.
+     */
+    @Nullable
+    public final JSONObject state;
 
     /**
      * One that played
@@ -231,6 +334,14 @@ public final class VideoStart {
     public VideoStart(long ts, String videoId, String trigger, boolean isFirstOfRun, long sinceProcessStartMs, @Nullable String client,
                       @Nullable String protocol, @Nullable String engine, boolean isCached, String outcome, long totalMs,
                       List<Stage> stages, long positionMs, @Nullable String video, int videoBitrateKbps) {
+        this(ts, videoId, trigger, isFirstOfRun, sinceProcessStartMs, client, protocol, engine, isCached, outcome, totalMs, stages,
+                positionMs, video, videoBitrateKbps, null, null);
+    }
+
+    public VideoStart(long ts, String videoId, String trigger, boolean isFirstOfRun, long sinceProcessStartMs, @Nullable String client,
+                      @Nullable String protocol, @Nullable String engine, boolean isCached, String outcome, long totalMs,
+                      List<Stage> stages, long positionMs, @Nullable String video, int videoBitrateKbps, @Nullable List<WarmUp> warmUps,
+                      @Nullable JSONObject state) {
         this.ts = ts;
         this.videoId = videoId;
         this.trigger = trigger;
@@ -246,10 +357,19 @@ public final class VideoStart {
         this.positionMs = positionMs;
         this.video = video;
         this.videoBitrateKbps = videoBitrateKbps;
+        this.warmUps = warmUps != null ? Collections.unmodifiableList(new ArrayList<>(warmUps)) : null;
+        this.state = state;
     }
 
     public boolean isPlayed() {
         return OUTCOME_PLAYED.equals(outcome);
+    }
+
+    /**
+     * It got ready to play: played, or paused then (see OUTCOME_PAUSED). Its stages ended by its end.
+     */
+    public boolean isReady() {
+        return isPlayed() || OUTCOME_PAUSED.equals(outcome);
     }
 
     /**
@@ -350,6 +470,20 @@ public final class VideoStart {
             }
 
             result.put("stages", stageArray);
+
+            if (warmUps != null) {
+                JSONArray warmUpArray = new JSONArray();
+
+                for (WarmUp warmUp : warmUps) {
+                    warmUpArray.put(warmUp.toJson());
+                }
+
+                result.put("warmUps", warmUpArray);
+            }
+
+            if (state != null) {
+                result.put("state", state);
+            }
         } catch (JSONException e) {
             throw new IllegalStateException(e);
         }
