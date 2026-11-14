@@ -52,6 +52,8 @@ import com.liskovsoft.smartyoutubetv2.tv.ui.playback.actions.SubscribeAction;
 import com.liskovsoft.smartyoutubetv2.tv.ui.playback.actions.TwoStateAction;
 import com.liskovsoft.smartyoutubetv2.tv.ui.playback.actions.ThumbsDownAction;
 import com.liskovsoft.smartyoutubetv2.tv.ui.playback.actions.ThumbsUpAction;
+import com.liskovsoft.smartyoutubetv2.tv.ui.playback.actions.TimestampsAction;
+import com.liskovsoft.smartyoutubetv2.tv.ui.playback.actions.VideoLinksAction;
 import com.liskovsoft.smartyoutubetv2.tv.ui.playback.actions.VideoSpeedAction;
 import com.liskovsoft.smartyoutubetv2.tv.ui.playback.actions.VideoStatsAction;
 import com.liskovsoft.smartyoutubetv2.tv.ui.playback.actions.VideoZoomAction;
@@ -137,6 +139,8 @@ public class VideoPlayerGlue extends MaxControlsVideoPlayerGlue<PlayerAdapter> i
         putAction(new FlipAction(context));
         putAction(new SoundOffAction(context));
         putAction(new NextFrameAction(context));
+        putAction(new TimestampsAction(context));
+        putAction(new VideoLinksAction(context));
     }
 
     @Override
@@ -234,6 +238,12 @@ public class VideoPlayerGlue extends MaxControlsVideoPlayerGlue<PlayerAdapter> i
         }
         if (mPlayerTweaksData.isPlayerButtonEnabled(PlayerTweaksData.PLAYER_BUTTON_VIDEO_INFO)) {
             adapter.add(mActions.get(R.id.action_info));
+        }
+        if (mPlayerTweaksData.isPlayerButtonEnabled(PlayerTweaksData.PLAYER_BUTTON_TIMESTAMPS)) {
+            adapter.add(mActions.get(R.id.action_timestamps));
+        }
+        if (mPlayerTweaksData.isPlayerButtonEnabled(PlayerTweaksData.PLAYER_BUTTON_VIDEO_LINKS)) {
+            adapter.add(mActions.get(R.id.action_video_links));
         }
         if (mPlayerTweaksData.isPlayerButtonEnabled(PlayerTweaksData.PLAYER_BUTTON_PLAYBACK_QUEUE)) {
             adapter.add(mActions.get(R.id.action_playback_queue));

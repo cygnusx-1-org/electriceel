@@ -276,6 +276,9 @@ public final class SyncedSettings {
         add("tweaks.quickSkipShortsAlt", 57, Type.BOOL, "Quick skip of Shorts (other keys)");
         add("tweaks.quickSkipVideosAlt", 58, Type.BOOL, "Quick skip of videos (other keys)");
         add("tweaks.queueRespectsPlaybackMode", 60, Type.BOOL, "The queue follows the playback mode");
+        // The buttons after the first field's (Electric Eel)
+        section("Player tweaks", PlayerTweaksData.PLAYER_BUTTONS2_DATA, true);
+        add("tweaks.playerButtons2", 0, Type.INT, "Player buttons (more)");
 
         section("Interface", MainUIData.MAIN_UI_DATA, true);
         // Not: 1 and 2 the grid and UI scales (the screen's), 31 a marker
