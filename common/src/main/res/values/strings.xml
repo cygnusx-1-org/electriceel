@@ -651,6 +651,8 @@
     <string name="action_next_frame">Next frame</string>
     <string name="action_timestamps">Timestamps</string>
     <string name="timestamps_not_found">No timestamps in the description</string>
+    <string name="action_video_links">Video links</string>
+    <string name="video_links_not_found">No video links in the description</string>
     <string name="subtitle_system">System style (Android settings &gt; Accessibility)</string>
     <string name="subtitle_scale">Subtitle scale</string>
     <string name="audio_sync_fix_desc">An alternative way to synchronize audio/video. It\'s considered obsolete, but in some cases, may help.</string>

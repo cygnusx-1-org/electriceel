@@ -15,12 +15,15 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLooper;
 
+import java.util.Collections;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
- * The Timestamps button is on by default: for the buttons saved before it came too, but only once
+ * The Timestamps and Video links buttons are on by default: for the buttons saved before they came too, but only once. Video links
+ * is in the second field of the buttons.
  */
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 28)
@@ -30,7 +33,7 @@ public class PlayerTweaksDataButtonsTest {
     /**
      * Saved by a version before the Timestamps button: the defaults of then, without the button
      */
-    private static final int OLD_BUTTONS = PlayerTweaksData.PLAYER_BUTTON_DEFAULT & ~PlayerTweaksData.PLAYER_BUTTON_TIMESTAMPS;
+    private static final int OLD_BUTTONS = (int) (PlayerTweaksData.PLAYER_BUTTON_DEFAULT & ~PlayerTweaksData.PLAYER_BUTTON_TIMESTAMPS);
     private static final int BUTTONS_INDEX = 13;
 
     @Before
@@ -127,14 +130,127 @@ public class PlayerTweaksDataButtonsTest {
         assertFalse(getData().isPlayerButtonEnabled(PlayerTweaksData.PLAYER_BUTTON_TIMESTAMPS));
     }
 
+    @Test
+    public void videoLinksOnForANewUser() {
+        assertTrue(getData().isPlayerButtonEnabled(PlayerTweaksData.PLAYER_BUTTON_VIDEO_LINKS));
+        // Only the defaults: nothing to save
+        assertTrue(TextUtils.isEmpty(getPrefs().getProfileData(PlayerTweaksData.PLAYER_BUTTONS2_DATA)));
+    }
+
     /**
-     * The buttons of the current account, as a version before the button saved them: not marked as added
+     * Saved by the version of the Timestamps button, which was turned off: Video links is on, Timestamps stays off
+     */
+    @Test
+    public void videoLinksOnForTheButtonsOfTheTimestampsVersion() {
+        saveTimestampsVersionButtons(OLD_BUTTONS);
+
+        PlayerTweaksData data = getData();
+
+        assertTrue(data.isPlayerButtonEnabled(PlayerTweaksData.PLAYER_BUTTON_VIDEO_LINKS));
+        assertFalse(data.isPlayerButtonEnabled(PlayerTweaksData.PLAYER_BUTTON_TIMESTAMPS));
+        assertEquals(OLD_BUTTONS, savedButtons());
+    }
+
+    @Test
+    public void videoLinksTurnedOffStaysOff() {
+        saveTimestampsVersionButtons(OLD_BUTTONS | PlayerTweaksData.PLAYER_BUTTON_TIMESTAMPS);
+        getData().setPlayerButtonDisabled(PlayerTweaksData.PLAYER_BUTTON_VIDEO_LINKS);
+        restart();
+
+        PlayerTweaksData data = getData();
+
+        assertFalse(data.isPlayerButtonEnabled(PlayerTweaksData.PLAYER_BUTTON_VIDEO_LINKS));
+        // The first field is kept as it was
+        assertTrue(data.isPlayerButtonEnabled(PlayerTweaksData.PLAYER_BUTTON_TIMESTAMPS));
+        assertEquals(OLD_BUTTONS | PlayerTweaksData.PLAYER_BUTTON_TIMESTAMPS, savedButtons());
+        assertEquals("0", getPrefs().getProfileData(PlayerTweaksData.PLAYER_BUTTONS2_DATA));
+    }
+
+    /**
+     * A button of one field turned off keeps the buttons of the other
+     */
+    @Test
+    public void fieldsApart() {
+        PlayerTweaksData data = getData();
+
+        data.setPlayerButtonDisabled(PlayerTweaksData.PLAYER_BUTTON_TIMESTAMPS);
+
+        assertTrue(data.isPlayerButtonEnabled(PlayerTweaksData.PLAYER_BUTTON_VIDEO_LINKS));
+
+        data.setPlayerButtonEnabled(PlayerTweaksData.PLAYER_BUTTON_TIMESTAMPS);
+        data.setPlayerButtonDisabled(PlayerTweaksData.PLAYER_BUTTON_VIDEO_LINKS);
+
+        assertTrue(data.isPlayerButtonEnabled(PlayerTweaksData.PLAYER_BUTTON_TIMESTAMPS));
+        assertFalse(data.isPlayerButtonEnabled(PlayerTweaksData.PLAYER_BUTTON_TIMESTAMPS | PlayerTweaksData.PLAYER_BUTTON_VIDEO_LINKS));
+    }
+
+    /**
+     * All of them off (as Child mode does), then the defaults back
+     */
+    @Test
+    public void allOffAndTheDefaultsBack() {
+        PlayerTweaksData data = getData();
+
+        data.setPlayerButtonDisabled(Long.MAX_VALUE);
+
+        assertFalse(data.isPlayerButtonEnabled(PlayerTweaksData.PLAYER_BUTTON_VIDEO_LINKS));
+        assertFalse(data.isPlayerButtonEnabled(PlayerTweaksData.PLAYER_BUTTON_SEARCH));
+
+        data.setPlayerButtonEnabled(PlayerTweaksData.PLAYER_BUTTON_DEFAULT);
+
+        assertTrue(data.isPlayerButtonEnabled(PlayerTweaksData.PLAYER_BUTTON_DEFAULT));
+    }
+
+    /**
+     * The first field's marks stay an int: a version before the second field reads them. Video links isn't marked: the second field
+     * came with it, so it's never turned on again.
+     */
+    @Test
+    public void addedMarksOfEachField() {
+        saveButtons(OLD_BUTTONS);
+        getData();
+
+        assertEquals(String.valueOf(PlayerTweaksData.PLAYER_BUTTON_TIMESTAMPS), getPrefs().getProfileData(PlayerTweaksData.PLAYER_BUTTONS_ADDED_DATA));
+        assertTrue(TextUtils.isEmpty(getPrefs().getProfileData(PlayerTweaksData.PLAYER_BUTTONS2_ADDED_DATA)));
+    }
+
+    /**
+     * The storage sync wrote the second field (see SyncedSettings): read again
+     */
+    @Test
+    public void secondFieldSynced() {
+        PlayerTweaksData data = getData();
+
+        getPrefs().setProfileData(PlayerTweaksData.PLAYER_BUTTONS2_DATA, "0");
+        getPrefs().onProfileDataSynced(Collections.singleton(PlayerTweaksData.PLAYER_BUTTONS2_DATA));
+        ShadowLooper.shadowMainLooper().idle();
+
+        assertFalse(data.isPlayerButtonEnabled(PlayerTweaksData.PLAYER_BUTTON_VIDEO_LINKS));
+    }
+
+    /**
+     * The buttons of the current account, as a version before the Timestamps button saved them: not marked as added
      */
     private static void saveButtons(int buttons) {
         String[] values = new String[BUTTONS_INDEX + 1];
         values[BUTTONS_INDEX] = String.valueOf(buttons);
         getPrefs().setProfileData(PlayerTweaksData.VIDEO_PLAYER_TWEAKS_DATA, Helpers.mergeData((Object[]) values));
         getPrefs().setProfileData(PlayerTweaksData.PLAYER_BUTTONS_ADDED_DATA, "");
+        getPrefs().setProfileData(PlayerTweaksData.PLAYER_BUTTONS2_DATA, "");
+        getPrefs().setProfileData(PlayerTweaksData.PLAYER_BUTTONS2_ADDED_DATA, "");
+        restart();
+    }
+
+    /**
+     * As the version of the Timestamps button saved them, before the second field: Timestamps marked as added
+     */
+    private static void saveTimestampsVersionButtons(int buttons) {
+        String[] values = new String[BUTTONS_INDEX + 1];
+        values[BUTTONS_INDEX] = String.valueOf(buttons);
+        getPrefs().setProfileData(PlayerTweaksData.VIDEO_PLAYER_TWEAKS_DATA, Helpers.mergeData((Object[]) values));
+        getPrefs().setProfileData(PlayerTweaksData.PLAYER_BUTTONS_ADDED_DATA, String.valueOf(PlayerTweaksData.PLAYER_BUTTON_TIMESTAMPS));
+        getPrefs().setProfileData(PlayerTweaksData.PLAYER_BUTTONS2_DATA, "");
+        getPrefs().setProfileData(PlayerTweaksData.PLAYER_BUTTONS2_ADDED_DATA, "");
         restart();
     }
 
@@ -152,6 +268,8 @@ public class PlayerTweaksDataButtonsTest {
         AppPrefs prefs = getPrefs();
         TestAccounts.clearSaved(prefs, PlayerTweaksData.VIDEO_PLAYER_TWEAKS_DATA);
         TestAccounts.clearSaved(prefs, PlayerTweaksData.PLAYER_BUTTONS_ADDED_DATA);
+        TestAccounts.clearSaved(prefs, PlayerTweaksData.PLAYER_BUTTONS2_DATA);
+        TestAccounts.clearSaved(prefs, PlayerTweaksData.PLAYER_BUTTONS2_ADDED_DATA);
         PlayerTweaksData.resetInstanceForTesting();
     }
 

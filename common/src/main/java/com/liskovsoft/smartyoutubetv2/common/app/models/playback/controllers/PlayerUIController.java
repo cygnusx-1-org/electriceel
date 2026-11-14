@@ -39,6 +39,8 @@ import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.track.SubtitleTr
 import com.liskovsoft.smartyoutubetv2.common.misc.ChildModeManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.DescriptionTimestamps;
 import com.liskovsoft.smartyoutubetv2.common.misc.DescriptionTimestamps.Timestamp;
+import com.liskovsoft.smartyoutubetv2.common.misc.DescriptionVideoLinks;
+import com.liskovsoft.smartyoutubetv2.common.misc.DescriptionVideoLinks.VideoLink;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.MusicAutoplayManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.PlayerKeyTranslator;
@@ -595,6 +597,48 @@ public class PlayerUIController extends BasePlayerController {
         dialogPresenter.showDialog(video.getTitle());
     }
 
+    /**
+     * The links of the description to other videos, a line each: one selected is played, from its time if it has one
+     */
+    private void onVideoLinksClicked() {
+        if (!mIsMetadataLoaded) {
+            MessageHelpers.showMessage(getContext(), R.string.wait_data_loading);
+            return;
+        }
+
+        Video video = getVideo();
+
+        if (video == null) {
+            return;
+        }
+
+        List<VideoLink> links = DescriptionVideoLinks.parse(video.description, video.videoId);
+
+        if (links.isEmpty()) {
+            MessageHelpers.showMessage(getContext(), R.string.video_links_not_found);
+            return;
+        }
+
+        AppDialogPresenter dialogPresenter = getAppDialogPresenter();
+        List<OptionItem> options = new ArrayList<>();
+
+        for (VideoLink link : links) {
+            options.add(UiOptionItem.from(link.text, optionItem -> {
+                dialogPresenter.closeDialog();
+                // Not by the address, as a link of the description is (see Utils.openUrlInternally): one with a playlist (&list=)
+                // would open the playlist
+                getPlaybackPresenter().openVideo(link.videoId, false, link.positionMs, false, VideoStart.TRIGGER_OPEN);
+            }));
+        }
+
+        // Only once there's a dialog: the hooks stay until a dialog closes, so the next one (e.g. a suggestion's menu) would get them
+        fitVideoIntoDialog();
+
+        dialogPresenter.appendStringsCategory(getContext().getString(R.string.action_video_links), options);
+
+        dialogPresenter.showDialog(video.getTitle());
+    }
+
     private void onShareLink() {
         fitVideoIntoDialog();
 
@@ -695,6 +739,8 @@ public class PlayerUIController extends BasePlayerController {
             onVideoInfoClicked();
         } else if (buttonId == R.id.action_timestamps) {
             onTimestampsClicked();
+        } else if (buttonId == R.id.action_video_links) {
+            onVideoLinksClicked();
         } else if (buttonId == R.id.action_pip) {
             onPipClicked();
         } else if (buttonId == R.id.action_search) {

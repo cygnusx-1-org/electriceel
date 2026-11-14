@@ -543,7 +543,7 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
     private void appendPlayerButtonsCategory(AppDialogPresenter settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
-        for (int[] pair : new int[][] {
+        for (long[] pair : new long[][] {
                 {R.string.auto_frame_rate, PlayerTweaksData.PLAYER_BUTTON_AFR},
                 {R.string.action_sound_off, PlayerTweaksData.PLAYER_BUTTON_SOUND_OFF},
                 {R.string.video_rotate, PlayerTweaksData.PLAYER_BUTTON_VIDEO_ROTATE},
@@ -555,6 +555,7 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
                 {R.string.share_link, PlayerTweaksData.PLAYER_BUTTON_SHARE},
                 {R.string.action_video_info, PlayerTweaksData.PLAYER_BUTTON_VIDEO_INFO},
                 {R.string.action_timestamps, PlayerTweaksData.PLAYER_BUTTON_TIMESTAMPS},
+                {R.string.action_video_links, PlayerTweaksData.PLAYER_BUTTON_VIDEO_LINKS},
                 {R.string.action_debug_info, PlayerTweaksData.PLAYER_BUTTON_VIDEO_STATS},
                 {R.string.action_playback_queue, PlayerTweaksData.PLAYER_BUTTON_PLAYBACK_QUEUE},
                 {R.string.screen_dimming, PlayerTweaksData.PLAYER_BUTTON_SCREEN_DIMMING},
@@ -574,7 +575,7 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
                 {R.string.action_previous, PlayerTweaksData.PLAYER_BUTTON_PREVIOUS},
                 {R.string.playback_settings, PlayerTweaksData.PLAYER_BUTTON_HIGH_QUALITY}
         }) {
-            options.add(UiOptionItem.from(getContext().getString(pair[0]), optionItem -> {
+            options.add(UiOptionItem.from(getContext().getString((int) pair[0]), optionItem -> {
                 if (optionItem.isSelected()) {
                     mPlayerTweaksData.setPlayerButtonEnabled(pair[1]);
                 } else {
