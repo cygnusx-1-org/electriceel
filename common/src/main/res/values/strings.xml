@@ -196,6 +196,7 @@
     <string name="msg_applying">Applying %s…</string>
     <string name="msg_done">Done</string>
     <string name="msg_live_no_media">%s has nothing to play this live stream from. Trying another client…</string>
+    <string name="msg_client_fallback">%1$s can\'t play this video. Playing it with %2$s</string>
     <string name="msg_no_media_retry">Nothing to play yet. Trying again in 30 s</string>
     <string name="settings_general">General</string>
     <string name="settings_content_filtering">Content Filtering</string>
@@ -854,6 +855,7 @@
     <string name="player_network_stack">Network engine</string>
     <string name="client_order">YouTube clients order</string>
     <string name="client_signed_in">%s (signed in, the best for Premium)</string>
+    <string name="player_client">YouTube client</string>
     <string name="cronet_desc">Cronet is the Chromium network stack. Cronet can reduce the latency and increase networking performance, which can help with buffering issues.</string>
     <string name="unlock_all_formats">Unlock all video formats</string>
     <string name="unlock_all_formats_desc">On some devices the firmware incorrectly reports some formats as unsupported, even if they are.\n(e.g. 1080p smart TVs tend to report 4k as not supported).</string>

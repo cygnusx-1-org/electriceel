@@ -11,6 +11,9 @@ import com.liskovsoft.smartyoutubetv2.common.app.views.PlaybackView;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailure;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerFailureLog;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
+import com.liskovsoft.youtubeapi.common.helpers.AppClient;
+import com.liskovsoft.youtubeapi.service.YouTubeServiceManager;
+import com.liskovsoft.youtubeapi.videoinfo.V2.VideoInfoService;
 
 import org.json.JSONObject;
 import org.junit.After;
@@ -22,6 +25,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowToast;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -60,6 +64,75 @@ public class VideoLoaderControllerTest {
     public void tearDown() {
         PlayerFailureLog.useForTesting(null);
         PlayerTweaksData.instance(RuntimeEnvironment.getApplication()).setPlayerDataSource(mSavedEngine);
+        YouTubeServiceManager.instance().clearPickedClient();
+    }
+
+    /**
+     * Picked in the player (#46): the video's formats are fetched again, asked of it first. Not the other videos'.
+     */
+    @Test
+    public void aClientPickedForTheVideoIsAskedFirstForItOnly() {
+        PlayingController controller = new PlayingController(video("bNAlycU0Xzg"));
+
+        controller.pickClient("WEB");
+
+        assertEquals(1, controller.mReloads);
+        assertEquals("WEB", controller.getPickedClient());
+        assertEquals(AppClient.WEB, VideoInfoService.instance().getPickedClient("bNAlycU0Xzg"));
+        assertNull(VideoInfoService.instance().getPickedClient("another"));
+    }
+
+    /**
+     * Reloaded, it stays. Another video plays on the order of the settings.
+     */
+    @Test
+    public void anotherVideoDropsThePickedClient() throws Exception {
+        PlayingController controller = new PlayingController(video("bNAlycU0Xzg"));
+        controller.pickClient("WEB");
+
+        resetPickedClient(controller, video("bNAlycU0Xzg"));
+        assertEquals(AppClient.WEB, VideoInfoService.instance().getPickedClient("bNAlycU0Xzg"));
+
+        resetPickedClient(controller, video("another"));
+        assertNull(getField(controller, "mPickedClientVideoId"));
+        assertNull(VideoInfoService.instance().getPickedClient("bNAlycU0Xzg"));
+    }
+
+    /**
+     * The formats came from another client (the picked one can't play the video): said once. Not when that one can't either: the
+     * player's title says why.
+     */
+    @Test
+    public void formatsFromAnotherClientThanThePickedOneAreSaidOnce() throws Exception {
+        PlayingController controller = new PickingController(video("bNAlycU0Xzg"));
+        MediaItemFormatInfo playable = formatInfo(new HashMap<>());
+        controller.pickClient("WEB");
+
+        setField(controller, "mFormatClient", "WEB");
+        showPickedClientFallback(controller, playable);
+        setField(controller, "mFormatClient", "WEB_SAFARI");
+        showPickedClientFallback(controller, formatInfo(Collections.<String, Object>singletonMap("isUnplayable", true)));
+        assertEquals(0, ShadowToast.shownToastCount());
+
+        showPickedClientFallback(controller, playable);
+        showPickedClientFallback(controller, playable);
+
+        assertEquals(1, ShadowToast.shownToastCount());
+        assertEquals("WEB can't play this video. Playing it with WEB_SAFARI", ShadowToast.getTextOfLatestToast());
+    }
+
+    /**
+     * Its attempts begin with the picked client, not the order's first
+     */
+    @Test
+    public void aFailureSaysWhichClientWasPicked() throws Exception {
+        PlayingController controller = new PlayingController(video("bNAlycU0Xzg"));
+        assertNull(controller.getPickedClient());
+
+        controller.pickClient("WEB");
+        controller.addPickedClient(PlayerFailure.create(RuntimeEnvironment.getApplication(), PlayerFailure.KIND_EMPTY_FORMATS)).record();
+
+        assertEquals("WEB", mLog.readAll().get(0).getJSONObject("details").getString("pickedClient"));
     }
 
     /**
@@ -397,6 +470,18 @@ public class VideoLoaderControllerTest {
         return (boolean) method.invoke(controller, formatInfo);
     }
 
+    private static void resetPickedClient(VideoLoaderController controller, Video video) throws Exception {
+        Method method = VideoLoaderController.class.getDeclaredMethod("resetPickedClient", Video.class);
+        method.setAccessible(true);
+        method.invoke(controller, video);
+    }
+
+    private static void showPickedClientFallback(VideoLoaderController controller, MediaItemFormatInfo formatInfo) throws Exception {
+        Method method = VideoLoaderController.class.getDeclaredMethod("showPickedClientFallback", MediaItemFormatInfo.class);
+        method.setAccessible(true);
+        method.invoke(controller, formatInfo);
+    }
+
     private static void resetLiveClientSwitch(VideoLoaderController controller, Video video) throws Exception {
         Method method = VideoLoaderController.class.getDeclaredMethod("resetLiveClientSwitch", Video.class);
         method.setAccessible(true);
@@ -529,6 +614,16 @@ public class VideoLoaderControllerTest {
         @Override
         public void reloadVideo(int delayMs) {
             mReloads++;
+        }
+    }
+
+    /**
+     * With the app's context, for what it says (see MessageHelpers)
+     */
+    private static class PickingController extends PlayingController {
+        private PickingController(Video video) {
+            super(video);
+            setAltContext(RuntimeEnvironment.getApplication());
         }
     }
 }

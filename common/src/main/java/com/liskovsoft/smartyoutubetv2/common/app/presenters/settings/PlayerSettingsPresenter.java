@@ -22,7 +22,6 @@ import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerTweaksData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.SearchData;
 import com.liskovsoft.smartyoutubetv2.common.utils.AppDialogUtil;
-import com.liskovsoft.youtubeapi.common.helpers.AppClient;
 import com.liskovsoft.youtubeapi.service.internal.MediaServiceData;
 
 import java.util.ArrayList;
@@ -703,9 +702,7 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
         List<OptionItem> options = new ArrayList<>();
 
         for (String client : mMediaServiceData.getClientOrder()) {
-            // The ones that are signed in (TV and TV_DOWNGRADED)
-            String title = AppClient.valueOf(client).isAuthSupported() ? getContext().getString(R.string.client_signed_in, client) : client;
-            options.add(UiOptionItem.from(title, null, false, client));
+            options.add(UiOptionItem.from(AppDialogUtil.getClientTitle(getContext(), client), null, false, client));
         }
 
         settingsPresenter.appendReorderCategory(getContext().getString(R.string.client_order), options, items -> {
