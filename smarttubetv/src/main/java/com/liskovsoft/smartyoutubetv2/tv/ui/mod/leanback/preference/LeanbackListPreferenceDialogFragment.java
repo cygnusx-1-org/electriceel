@@ -83,6 +83,10 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
     private int mDialogLayoutRes;
     protected Set<String> mInitialSelections;
     protected String mInitialSelection;
+    /**
+     * MOD: the value of the row focused when the list opens (e.g. a setting the settings search opens), null for the first
+     */
+    private String mFocusedValue;
 
     public static LeanbackListPreferenceDialogFragment newInstanceSingle(String key) {
         final Bundle args = new Bundle(1);
@@ -183,6 +187,13 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
         verticalGridView.setAdapter(onCreateAdapter());
         verticalGridView.requestFocus();
 
+        // MOD: a row focused (see setFocusedValue)
+        int focused = findPosition(mFocusedValue);
+
+        if (focused >= 0) {
+            verticalGridView.setSelectedPosition(focused);
+        }
+
         final CharSequence title = mDialogTitle;
         if (!TextUtils.isEmpty(title)) {
             final TextView titleView = (TextView) view.findViewById(androidx.leanback.preference.R.id.decor_title);
@@ -246,6 +257,30 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
         } else {
             return new AdapterSingle(mEntries, mEntryValues, mInitialSelection);
         }
+    }
+
+    /**
+     * MOD: the row of this value has the focus when the list opens
+     */
+    public void setFocusedValue(@Nullable String value) {
+        mFocusedValue = value;
+    }
+
+    /**
+     * MOD: the row whose value it is, -1 when none is
+     */
+    protected int findPosition(@Nullable String value) {
+        if (value == null || mEntryValues == null) {
+            return -1;
+        }
+
+        for (int i = 0; i < mEntryValues.length; i++) {
+            if (value.contentEquals(mEntryValues[i])) {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
     public class AdapterSingle extends RecyclerView.Adapter<ViewHolder>

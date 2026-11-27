@@ -6,6 +6,7 @@ import android.content.Context;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.SettingsCardsView;
+import com.liskovsoft.smartyoutubetv2.common.settingssearch.SettingsCapture;
 
 import java.text.Collator;
 import java.util.ArrayList;
@@ -55,6 +56,11 @@ public class SettingsCardsPresenter extends BasePresenter<SettingsCardsView> {
      * From the screen itself: on top of the section shown. From elsewhere (e.g. the Settings section): a new screen.
      */
     public void show(Cards cards) {
+        // Looked through by the settings search instead: not shown
+        if (SettingsCapture.offerCards(cards)) {
+            return;
+        }
+
         if (getView() != null) {
             mSelectedCards.add(getShownCard(getView().getSelectedPosition()));
             mStack.add(cards);
@@ -66,6 +72,33 @@ public class SettingsCardsPresenter extends BasePresenter<SettingsCardsView> {
         mSelectedCards.clear();
         mSavedCard = -1;
         mStack.add(cards);
+
+        getViewManager().startView(SettingsCardsView.class);
+    }
+
+    /**
+     * Sections opened one in another: the last one is shown, Back goes to the ones before (e.g. System, then General, for a
+     * card the settings search found in General). Instead of the sections shown.
+     *
+     * @param openers of each section but the first, the index of the card that opens it in the cards of the section before
+     * @param focusedCard the index of the card to focus in the cards of the last section, -1 for the first one shown
+     */
+    public void showPath(List<Cards> sections, List<Integer> openers, int focusedCard) {
+        if (sections.isEmpty() || openers.size() != sections.size() - 1 || SettingsCapture.isActive()) {
+            return;
+        }
+
+        mStack.clear();
+        mStack.addAll(sections);
+        mSelectedCards.clear();
+        mSelectedCards.addAll(openers);
+
+        if (getView() != null) {
+            updateView(focusedCard);
+            return;
+        }
+
+        mSavedCard = focusedCard;
 
         getViewManager().startView(SettingsCardsView.class);
     }

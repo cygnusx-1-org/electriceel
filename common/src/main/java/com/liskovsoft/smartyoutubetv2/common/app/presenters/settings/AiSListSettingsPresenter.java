@@ -78,7 +78,10 @@ public class AiSListSettingsPresenter extends BasePresenter<Void> {
      */
     private void appendListMenu(AppDialogPresenter settingsPresenter, int list, int titleResId) {
         String title = getContext().getString(titleResId);
-        settingsPresenter.appendSingleButton(UiOptionItem.from(title, option -> showListMenu(list, title)));
+        OptionItem listMenu = UiOptionItem.from(title, option -> showListMenu(list, title));
+        // Opens a list: its rows are found by the settings search (see SettingsCatalog)
+        listMenu.setMenu(true);
+        settingsPresenter.appendSingleButton(listMenu);
     }
 
     /**
@@ -179,7 +182,10 @@ public class AiSListSettingsPresenter extends BasePresenter<Void> {
      */
     private void appendReportsMenu(AppDialogPresenter settingsPresenter) {
         String title = getContext().getString(R.string.aislist_reports);
-        settingsPresenter.appendSingleButton(UiOptionItem.from(title, option -> showReportsMenu(title)));
+        OptionItem reportsMenu = UiOptionItem.from(title, option -> showReportsMenu(title));
+        // Opens a list: its rows are found by the settings search (see SettingsCatalog)
+        reportsMenu.setMenu(true);
+        settingsPresenter.appendSingleButton(reportsMenu);
     }
 
     private void showReportsMenu(String title) {

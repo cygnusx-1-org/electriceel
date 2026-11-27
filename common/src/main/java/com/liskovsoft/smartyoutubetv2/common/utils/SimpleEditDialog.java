@@ -16,6 +16,7 @@ import androidx.appcompat.app.AlertDialog;
 import com.liskovsoft.sharedutils.helpers.KeyHelpers;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.settingssearch.SettingsCapture;
 
 public class SimpleEditDialog {
     /**
@@ -58,7 +59,15 @@ public class SimpleEditDialog {
      * A search, e.g. inside a channel: the keyboard's corrections as the search setting has them (off by default)
      */
     public static void showSearch(Context context, String dialogTitle, String defaultValue, OnChange onChange) {
-        show(context, dialogTitle, dialogTitle, defaultValue, onChange, null, InputType.TYPE_NULL, null, null, false, true);
+        showSearch(context, dialogTitle, dialogTitle, defaultValue, onChange, null);
+    }
+
+    /**
+     * @param onDismiss once it's closed: by OK, Cancel or Back. Null for nothing.
+     */
+    public static void showSearch(Context context, String dialogTitle, String dialogHint, String defaultValue, OnChange onChange,
+                                  Runnable onDismiss) {
+        show(context, dialogTitle, dialogHint, defaultValue, onChange, onDismiss, InputType.TYPE_NULL, null, null, false, true);
     }
 
     /**
@@ -113,6 +122,11 @@ public class SimpleEditDialog {
      */
     private static void show(Context context, String dialogTitle, String dialogHint, String defaultValue, OnChange onChange, Runnable onDismiss,
                              int inputType, String characters, String privateImeOptions, boolean isEmptyAllowed, boolean isSearch) {
+        // Clicked by the settings search as it looks the menus through: does nothing then (see SettingsCapture)
+        if (SettingsCapture.isActive()) {
+            return;
+        }
+
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppDialog);
         LayoutInflater inflater = LayoutInflater.from(context);
         View contentView = inflater.inflate(R.layout.simple_edit_dialog, null);

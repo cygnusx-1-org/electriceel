@@ -8,6 +8,7 @@ import com.liskovsoft.mediaserviceinterfaces.oauth.Account;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.sharedutils.rx.RxHelper;
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.settingssearch.SettingsCapture;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
@@ -99,7 +100,11 @@ public class StorageSettingsPresenter extends BasePresenter<Void> {
             }
         }
 
-        mSync.addListener(mListener);
+        // Not when the settings search looks the panel through: it isn't shown, so nothing would remove it
+        if (!SettingsCapture.isActive()) {
+            mSync.addListener(mListener);
+        }
+
         // With sync off the switch is its only row: a single row would be opened as a dialog of its own, empty
         dialog.enableExpandable(false);
         dialog.enableReplace(replace);

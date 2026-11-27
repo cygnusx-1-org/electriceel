@@ -54,6 +54,16 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
     // The title (without its parent) of each list on the stack: the next one is titled "<Parent> - <Title>"
     private final List<CharSequence> mBaseTitles = new ArrayList<>();
     private boolean mIsNestedTitles;
+    /**
+     * Of a dialog titled as from its section (e.g. a setting the settings search opens): the index of its first list in
+     * mBaseTitles, -1 for none
+     */
+    private int mTitleRootIndex = -1;
+    private CharSequence mTitleRoot;
+    /**
+     * Restored once the lists of that dialog are gone (e.g. Back to the results of the settings search)
+     */
+    private boolean mIsNestedTitlesBeforeRoot;
 
     private static final String PREFERENCE_FRAGMENT_TAG =
             "androidx.leanback.preference.LeanbackSettingsFragment.PREFERENCE_FRAGMENT";
@@ -135,6 +145,11 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
         return fragment;
     }
 
+    /**
+     * Of the list opened right away, while it's made: the value of the row focused
+     */
+    private String mFocusedValue;
+
     @Override
     public void show(List<OptionCategory> categories, CharSequence title, boolean isExpandable, boolean isTransparent, boolean isOverlay, int id) {
         if (!Utils.checkActivity(getActivity())) {
@@ -149,6 +164,16 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
             popBackStackAll();
         }
 
+        // Titled as from its section, its lists as from it: as when its card opens it
+        CharSequence titleRoot = mPresenter.getTitleRoot();
+
+        if (titleRoot != null) {
+            mIsNestedTitlesBeforeRoot = mTitleRootIndex == -1 ? mIsNestedTitles : mIsNestedTitlesBeforeRoot;
+            mTitleRootIndex = mBaseTitles.size();
+            mTitleRoot = titleRoot;
+            mIsNestedTitles = true;
+        }
+
         // Only root fragment could make other fragments in the stack transparent
         boolean stackIsEmpty = isReplace || getChildFragmentManager() != null && getChildFragmentManager().getBackStackEntryCount() == 0;
         mIsTransparent = stackIsEmpty ? isTransparent : mIsTransparent;
@@ -158,7 +183,11 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
         if (isSingleCategory) {
             OptionCategory category = categories.get(0);
             if (category.options != null) {
+                // The row focused, of the list opened right away (e.g. a setting the settings search opens)
+                OptionItem focused = mPresenter.getFocusedItem();
+                mFocusedValue = focused != null && category.options.contains(focused) ? focused.toString() : null;
                 onPreferenceDisplayDialog(null, mManager.createPreference(category));
+                mFocusedValue = null;
             }
         } else {
             AppPreferenceFragment fragment = buildPreferenceFragment(categories, createTitle(title));
@@ -184,7 +213,9 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
 
         CharSequence parentTitle;
 
-        if (mBaseTitles.isEmpty()) {
+        if (mBaseTitles.size() == mTitleRootIndex) {
+            parentTitle = mTitleRoot;
+        } else if (mBaseTitles.isEmpty()) {
             parentTitle = mPresenter.getTitlePrefix();
             mIsNestedTitles = mPresenter.isNestedTitlesEnabled();
         } else {
@@ -202,6 +233,10 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
 
         while (mBaseTitles.size() > size) {
             mBaseTitles.remove(mBaseTitles.size() - 1);
+        }
+
+        if (mTitleRootIndex != -1 && mBaseTitles.size() <= mTitleRootIndex) {
+            clearTitleRoot();
         }
     }
 
@@ -241,6 +276,7 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
         } else if (pref instanceof ListPreference) {
             ListPreference listPreference = (ListPreference) pref;
             RadioListPreferenceDialogFragment f = RadioListPreferenceDialogFragment.newInstanceSingle(listPreference.getKey());
+            f.setFocusedValue(mFocusedValue);
             f.enableTransparent(mIsTransparent);
             f.setTargetFragment(caller, 0);
             f.setPreference(pref);
@@ -272,6 +308,7 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
         } else if (pref instanceof MultiSelectListPreference) {
             MultiSelectListPreference listPreference = (MultiSelectListPreference) pref;
             LeanbackListPreferenceDialogFragment f = LeanbackListPreferenceDialogFragment.newInstanceMulti(listPreference.getKey());
+            f.setFocusedValue(mFocusedValue);
             f.setTargetFragment(caller, 0);
             f.setPreference(pref);
             startPreferenceFragment(f);
@@ -335,6 +372,16 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
     private void popBackStackAll() {
         getChildFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         mBaseTitles.clear();
+        clearTitleRoot();
+    }
+
+    private void clearTitleRoot() {
+        if (mTitleRootIndex != -1) {
+            mIsNestedTitles = mIsNestedTitlesBeforeRoot;
+        }
+
+        mTitleRootIndex = -1;
+        mTitleRoot = null;
     }
 
     @Override
@@ -358,6 +405,7 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
         // this manager holds entire back stack
         Helpers.setField(this, "mChildFragmentManager", null);
         mBaseTitles.clear();
+        clearTitleRoot();
     }
 
     @Override

@@ -11,6 +11,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionCatego
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.views.AppDialogView;
+import com.liskovsoft.smartyoutubetv2.common.settingssearch.SettingsCapture;
 import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 
 import java.util.ArrayList;
@@ -36,6 +37,17 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
     private boolean mIsNestedTitlesEnabled;
     private OptionItem mFocusedItem;
     private boolean mIsReplace;
+    private ItemMatcher mFocusedItemMatcher;
+    private CharSequence mNextTitlePrefix;
+    private CharSequence mTitleRoot;
+    private CharSequence mBackupTitleRoot;
+
+    /**
+     * A row of a dialog built by someone else, e.g. a setting the settings search opens
+     */
+    public interface ItemMatcher {
+        boolean matches(OptionCategory category, OptionItem item);
+    }
 
     private CharSequence mBackupTitle;
     private List<OptionCategory> mBackupCategories;
@@ -82,6 +94,8 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
         mBackupFocusedItem = null; // Same
         mOnStart.clear();
         mOnFinish.clear();
+        mFocusedItemMatcher = null;
+        mNextTitlePrefix = null;
     }
 
     /**
@@ -96,6 +110,7 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
         mBackupIsOverlay = mIsOverlay;
         mBackupTitlePrefix = mTitlePrefix;
         mBackupIsNestedTitlesEnabled = mIsNestedTitlesEnabled;
+        mBackupTitleRoot = mTitleRoot;
         mBackupFocusedItem = mFocusedItem;
         mBackupIsReplace = mIsReplace;
     }
@@ -109,6 +124,7 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
         mTitle = null;
         mFocusedItem = null;
         mIsReplace = false;
+        mTitleRoot = null;
     }
 
     @Override
@@ -139,6 +155,23 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
     }
 
     public void showDialog(CharSequence dialogTitle, Runnable onFinish) {
+        // Looked through by the settings search instead: not shown, closed after (onFinish runs then)
+        if (SettingsCapture.offerPanel(dialogTitle, mCategories)) {
+            SettingsCapture.offerOnClose(onFinish);
+            resetData();
+            return;
+        }
+
+        mTitleRoot = mNextTitlePrefix;
+
+        if (mFocusedItem == null && mFocusedItemMatcher != null) {
+            mFocusedItem = findItem(mCategories, mFocusedItemMatcher);
+        }
+
+        // Of this dialog only
+        mNextTitlePrefix = null;
+        mFocusedItemMatcher = null;
+
         mTitle = dialogTitle;
         mOnFinish.add(onFinish);
         
@@ -179,6 +212,49 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
     }
 
     /**
+     * The row of the next dialog that has the focus when it opens: the first item it matches, of the ones appended to it.
+     * For a dialog built by someone else (e.g. a setting the settings search opens), whose items are made when it's shown.
+     */
+    public void setFocusedItemMatcher(ItemMatcher matcher) {
+        mFocusedItemMatcher = matcher;
+    }
+
+    /**
+     * The next dialog is titled "<prefix> - <title>", also when it opens over another one (unlike {@link #setTitlePrefix}),
+     * and the lists opened in it "<parent> - <title>": e.g. "Player - Video" for the Video card opened from the results of the
+     * settings search, as from the Player section
+     */
+    public void setNextTitlePrefix(CharSequence prefix) {
+        mNextTitlePrefix = prefix;
+    }
+
+    /**
+     * Forgets what was appended for a dialog that wasn't shown (e.g. a panel that failed while the settings search looked it
+     * through): the next dialog starts empty
+     */
+    public void clearPending() {
+        resetData();
+        mNextTitlePrefix = null;
+        mFocusedItemMatcher = null;
+    }
+
+    private static OptionItem findItem(List<OptionCategory> categories, ItemMatcher matcher) {
+        for (OptionCategory category : categories) {
+            if (category.options == null) {
+                continue;
+            }
+
+            for (OptionItem item : category.options) {
+                if (matcher.matches(category, item)) {
+                    return item;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Of the dialog shown: null for the first row
      */
     public OptionItem getFocusedItem() {
@@ -213,6 +289,14 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
      */
     public CharSequence getTitlePrefix() {
         return mBackupTitlePrefix;
+    }
+
+    /**
+     * Of the dialog shown: titled "<root> - <title>", its lists "<parent> - <title>", also over another dialog (see
+     * {@link #setNextTitlePrefix}). Null for none.
+     */
+    public CharSequence getTitleRoot() {
+        return mBackupTitleRoot;
     }
 
     /**
@@ -327,10 +411,20 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
     }
 
     public void setOnStart(Runnable onStart) {
+        // Of a dialog that isn't shown (see SettingsCapture): it doesn't start
+        if (SettingsCapture.isActive()) {
+            return;
+        }
+
         Utils.addMyCallback(mOnStart, onStart);
     }
 
     public void setOnFinish(Runnable onFinish) {
+        // Of a dialog that isn't shown: run as it's closed, after it's looked through
+        if (SettingsCapture.offerOnClose(onFinish)) {
+            return;
+        }
+
         Utils.addMyCallback(mOnFinish, onFinish);
     }
 

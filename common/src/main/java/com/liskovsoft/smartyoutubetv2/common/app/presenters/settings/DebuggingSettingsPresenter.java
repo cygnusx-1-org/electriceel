@@ -17,6 +17,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.DataSubmitter;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.JsonHighlighter;
 import com.liskovsoft.smartyoutubetv2.common.prefs.DebuggingData;
+import com.liskovsoft.smartyoutubetv2.common.settingssearch.SettingsCapture;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -64,6 +65,12 @@ public class DebuggingSettingsPresenter extends BasePresenter<Void> {
         Context context = getContext();
 
         if (context == null) {
+            return;
+        }
+
+        // Looked through by the settings search: its rows without the counts read in the background
+        if (SettingsCapture.isActive()) {
+            showPanel(0, 0, submittedId);
             return;
         }
 
