@@ -216,7 +216,7 @@ public class ExoPlayerController implements Player.EventListener {
 
             if (mediaLoadData.dataType == C.DATA_TYPE_MEDIA) {
                 FormatAttempts.onLoad(loadEventInfo.bytesLoaded, loadEventInfo.loadDurationMs, isVideoLoad(mediaLoadData),
-                        mediaLoadData.trackType == C.TRACK_TYPE_AUDIO, mediaLoadData.mediaEndTimeMs);
+                        mediaLoadData.trackType == C.TRACK_TYPE_AUDIO, mediaLoadData.mediaStartTimeMs, mediaLoadData.mediaEndTimeMs);
 
                 // The track's 404s before it were the live edge's. Muxed has the audio too.
                 if (isVideoLoad(mediaLoadData)) {
@@ -403,6 +403,7 @@ public class ExoPlayerController implements Player.EventListener {
                 sample.audioTotalFramesMismatches = mAudioClockInfo.totalFramesMismatches;
                 sample.audioTotalClockMismatches = mAudioClockInfo.totalClockMismatches;
                 sample.audioTotalHoldReleases = mAudioClockInfo.totalHoldReleases;
+                sample.audioTotalHoldSkips = mAudioClockInfo.totalHoldSkips;
             }
 
             DecoderCounters counters = mPlayer.getVideoDecoderCounters();
@@ -546,6 +547,7 @@ public class ExoPlayerController implements Player.EventListener {
                 failure.detail("audioBadLatencies", mAudioClockInfo.badLatencies);
                 failure.detail("audioHoldReleases", mAudioClockInfo.holdReleases);
                 failure.detail("audioLongestHoldMs", mAudioClockInfo.longestHoldMs);
+                failure.detail("audioHoldSkips", mAudioClockInfo.holdSkips);
             }
         }
 

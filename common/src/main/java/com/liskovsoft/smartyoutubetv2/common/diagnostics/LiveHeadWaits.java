@@ -92,10 +92,35 @@ public final class LiveHeadWaits {
     }
 
     /**
+     * The waits told in the last ms given: a live stall with some is the stream's head standing still, its server answering that
+     * the next segment isn't there yet (see ErrorFixerController#runLongBufferingAction)
+     */
+    public static synchronized int countWithin(long windowMs) {
+        long nowMs = sClock.now();
+        int result = 0;
+
+        for (long[] wait : sWaits) {
+            if (nowMs - wait[0] <= windowMs) {
+                result++;
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * When the next request is sent, cut to the time
      */
     private static long getEndMs(long[] wait, long toMs) {
         return Math.min(wait[0] + wait[1], toMs);
+    }
+
+    /**
+     * None told, on the device's clock: another package's test's
+     */
+    @VisibleForTesting
+    public static void resetForTesting() {
+        resetForTesting(null);
     }
 
     @VisibleForTesting

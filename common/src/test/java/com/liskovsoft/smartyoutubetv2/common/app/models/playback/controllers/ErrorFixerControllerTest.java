@@ -7,6 +7,7 @@ import android.os.SystemClock;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.audio.AudioSink;
+import com.google.android.exoplayer2.ext.cronet.CronetDataSource;
 import com.google.android.exoplayer2.source.sabr.SabrRefusedRequest;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.BrokenPartError;
 import com.google.android.exoplayer2.source.sabr.parser.exceptions.PoTokenError;
@@ -25,6 +26,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.views.PlaybackView;
 import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.Connections;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.FormatAttempts;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.LiveHeadWaits;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlaybackSpeed;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.LoadErrors;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlaybackHealth;
@@ -50,6 +52,7 @@ import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.youtubeapi.app.PoTokenGate;
 import com.liskovsoft.youtubeapi.videoinfo.V2.ClientAttempts;
 
+import org.chromium.net.NetworkException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
@@ -78,6 +81,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.net.ssl.SSLHandshakeException;
@@ -129,6 +133,7 @@ public class ErrorFixerControllerTest {
         LoadErrors.resetForTesting();
         Connections.resetForTesting();
         Connections.onPrepare();
+        LiveHeadWaits.resetForTesting();
         ProtectionStatuses.resetForTesting(null);
         NetworkEngineFallback.resetForTesting();
         ShadowToast.reset();
@@ -1291,6 +1296,60 @@ public class ErrorFixerControllerTest {
     }
 
     /**
+     * GWS5HG2H #1-#3: a live stream's head stood still, its server answering each request that the next segment wasn't there yet, and a
+     * reload every 21 s got the same from a black screen. Waited in place, the user told once, checked again a stall later; reloaded as
+     * before once the server's waits stop.
+     */
+    @Test
+    public void aLiveStallAtAHeadThatStandsStillWaitsInPlace() throws Exception {
+        Video live = video("pfsI290BV4U");
+        live.isLive = true;
+        TestController controller = new TestController(live, null, playerStub(atMs(1_000_000, 3_626_700)));
+        controller.onPlay();
+        LiveHeadWaits.onWait(C.TRACK_TYPE_VIDEO, 5_000);
+
+        controller.onLongBuffering();
+
+        assertEquals(Arrays.asList("live_head_wait"), getActions(mLog.readAll().get(0)));
+        assertEquals(1, ShadowToast.shownToastCount());
+
+        // A stall later, the server still waiting
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(15));
+        LiveHeadWaits.onWait(C.TRACK_TYPE_AUDIO, 5_000);
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(6));
+
+        List<JSONObject> events = mLog.readAll();
+        assertEquals(Arrays.asList("live_head_wait"), getActions(events.get(events.size() - 1)));
+        assertEquals(0, controller.mReloads.size());
+        assertEquals(1, ShadowToast.shownToastCount());
+
+        // No wait told since: reloaded
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofSeconds(21));
+
+        events = mLog.readAll();
+        assertEquals(Arrays.asList("reload_video"), getActions(events.get(events.size() - 1)));
+        assertEquals(1, controller.mReloads.size());
+    }
+
+    /**
+     * A load that failed on its connection lately: the network's, not the head's, reloaded as before
+     */
+    @Test
+    public void aLiveStallWithAConnectionErrorIsntTheHeads() throws Exception {
+        Video live = video("pfsI290BV4U");
+        live.isLive = true;
+        TestController controller = new TestController(live, null, playerStub(atMs(1_000_000, 3_626_700)));
+        controller.onPlay();
+        LiveHeadWaits.onWait(C.TRACK_TYPE_VIDEO, 5_000);
+        long now = SystemClock.elapsedRealtime();
+        LoadErrors.onLoadError(now - 8_000, now, C.DATA_TYPE_MEDIA, C.TRACK_TYPE_VIDEO, new SocketTimeoutException("timeout"));
+
+        controller.onLongBuffering();
+
+        assertEquals(Arrays.asList("reload_video"), getActions(mLog.readAll().get(0)));
+    }
+
+    /**
      * Asked again within a minute it isn't: each stall of a stream that goes on doesn't ask the server
      */
     @Test
@@ -1780,6 +1839,66 @@ public class ErrorFixerControllerTest {
         assertEquals(Collections.emptyList(), getActions(events.get(0)));
         assertEquals(Arrays.asList("other_codec:vp9", "restart_engine"), getActions(events.get(1)));
         assertEquals(1, controller.mRestarts.size());
+    }
+
+    /**
+     * C2TJMVW6 #1, #2: a live stream's VP9 1080p60 on a 720p TV dropped 102 of 182 frames, its first video, with no fix. Lowered to the
+     * display's size, for this video only.
+     */
+    @Test
+    public void framesDroppedOnAVideoBiggerThanTheDisplayLowerItToTheDisplay() throws Exception {
+        List<FormatItem> formats = Arrays.asList(
+                ExoFormatItem.fromVideoSpec("1920,1080,60,vp9", false),
+                ExoFormatItem.fromVideoSpec("1280,720,60,vp9", false),
+                ExoFormatItem.fromVideoSpec("854,480,30,vp9", false));
+        Video live = video("6J-bqpLI7CQ");
+        live.isLive = true;
+        TestController controller = new TestController(live, formats, formats.get(0));
+        controller.mDisplaySize = 1280;
+        controller.onPlay();
+
+        dropFrames(controller);
+
+        assertEquals(Arrays.asList("lower_to_display", "restart_engine"), getActions(mLog.readAll().get(0)));
+        assertEquals(720, getPlayerData().getTempVideoFormat().getHeight());
+        assertEquals(1, controller.mRestarts.size());
+    }
+
+    /**
+     * 4K on a 1080p TV: straight to the display's size, not a size at a time
+     */
+    @Test
+    public void framesDroppedOnAVideoBiggerThanTheDisplaySkipTheSizesBetween() throws Exception {
+        List<FormatItem> formats = Arrays.asList(
+                ExoFormatItem.fromVideoSpec("3840,2160,60,vp9", false),
+                ExoFormatItem.fromVideoSpec("2560,1440,60,vp9", false),
+                ExoFormatItem.fromVideoSpec("1920,1080,60,vp9", false));
+        TestController controller = new TestController(video("6J-bqpLI7CQ"), formats, formats.get(0));
+        controller.mDisplaySize = 1920;
+        controller.onPlay();
+
+        dropFrames(controller);
+
+        assertEquals(Arrays.asList("lower_to_display", "restart_engine"), getActions(mLog.readAll().get(0)));
+        assertEquals(1080, getPlayerData().getTempVideoFormat().getHeight());
+    }
+
+    /**
+     * No bigger than the display: the drops of a first video are left alone, as before
+     */
+    @Test
+    public void framesDroppedOnAVideoTheDisplayShowsAreLeftAlone() throws Exception {
+        List<FormatItem> formats = Arrays.asList(
+                ExoFormatItem.fromVideoSpec("1920,1080,60,vp9", false),
+                ExoFormatItem.fromVideoSpec("1280,720,60,vp9", false));
+        TestController controller = new TestController(video("6J-bqpLI7CQ"), formats, formats.get(0));
+        controller.mDisplaySize = 1920;
+        controller.onPlay();
+
+        dropFrames(controller);
+
+        assertEquals(Collections.emptyList(), getActions(mLog.readAll().get(0)));
+        assertEquals(null, getPlayerData().getTempVideoFormat());
     }
 
     /**
@@ -2380,6 +2499,62 @@ public class ErrorFixerControllerTest {
     }
 
     /**
+     * 3TKGJY3Z #3: Cronet's request on a Wi-Fi that dropped (ERR_INTERNET_DISCONNECTED) set the default engine for good. The network's:
+     * waited out with the engine kept, longer each time till it plays.
+     */
+    @Test
+    public void aCronetRequestWithNoNetworkWaitsWithTheEngineKept() throws Exception {
+        TestController controller = new TestController(video("cszzGTz_Fls"), "TV");
+        controller.onPlay();
+
+        controller.onEngineError(PlayerEventListener.ERROR_TYPE_SOURCE, PlayerEventListener.RENDERER_INDEX_UNKNOWN, cronetDisconnected());
+        controller.onEngineError(PlayerEventListener.ERROR_TYPE_SOURCE, PlayerEventListener.RENDERER_INDEX_UNKNOWN, cronetDisconnected());
+
+        List<JSONObject> events = mLog.readAll();
+        assertEquals(Arrays.asList("network_wait", "reload_video"), getActions(events.get(0)));
+        assertEquals(Arrays.asList("network_wait", "reload_video_2s"), getActions(events.get(events.size() - 1)));
+        assertEquals(PlayerTweaksData.PLAYER_DATA_SOURCE_OKHTTP, getTweaks().getPlayerDataSource());
+        assertEquals(Arrays.asList(1_000, 2_000), controller.mReloads);
+        assertEquals(0, controller.mRestarts.size());
+        assertEquals(0, ShadowToast.shownToastCount());
+    }
+
+    /**
+     * 3TKGJY3Z #4: with no network, the default engine's name that didn't resolve switched the engine to OkHttp, saved. Waited out.
+     */
+    @Test
+    public void aRequestThatCouldntConnectWithNoNetworkKeepsTheEngine() throws Exception {
+        getTweaks().setPlayerDataSource(PlayerTweaksData.PLAYER_DATA_SOURCE_DEFAULT);
+        TestController controller = new TestController(video("cszzGTz_Fls"), "TV");
+        controller.mHasNetwork = false;
+        controller.onPlay();
+
+        controller.onEngineError(PlayerEventListener.ERROR_TYPE_SOURCE, PlayerEventListener.RENDERER_INDEX_UNKNOWN,
+                new HttpDataSourceException("Unable to connect to https://www.youtube.com/api/timedtext",
+                        new UnknownHostException("Unable to resolve host \"www.youtube.com\""), dataSpec(),
+                        HttpDataSourceException.TYPE_OPEN));
+
+        assertEquals(Arrays.asList("network_wait", "reload_video"), getActions(mLog.readAll().get(0)));
+        assertEquals(PlayerTweaksData.PLAYER_DATA_SOURCE_DEFAULT, getTweaks().getPlayerDataSource());
+        assertEquals(0, controller.mRestarts.size());
+    }
+
+    /**
+     * Cronet's request that timed out with the network up: its engine's, fixed as before
+     */
+    @Test
+    public void aCronetTimeoutWithTheNetworkUpIsFixedAsBefore() throws Exception {
+        TestController controller = new TestController(video("cszzGTz_Fls"), "TV");
+        controller.onPlay();
+
+        controller.onEngineError(PlayerEventListener.ERROR_TYPE_SOURCE, PlayerEventListener.RENDERER_INDEX_UNKNOWN,
+                cronetError(NetworkException.ERROR_TIMED_OUT, "ERR_TIMED_OUT"));
+
+        assertEquals(Arrays.asList("engine_default", "restart_engine"), getActions(mLog.readAll().get(0)));
+        assertEquals(PlayerTweaksData.PLAYER_DATA_SOURCE_DEFAULT, getTweaks().getPlayerDataSource());
+    }
+
+    /**
      * A source's error tells what its loads did: the ones that failed since it last played, each try's time and error, and the number
      * of the server its request went to (R71TW3F4 #1-#13 told none of it)
      */
@@ -2509,6 +2684,59 @@ public class ErrorFixerControllerTest {
     }
 
     /**
+     * H6ZWKZTQ #1: a high-bitrate 4K60, 45.3 Mbps on average, stalled 4 times in 2 minutes at 55.5 Mbps, with no fix. What it played
+     * then needed more: the throughput is to keep up with the segments loaded lately, 80 Mbps here.
+     */
+    @Test
+    public void healthStallsOnSegmentsAboveTheThroughputLowerTheQuality() throws Exception {
+        try {
+            playingAt(45_322_000, 55_545);
+            // 10 s of the video in 100 MB, loaded at 55.5 Mbps
+            FormatAttempts.onLoad(50_000_000, 7_200, true, false, 90_000, 95_000);
+            FormatAttempts.onLoad(50_000_000, 7_200, true, false, 95_000, 100_000);
+
+            JSONObject event = failHealthStalls();
+
+            assertEquals(80_000, event.getJSONObject("details").getLong("recentVideoBitrateKbps"));
+            assertEquals(Arrays.asList("lower_quality", "restart_engine"), getActions(event));
+        } finally {
+            FormatAttempts.end(RuntimeEnvironment.getApplication());
+        }
+    }
+
+    /**
+     * Too little of the video loaded lately to tell its bitrate there: the format's own goes, as before
+     */
+    @Test
+    public void healthStallsOnTooLittleOfTheVideoGoByTheFormatsBitrate() throws Exception {
+        try {
+            playingAt(45_322_000, 55_545);
+            FormatAttempts.onLoad(30_000_000, 4_320, true, false, 90_000, 93_000);
+
+            JSONObject event = failHealthStalls();
+
+            assertTrue(event.getJSONObject("details").isNull("recentVideoBitrateKbps"));
+            assertEquals(Collections.emptyList(), getActions(event));
+        } finally {
+            FormatAttempts.end(RuntimeEnvironment.getApplication());
+        }
+    }
+
+    /**
+     * A health "stalls" failure of a 4K VP9 playing, recorded
+     */
+    private JSONObject failHealthStalls() throws Exception {
+        TestController controller = new TestController(video("0N4ujc0HJus"), QUALITIES, QUALITIES.get(0));
+        controller.onPlay();
+        PlayerFailure failure = PlayerFailure.create(RuntimeEnvironment.getApplication(), PlaybackHealth.KIND_STALLS);
+
+        controller.onHealthFailure(PlaybackHealth.KIND_STALLS, failure);
+        failure.record();
+
+        return mLog.readAll().get(0);
+    }
+
+    /**
      * Z6R2NPPX #6: AV1 1080p was lowered to VP9 720p, the list's first, though AV1 720p was offered: the codec playing
      */
     @Test
@@ -2610,6 +2838,35 @@ public class ErrorFixerControllerTest {
     /**
      * "Unable to connect to …" from a read that timed out, as the player fails with it
      */
+    private static HttpDataSourceException cronetDisconnected() {
+        return cronetError(NetworkException.ERROR_INTERNET_DISCONNECTED, "ERR_INTERNET_DISCONNECTED");
+    }
+
+    /**
+     * As CronetDataSource throws Cronet's error (3TKGJY3Z #3): its message the cause's, "...: Exception in CronetUrlRequest: ..."
+     */
+    private static HttpDataSourceException cronetError(int errorCode, String name) {
+        NetworkException cause = new NetworkException(String.format(Locale.US,
+                "Exception in CronetUrlRequest: net::%s, ErrorCode=%d, InternalErrorCode=-106, Retryable=false", name, errorCode), null) {
+            @Override
+            public int getErrorCode() {
+                return errorCode;
+            }
+
+            @Override
+            public int getCronetInternalErrorCode() {
+                return -106;
+            }
+
+            @Override
+            public boolean immediatelyRetryable() {
+                return false;
+            }
+        };
+
+        return new CronetDataSource.OpenException(cause, dataSpec(), 0);
+    }
+
     private static HttpDataSourceException unableToConnect() {
         return new HttpDataSourceException("Unable to connect to https://" + HOST + "/videoplayback",
                 new SocketTimeoutException("timeout"), dataSpec(), HttpDataSourceException.TYPE_OPEN);
@@ -2864,6 +3121,14 @@ public class ErrorFixerControllerTest {
         private String mSwitchedTo = "WEB";
         private int mSwitches;
         private boolean mIsSignedIn;
+        /**
+         * The device has a network (see ErrorFixerController#hasActiveNetwork)
+         */
+        private boolean mHasNetwork = true;
+        /**
+         * The longest side of the display's biggest mode (see ErrorFixerController#getDisplaySize), -1 unknown
+         */
+        private int mDisplaySize = -1;
 
         private TestController(Video video) throws Exception {
             this(video, (String) null);
@@ -2931,6 +3196,16 @@ public class ErrorFixerControllerTest {
         @Override
         boolean isSignedIn() {
             return mIsSignedIn;
+        }
+
+        @Override
+        boolean hasActiveNetwork() {
+            return mHasNetwork;
+        }
+
+        @Override
+        int getDisplaySize() {
+            return mDisplaySize;
         }
 
         /**

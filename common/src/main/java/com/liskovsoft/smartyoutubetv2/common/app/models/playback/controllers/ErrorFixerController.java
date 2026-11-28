@@ -4,6 +4,8 @@ import android.os.SystemClock;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.Network;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -26,6 +28,7 @@ import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.HttpDataSource.HttpDataSourceException;
 import com.google.android.exoplayer2.upstream.HttpDataSource.InvalidResponseCodeException;
 import com.google.android.exoplayer2.util.MimeTypes;
+import com.liskovsoft.googlecommon.common.helpers.ConnectionErrors;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaItemMetadata;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
@@ -37,7 +40,9 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.BasePlayerContr
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.listener.PlayerEventListener;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.AudioOutputProbe;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.Connections;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.DeviceCapabilities;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.FormatAttempts;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.LiveHeadWaits;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.LoadErrors;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.LoadHolds;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlayerCommands;
@@ -47,6 +52,7 @@ import com.liskovsoft.smartyoutubetv2.common.diagnostics.Plays;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlaybackHealth;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.PlaybackSpeed;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.ProtectionStatuses;
+import com.liskovsoft.smartyoutubetv2.common.diagnostics.RendererWaits;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.SilenceDetector;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoDecoderState;
 import com.liskovsoft.smartyoutubetv2.common.diagnostics.VideoStarts;
@@ -151,6 +157,11 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
      */
     private static final long STUCK_CONNECTION_MS = 5_000;
     /**
+     * A live stall with a wait for the stream's head this recent stands at the head (see isLiveHeadStill): the server asks the next
+     * request to wait 5 s at most
+     */
+    private static final long LIVE_HEAD_WAIT_WINDOW_MS = 10_000;
+    /**
      * A SABR refusal this soon after the stream fetched the player response again (see SabrProtocolError#getSessionAgeMs): the fresh
      * one was refused, another fetch gets the same
      */
@@ -234,7 +245,8 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
      */
     private final RetryBackoff mFetchRetries = new RetryBackoff(RETRY_MS, MAX_RETRY_MS);
     /**
-     * Of the video, the reloads of a start that hangs on a connection that fails, till it plays (see runLongBufferingAction)
+     * Of the video, the reloads of a start that hangs on a connection that fails (see runLongBufferingAction), or of a request that
+     * failed on a network that's down (see applyNetworkDownWait), till it plays
      */
     private final RetryBackoff mStallRetries = new RetryBackoff(RETRY_MS, MAX_RETRY_MS);
     /**
@@ -249,6 +261,10 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
     private boolean mIsDnsFixRefuted;
     private String mSabrErrorFixVideoId;
     private int mSabrErrorFixAttempts;
+    /**
+     * The live stream the user was told its head stands still (see runLongBufferingAction): once a video
+     */
+    private String mLiveHeadWaitVideoId;
     /**
      * The video the reloads on a broken connection are counted for (see applyNetworkErrorReload)
      */
@@ -480,6 +496,7 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
         // didn't tell whether the player held its loading back or a decoder had taken it all (96YV3AK4)
         LoadHolds.addDetails(failure);
         VideoDecoderState.addDetails(failure);
+        RendererWaits.addDetails(failure);
 
         try {
             runLongBufferingAction(failure);
@@ -505,7 +522,16 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
         }
 
         // Not over a fix already asked for (e.g. a long stall's reload)
-        if (!isOfflineVideo() || mVideoLoaderController.isFixPending()) {
+        if (mVideoLoaderController.isFixPending()) {
+            return;
+        }
+
+        // A live stream's too: C2TJMVW6's was one
+        if (applyDisplaySizeLowering(kind, failure)) {
+            return;
+        }
+
+        if (!isOfflineVideo()) {
             return;
         }
 
@@ -584,6 +610,33 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
             failure.action("other_codec:" + otherCodec).action("restart_engine");
             mVideoLoaderController.restartEngine(failure.getKind());
         }
+    }
+
+    /**
+     * Bigger than the display can show, dropping frames: its size there looks the same and is less to decode, for this video only, the
+     * first one too. C2TJMVW6 #1, #2: a live stream's VP9 1080p60 on a 720p TV dropped 102 of 182 frames, then 137 of 214, on a decoder
+     * that declares 1080p60, and the user left after 35 s and 8 s; 3TKGJY3Z #1: VP9 1080p25 on a 720p TV, 31 of 91. Not a card's
+     * preview: its surface is small whatever the display.
+     *
+     * @return whether it was lowered, the engine restarting
+     */
+    private boolean applyDisplaySizeLowering(String kind, PlayerFailure failure) {
+        if (!PlaybackHealth.KIND_FRAME_DROPS.equals(kind) || getPlayer() == null || getVideo() == null || isEmbedPlayer()) {
+            return false;
+        }
+
+        FormatItem video = getPlayer().getVideoFormat();
+        int displaySize = getDisplaySize();
+
+        if (displaySize <= 0 || video == null || Math.max(video.getWidth(), video.getHeight()) <= displaySize
+                || !lowerVideoQuality(displaySize)) {
+            return false;
+        }
+
+        failure.action("lower_to_display").action("restart_engine");
+        mVideoLoaderController.restartEngine(failure.getKind());
+
+        return true;
     }
 
     /**
@@ -924,11 +977,39 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
             // reload stalled again, and two lowerings later it played at 1080p, three minutes on). For this video only.
             failure.action("lower_quality").action("restart_engine");
             mVideoLoaderController.restartEngine(failure.getKind());
+        } else if (isLiveHeadStill()) {
+            // The live stream's head stands still: its server answers the next segment isn't there yet, and goes on so. A reload seeks to
+            // where the head would be by now and waits the same, from a black screen (GWS5HG2H #1-#3: 10 min at the head of a 24 h
+            // stream, then a reload every 21 s, each with only the server's 5 s waits for the head, till the user left a minute later).
+            // Waited in place: the picture stays, the player asks for the head as the server says (see DefaultSabrChunkSource), and
+            // plays once it moves. Checked again a stall later (the detector is reset before this), the user told once.
+            failure.action("live_head_wait");
+            Video video = getVideo();
+
+            if (video != null && !Helpers.equals(video.videoId, mLiveHeadWaitVideoId)) {
+                mLiveHeadWaitVideoId = video.videoId;
+                MessageHelpers.showLongMessage(getContext(), R.string.msg_live_head_wait);
+            }
+
+            mBufferingDetector.onStartBuffering();
         } else {
             // SABR may hang if the server issues a high backoffTime
             failure.action("reload_video");
             mVideoLoaderController.reloadVideo(failure.getKind());
         }
+    }
+
+    /**
+     * A live stream's stall at its head: its server told the player's requests in the last LIVE_HEAD_WAIT_WINDOW_MS that the next
+     * segment isn't there yet, and none of its loads failed on its connection (see runLongBufferingAction)
+     */
+    private boolean isLiveHeadStill() {
+        Video video = getVideo();
+
+        return getPlayer() != null && video != null && video.isLive && !video.isLiveEnd
+                && LiveHeadWaits.countWithin(LIVE_HEAD_WAIT_WINDOW_MS) > 0
+                && !LoadErrors.hasConnectionErrorWithin(CONNECTION_ERROR_WINDOW_MS)
+                && Connections.getStuckConnection(STUCK_CONNECTION_MS) == null;
     }
 
     @Override
@@ -1666,6 +1747,50 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
     }
 
     /**
+     * The player's request failed on its connection while the device has no network, or the request says it has none (Cronet's
+     * ERR_INTERNET_DISCONNECTED, see ConnectionErrors#DISCONNECTED): no engine or client is to blame, and the engine switches of
+     * applyEngineErrorAction are saved in the settings. 3TKGJY3Z #3-#5: a Wi-Fi drop of about 30 s, no network in each failure's state;
+     * Cronet's ERR_INTERNET_DISCONNECTED set the default engine, the default's name that didn't resolve switched it to OkHttp, and the
+     * user's Cronet was gone for good. Waited out instead, as a fetch that can't connect is (see loadFormatInfo), each wait longer
+     * till it plays. A connection that fails with the network up is fixed as before.
+     */
+    private boolean applyNetworkDownWait(Throwable error, PlayerFailure failure) {
+        Video video = getVideo();
+
+        if (video == null || !LoadErrors.isConnectionError(error)
+                || (hasActiveNetwork() && !ConnectionErrors.DISCONNECTED.equals(ConnectionErrors.describe(error)))) {
+            return false;
+        }
+
+        failure.action("network_wait");
+        undoStallClientSwitch(failure);
+        reloadLater(failure, mStallRetries.next(video.videoId));
+
+        return true;
+    }
+
+    /**
+     * The device has a network, validated or not (a network that never validates, its check blocked, still plays): true when it can't
+     * be told. Not the system's: a test's.
+     */
+    boolean hasActiveNetwork() {
+        Context context = getContext();
+        ConnectivityManager manager = context != null ? (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE) : null;
+
+        if (manager == null) {
+            return true;
+        }
+
+        try {
+            Network network = manager.getActiveNetwork();
+
+            return network != null && manager.getNetworkCapabilities(network) != null;
+        } catch (RuntimeException e) { // e.g. a SecurityException of a vendor's build: unknown, as before
+            return true;
+        }
+    }
+
+    /**
      * A SABR response read out of step happened with Cronet or the default engine 20 times in 628 plays, and with OkHttp none in 679
      * (2026-11-19's submissions: FVNAAYZD, RF6HBNNH, F8DMFX2M, 84ENEA2S, 2Q5RK79E, DMQEWB9B), so the video's reload read with OkHttp.
      * OkHttp did it too: Z6R2NPPX #2-#4 (32.70.5, 32.71.3, okhttp_no_ipv6), 0.2-0.3 s after a seek each, as 15 of those 16 whose
@@ -1835,6 +1960,10 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
         String errorTitle = getErrorTitle(type, rendererIndex, error);
         String errorMessage = errorTitle + "\n" + errorContent;
         Log.e(TAG, errorMessage);
+
+        if (applyNetworkDownWait(error, failure)) {
+            return;
+        }
 
         if (Helpers.startsWithAny(errorContent, "Unable to connect to") && mBufferingDetector.isPlayable() && isConnectionError(error)) {
             // It played, and its connection broke (e.g. a read timed out): not the device's date nor no internet. Counted for the video
@@ -2710,6 +2839,15 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
      * This will change current format to 'Disabled'. Do reloadEngine() instead.
      */
     private boolean lowerVideoQuality() {
+        return lowerVideoQuality(Integer.MAX_VALUE);
+    }
+
+    /**
+     * See lowerVideoQuality(): the biggest size down that's no bigger than the one given (e.g. the display's), at once
+     *
+     * @param maxSize the longest side's, e.g. 1280 for 720p
+     */
+    private boolean lowerVideoQuality(int maxSize) {
         if (getPlayer() == null) {
             return false;
         }
@@ -2736,7 +2874,7 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
         for (FormatItem format : videoFormats) {
             int formatSize = Math.max(format.getWidth(), format.getHeight());
 
-            if (formatSize > 0 && formatSize < size && formatSize > lowerSize) {
+            if (formatSize > 0 && formatSize < size && formatSize <= maxSize && formatSize > lowerSize) {
                 lowerSize = formatSize;
             }
         }
@@ -2785,6 +2923,16 @@ public class ErrorFixerController extends BasePlayerController implements OnLong
         mVideoFallback = limit;
 
         return true;
+    }
+
+    /**
+     * The longest side of the biggest picture the display shows, of the modes it can switch to (see DeviceCapabilities): -1 when it
+     * can't be told. Not the device's: a test's.
+     */
+    int getDisplaySize() {
+        Context context = getContext();
+
+        return context != null ? DeviceCapabilities.getLargestModeSize(context) : -1;
     }
 
     /**

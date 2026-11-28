@@ -284,7 +284,7 @@ public class DiagnosticsContractTest {
         fixture.slowStart();
         VideoStarts.sProtection = (videoId, fromMs, toMs) -> Collections.emptyList();
         VideoStarts.onFrames(new PlaybackHealth.StartFrames(VideoStartFixture.VIDEO_ID, 10_000, 40, 120, 1, 4_500,
-                new PlaybackHealth.StartAudioClock(1, 1, 0, 1, 480)));
+                new PlaybackHealth.StartAudioClock(1, 1, 0, 1, 480, 0)));
         // Its play: paused by the media session, played on by the user, till the next video's start plays
         PlayerCommands.onPlayWhenReady(false, PlayerCommands.SOURCE_MEDIA_SESSION, "android KEYCODE_MEDIA_PAUSE", 29_234);
         PlayerCommands.onPlayWhenReady(true, PlayerCommands.SOURCE_APP, 29_240);

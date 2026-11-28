@@ -1578,6 +1578,10 @@ public final class VideoStarts {
                 result.put("audioClockMismatches", audio.clockMismatches);
                 result.put("audioHoldReleases", audio.holdReleases);
                 result.put("audioLongestHoldMs", audio.longestHoldMs);
+
+                if (audio.holdSkips >= 0) {
+                    result.put("audioHoldSkips", audio.holdSkips);
+                }
             }
         } catch (JSONException e) {
             throw new IllegalStateException(e);

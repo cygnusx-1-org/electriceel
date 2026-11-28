@@ -127,6 +127,11 @@ public final class FormatAttempts {
     static Clock sClock = System::currentTimeMillis;
     private static final long RECENT_LOADS_MS = 30_000;
     /**
+     * Of the video segments loaded in the last RECENT_LOADS_MS, at least this much of the video: fewer say too little of its bitrate
+     * there (see getRecentVideoKbps)
+     */
+    private static final long MIN_RECENT_VIDEO_MS = 4_000;
+    /**
      * Of an attempt: a server more is a redirect or another reload
      */
     @VisibleForTesting
@@ -219,6 +224,10 @@ public final class FormatAttempts {
          * Finished in the last RECENT_LOADS_MS, oldest first: {when, bytes, load time}
          */
         final ArrayDeque<long[]> recentLoads = new ArrayDeque<>();
+        /**
+         * The video's segments of them whose place in the video is known: {when, bytes, ms of the video}
+         */
+        final ArrayDeque<long[]> recentVideoLoads = new ArrayDeque<>();
         long videoLoadedAt = -1;
         long audioLoadedAt = -1;
         long videoLoadedToMs = -1;
@@ -510,6 +519,14 @@ public final class FormatAttempts {
      * @param mediaEndMs where the segment ends in the video, negative when unknown
      */
     public static void onLoad(long bytes, long durationMs, boolean isVideo, boolean isAudio, long mediaEndMs) {
+        onLoad(bytes, durationMs, isVideo, isAudio, -1, mediaEndMs);
+    }
+
+    /**
+     * @param mediaStartMs where the segment starts in the video, negative when unknown
+     * @param mediaEndMs where it ends, negative when unknown
+     */
+    public static void onLoad(long bytes, long durationMs, boolean isVideo, boolean isAudio, long mediaStartMs, long mediaEndMs) {
         onLoad(bytes, durationMs);
         Attempt last = getLast();
 
@@ -518,8 +535,17 @@ public final class FormatAttempts {
         }
 
         if (isVideo) {
-            last.videoLoadedAt = sClock.now();
+            long now = sClock.now();
+            last.videoLoadedAt = now;
             last.videoLoadedToMs = mediaEndMs;
+
+            if (bytes > 0 && mediaStartMs >= 0 && mediaEndMs > mediaStartMs) {
+                last.recentVideoLoads.addLast(new long[]{now, bytes, mediaEndMs - mediaStartMs});
+
+                while (now - last.recentVideoLoads.peekFirst()[0] > RECENT_LOADS_MS) {
+                    last.recentVideoLoads.removeFirst();
+                }
+            }
         } else if (isAudio) {
             last.audioLoadedAt = sClock.now();
             last.audioLoadedToMs = mediaEndMs;
@@ -550,6 +576,8 @@ public final class FormatAttempts {
                 .detail("recentThroughputKbps", throughputKbps >= 0 ? throughputKbps : null)
                 .detail("videoBitrateKbps", last.videoBitrateKbps > 0 ? last.videoBitrateKbps : null)
                 .detail("videoAverageBitrateKbps", last.videoAverageKbps > 0 ? last.videoAverageKbps : null);
+        long recentVideoKbps = getRecentVideoKbps(last, now);
+        failure.detail("recentVideoBitrateKbps", recentVideoKbps > 0 ? recentVideoKbps : null);
     }
 
     /**
@@ -588,15 +616,38 @@ public final class FormatAttempts {
     }
 
     /**
-     * What the throughput is to keep up with to play the attempt's video: its average bitrate, or the stream's when not known. -1 when
-     * neither is.
+     * What the throughput is to keep up with to play the attempt's video: its average bitrate, or the stream's when not known; the
+     * bitrate of its segments loaded lately when that's higher, the part being played needing more than the video does on average.
+     * H6ZWKZTQ #1: a 4K60 format of 45.3 Mbps on average (198.8 Mbps the stream's, a high-bitrate one) stalled 4 times in 2 minutes
+     * at 55.5 Mbps, with no fix: faster than its average, not than what it played then. -1 when none is known.
      */
     private static int getNeededKbps(@Nullable Attempt attempt) {
         if (attempt == null) {
             return -1;
         }
 
-        return attempt.videoAverageKbps > 0 ? attempt.videoAverageKbps : attempt.videoBitrateKbps;
+        int neededKbps = attempt.videoAverageKbps > 0 ? attempt.videoAverageKbps : attempt.videoBitrateKbps;
+        long recentKbps = getRecentVideoKbps(attempt, sClock.now());
+
+        return recentKbps > neededKbps ? (int) recentKbps : neededKbps;
+    }
+
+    /**
+     * Of the video segments that finished loading in the last RECENT_LOADS_MS, their bitrate: their bytes over the length of the video
+     * they hold. -1 for less than MIN_RECENT_VIDEO_MS of it.
+     */
+    private static long getRecentVideoKbps(Attempt attempt, long now) {
+        long bytes = 0;
+        long mediaMs = 0;
+
+        for (long[] load : attempt.recentVideoLoads) {
+            if (now - load[0] <= RECENT_LOADS_MS) {
+                bytes += load[1];
+                mediaMs += load[2];
+            }
+        }
+
+        return mediaMs >= MIN_RECENT_VIDEO_MS ? bytes * 8 / mediaMs : -1;
     }
 
     /**

@@ -578,6 +578,30 @@ public final class DeviceCapabilities {
         return mode.getPhysicalWidth() + "x" + mode.getPhysicalHeight() + "@" + String.format(Locale.US, "%.2f", mode.getRefreshRate());
     }
 
+    /**
+     * The longest side of the biggest of the display's modes (see Display#getSupportedModes), e.g. 1280 for a 720p TV: -1 when it can't
+     * be told. A 4K TV in a 1080p mode can switch to 4K (see AutoFrameRateController), so it's the biggest mode, not the one in use.
+     */
+    public static int getLargestModeSize(Context context) {
+        try {
+            Display display = getDisplay(context);
+
+            if (display == null) {
+                return -1;
+            }
+
+            int result = -1;
+
+            for (Display.Mode mode : display.getSupportedModes()) {
+                result = Math.max(result, Math.max(mode.getPhysicalWidth(), mode.getPhysicalHeight()));
+            }
+
+            return result > 0 ? result : -1;
+        } catch (RuntimeException e) { // a vendor's display service
+            return -1;
+        }
+    }
+
     @Nullable
     private static Display getDisplay(Context context) {
         DisplayManager displayManager = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);

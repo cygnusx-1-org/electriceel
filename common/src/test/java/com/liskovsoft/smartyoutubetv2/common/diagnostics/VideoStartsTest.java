@@ -482,7 +482,7 @@ public class VideoStartsTest {
         mFixture.slowStart();
 
         VideoStarts.onFrames(new PlaybackHealth.StartFrames(VIDEO_ID, 10_000, 250, 9, 0, 0,
-                new PlaybackHealth.StartAudioClock(2, 0, 1, 1, 480)));
+                new PlaybackHealth.StartAudioClock(2, 0, 1, 1, 480, 0)));
 
         JSONObject result = frames.get(0);
         assertEquals(2, result.optInt("audioTimestampState"));

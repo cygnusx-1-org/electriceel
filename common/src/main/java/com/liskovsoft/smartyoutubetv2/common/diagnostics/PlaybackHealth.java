@@ -184,6 +184,7 @@ public final class PlaybackHealth {
     private final Increase mStartFramesMismatches = new Increase();
     private final Increase mStartClockMismatches = new Increase();
     private final Increase mStartHoldReleases = new Increase();
+    private final Increase mStartHoldSkips = new Increase();
     private int mStartTimestampState = -1;
     private long mStartLongestHoldMs = -1;
     /**
@@ -267,6 +268,11 @@ public final class PlaybackHealth {
         public long audioTotalClockMismatches = -1;
         public long audioTotalHoldReleases = -1;
         /**
+         * Of all the AudioTracks so far (see AudioClockInfo), -1 when unknown: the times the position didn't wait on a timestamp that
+         * didn't advance, the device's having stood still before
+         */
+        public long audioTotalHoldSkips = -1;
+        /**
          * A frame of the format tried was shown
          */
         public boolean isVideoRendered;
@@ -348,13 +354,20 @@ public final class PlaybackHealth {
          * The longest it waited on one: how far the playhead got past it meanwhile
          */
         public final long longestHoldMs;
+        /**
+         * Times in them it didn't wait on one, the device's timestamps having stood still before (see AudioClockInfo#holdSkips): -1
+         * when unknown
+         */
+        public final long holdSkips;
 
-        StartAudioClock(int timestampState, long framesMismatches, long clockMismatches, long holdReleases, long longestHoldMs) {
+        StartAudioClock(int timestampState, long framesMismatches, long clockMismatches, long holdReleases, long longestHoldMs,
+                long holdSkips) {
             this.timestampState = timestampState;
             this.framesMismatches = framesMismatches;
             this.clockMismatches = clockMismatches;
             this.holdReleases = holdReleases;
             this.longestHoldMs = longestHoldMs;
+            this.holdSkips = holdSkips;
         }
     }
 
@@ -648,6 +661,7 @@ public final class PlaybackHealth {
         mStartFramesMismatches.add(sample.audioTotalFramesMismatches);
         mStartClockMismatches.add(sample.audioTotalClockMismatches);
         mStartHoldReleases.add(sample.audioTotalHoldReleases);
+        mStartHoldSkips.add(sample.audioTotalHoldSkips);
         mStartTimestampState = sample.audioTimestampState;
         mStartLongestHoldMs = Math.max(mStartLongestHoldMs, sample.audioLongestHoldMs);
     }
@@ -659,7 +673,7 @@ public final class PlaybackHealth {
         }
 
         return new StartAudioClock(mStartTimestampState, mStartFramesMismatches.get(), mStartClockMismatches.get(), mStartHoldReleases.get(),
-                mStartLongestHoldMs);
+                mStartLongestHoldMs, mStartHoldSkips.isKnown() ? mStartHoldSkips.get() : -1);
     }
 
     /**
@@ -944,6 +958,7 @@ public final class PlaybackHealth {
         mStartFramesMismatches.reset();
         mStartClockMismatches.reset();
         mStartHoldReleases.reset();
+        mStartHoldSkips.reset();
         mStartTimestampState = -1;
         mStartLongestHoldMs = -1;
         // Of the player's clock, not of a format: another one switched to (e.g. another quality) goes on with it

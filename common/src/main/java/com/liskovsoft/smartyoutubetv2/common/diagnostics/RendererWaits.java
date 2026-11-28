@@ -112,6 +112,21 @@ public final class RendererWaits {
     }
 
     /**
+     * Of a stall: whether each renderer could play from where it was, as last told (null when not told since the player was prepared),
+     * and how long one that couldn't hadn't. GWS5HG2H #1: a live stream stalled 21 s with 7.4 s of both tracks buffered, and nothing
+     * told which renderer held it.
+     */
+    public static synchronized void addDetails(PlayerFailure failure) {
+        long nowMs = sClock.now();
+
+        for (Track track : new Track[]{sVideo, sAudio}) {
+            String name = track == sVideo ? "video" : "audio";
+            failure.detail(name + "RendererReady", track.isKnown ? track.isReady : null)
+                    .detail(name + "NotReadyMs", track.open != null ? nowMs - track.open.startMs : null);
+        }
+    }
+
+    /**
      * The waits between the times, cut to them, as stages of a start's buffering (in the clock's time): "audio not ready", "video not
      * ready". One still going at the end says so.
      */

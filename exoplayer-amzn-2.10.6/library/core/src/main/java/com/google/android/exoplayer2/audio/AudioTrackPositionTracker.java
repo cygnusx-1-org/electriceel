@@ -128,7 +128,8 @@ import java.lang.reflect.Method;
   private static final long MAX_LATENCY_US = 5 * C.MICROS_PER_SECOND;
   /**
    * The playhead this far past a timestamp that doesn't advance, the position goes by the playhead. On a SHIELD it may not advance till
-   * it's rejected for being {@link #MAX_AUDIO_TIMESTAMP_OFFSET_US} off: the position and the picture would stand still that long.
+   * it's rejected for being {@link #MAX_AUDIO_TIMESTAMP_OFFSET_US} off: the position and the picture would stand still that long. Once
+   * one was, the next ones aren't waited on (see #isTimestampFreezeSeen).
    */
   private static final long MAX_TIMESTAMP_HOLD_US = 500_000;
 
@@ -168,6 +169,15 @@ import java.lang.reflect.Method;
   private volatile boolean timestampsDisabled;
   /** The position stopped waiting on the timestamp that doesn't advance: counted once, till the poller has another. */
   private boolean isHoldReleased;
+  /** The position didn't wait on the timestamp that doesn't advance (see #isTimestampFreezeSeen): counted once a track. */
+  private boolean isHoldSkipped;
+  /**
+   * A timestamp that didn't advance was rejected for its time being too far off the system clock: it had stood still since it was
+   * got, a SHIELD's AudioTrack's, and the device's next ones do the same till one advances. The next tracks' positions don't wait on
+   * theirs: each 4K60 start of EMY0D3Q2's SHIELD from its 8th hour on waited 496 ms on one and dropped 34-39 frames catching up
+   * after, its timestamp rejected 9-11 times a start. Of the process: the device's audio, whatever the track.
+   */
+  private static volatile boolean isTimestampFreezeSeen;
   private boolean hasData;
 
   private boolean isOutputPcm;
@@ -224,6 +234,7 @@ import java.lang.reflect.Method;
     audioTimestampPoller = new AudioTimestampPoller(audioTrack);
     clockInfo.reset();
     isHoldReleased = false;
+    isHoldSkipped = false;
     outputSampleRate = audioTrack.getSampleRate();
     needsPassthroughWorkarounds = needsPassthroughWorkarounds(outputEncoding);
     isOutputPcm = Util.isEncodingLinearPcm(outputEncoding);
@@ -238,6 +249,11 @@ import java.lang.reflect.Method;
   }
 
   /** For diagnostics, of the AudioTrack in use. */
+  /** The device's timestamps are waited on again, as at the process's start: a test's. */
+  /* package */ static void resetTimestampFreeze() {
+    isTimestampFreezeSeen = false;
+  }
+
   public AudioClockInfo getClockInfo() {
     return clockInfo;
   }
@@ -466,6 +482,7 @@ import java.lang.reflect.Method;
     // None in use: what the one before went by isn't told as the next one's
     clockInfo.reset();
     isHoldReleased = false;
+    isHoldSkipped = false;
   }
 
   /**
@@ -474,7 +491,23 @@ import java.lang.reflect.Method;
    */
   private boolean holdsStuckTimestamp(AudioTimestampPoller audioTimestampPoller) {
     if (!audioTimestampPoller.hasTimestamp() || audioTimestampPoller.isTimestampAdvancing()) {
+      // The device's timestamps advance again: the next one that doesn't is waited on
+      if (audioTimestampPoller.isTimestampAdvancing()) {
+        isTimestampFreezeSeen = false;
+      }
+
       isHoldReleased = false;
+      return false;
+    }
+
+    // The device's timestamps stand still: the playhead goes
+    if (isTimestampFreezeSeen) {
+      if (!isHoldSkipped) {
+        isHoldSkipped = true;
+        clockInfo.holdSkips++;
+        clockInfo.totalHoldSkips++;
+      }
+
       return false;
     }
 
@@ -542,6 +575,11 @@ import java.lang.reflect.Method;
     long audioTimestampSystemTimeUs = audioTimestampPoller.getTimestampSystemTimeUs();
     long audioTimestampPositionFrames = audioTimestampPoller.getTimestampPositionFrames();
     if (Math.abs(audioTimestampSystemTimeUs - systemTimeUs) > MAX_AUDIO_TIMESTAMP_OFFSET_US) {
+      // One that never advanced, gone stale: frozen (see #isTimestampFreezeSeen)
+      if (audioTimestampPoller.hasTimestamp() && !audioTimestampPoller.isTimestampAdvancing()) {
+        isTimestampFreezeSeen = true;
+      }
+
       clockInfo.clockMismatches++;
       clockInfo.totalClockMismatches++;
       listener.onSystemTimeUsMismatch(

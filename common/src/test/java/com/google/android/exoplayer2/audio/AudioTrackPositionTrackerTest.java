@@ -30,9 +30,15 @@ public final class AudioTrackPositionTrackerTest {
     private int mListenerMismatches;
     private int mPlayheadFrames;
     private long mTimestampFrames;
+    /**
+     * Its timestamps' time goes stale after the first, as a SHIELD's that stands still: 6 s behind the system clock
+     */
+    private boolean mIsTimestampStale;
+    private int mTimestampCalls;
 
     @Before
     public void setUp() {
+        AudioTrackPositionTracker.resetTimestampFreeze();
         mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, SAMPLE_RATE, AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT,
                 BUFFER_SIZE, AudioTrack.MODE_STREAM) {
             @Override
@@ -53,7 +59,7 @@ public final class AudioTrackPositionTrackerTest {
             @Override
             public boolean getTimestamp(AudioTimestamp timestamp) {
                 timestamp.framePosition = mTimestampFrames;
-                timestamp.nanoTime = System.nanoTime();
+                timestamp.nanoTime = mIsTimestampStale && mTimestampCalls++ > 0 ? System.nanoTime() - 6_000_000_000L : System.nanoTime();
                 return true;
             }
         };
@@ -115,6 +121,61 @@ public final class AudioTrackPositionTrackerTest {
         assertEquals(1, info.holdReleases);
         assertEquals(1, info.totalHoldReleases);
         assertTrue("held " + info.longestHoldMs, info.longestHoldMs < 500);
+    }
+
+    /**
+     * EMY0D3Q2: from its 8th hour on, each 4K60 start of a SHIELD waited 496 ms on a timestamp that stood still and dropped 34-39 frames
+     * catching up, the timestamp rejected 9-11 times a start for its time being 5 s off the system clock. Once one was, the next
+     * track's isn't waited on.
+     */
+    @Test
+    public void aTimestampFrozenOffTheClockIsntWaitedOnByTheNextTrack() throws InterruptedException {
+        mIsTimestampStale = true;
+        playMs(100);
+
+        assertTrue(mTracker.getClockInfo().clockMismatches >= 1);
+
+        mIsTimestampStale = false;
+        setTrack();
+        mPlayheadFrames = 0;
+        mTracker.start();
+        long firstUs = playMs(100);
+        long laterUs = playMs(300);
+        AudioClockInfo info = mTracker.getClockInfo();
+
+        assertEquals(1, info.timestampState); // AudioTimestampPoller's STATE_TIMESTAMP: there, not advancing
+        assertEquals(0, info.longestHoldMs);
+        assertEquals(1, info.holdSkips);
+        assertEquals(1, info.totalHoldSkips);
+        assertTrue("moved " + (laterUs - firstUs), laterUs - firstUs >= 200_000);
+    }
+
+    /**
+     * The device's timestamps advance again: the next one that doesn't is waited on, as before
+     */
+    @Test
+    public void aTimestampThatAdvancesAfterAFreezeIsWaitedOnAgain() throws InterruptedException {
+        mIsTimestampStale = true;
+        playMs(100);
+        mIsTimestampStale = false;
+        setTrack();
+        mPlayheadFrames = 0;
+        mTracker.start();
+        playMs(100);
+        mTimestampFrames = 3 * SAMPLE_RATE;
+        playMs(100);
+
+        assertEquals(2, mTracker.getClockInfo().timestampState); // AudioTimestampPoller's STATE_TIMESTAMP_ADVANCING
+
+        setTrack();
+        mPlayheadFrames = 0;
+        mTimestampFrames = 0;
+        mTracker.start();
+        playMs(300);
+        AudioClockInfo info = mTracker.getClockInfo();
+
+        assertEquals(0, info.holdSkips);
+        assertTrue("held " + info.longestHoldMs, info.longestHoldMs >= 200 && info.longestHoldMs < 500);
     }
 
     @Test
