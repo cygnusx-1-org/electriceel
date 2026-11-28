@@ -6,6 +6,7 @@ import android.content.Context;
 import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsRows;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
@@ -66,16 +67,25 @@ public class BackupSettingsPresenter extends BasePresenter<Void> {
     }
 
     private void createAndShowDialog() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.app_backup_restore), this::appendRows,
+                BackupSettingsPresenter::unhold);
+    }
 
+    /**
+     * The rows of the panel, from an instance that isn't held: nothing waits on it (e.g. the auto-backups, see SettingsPanel)
+     */
+    public static void appendRows(Context context, SettingsRows rows) {
+        new BackupSettingsPresenter(context).appendRows(rows);
+    }
+
+    private void appendRows(SettingsRows settingsPresenter) {
         appendLocalBackupCategory(settingsPresenter);
         appendGDriveBackupCategory(settingsPresenter);
         appendSubscriptionsBackupButton(settingsPresenter);
         appendPlaylistsBackupButtons(settingsPresenter);
-        settingsPresenter.showDialog(getContext().getString(R.string.app_backup_restore), BackupSettingsPresenter::unhold);
     }
 
-    private void appendGDriveBackupCategory(AppDialogPresenter settingsPresenter) {
+    private void appendGDriveBackupCategory(SettingsRows settingsPresenter) {
         settingsPresenter.appendSingleButton(UiOptionItem.from("Google Drive", optionItem -> {
             AppDialogPresenter settingsPresenter2 = AppDialogPresenter.instance(getContext());
             appendGDriveBackupSettings(settingsPresenter2);
@@ -87,11 +97,11 @@ public class BackupSettingsPresenter extends BasePresenter<Void> {
         }));
     }
 
-    private void appendGDriveRestoreSettings(AppDialogPresenter settingsPresenter) {
+    private void appendGDriveRestoreSettings(SettingsRows settingsPresenter) {
         settingsPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.app_restore), optionItem -> mGDriveBackupManager.restore()));
     }
 
-    private void appendGDriveBackupSettings(AppDialogPresenter settingsPresenter) {
+    private void appendGDriveBackupSettings(SettingsRows settingsPresenter) {
         settingsPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.app_backup), optionItem -> mGDriveBackupManager.backup()));
     }
 
@@ -127,7 +137,7 @@ public class BackupSettingsPresenter extends BasePresenter<Void> {
         );
     }
 
-    private void appendGDriveAutoBackupButton(AppDialogPresenter settingsPresenter) {
+    private void appendGDriveAutoBackupButton(SettingsRows settingsPresenter) {
         settingsPresenter.appendSingleButton(UiOptionItem.from(
                 getContext().getString(R.string.auto_backup_category), option -> {
                     AppDialogPresenter settingsPresenter2 = AppDialogPresenter.instance(getContext());
@@ -157,7 +167,7 @@ public class BackupSettingsPresenter extends BasePresenter<Void> {
                 }));
     }
 
-    private void appendGDriveMiscButtons(AppDialogPresenter settingsPresenter) {
+    private void appendGDriveMiscButtons(SettingsRows settingsPresenter) {
         settingsPresenter.appendSingleSwitch(UiOptionItem.from(
                 getContext().getString(R.string.device_specific_backup),
                 option2 -> mGeneralData.setDeviceSpecificBackupEnabled(option2.isSelected()),
@@ -168,7 +178,7 @@ public class BackupSettingsPresenter extends BasePresenter<Void> {
                 getContext().getString(R.string.dialog_add_account), option2 -> GoogleSignInPresenter.instance(getContext()).start()));
     }
 
-    private void appendLocalBackupCategory(AppDialogPresenter settingsPresenter) {
+    private void appendLocalBackupCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         appendLocalBackupRestoreOptions(options);
@@ -212,11 +222,11 @@ public class BackupSettingsPresenter extends BasePresenter<Void> {
                 }));
     }
 
-    private void appendSubscriptionsBackupButton(AppDialogPresenter settingsPresenter) {
+    private void appendSubscriptionsBackupButton(SettingsRows settingsPresenter) {
         settingsPresenter.appendSingleButton(AppDialogUtil.createSubscriptionsBackupButton(getContext()));
     }
 
-    private void appendPlaylistsBackupButtons(AppDialogPresenter settingsPresenter) {
+    private void appendPlaylistsBackupButtons(SettingsRows settingsPresenter) {
         // Where the files are written to, as for the backup
         settingsPresenter.appendSingleButton(UiOptionItem.from(String.format("%s:\n%s", getContext().getString(R.string.export_playlists),
                         PlaylistsBackupPresenter.getBackupDir().getAbsolutePath()),

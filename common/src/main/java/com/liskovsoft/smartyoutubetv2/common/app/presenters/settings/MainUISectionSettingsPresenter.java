@@ -39,24 +39,31 @@ public class MainUISectionSettingsPresenter extends BasePresenter<Void> implemen
     public List<SettingsItem> getItems(Context context) {
         List<SettingsItem> items = new ArrayList<>();
         items.add(new SettingsItem(context.getString(R.string.settings_general),
-                () -> MainUIGeneralSettingsPresenter.instance(context).show(), R.drawable.settings_general));
+                () -> MainUIGeneralSettingsPresenter.instance(context).show(), R.drawable.settings_general)
+                .setCards(MainUIGeneralSettingsPresenter.instance(context)));
         items.add(new SettingsItem(context.getString(R.string.dialog_select_language),
-                () -> LanguageSettingsPresenter.instance(context).showLanguage(), R.drawable.settings_language));
+                () -> LanguageSettingsPresenter.instance(context).showLanguage(), R.drawable.settings_language)
+                .setPanel(rows -> LanguageSettingsPresenter.instance(context).appendLanguageRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.dialog_select_country),
-                () -> LanguageSettingsPresenter.instance(context).showCountry(), R.drawable.settings_language));
+                () -> LanguageSettingsPresenter.instance(context).showCountry(), R.drawable.settings_language)
+                .setPanel(rows -> LanguageSettingsPresenter.instance(context).appendCountryRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.dearrow_provider),
                 () -> DeArrowSettingsPresenter.instance(context).show(), R.drawable.settings_dearrow)
+                .setPanel(rows -> DeArrowSettingsPresenter.instance(context).appendRows(rows))
                 .setDescription(context.getString(R.string.card_desc_dearrow))
                 .addLink(context.getString(R.string.about_dearrow), context.getString(R.string.dearrow_provider_url))
                 .addLink(context.getString(R.string.dearrow_status), context.getString(R.string.dearrow_status_url)));
         items.add(new SettingsItem(context.getString(R.string.header_home),
-                () -> MainUISettingsPresenter.instance(context).showHome(), R.drawable.settings_home_rows));
+                () -> MainUISettingsPresenter.instance(context).showHome(), R.drawable.settings_home_rows)
+                .setPanel(rows -> MainUISettingsPresenter.instance(context).appendHomeRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.sidebar),
-                () -> MainUISettingsPresenter.instance(context).showSidebar(), R.drawable.settings_sections));
+                () -> MainUISettingsPresenter.instance(context).showSidebar(), R.drawable.settings_sections)
+                .setPanel(rows -> MainUISettingsPresenter.instance(context).appendSidebarRows(rows)));
         // Nothing to pick from with one skin
         if (Skins.getSkinIds().size() > 1) {
             items.add(new SettingsItem(context.getString(R.string.settings_skins),
-                    () -> MainUISettingsPresenter.instance(context).showSkins(), R.drawable.settings_skin));
+                    () -> MainUISettingsPresenter.instance(context).showSkins(), R.drawable.settings_skin)
+                    .setPanel(rows -> MainUISettingsPresenter.instance(context).appendSkinsRows(rows)));
         }
         if (HomeScreenPlaylistsData.isSupported(context)) {
             items.add(new SettingsItem(context.getString(R.string.home_screen_channels),

@@ -1270,4 +1270,8 @@
     <string name="card_desc_api_keys">مفتاح YouTube Data API الخاص بك، مطلوب للتشغيل التلقائي للموسيقى ولإخفاء الفيديوهات أو تمييزها حسب الفئة (موسيقى، ألعاب، أخبار…) في الصفحة الرئيسية</string>
     <string name="card_desc_dns">يغيّر طريقة عثور التطبيق على خوادم YouTube. قد يساعد عندما لا يتم تحميل التطبيق إطلاقًا.</string>
     <string name="card_desc_remote_control">يقرن هاتفًا أو جهازًا لوحيًا ليتمكن تطبيق YouTube فيه من التحكم في التشغيل على هذا التلفزيون</string>
+    <!-- Settings search -->
+    <string name="find_setting">البحث في الإعدادات</string>
+    <string name="find_setting_none">لا يوجد إعداد يطابق \"%s\"</string>
+    <string name="find_setting_gone">هذا الإعداد لم يعد موجودًا. ابحث مرة أخرى.</string>
 </resources>

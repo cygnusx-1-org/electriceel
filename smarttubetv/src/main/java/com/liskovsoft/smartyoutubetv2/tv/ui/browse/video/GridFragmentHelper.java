@@ -9,6 +9,8 @@ import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 
+import androidx.annotation.Nullable;
+import androidx.leanback.widget.BaseGridView;
 import androidx.leanback.widget.VerticalGridView;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -198,13 +200,25 @@ public class GridFragmentHelper {
      * (e.g. from the 3rd to 5th card of a row of five onto a row of two). The grid ignores it otherwise.
      */
     public static void enableDownToShorterRow(VerticalGridView grid, int numColumns) {
-        if (grid == null || numColumns <= 1) {
+        enableDownToShorterRow(grid, numColumns, null);
+    }
+
+    /**
+     * @param otherKeys the keys this doesn't take go to it first (the grid has one listener), null for none
+     */
+    public static void enableDownToShorterRow(VerticalGridView grid, int numColumns, @Nullable BaseGridView.OnKeyInterceptListener otherKeys) {
+        if (grid == null) {
+            return;
+        }
+
+        if (numColumns <= 1) {
+            grid.setOnKeyInterceptListener(otherKeys);
             return;
         }
 
         grid.setOnKeyInterceptListener(event -> {
             if (event.getKeyCode() != KeyEvent.KEYCODE_DPAD_DOWN) {
-                return false;
+                return otherKeys != null && otherKeys.onInterceptKeyEvent(event);
             }
 
             RecyclerView.Adapter<?> adapter = grid.getAdapter();

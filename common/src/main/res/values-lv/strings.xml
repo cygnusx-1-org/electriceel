@@ -1224,4 +1224,8 @@
     <string name="card_desc_api_keys">Jūsu paša YouTube Data API atslēga, kas nepieciešama mūzikas automātiskajai atskaņošanai un lai Sākumā paslēptu vai atzīmētu videoklipus pēc kategorijas (mūzika, spēles, ziņas…)</string>
     <string name="card_desc_dns">Maina, kā lietotne atrod YouTube serverus. Var palīdzēt, ja lietotne nemaz neielādējas.</string>
     <string name="card_desc_remote_control">Savieno pārī tālruni vai planšetdatoru, lai tā YouTube lietotne varētu vadīt atskaņošanu šajā televizorā</string>
+    <!-- Settings search -->
+    <string name="find_setting">Meklēt iestatījumos</string>
+    <string name="find_setting_none">Neviens iestatījums neatbilst “%s”</string>
+    <string name="find_setting_gone">Šī iestatījuma vairs nav. Meklējiet vēlreiz.</string>
 </resources>

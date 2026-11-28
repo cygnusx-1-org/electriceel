@@ -135,6 +135,11 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
         return fragment;
     }
 
+    /**
+     * Of the list opened right away, while it's made: the value of the row focused
+     */
+    private String mFocusedValue;
+
     @Override
     public void show(List<OptionCategory> categories, CharSequence title, boolean isExpandable, boolean isTransparent, boolean isOverlay, int id) {
         if (!Utils.checkActivity(getActivity())) {
@@ -158,7 +163,11 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
         if (isSingleCategory) {
             OptionCategory category = categories.get(0);
             if (category.options != null) {
+                // The row focused, of the list opened right away (e.g. a setting the settings search opens)
+                OptionItem focused = mPresenter.getFocusedItem();
+                mFocusedValue = focused != null && category.options.contains(focused) ? focused.toString() : null;
                 onPreferenceDisplayDialog(null, mManager.createPreference(category));
+                mFocusedValue = null;
             }
         } else {
             AppPreferenceFragment fragment = buildPreferenceFragment(categories, createTitle(title));
@@ -241,6 +250,7 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
         } else if (pref instanceof ListPreference) {
             ListPreference listPreference = (ListPreference) pref;
             RadioListPreferenceDialogFragment f = RadioListPreferenceDialogFragment.newInstanceSingle(listPreference.getKey());
+            f.setFocusedValue(mFocusedValue);
             f.enableTransparent(mIsTransparent);
             f.setTargetFragment(caller, 0);
             f.setPreference(pref);
@@ -272,6 +282,7 @@ public class AppDialogFragment extends LeanbackSettingsFragment implements AppDi
         } else if (pref instanceof MultiSelectListPreference) {
             MultiSelectListPreference listPreference = (MultiSelectListPreference) pref;
             LeanbackListPreferenceDialogFragment f = LeanbackListPreferenceDialogFragment.newInstanceMulti(listPreference.getKey());
+            f.setFocusedValue(mFocusedValue);
             f.setTargetFragment(caller, 0);
             f.setPreference(pref);
             startPreferenceFragment(f);

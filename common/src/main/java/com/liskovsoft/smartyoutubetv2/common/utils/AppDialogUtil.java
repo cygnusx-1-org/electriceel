@@ -23,6 +23,7 @@ import com.liskovsoft.sharedutils.okhttp.OkHttpManager;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.sharedutils.rx.RxHelper;
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsRows;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Playlist;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.SimpleMediaItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
@@ -1169,7 +1170,7 @@ public class AppDialogUtil {
         settingsPresenter.showDialog(title);
     }
 
-    public static void appendSeekIntervalDialogItems(Context context, AppDialogPresenter dialogPresenter, PlayerData playerData, boolean closeOnSelect) {
+    public static void appendSeekIntervalDialogItems(Context context, SettingsRows dialogPresenter, PlayerData playerData, boolean closeOnSelect) {
         List<OptionItem> options = new ArrayList<>();
 
         for (int intervalMs : new int[] {1_000, 2_000, 3_000, 5_000, 7_000, 10_000, 15_000, 20_000, 30_000, 60_000}) {
@@ -1180,7 +1181,7 @@ public class AppDialogUtil {
                             Utils.showNotCompatibleMessage(context, R.string.player_seek_preview_carousel_slow);
                         }
                         if (closeOnSelect) {
-                            dialogPresenter.closeDialog();
+                            AppDialogPresenter.instance(context).closeDialog();
                         }
                     },
                     intervalMs == playerData.getSeekIncrementMs()));

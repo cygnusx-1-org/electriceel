@@ -36,23 +36,32 @@ public class MainUIGeneralSettingsPresenter extends BasePresenter<Void> implemen
     public List<SettingsItem> getItems(Context context) {
         List<SettingsItem> items = new ArrayList<>();
         items.add(new SettingsItem(context.getString(R.string.context_menu),
-                () -> MainUISettingsPresenter.instance(context).showContextMenuItems(), R.drawable.settings_context_menu));
+                () -> MainUISettingsPresenter.instance(context).showContextMenuItems(), R.drawable.settings_context_menu)
+                .setPanel(rows -> MainUISettingsPresenter.instance(context).appendContextMenuItemsRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.settings_buttons_options),
-                () -> MainUISettingsPresenter.instance(context).showButtons(), R.drawable.settings_top_buttons));
+                () -> MainUISettingsPresenter.instance(context).showButtons(), R.drawable.settings_top_buttons)
+                .setPanel(rows -> MainUISettingsPresenter.instance(context).appendButtonsRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.settings_cards_options),
-                () -> MainUISettingsPresenter.instance(context).showCards(), R.drawable.settings_cards));
+                () -> MainUISettingsPresenter.instance(context).showCards(), R.drawable.settings_cards)
+                .setPanel(rows -> MainUISettingsPresenter.instance(context).appendCardsRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.settings_time_options),
-                () -> MainUISettingsPresenter.instance(context).showTime(), R.drawable.settings_time));
+                () -> MainUISettingsPresenter.instance(context).showTime(), R.drawable.settings_time)
+                .setPanel(rows -> MainUISettingsPresenter.instance(context).appendTimeRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.settings_channels_options),
-                () -> MainUISettingsPresenter.instance(context).showChannels(), R.drawable.settings_channels));
+                () -> MainUISettingsPresenter.instance(context).showChannels(), R.drawable.settings_channels)
+                .setPanel(rows -> MainUISettingsPresenter.instance(context).appendChannelsRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.settings_sort_options),
-                () -> MainUISettingsPresenter.instance(context).showSorting(), R.drawable.settings_sort));
+                () -> MainUISettingsPresenter.instance(context).showSorting(), R.drawable.settings_sort)
+                .setPanel(rows -> MainUISettingsPresenter.instance(context).appendSortingRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.settings_color_scheme_options),
-                () -> MainUISettingsPresenter.instance(context).showColors(), R.drawable.settings_color_scheme));
+                () -> MainUISettingsPresenter.instance(context).showColors(), R.drawable.settings_color_scheme)
+                .setPanel(rows -> MainUISettingsPresenter.instance(context).appendColorsRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.settings_misc_options),
-                () -> MainUISettingsPresenter.instance(context).showMisc(), R.drawable.settings_misc));
+                () -> MainUISettingsPresenter.instance(context).showMisc(), R.drawable.settings_misc)
+                .setPanel(rows -> MainUISettingsPresenter.instance(context).appendMiscRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.settings_scale_options),
-                () -> MainUISettingsPresenter.instance(context).showScale(), R.drawable.settings_ui_scale));
+                () -> MainUISettingsPresenter.instance(context).showScale(), R.drawable.settings_ui_scale)
+                .setPanel(rows -> MainUISettingsPresenter.instance(context).appendScaleRows(rows)));
 
         return items;
     }

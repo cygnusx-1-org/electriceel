@@ -7,6 +7,7 @@ import com.liskovsoft.mediaserviceinterfaces.RemoteControlService;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.sharedutils.helpers.PermissionHelpers;
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsRows;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AddDevicePresenter;
@@ -54,17 +55,26 @@ public class RemoteControlSettingsPresenter extends BasePresenter<Void> {
     }
 
     private void createAndShowDialog() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_remote_control),
+                this::appendRows, 
+                this::unhold);
+    }
 
+    /**
+     * The rows of the panel, from an instance that isn't held (see SettingsPanel)
+     */
+    public static void appendRows(Context context, SettingsRows rows) {
+        new RemoteControlSettingsPresenter(context).appendRows(rows);
+    }
+
+    private void appendRows(SettingsRows settingsPresenter) {
         appendDeviceLinkSwitch(settingsPresenter);
         appendAddDeviceButton(settingsPresenter);
         appendRemoveAllDevicesButton(settingsPresenter);
         appendMiscCategory(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.settings_remote_control), this::unhold);
     }
 
-    private void appendDeviceLinkSwitch(AppDialogPresenter settingsPresenter) {
+    private void appendDeviceLinkSwitch(SettingsRows settingsPresenter) {
         settingsPresenter.appendSingleSwitch(UiOptionItem.from(getContext().getString(R.string.settings_remote_control), optionItem -> {
             // Remote link depends on background service
             mRemoteControlData.enableDeviceLink(optionItem.isSelected());
@@ -81,7 +91,7 @@ public class RemoteControlSettingsPresenter extends BasePresenter<Void> {
         }, mRemoteControlData.isDeviceLinkEnabled()));
     }
 
-    private void appendAddDeviceButton(AppDialogPresenter settingsPresenter) {
+    private void appendAddDeviceButton(SettingsRows settingsPresenter) {
         settingsPresenter.appendSingleButton(UiOptionItem.from(
                 getContext().getString(R.string.dialog_add_device), option -> {
                     mRemoteControlData.enableDeviceLink(true);
@@ -107,14 +117,14 @@ public class RemoteControlSettingsPresenter extends BasePresenter<Void> {
                 }));
     }
 
-    private void appendRemoveAllDevicesButton(AppDialogPresenter settingsPresenter) {
+    private void appendRemoveAllDevicesButton(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         OptionItem confirmItem = UiOptionItem.from(
                 getContext().getString(R.string.btn_confirm), option -> {
                     RxHelper.execute(mRemoteManager.resetDataObserve());
                     MessageHelpers.showMessage(getContext(), R.string.msg_done);
-                    settingsPresenter.closeDialog();
+                    AppDialogPresenter.instance(getContext()).closeDialog();
 
                     mRemoteControlData.enableDeviceLink(false);
                     Utils.updateRemoteControlService(getContext());
@@ -126,7 +136,7 @@ public class RemoteControlSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendStringsCategory(getContext().getString(R.string.dialog_remove_all_devices), options);
     }
 
-    private void appendMiscCategory(AppDialogPresenter settingsPresenter) {
+    private void appendMiscCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(UiOptionItem.from(getContext().getString(R.string.finish_on_disconnect),

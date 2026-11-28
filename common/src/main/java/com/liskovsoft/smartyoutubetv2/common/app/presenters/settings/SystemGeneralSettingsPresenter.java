@@ -37,29 +37,41 @@ public class SystemGeneralSettingsPresenter extends BasePresenter<Void> implemen
         List<SettingsItem> items = new ArrayList<>();
         items.add(new SettingsItem(context.getString(R.string.api_keys),
                 () -> GeneralSettingsPresenter.instance(context).showApiKeys(), R.drawable.settings_api_keys)
+                .setPanel(rows -> GeneralSettingsPresenter.instance(context).appendApiKeysRows(rows))
                 .setDescription(context.getString(R.string.card_desc_api_keys)));
         items.add(new SettingsItem(context.getString(R.string.category_background_playback),
-                () -> GeneralSettingsPresenter.instance(context).showBackgroundPlayback(), R.drawable.settings_background_playback));
+                () -> GeneralSettingsPresenter.instance(context).showBackgroundPlayback(), R.drawable.settings_background_playback)
+                .setPanel(rows -> GeneralSettingsPresenter.instance(context).appendBackgroundPlaybackRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.child_mode),
-                () -> GeneralSettingsPresenter.instance(context).showChildMode(), R.drawable.settings_child_mode));
+                () -> GeneralSettingsPresenter.instance(context).showChildMode(), R.drawable.settings_child_mode)
+                .setPanel(rows -> GeneralSettingsPresenter.instance(context).appendChildModeRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.settings_disable_options),
-                () -> GeneralSettingsPresenter.instance(context).showDisable(), R.drawable.settings_disable));
+                () -> GeneralSettingsPresenter.instance(context).showDisable(), R.drawable.settings_disable)
+                .setPanel(rows -> GeneralSettingsPresenter.instance(context).appendDisableRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.settings_exit_options),
-                () -> GeneralSettingsPresenter.instance(context).showExit(), R.drawable.settings_exit));
+                () -> GeneralSettingsPresenter.instance(context).showExit(), R.drawable.settings_exit)
+                .setPanel(rows -> GeneralSettingsPresenter.instance(context).appendExitRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.header_history),
-                () -> GeneralSettingsPresenter.instance(context).showHistory(), R.drawable.settings_history));
+                () -> GeneralSettingsPresenter.instance(context).showHistory(), R.drawable.settings_history)
+                .setPanel(rows -> GeneralSettingsPresenter.instance(context).appendHistoryRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.key_remapping),
-                () -> GeneralSettingsPresenter.instance(context).showKeyRemapping(), R.drawable.settings_key_remapping));
+                () -> GeneralSettingsPresenter.instance(context).showKeyRemapping(), R.drawable.settings_key_remapping)
+                .setPanel(rows -> GeneralSettingsPresenter.instance(context).appendKeyRemappingRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.settings_misc_options),
-                () -> GeneralSettingsPresenter.instance(context).showMisc(), R.drawable.settings_misc));
+                () -> GeneralSettingsPresenter.instance(context).showMisc(), R.drawable.settings_misc)
+                .setPanel(rows -> GeneralSettingsPresenter.instance(context).appendMiscRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.network_settings),
-                () -> GeneralSettingsPresenter.instance(context).showNetwork(), R.drawable.settings_network));
+                () -> GeneralSettingsPresenter.instance(context).showNetwork(), R.drawable.settings_network)
+                .setPanel(rows -> GeneralSettingsPresenter.instance(context).appendNetworkRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.settings_password_options),
-                () -> GeneralSettingsPresenter.instance(context).showPasswords(), R.drawable.settings_password));
+                () -> GeneralSettingsPresenter.instance(context).showPasswords(), R.drawable.settings_password)
+                .setPanel(rows -> GeneralSettingsPresenter.instance(context).appendPasswordsRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.settings_remember_options),
-                () -> GeneralSettingsPresenter.instance(context).showRemember(), R.drawable.settings_remember));
+                () -> GeneralSettingsPresenter.instance(context).showRemember(), R.drawable.settings_remember)
+                .setPanel(rows -> GeneralSettingsPresenter.instance(context).appendRememberRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.screen_dimming),
-                () -> GeneralSettingsPresenter.instance(context).showScreenDimming(), R.drawable.settings_screen_dimming));
+                () -> GeneralSettingsPresenter.instance(context).showScreenDimming(), R.drawable.settings_screen_dimming)
+                .setPanel(rows -> GeneralSettingsPresenter.instance(context).appendScreenDimmingRows(rows)));
 
         return items;
     }

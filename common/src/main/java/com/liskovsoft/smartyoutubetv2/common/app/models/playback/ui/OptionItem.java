@@ -1,5 +1,7 @@
 package com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui;
 
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsPanel;
+
 public interface OptionItem {
     int getId();
     CharSequence getTitle();
@@ -51,6 +53,14 @@ public interface OptionItem {
      */
     void setMenu(boolean isMenu);
     boolean isMenu();
+    /**
+     * Of a row that opens a menu: the rows of that menu, as it shows them (see SettingsPanel). Found by the settings search.
+     */
+    void setPanel(SettingsPanel panel);
+    /**
+     * @return null when none is set
+     */
+    SettingsPanel getPanel();
     /**
      * Show this item of a checked list as a switch instead of a checkbox
      */

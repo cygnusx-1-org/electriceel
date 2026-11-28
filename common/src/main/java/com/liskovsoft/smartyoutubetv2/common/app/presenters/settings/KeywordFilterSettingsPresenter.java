@@ -16,6 +16,7 @@ import com.liskovsoft.sharedutils.helpers.PermissionHelpers;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.sharedutils.rx.RxHelper;
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsRows;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.BrowseSection;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
@@ -75,8 +76,14 @@ public class KeywordFilterSettingsPresenter extends BasePresenter<Void> {
     }
 
     public void show() {
-        AppDialogPresenter presenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.keyword_filtering),
+                this::appendRows, null);
+    }
 
+    /**
+     * The rows of the panel show shows (see SettingsPanel)
+     */
+    public void appendRows(SettingsRows presenter) {
         List<OptionItem> options = new ArrayList<>();
         options.add(createMenuItem(R.string.keyword_filter_keywords, this::showKeywords));
         options.add(createMenuItem(R.string.keyword_filter_common, this::showCommonKeywords));
@@ -86,7 +93,6 @@ public class KeywordFilterSettingsPresenter extends BasePresenter<Void> {
 
         String title = getContext().getString(R.string.keyword_filtering);
         presenter.appendCheckedCategory(title, options);
-        presenter.showDialog(title);
     }
 
     /**

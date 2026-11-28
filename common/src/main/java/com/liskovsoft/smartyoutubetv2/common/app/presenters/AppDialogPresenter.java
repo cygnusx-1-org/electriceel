@@ -7,6 +7,8 @@ import android.os.Looper;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsPanel;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsRows;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionCategory;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
@@ -18,7 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class AppDialogPresenter extends BasePresenter<AppDialogView> {
+public class AppDialogPresenter extends BasePresenter<AppDialogView> implements SettingsRows {
     @SuppressLint("StaticFieldLeak")
     private static AppDialogPresenter sInstance;
     private final Handler mHandler;
@@ -36,6 +38,14 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
     private boolean mIsNestedTitlesEnabled;
     private OptionItem mFocusedItem;
     private boolean mIsReplace;
+    private ItemMatcher mFocusedItemMatcher;
+
+    /**
+     * A row of a dialog built by someone else, e.g. a setting the settings search opens
+     */
+    public interface ItemMatcher {
+        boolean matches(OptionCategory category, OptionItem item);
+    }
 
     private CharSequence mBackupTitle;
     private List<OptionCategory> mBackupCategories;
@@ -82,6 +92,7 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
         mBackupFocusedItem = null; // Same
         mOnStart.clear();
         mOnFinish.clear();
+        mFocusedItemMatcher = null;
     }
 
     /**
@@ -138,7 +149,22 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
         showDialog(null, onFinish);
     }
 
+    /**
+     * The rows of the panel, then the panel shown (see SettingsPanel)
+     */
+    public void showPanel(CharSequence dialogTitle, SettingsPanel panel, Runnable onFinish) {
+        panel.appendRows(this);
+        showDialog(dialogTitle, onFinish);
+    }
+
     public void showDialog(CharSequence dialogTitle, Runnable onFinish) {
+        if (mFocusedItem == null && mFocusedItemMatcher != null) {
+            mFocusedItem = findItem(mCategories, mFocusedItemMatcher);
+        }
+
+        // Of this dialog only
+        mFocusedItemMatcher = null;
+
         mTitle = dialogTitle;
         mOnFinish.add(onFinish);
         
@@ -174,8 +200,45 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
      * The row of the next dialog that has the focus when it opens, instead of the first one: e.g. the one opened last,
      * when the dialog is opened again after it. Of the items appended to it.
      */
+    @Override
     public void setFocusedItem(OptionItem item) {
         mFocusedItem = item;
+    }
+
+    /**
+     * The row of the next dialog that has the focus when it opens: the first item it matches, of the ones appended to it.
+     * For a dialog built by someone else (e.g. a setting the settings search opens), whose items are made when it's shown.
+     */
+    public void setFocusedItemMatcher(ItemMatcher matcher) {
+        mFocusedItemMatcher = matcher;
+    }
+
+    /**
+     * Forgets what was appended for a dialog that wasn't shown (e.g. a panel that failed while the settings search looked it
+     * through): the next dialog starts empty
+     */
+    public void clearPending() {
+        resetData();
+        mFocusedItemMatcher = null;
+    }
+
+    /**
+     * @return the first item it matches, null for none
+     */
+    public static OptionItem findItem(List<OptionCategory> categories, ItemMatcher matcher) {
+        for (OptionCategory category : categories) {
+            if (category.options == null) {
+                continue;
+            }
+
+            for (OptionItem item : category.options) {
+                if (matcher.matches(category, item)) {
+                    return item;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -252,64 +315,9 @@ public class AppDialogPresenter extends BasePresenter<AppDialogView> {
         return isDialogShown() && isTypeComments();
     }
 
+    @Override
     public void appendCategory(OptionCategory category) {
         mCategories.add(category);
-    }
-
-    public void appendRadioCategory(CharSequence categoryTitle, List<OptionItem> items) {
-        mCategories.add(OptionCategory.radioList(categoryTitle, items));
-    }
-
-    public void appendCheckedCategory(CharSequence categoryTitle, List<OptionItem> items) {
-        mCategories.add(OptionCategory.checkedList(categoryTitle, items));
-    }
-
-    /**
-     * Its items are moved up and down, see {@link OptionCategory#reorderList}
-     */
-    public void appendReorderCategory(CharSequence categoryTitle, List<OptionItem> items, OptionCategory.OnReorder onReorder) {
-        mCategories.add(OptionCategory.reorderList(categoryTitle, items, onReorder));
-    }
-
-    public void appendStringsCategory(CharSequence categoryTitle, List<OptionItem> items) {
-        mCategories.add(OptionCategory.stringList(categoryTitle, items));
-    }
-
-    public void appendLongTextCategory(CharSequence categoryTitle, OptionItem item) {
-        mCategories.add(OptionCategory.longText(categoryTitle, item));
-    }
-
-    /**
-     * @param isLinkified its addresses and time codes are links
-     */
-    public void appendLongTextCategory(CharSequence categoryTitle, OptionItem item, boolean isLinkified) {
-        mCategories.add(OptionCategory.longText(categoryTitle, item, isLinkified));
-    }
-
-    public void appendChatCategory(CharSequence categoryTitle, OptionItem item) {
-        mCategories.add(OptionCategory.chat(categoryTitle, item));
-    }
-
-    /**
-     * @param subtitle on its own line under the title (e.g. the number of comments), null for none
-     */
-    public void appendCommentsCategory(CharSequence categoryTitle, CharSequence subtitle, OptionItem item) {
-        mCategories.add(OptionCategory.comments(categoryTitle, subtitle, item));
-    }
-
-    public void appendSingleSwitch(OptionItem optionItem) {
-        mCategories.add(OptionCategory.singleSwitch(optionItem));
-    }
-
-    public void appendSingleButton(OptionItem optionItem) {
-        mCategories.add(OptionCategory.singleButton(optionItem));
-    }
-
-    /**
-     * A QR code of the text (e.g. an address) with its title above it
-     */
-    public void appendQrCode(CharSequence title, String text) {
-        mCategories.add(OptionCategory.qrCode(title, text));
     }
 
     public void showDialogMessage(String dialogTitle, Runnable onClose, int timeoutMs) {

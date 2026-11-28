@@ -24,6 +24,7 @@ import com.liskovsoft.sharedutils.okhttp.PreferredDns;
 import com.liskovsoft.sharedutils.okhttp.PublicDnsResolver;
 import com.liskovsoft.sharedutils.rx.RxHelper;
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsRows;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.manager.PlayerConstants;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionCategory;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
@@ -90,68 +91,92 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
      * The Background playback card of the System settings, in General (was in the General panel)
      */
     public void showBackgroundPlayback() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.category_background_playback),
+                this::appendBackgroundPlaybackRows, mOnFinish);
+    }
 
+    /**
+     * The rows of the panel showBackgroundPlayback shows (see SettingsPanel)
+     */
+    public void appendBackgroundPlaybackRows(SettingsRows settingsPresenter) {
         appendBackgroundPlaybackCategory(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.category_background_playback), mOnFinish);
     }
 
     /**
      * The Screen dimming card of the System settings, in General (was in the General panel)
      */
     public void showScreenDimming() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.screen_dimming),
+                this::appendScreenDimmingRows, mOnFinish);
+    }
 
+    /**
+     * The rows of the panel showScreenDimming shows (see SettingsPanel)
+     */
+    public void appendScreenDimmingRows(SettingsRows settingsPresenter) {
         appendScreenDimmingAmountCategory(settingsPresenter);
         appendScreenDimmingTimeoutCategory(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.screen_dimming), mOnFinish);
     }
 
     /**
      * The Key remapping card of the System settings, in General (was in the General panel)
      */
     public void showKeyRemapping() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.key_remapping),
+                this::appendKeyRemappingRows, mOnFinish);
+    }
 
+    /**
+     * The rows of the panel showKeyRemapping shows (see SettingsPanel)
+     */
+    public void appendKeyRemappingRows(SettingsRows settingsPresenter) {
         appendKeyRemappingCategory(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.key_remapping), mOnFinish);
     }
 
     /**
      * The Network settings card of the System settings, in General (was in the General panel)
      */
     public void showNetwork() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.network_settings),
+                this::appendNetworkRows, mOnFinish);
+    }
 
+    /**
+     * The rows of the panel showNetwork shows (see SettingsPanel)
+     */
+    public void appendNetworkRows(SettingsRows settingsPresenter) {
         appendInternetCensorship(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.network_settings), mOnFinish);
     }
 
     /**
      * The History card of the System settings, in General (was in the General panel)
      */
     public void showHistory() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.header_history),
+                this::appendHistoryRows, mOnFinish);
+    }
 
+    /**
+     * The rows of the panel showHistory shows (see SettingsPanel)
+     */
+    public void appendHistoryRows(SettingsRows settingsPresenter) {
         appendHistoryCategory(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.header_history), mOnFinish);
     }
 
     /**
      * The API keys card of the System settings, in General (was in the General panel)
      */
     public void showApiKeys() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.api_keys),
+                this::appendApiKeysRows, mOnFinish);
+    }
 
+    /**
+     * The rows of the panel showApiKeys shows (see SettingsPanel)
+     */
+    public void appendApiKeysRows(SettingsRows settingsPresenter) {
         appendDataApiKeySwitch(settingsPresenter);
         appendDataApiKeyButton(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.api_keys), mOnFinish);
     }
 
     /**
@@ -168,7 +193,18 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
      * @param focusedResId the title of the row that has the focus when it opens (the one just changed), 0 for the first row
      */
     private void showDns(int focusedResId) {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_dns),
+                rows -> appendDnsRows(rows, focusedResId), mOnFinish);
+    }
+
+    /**
+     * The rows of the DNS card (see SettingsPanel)
+     */
+    public void appendDnsRows(SettingsRows rows) {
+        appendDnsRows(rows, 0);
+    }
+
+    private void appendDnsRows(SettingsRows settingsPresenter, int focusedResId) {
         int dnsType = mPlayerTweaksData.getPreferredDnsType();
 
         appendDnsServer(settingsPresenter, focusedResId);
@@ -187,8 +223,6 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
 
         appendDnsCheck(settingsPresenter, focusedResId);
         appendDnsFix(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.settings_dns), mOnFinish);
     }
 
     /**
@@ -230,7 +264,7 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
      * One DNS: they were checkboxes of one setting, so two could look chosen at once (#93). A choice closes the list: the card is
      * built again with the rows of the server chosen.
      */
-    private void appendDnsServer(AppDialogPresenter settingsPresenter, int focusedResId) {
+    private void appendDnsServer(SettingsRows settingsPresenter, int focusedResId) {
         int[][] servers = {
                 {PlayerTweaksData.DNS_TYPE_SYSTEM, R.string.dns_system},
                 {PlayerTweaksData.DNS_TYPE_IPV4, R.string.dns_system_ipv4_first},
@@ -278,7 +312,7 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
      * Of the public DNS servers (the system's has its own). DNS-over-TLS isn't one: it's Android's Private DNS, for every app. A
      * choice closes the list, as the server's does: the custom server's rows are the protocol's.
      */
-    private void appendDnsProtocol(AppDialogPresenter settingsPresenter, int focusedResId) {
+    private void appendDnsProtocol(SettingsRows settingsPresenter, int focusedResId) {
         int protocol = mPlayerTweaksData.getPreferredDnsProtocol();
         List<OptionItem> options = new ArrayList<>();
 
@@ -305,7 +339,7 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
      * A public DNS over HTTPS: its URL, as a line of text, the server asked (as the check asks it). Its host's addresses aren't the
      * servers: only where the URL's host is.
      */
-    private void appendDohUrl(AppDialogPresenter settingsPresenter, int dnsType) {
+    private void appendDohUrl(SettingsRows settingsPresenter, int dnsType) {
         OptionItem item = UiOptionItem.from(getContext().getString(R.string.dns_doh_url),
                 getValueOrNotSet(PreferredDns.getDohUrl(dnsType)), option -> {});
         item.setNote(true);
@@ -315,7 +349,7 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
     /**
      * The servers asked, as lines of text (see getDnsAddresses): two at least, "Not set" without them, four at most
      */
-    private void appendDnsAddresses(AppDialogPresenter settingsPresenter, int dnsType) {
+    private void appendDnsAddresses(SettingsRows settingsPresenter, int dnsType) {
         List<String> addresses = getDnsAddresses(dnsType);
         int[] titles = {R.string.dns_primary_server, R.string.dns_secondary_server, R.string.dns_third_server, R.string.dns_fourth_server};
         int count = Math.max(2, Math.min(titles.length, addresses.size()));
@@ -422,26 +456,26 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
     /**
      * The custom server's: its addresses for plain DNS (typed on the number pad), its URL for DNS-over-HTTPS
      */
-    private void appendCustomDns(AppDialogPresenter settingsPresenter, int focusedResId) {
+    private void appendCustomDns(SettingsRows settingsPresenter, int focusedResId) {
         if (mPlayerTweaksData.getPreferredDnsProtocol() == PlayerTweaksData.DNS_PROTOCOL_DOH) {
             appendCustomDnsButton(settingsPresenter, R.string.dns_custom_doh_url, mPlayerTweaksData.getCustomDohUrl(), focusedResId,
-                    () -> showCustomDnsDialog(settingsPresenter, R.string.dns_custom_doh_url, R.string.dns_custom_doh_url_hint,
+                    () -> showCustomDnsDialog(AppDialogPresenter.instance(getContext()), R.string.dns_custom_doh_url, R.string.dns_custom_doh_url_hint,
                             mPlayerTweaksData.getCustomDohUrl(), mPlayerTweaksData::setCustomDohUrl, PublicDnsResolver::isDohUrl,
                             R.string.dns_invalid_doh_url, false));
             return;
         }
 
         appendCustomDnsButton(settingsPresenter, R.string.dns_custom_primary, mPlayerTweaksData.getCustomDnsPrimary(), focusedResId,
-                () -> showCustomDnsDialog(settingsPresenter, R.string.dns_custom_primary, R.string.dns_custom_address_hint,
+                () -> showCustomDnsDialog(AppDialogPresenter.instance(getContext()), R.string.dns_custom_primary, R.string.dns_custom_address_hint,
                         mPlayerTweaksData.getCustomDnsPrimary(), mPlayerTweaksData::setCustomDnsPrimary, PublicDnsResolver::isIpv4Address,
                         R.string.dns_invalid_address, true));
         appendCustomDnsButton(settingsPresenter, R.string.dns_custom_secondary, mPlayerTweaksData.getCustomDnsSecondary(), focusedResId,
-                () -> showCustomDnsDialog(settingsPresenter, R.string.dns_custom_secondary, R.string.dns_custom_address_hint,
+                () -> showCustomDnsDialog(AppDialogPresenter.instance(getContext()), R.string.dns_custom_secondary, R.string.dns_custom_address_hint,
                         mPlayerTweaksData.getCustomDnsSecondary(), mPlayerTweaksData::setCustomDnsSecondary, PublicDnsResolver::isIpv4Address,
                         R.string.dns_invalid_address, true));
     }
 
-    private void appendCustomDnsButton(AppDialogPresenter settingsPresenter, int titleResId, String value, int focusedResId,
+    private void appendCustomDnsButton(SettingsRows settingsPresenter, int titleResId, String value, int focusedResId,
                                        Runnable onClick) {
         OptionItem item = UiOptionItem.from(getContext().getString(titleResId), getValueOrNotSet(value), option -> onClick.run());
         settingsPresenter.appendSingleButton(item);
@@ -501,7 +535,7 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
      * SharedModules). Pressed: a line for each server in its place, a green check or a red cross before each as it answers or fails.
      * They stay while the settings are the ones checked (see getDnsCheckKey).
      */
-    private void appendDnsCheck(AppDialogPresenter settingsPresenter, int focusedResId) {
+    private void appendDnsCheck(SettingsRows settingsPresenter, int focusedResId) {
         CharSequence result = getDnsCheckKey().equals(mDnsCheckKey) ? mDnsCheckResult : null;
         OptionItem item = UiOptionItem.from(getContext().getString(R.string.dns_check),
                 result != null ? result : getContext().getString(R.string.dns_check_desc, DnsCheck.HOSTNAME), option -> startDnsCheck());
@@ -661,7 +695,7 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
         return address != null ? address.getHostAddress() : "";
     }
 
-    private void appendDnsFix(AppDialogPresenter settingsPresenter) {
+    private void appendDnsFix(SettingsRows settingsPresenter) {
         settingsPresenter.appendSingleSwitch(UiOptionItem.from(getContext().getString(R.string.dns_fix),
                 getContext().getString(R.string.dns_fix_desc),
                 option -> mPlayerTweaksData.setDnsFixEnabled(option.isSelected()),
@@ -672,28 +706,44 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
      * The Misc options card of the System settings, in General (was Misc in the General panel)
      */
     public void showMisc() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_misc_options),
+                this::appendMiscRows, mOnFinish);
+    }
 
+    /**
+     * The rows of the panel showMisc shows (see SettingsPanel)
+     */
+    public void appendMiscRows(SettingsRows settingsPresenter) {
         appendMiscCategory(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.settings_misc_options), mOnFinish);
     }
 
     /**
      * The Child mode card of the System settings, in General (was in Misc options)
      */
     public void showChildMode() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.child_mode),
+                this::appendChildModeRows, mOnFinish);
+    }
 
+    /**
+     * The rows of the panel showChildMode shows (see SettingsPanel)
+     */
+    public void appendChildModeRows(SettingsRows settingsPresenter) {
         appendChildModeCategory(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.child_mode), mOnFinish);
     }
 
     /**
      * The Remember options card of the System settings, in General (was in the General panel)
      */
     public void showRemember() {
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_remember_options),
+                this::appendRememberRows, mOnFinish);
+    }
+
+    /**
+     * The rows of the panel showRemember shows (see SettingsPanel)
+     */
+    public void appendRememberRows(SettingsRows rows) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(UiOptionItem.from(getContext().getString(R.string.remember_position_subscriptions),
@@ -704,13 +754,21 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
                 option -> mGeneralData.setRememberPinnedPositionEnabled(option.isSelected()),
                 mGeneralData.isRememberPinnedPositionEnabled()));
 
-        showOptions(R.string.settings_remember_options, options);
+        rows.appendCheckedCategory(getContext().getString(R.string.settings_remember_options), options);
     }
 
     /**
      * The Disable options card of the System settings, in General (was in the General panel)
      */
     public void showDisable() {
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_disable_options),
+                this::appendDisableRows, mOnFinish);
+    }
+
+    /**
+     * The rows of the panel showDisable shows (see SettingsPanel)
+     */
+    public void appendDisableRows(SettingsRows rows) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(UiOptionItem.from(getContext().getString(R.string.disable_screensaver),
@@ -723,29 +781,27 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
                 option -> mGeneralData.setOkButtonLongPressDisabled(option.isSelected()),
                 mGeneralData.isOkButtonLongPressDisabled()));
 
-        showOptions(R.string.settings_disable_options, options);
-    }
-
-    private void showOptions(int titleResId, List<OptionItem> options) {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
-
-        String title = getContext().getString(titleResId);
-        settingsPresenter.appendCheckedCategory(title, options);
-        settingsPresenter.showDialog(title, mOnFinish);
+        rows.appendCheckedCategory(getContext().getString(R.string.settings_disable_options), options);
     }
 
     /**
      * The Password options card of the System settings, in General (was in the General panel)
      */
     public void showPasswords() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_password_options),
+                this::appendPasswordsRows, mOnFinish);
+    }
 
+    /**
+     * The rows of the panel showPasswords shows (see SettingsPanel)
+     */
+    public void appendPasswordsRows(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(UiOptionItem.from(getContext().getString(R.string.protect_settings_with_password),
                 option -> {
                     if (option.isSelected()) {
-                        showPasswordDialog(settingsPresenter, null);
+                        showPasswordDialog(AppDialogPresenter.instance(getContext()), null);
                     } else {
                         mGeneralData.setSettingsPassword(null);
                     }
@@ -755,7 +811,7 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
         options.add(UiOptionItem.from(getContext().getString(R.string.enable_master_password),
                 option -> {
                     if (option.isSelected()) {
-                        showMasterPasswordDialog(settingsPresenter, null);
+                        showMasterPasswordDialog(AppDialogPresenter.instance(getContext()), null);
                     } else {
                         mGeneralData.setMasterPassword(null);
                     }
@@ -764,15 +820,20 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
 
         String title = getContext().getString(R.string.settings_password_options);
         settingsPresenter.appendCheckedCategory(title, options);
-        settingsPresenter.showDialog(title, mOnFinish);
     }
 
     /**
      * The Exit from options card of the System settings, in General (was in the General panel): one list, the app exit opens from it
      */
     public void showExit() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_exit_options),
+                this::appendExitRows, mOnFinish);
+    }
 
+    /**
+     * The rows of the panel showExit shows (see SettingsPanel)
+     */
+    public void appendExitRows(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         OptionItem appExit = UiOptionItem.from(getContext().getString(R.string.app_exit_shortcut), option -> showAppExitMenu());
@@ -789,7 +850,6 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
 
         String title = getContext().getString(R.string.settings_exit_options);
         settingsPresenter.appendCheckedCategory(title, options);
-        settingsPresenter.showDialog(title, mOnFinish);
     }
 
     private void showAppExitMenu() {
@@ -800,7 +860,7 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.showDialog(getContext().getString(R.string.app_exit_shortcut));
     }
 
-    private void appendAppExitCategory(AppDialogPresenter settingsPresenter) {
+    private void appendAppExitCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         for (int[] pair : new int[][] {
@@ -815,12 +875,12 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.app_exit_shortcut), options);
     }
 
-    private void appendBackgroundPlaybackCategory(AppDialogPresenter settingsPresenter) {
+    private void appendBackgroundPlaybackCategory(SettingsRows settingsPresenter) {
         OptionCategory category = AppDialogUtil.createBackgroundPlaybackCategory(getContext(), mPlayerData, mGeneralData);
         settingsPresenter.appendRadioCategory(category.title, category.options);
     }
 
-    private void appendKeyRemappingCategory(AppDialogPresenter settingsPresenter) {
+    private void appendKeyRemappingCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(UiOptionItem.from("OK -> " + getContext().getString(R.string.player_toggle_speed),
@@ -965,7 +1025,7 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendCheckedCategory(getContext().getString(R.string.key_remapping), options);
     }
 
-    private void appendScreenDimmingAmountCategory(AppDialogPresenter settingsPresenter) {
+    private void appendScreenDimmingAmountCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         int activeMode = mGeneralData.getScreensaverDimmingPercents();
@@ -988,7 +1048,7 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
     }
 
     @SuppressLint("StringFormatMatches")
-    private void appendScreenDimmingTimeoutCategory(AppDialogPresenter settingsPresenter) {
+    private void appendScreenDimmingTimeoutCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         int screensaverTimeoutMs = mGeneralData.getScreensaverTimeoutMs();
@@ -1017,7 +1077,7 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.screen_dimming_timeout), options);
     }
 
-    //private void appendTimeFormatCategory(AppDialogPresenter settingsPresenter) {
+    //private void appendTimeFormatCategory(SettingsRows settingsPresenter) {
     //    List<OptionItem> options = new ArrayList<>();
     //
     //    options.add(UiOptionItem.from(
@@ -1039,7 +1099,7 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
     //    settingsPresenter.appendRadioCategory(getContext().getString(R.string.time_format), options);
     //}
 
-    private void appendHistoryCategory(AppDialogPresenter settingsPresenter) {
+    private void appendHistoryCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         for (int[] pair : new int[][] {
@@ -1055,7 +1115,7 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.header_history), options);
     }
 
-    private void appendChildModeCategory(AppDialogPresenter settingsPresenter) {
+    private void appendChildModeCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(UiOptionItem.from(getContext().getString(R.string.child_mode),
@@ -1063,12 +1123,12 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
                 option -> {
                     if (option.isSelected()) {
                         AppDialogUtil.showConfirmationDialog(getContext(), getContext().getString(R.string.lost_setting_warning),
-                                () -> showPasswordDialog(settingsPresenter, () -> enableChildMode(option.isSelected())),
-                                settingsPresenter::closeDialog);
+                                () -> showPasswordDialog(AppDialogPresenter.instance(getContext()), () -> enableChildMode(option.isSelected())),
+                                () -> AppDialogPresenter.instance(getContext()).closeDialog());
                     } else {
                         mGeneralData.setSettingsPassword(null);
                         enableChildMode(option.isSelected());
-                        settingsPresenter.closeDialog();
+                        AppDialogPresenter.instance(getContext()).closeDialog();
                     }
                 },
                 mGeneralData.isChildModeEnabled()));
@@ -1076,7 +1136,7 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendCheckedCategory(getContext().getString(R.string.child_mode), options);
     }
 
-    private void appendMiscCategory(AppDialogPresenter settingsPresenter) {
+    private void appendMiscCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(UiOptionItem.from(getContext().getString(R.string.return_to_launcher),
@@ -1090,11 +1150,11 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendCheckedCategory(getContext().getString(R.string.settings_misc_options), options);
     }
 
-    private void appendDataApiKeySwitch(AppDialogPresenter settingsPresenter) {
+    private void appendDataApiKeySwitch(SettingsRows settingsPresenter) {
         settingsPresenter.appendSingleSwitch(UiOptionItem.from(getContext().getString(R.string.data_api_key),
                 option -> {
                     if (option.isSelected()) {
-                        showDataApiKeyDialog(settingsPresenter);
+                        showDataApiKeyDialog(AppDialogPresenter.instance(getContext()));
                     } else {
                         mMediaServiceData.setDataApiKey(null);
                     }
@@ -1105,12 +1165,12 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
     /**
      * Opens the key in the editor: the switch can only enter a new key or remove the current one
      */
-    private void appendDataApiKeyButton(AppDialogPresenter settingsPresenter) {
+    private void appendDataApiKeyButton(SettingsRows settingsPresenter) {
         settingsPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.data_api_key_change),
-                option -> showDataApiKeyDialog(settingsPresenter)));
+                option -> showDataApiKeyDialog(AppDialogPresenter.instance(getContext()))));
     }
 
-    private void appendInternetCensorship(AppDialogPresenter settingsPresenter) {
+    private void appendInternetCensorship(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         appendProxyManager(settingsPresenter, options);
@@ -1122,7 +1182,7 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendCheckedCategory(getContext().getString(R.string.network_settings), options);
     }
 
-    private void appendProxyManager(AppDialogPresenter settingsPresenter, List<OptionItem> options) {
+    private void appendProxyManager(SettingsRows settingsPresenter, List<OptionItem> options) {
         ProxyManager proxyManager = new ProxyManager(getContext());
 
         if (proxyManager.isProxySupported()) {
@@ -1134,7 +1194,7 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
                         mGeneralData.setProxyEnabled(option.isSelected());
                         new WebProxyDialog(getContext()).enable(option.isSelected());
                         if (option.isSelected()) {
-                            settingsPresenter.closeDialog();
+                            AppDialogPresenter.instance(getContext()).closeDialog();
                         }
 
                         OkHttpManager.unhold();
@@ -1143,7 +1203,7 @@ public class GeneralSettingsPresenter extends BasePresenter<Void> {
         }
     }
 
-    private void appendConscrypt(AppDialogPresenter settingsPresenter, List<OptionItem> options) {
+    private void appendConscrypt(SettingsRows settingsPresenter, List<OptionItem> options) {
         options.add(UiOptionItem.from(getContext().getString(R.string.enable_conscrypt),
                 getContext().getString(R.string.enable_conscrypt_desc),
                 option -> {

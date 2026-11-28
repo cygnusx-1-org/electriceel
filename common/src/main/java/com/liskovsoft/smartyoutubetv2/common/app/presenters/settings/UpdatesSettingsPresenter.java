@@ -9,6 +9,7 @@ import com.liskovsoft.appupdatechecker2.AppUpdateChecker;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.sharedutils.rx.RxHelper;
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsRows;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
@@ -58,6 +59,20 @@ public class UpdatesSettingsPresenter extends BasePresenter<Void> {
     private void show(boolean isReleaseNotesFocused) {
         AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
 
+        settingsPresenter.showPanel(getContext().getString(R.string.settings_updates),
+                rows -> appendRows(rows, isReleaseNotesFocused), 
+                null);
+        mIsNestedTitles = settingsPresenter.isNestedTitlesEnabled();
+    }
+
+    /**
+     * The rows of the panel (see SettingsPanel)
+     */
+    public void appendRows(SettingsRows rows) {
+        appendRows(rows, false);
+    }
+
+    private void appendRows(SettingsRows settingsPresenter, boolean isReleaseNotesFocused) {
         settingsPresenter.appendSingleSwitch(UiOptionItem.from(getContext().getString(R.string.check_updates_auto),
                 optionItem -> mUpdateChecker.setUpdateCheckEnabled(optionItem.isSelected()),
                 mUpdateChecker.isUpdateCheckEnabled()));
@@ -71,9 +86,6 @@ public class UpdatesSettingsPresenter extends BasePresenter<Void> {
         if (isReleaseNotesFocused) {
             settingsPresenter.setFocusedItem(releaseNotesItem);
         }
-
-        settingsPresenter.showDialog(getContext().getString(R.string.settings_updates));
-        mIsNestedTitles = settingsPresenter.isNestedTitlesEnabled();
     }
 
     private void loadReleases() {

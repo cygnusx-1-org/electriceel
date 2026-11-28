@@ -36,17 +36,21 @@ public class ContentFilteringSettingsPresenter extends BasePresenter<Void> imple
         List<SettingsItem> items = new ArrayList<>();
         items.add(new SettingsItem(context.getString(R.string.content_filtering_filtering),
                 () -> FilteringSettingsPresenter.instance(context).show(), R.drawable.settings_content_filtering)
+                .setPanel(rows -> FilteringSettingsPresenter.instance(context).appendRows(rows))
                 .setDescription(context.getString(R.string.card_desc_filtering)));
         items.add(new SettingsItem(context.getString(R.string.hide_unwanted_content),
                 () -> HideContentSettingsPresenter.instance(context).show(), R.drawable.settings_hide_content)
+                .setPanel(rows -> HideContentSettingsPresenter.instance(context).appendRows(rows))
                 .setDescription(context.getString(R.string.card_desc_hide_content)));
         items.add(new SettingsItem(context.getString(R.string.content_block_provider),
                 () -> SponsorBlockSettingsPresenter.instance(context).show(), R.drawable.settings_block)
+                .setPanel(rows -> SponsorBlockSettingsPresenter.instance(context).appendRows(rows))
                 .setDescription(context.getString(R.string.card_desc_sponsorblock))
                 .addLink(context.getString(R.string.about_sponsorblock), context.getString(R.string.content_block_provider_url))
                 .addLink(context.getString(R.string.content_block_status), context.getString(R.string.content_block_status_url)));
         items.add(new SettingsItem(context.getString(R.string.aislist_provider),
                 () -> AiSListSettingsPresenter.instance(context).show(), R.drawable.settings_aislist)
+                .setPanel(rows -> AiSListSettingsPresenter.instance(context).appendRows(rows))
                 .setDescription(context.getString(R.string.card_desc_aislist))
                 .addLink(context.getString(R.string.aislist_about), context.getString(R.string.aislist_provider_url)));
 

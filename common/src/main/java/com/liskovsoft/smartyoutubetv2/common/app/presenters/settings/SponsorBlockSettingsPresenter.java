@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import androidx.core.content.ContextCompat;
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsRows;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers.SponsorBlockController.SegmentAction;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionCategory;
@@ -35,8 +36,14 @@ public class SponsorBlockSettingsPresenter extends BasePresenter<Void> {
     }
 
     public void show(Runnable onFinish) {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.content_block_provider),
+                this::appendRows, onFinish);
+    }
 
+    /**
+     * The rows of the panel show shows (see SettingsPanel)
+     */
+    public void appendRows(SettingsRows settingsPresenter) {
         appendSponsorBlockSwitch(settingsPresenter);
         appendExcludeChannelButton(settingsPresenter);
         appendActionsCategory(settingsPresenter);
@@ -44,15 +51,13 @@ public class SponsorBlockSettingsPresenter extends BasePresenter<Void> {
         appendIgnoreShortSegmentsCategory(settingsPresenter);
         appendMiscCategory(settingsPresenter);
         appendLinks(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.content_block_provider), onFinish);
     }
 
     public void show() {
         show(null);
     }
 
-    private void appendSponsorBlockSwitch(AppDialogPresenter settingsPresenter) {
+    private void appendSponsorBlockSwitch(SettingsRows settingsPresenter) {
         Video video = null;
 
         if (getViewManager().getTopView() == PlaybackView.class) {
@@ -73,7 +78,7 @@ public class SponsorBlockSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendSingleSwitch(sponsorBlockOption);
     }
 
-    private void appendActionsCategory(AppDialogPresenter settingsPresenter) {
+    private void appendActionsCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         Set<SegmentAction> actions = mSponsorBlockData.getActions();
@@ -108,7 +113,7 @@ public class SponsorBlockSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendStringsCategory(getContext().getString(R.string.content_block_action_type), options);
     }
 
-    private void appendColorMarkersCategory(AppDialogPresenter settingsPresenter) {
+    private void appendColorMarkersCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         for (String segmentCategory : mSponsorBlockData.getAllCategories()) {
@@ -126,12 +131,12 @@ public class SponsorBlockSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendCheckedCategory(getContext().getString(R.string.sponsor_color_markers), options);
     }
 
-    private void appendIgnoreShortSegmentsCategory(AppDialogPresenter settingsPresenter) {
+    private void appendIgnoreShortSegmentsCategory(SettingsRows settingsPresenter) {
         OptionCategory category = AppDialogUtil.createIgnoreShortSegmentsCategory(getContext());
         settingsPresenter.appendCategory(category);
     }
 
-    private void appendLinks(AppDialogPresenter settingsPresenter) {
+    private void appendLinks(SettingsRows settingsPresenter) {
         OptionItem statsCheckOption = UiOptionItem.from(getContext().getString(R.string.content_block_status),
                 option -> Utils.openLink(getContext(), getContext().getString(R.string.content_block_status_url)));
 
@@ -142,7 +147,7 @@ public class SponsorBlockSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendSingleButton(webSiteOption);
     }
 
-    private void appendMiscCategory(AppDialogPresenter settingsPresenter) {
+    private void appendMiscCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
         
         options.add(UiOptionItem.from(getContext().getString(R.string.paid_content_notification),
@@ -161,14 +166,15 @@ public class SponsorBlockSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendCheckedCategory(getContext().getString(R.string.player_other), options);
     }
 
-    private void appendExcludeChannelButton(AppDialogPresenter settingsPresenter) {
+    private void appendExcludeChannelButton(SettingsRows settingsPresenter) {
         Video video = PlaybackPresenter.instance(getContext()).getVideo();
 
         if (video == null || getViewManager().getTopView() != PlaybackView.class) {
             return;
         }
 
-        settingsPresenter.appendSingleButton(AppDialogUtil.createExcludeFromContentBlockButton(getContext(), video, MediaServiceManager.instance(), settingsPresenter::closeDialog));
+        settingsPresenter.appendSingleButton(AppDialogUtil.createExcludeFromContentBlockButton(getContext(), video, MediaServiceManager.instance(),
+                () -> AppDialogPresenter.instance(getContext()).closeDialog()));
     }
 
     private CharSequence getColoredString(int strResId, int colorResId) {

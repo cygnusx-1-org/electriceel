@@ -1227,4 +1227,8 @@
     <string name="card_desc_api_keys">Vaš vlastiti ključ za YouTube Data API, potreban za automatsku reprodukciju glazbe te za skrivanje ili označavanje videozapisa po kategoriji (glazba, igre, vijesti…) na Početnoj</string>
     <string name="card_desc_dns">Mijenja način na koji aplikacija pronalazi YouTubeove poslužitelje. Može pomoći kada se aplikacija uopće ne učitava.</string>
     <string name="card_desc_remote_control">Uparuje telefon ili tablet kako bi njegova aplikacija YouTube mogla upravljati reprodukcijom na ovom televizoru</string>
+    <!-- Settings search -->
+    <string name="find_setting">Pretraži postavke</string>
+    <string name="find_setting_none">Nijedna postavka ne odgovara „%s”</string>
+    <string name="find_setting_gone">Ova postavka više ne postoji. Pretražite ponovno.</string>
 </resources>

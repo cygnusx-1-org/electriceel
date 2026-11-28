@@ -1210,4 +1210,8 @@
     <string name="card_desc_api_keys">Sua própria chave da YouTube Data API, necessária para a reprodução automática de música e para ocultar ou marcar vídeos por categoria (música, jogos, notícias…) no Início</string>
     <string name="card_desc_dns">Muda como o aplicativo encontra os servidores do YouTube. Pode ajudar quando o aplicativo não carrega de jeito nenhum.</string>
     <string name="card_desc_remote_control">Pareia um celular ou tablet para que o aplicativo do YouTube nele controle a reprodução nesta TV</string>
+    <!-- Settings search -->
+    <string name="find_setting">Pesquisar configurações</string>
+    <string name="find_setting_none">Nenhuma configuração corresponde a \"%s\"</string>
+    <string name="find_setting_gone">Esta configuração não existe mais. Pesquise novamente.</string>
 </resources>

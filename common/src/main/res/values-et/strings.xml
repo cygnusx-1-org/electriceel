@@ -1210,4 +1210,8 @@
     <string name="card_desc_api_keys">Sinu enda YouTube Data API võti, mida on vaja muusika automaatesituseks ning videote peitmiseks või märkimiseks kategooria järgi (muusika, mängud, uudised…) Avalehel</string>
     <string name="card_desc_dns">Muudab, kuidas rakendus YouTube\'i serverid leiab. Võib aidata, kui rakendus üldse ei laadi.</string>
     <string name="card_desc_remote_control">Seob telefoni või tahvelarvuti, et selle YouTube\'i rakendus saaks selle teleri taasesitust juhtida</string>
+    <!-- Settings search -->
+    <string name="find_setting">Otsi seadetest</string>
+    <string name="find_setting_none">Ükski seade ei vasta otsingule „%s“</string>
+    <string name="find_setting_gone">Seda seadet pole enam. Otsige uuesti.</string>
 </resources>

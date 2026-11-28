@@ -1210,4 +1210,8 @@
     <string name="card_desc_api_keys">Oma YouTube Data API -avaimesi, jota tarvitaan musiikin automaattiseen toistoon sekä videoiden piilottamiseen tai merkitsemiseen luokan mukaan (musiikki, pelit, uutiset…) Kodissa</string>
     <string name="card_desc_dns">Muuttaa tapaa, jolla sovellus löytää YouTuben palvelimet. Voi auttaa, kun sovellus ei lataudu lainkaan.</string>
     <string name="card_desc_remote_control">Muodostaa pariliitoksen puhelimeen tai tablettiin, jotta sen YouTube-sovellus voi ohjata toistoa tässä televisiossa</string>
+    <!-- Settings search -->
+    <string name="find_setting">Hae asetuksista</string>
+    <string name="find_setting_none">Mikään asetus ei vastaa hakua \"%s\"</string>
+    <string name="find_setting_gone">Tätä asetusta ei ole enää. Hae uudelleen.</string>
 </resources>

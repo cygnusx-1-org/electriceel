@@ -1210,4 +1210,8 @@
     <string name="card_desc_api_keys">Ihr eigener YouTube Data API-Schlüssel, nötig für Musik-Autoplay und um Videos auf Start nach Kategorie (Musik, Gaming, Nachrichten…) auszublenden oder zu markieren</string>
     <string name="card_desc_dns">Ändert, wie die App die Server von YouTube findet. Kann helfen, wenn die App gar nicht lädt.</string>
     <string name="card_desc_remote_control">Koppelt ein Smartphone oder Tablet, damit dessen YouTube-App die Wiedergabe auf diesem Fernseher steuern kann</string>
+    <!-- Settings search -->
+    <string name="find_setting">Einstellungen durchsuchen</string>
+    <string name="find_setting_none">Keine Einstellung passt zu „%s“</string>
+    <string name="find_setting_gone">Diese Einstellung gibt es nicht mehr. Bitte erneut suchen.</string>
 </resources>

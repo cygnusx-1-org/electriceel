@@ -1210,4 +1210,8 @@
     <string name="card_desc_api_keys">Kendi YouTube Data API anahtarınız; müzik otomatik oynatma ve Ana Sayfa\'da videoları kategoriye (müzik, oyun, haberler…) göre gizlemek veya işaretlemek için gerekir</string>
     <string name="card_desc_dns">Uygulamanın YouTube sunucularını nasıl bulduğunu değiştirir. Uygulama hiç yüklenmediğinde yardımcı olabilir.</string>
     <string name="card_desc_remote_control">Bir telefon veya tableti eşler, böylece üzerindeki YouTube uygulaması bu TV\'deki oynatmayı kontrol edebilir</string>
+    <!-- Settings search -->
+    <string name="find_setting">Ayarlarda ara</string>
+    <string name="find_setting_none">\"%s\" ile eşleşen ayar yok</string>
+    <string name="find_setting_gone">Bu ayar artık yok. Tekrar arayın.</string>
 </resources>

@@ -1,5 +1,7 @@
 package com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui;
 
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsPanel;
+
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
 
 import java.util.ArrayList;
@@ -21,6 +23,7 @@ public class UiOptionItem implements OptionItem {
     private boolean mIsSeparator;
     private boolean mIsLabel;
     private boolean mIsMenu;
+    private SettingsPanel mPanel;
     private boolean mIsToggle;
     private OptionItem[] mSelectAllItems;
     private ChatReceiver mChatReceiver;
@@ -259,6 +262,16 @@ public class UiOptionItem implements OptionItem {
     @Override
     public boolean isMenu() {
         return mIsMenu;
+    }
+
+    @Override
+    public void setPanel(SettingsPanel panel) {
+        mPanel = panel;
+    }
+
+    @Override
+    public SettingsPanel getPanel() {
+        return mPanel;
     }
 
     @Override

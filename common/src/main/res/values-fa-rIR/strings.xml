@@ -1210,4 +1210,8 @@
     <string name="card_desc_api_keys">کلید YouTube Data API خودتان، لازم برای پخش خودکار موسیقی و پنهان یا علامت‌گذاری کردن ویدیوها بر اساس دسته (موسیقی، بازی، اخبار…) در خانه</string>
     <string name="card_desc_dns">نحوهٔ پیدا کردن سرورهای YouTube توسط برنامه را تغییر می‌دهد. وقتی برنامه اصلاً بارگیری نمی‌شود ممکن است کمک کند.</string>
     <string name="card_desc_remote_control">یک تلفن یا تبلت را جفت می‌کند تا برنامهٔ YouTube آن بتواند پخش را روی این تلویزیون کنترل کند</string>
+    <!-- Settings search -->
+    <string name="find_setting">جستجو در تنظیمات</string>
+    <string name="find_setting_none">هیچ تنظیمی با «%s» مطابقت ندارد</string>
+    <string name="find_setting_gone">این تنظیم دیگر وجود ندارد. دوباره جستجو کنید.</string>
 </resources>

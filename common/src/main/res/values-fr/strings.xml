@@ -1210,4 +1210,8 @@
     <string name="card_desc_api_keys">Votre propre clé YouTube Data API, nécessaire pour la lecture auto de la musique et pour masquer ou marquer les vidéos par catégorie (musique, jeux, actualités…) dans l\'Accueil</string>
     <string name="card_desc_dns">Change la façon dont l\'application trouve les serveurs de YouTube. Peut aider quand l\'application ne se charge pas du tout.</string>
     <string name="card_desc_remote_control">Associe un téléphone ou une tablette pour que son application YouTube contrôle la lecture sur ce téléviseur</string>
+    <!-- Settings search -->
+    <string name="find_setting">Rechercher dans les paramètres</string>
+    <string name="find_setting_none">Aucun paramètre ne correspond à « %s »</string>
+    <string name="find_setting_gone">Ce paramètre n\'existe plus. Recherchez à nouveau.</string>
 </resources>

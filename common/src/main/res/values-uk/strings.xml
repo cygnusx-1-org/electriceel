@@ -1243,4 +1243,8 @@
     <string name="card_desc_api_keys">Ваш власний ключ YouTube Data API, потрібний для автовідтворення музики та щоб приховувати або позначати відео за категорією (музика, ігри, новини…) на Головній</string>
     <string name="card_desc_dns">Змінює спосіб, у який застосунок знаходить сервери YouTube. Може допомогти, коли застосунок взагалі не завантажується.</string>
     <string name="card_desc_remote_control">Поєднує телефон або планшет, щоб його застосунок YouTube міг керувати відтворенням на цьому телевізорі</string>
+    <!-- Settings search -->
+    <string name="find_setting">Пошук у налаштуваннях</string>
+    <string name="find_setting_none">Немає налаштувань, що відповідають «%s»</string>
+    <string name="find_setting_gone">Цього налаштування більше немає. Повторіть пошук.</string>
 </resources>

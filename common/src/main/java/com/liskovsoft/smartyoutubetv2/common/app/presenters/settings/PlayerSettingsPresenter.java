@@ -7,6 +7,7 @@ import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.sharedutils.prefs.GlobalPreferences;
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsRows;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionCategory;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
@@ -63,21 +64,45 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
      * The Playback mode card of the Player settings, in General (was in the General panel)
      */
     public void showPlaybackMode() {
-        showCategory(R.string.action_repeat_mode, this::appendPlaybackModeCategory);
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.action_repeat_mode),
+                this::appendPlaybackModeRows, mOnFinish);
+    }
+
+    /**
+     * The rows of the panel showPlaybackMode shows (see SettingsPanel)
+     */
+    public void appendPlaybackModeRows(SettingsRows rows) {
+        appendPlaybackModeCategory(rows);
     }
 
     /**
      * The Music autoplay card of the Player settings, in General. Plays on from a music video where the playback mode stops.
      */
     public void showMusicAutoplay() {
-        showCategory(R.string.music_autoplay, this::appendMusicAutoplayCategory);
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.music_autoplay),
+                this::appendMusicAutoplayRows, mOnFinish);
+    }
+
+    /**
+     * The rows of the panel showMusicAutoplay shows (see SettingsPanel)
+     */
+    public void appendMusicAutoplayRows(SettingsRows rows) {
+        appendMusicAutoplayCategory(rows);
     }
 
     /**
      * The Network engine card of the Player settings, in General (was in the General panel)
      */
     public void showNetworkEngine() {
-        showCategory(R.string.player_network_stack, this::appendNetworkEngineCategory);
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.player_network_stack),
+                this::appendNetworkEngineRows, mOnFinish);
+    }
+
+    /**
+     * The rows of the panel showNetworkEngine shows (see SettingsPanel)
+     */
+    public void appendNetworkEngineRows(SettingsRows rows) {
+        appendNetworkEngineCategory(rows);
     }
 
     /**
@@ -85,77 +110,111 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
      * video, until one plays
      */
     public void showClientOrder() {
-        showCategory(R.string.client_order, this::appendClientOrderCategory);
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.client_order),
+                this::appendClientOrderRows, mOnFinish);
+    }
+
+    /**
+     * The rows of the panel showClientOrder shows (see SettingsPanel)
+     */
+    public void appendClientOrderRows(SettingsRows rows) {
+        appendClientOrderCategory(rows);
     }
 
     /**
      * The Auto-hide UI card of the Player settings, in General (was in the General panel)
      */
     public void showUIAutoHide() {
-        showCategory(R.string.player_ui_hide_behavior, this::appendUIAutoHideCategory);
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.player_ui_hide_behavior),
+                this::appendUIAutoHideRows, mOnFinish);
+    }
+
+    /**
+     * The rows of the panel showUIAutoHide shows (see SettingsPanel)
+     */
+    public void appendUIAutoHideRows(SettingsRows rows) {
+        appendUIAutoHideCategory(rows);
     }
 
     /**
      * The Pixel ratio card of the Player settings, in General (was in the General panel)
      */
     public void showPixelRatio() {
-        showCategory(R.string.player_pixel_ratio, this::appendPixelRatioCategory);
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.player_pixel_ratio),
+                this::appendPixelRatioRows, mOnFinish);
+    }
+
+    /**
+     * The rows of the panel showPixelRatio shows (see SettingsPanel)
+     */
+    public void appendPixelRatioRows(SettingsRows rows) {
+        appendPixelRatioCategory(rows);
     }
 
     /**
      * The Sleep timer card of the Player settings, in General (was in the General panel)
      */
     public void showSleepTimer() {
-        showCategory(R.string.player_sleep_timer, this::appendSleepTimerCategory);
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.player_sleep_timer),
+                this::appendSleepTimerRows, mOnFinish);
     }
 
-    private interface CategoryAppender {
-        void append(AppDialogPresenter settingsPresenter);
-    }
-
-    private void showCategory(int titleResId, CategoryAppender appender) {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
-
-        appender.append(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(titleResId), mOnFinish);
+    /**
+     * The rows of the panel showSleepTimer shows (see SettingsPanel)
+     */
+    public void appendSleepTimerRows(SettingsRows rows) {
+        appendSleepTimerCategory(rows);
     }
 
     /**
      * The Video card of the Player settings (was in General)
      */
     public void showVideo() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_video),
+                this::appendVideoRows, mOnFinish);
+    }
 
+    /**
+     * The rows of the panel showVideo shows (see SettingsPanel)
+     */
+    public void appendVideoRows(SettingsRows settingsPresenter) {
         appendVideoPresetsCategory(settingsPresenter);
         appendVideoBufferCategory(settingsPresenter);
         appendVideoZoomCategory(settingsPresenter);
         appendVideoSpeedCategory(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.settings_video), mOnFinish);
     }
 
     /**
      * The Audio card of the Player settings (was in General and its Misc)
      */
     public void showAudio() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_audio),
+                this::appendAudioRows, mOnFinish);
+    }
 
+    /**
+     * The rows of the panel showAudio shows (see SettingsPanel)
+     */
+    public void appendAudioRows(SettingsRows settingsPresenter) {
         appendAudioFormatsCategory(settingsPresenter);
         appendAudioLanguageCategory(settingsPresenter);
         appendAudioDelayCategory(settingsPresenter);
         appendMasterVolumeCategory(settingsPresenter);
         appendAudioOptionsCategory(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.settings_audio), mOnFinish);
     }
 
     /**
      * The Show options card of the Player settings: what the controls show (was in General and its Misc)
      */
     public void showShows() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_show_options),
+                this::appendShowsRows, mOnFinish);
+    }
 
+    /**
+     * The rows of the panel showShows shows (see SettingsPanel)
+     */
+    public void appendShowsRows(SettingsRows settingsPresenter) {
         appendEndingTimeCategory(settingsPresenter);
 
         List<OptionItem> options = new ArrayList<>();
@@ -191,16 +250,20 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
                 infoCardData.isShowEnabled()));
 
         settingsPresenter.appendCheckedCategory(getContext().getString(R.string.settings_show_options), options);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.settings_show_options), mOnFinish);
     }
 
     /**
      * The Place to the left card of the Player settings, in General: chat and comments on the left (was in Misc)
      */
     public void showPlaces() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_places),
+                this::appendPlacesRows, mOnFinish);
+    }
 
+    /**
+     * The rows of the panel showPlaces shows (see SettingsPanel)
+     */
+    public void appendPlacesRows(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(UiOptionItem.from(getContext().getString(R.string.place_chat_left),
@@ -213,13 +276,20 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
 
         String title = getContext().getString(R.string.settings_places);
         settingsPresenter.appendCheckedCategory(title, options);
-        settingsPresenter.showDialog(title, mOnFinish);
     }
 
     /**
      * The Disable options card of the Player settings (was in General: Misc and Developer options)
      */
     public void showDisables() {
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_disable_options),
+                this::appendDisablesRows, mOnFinish);
+    }
+
+    /**
+     * The rows of the panel showDisables shows (see SettingsPanel)
+     */
+    public void appendDisablesRows(SettingsRows rows) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(UiOptionItem.from(getContext().getString(R.string.player_disable_suggestions),
@@ -254,13 +324,21 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
                 },
                 !GlobalPreferences.instance(getContext()).isChannelsServiceEnabled()));
 
-        showCheckedList(R.string.settings_disable_options, options);
+        rows.appendCheckedCategory(getContext().getString(R.string.settings_disable_options), options);
     }
 
     /**
      * The Unlock options card of the Player settings (was in General: Misc and Developer options)
      */
     public void showUnlocks() {
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_unlock_options),
+                this::appendUnlocksRows, mOnFinish);
+    }
+
+    /**
+     * The rows of the panel showUnlocks shows (see SettingsPanel)
+     */
+    public void appendUnlocksRows(SettingsRows rows) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(UiOptionItem.from(getContext().getString(R.string.unlock_high_bitrate_formats) + " " + TrackSelectorUtil.HIGH_BITRATE_MARK,
@@ -272,13 +350,21 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
                 option -> mPlayerTweaksData.setAllFormatsUnlocked(option.isSelected()),
                 mPlayerTweaksData.isAllFormatsUnlocked()));
 
-        showCheckedList(R.string.settings_unlock_options, options);
+        rows.appendCheckedCategory(getContext().getString(R.string.settings_unlock_options), options);
     }
 
     /**
      * The Frame options card of the Player settings (was in General: Misc and Developer options)
      */
     public void showFrameDrops() {
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_frame_options),
+                this::appendFrameDropsRows, mOnFinish);
+    }
+
+    /**
+     * The rows of the panel showFrameDrops shows (see SettingsPanel)
+     */
+    public void appendFrameDropsRows(SettingsRows rows) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(UiOptionItem.from(getContext().getString(R.string.amlogic_fix),
@@ -296,13 +382,21 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
                 option -> mPlayerTweaksData.setAmazonFrameDropFixEnabled(option.isSelected()),
                 mPlayerTweaksData.isAmazonFrameDropFixEnabled()));
 
-        showCheckedList(R.string.settings_frame_options, options);
+        rows.appendCheckedCategory(getContext().getString(R.string.settings_frame_options), options);
     }
 
     /**
      * The Fix options card of the Player settings (was in General: Misc and Developer options)
      */
     public void showFixes() {
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_fix_options),
+                this::appendFixesRows, mOnFinish);
+    }
+
+    /**
+     * The rows of the panel showFixes shows (see SettingsPanel)
+     */
+    public void appendFixesRows(SettingsRows rows) {
         List<OptionItem> options = new ArrayList<>();
 
         // Oculus Quest fix: back button not closing the activity
@@ -342,49 +436,67 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
                 option -> mMediaServiceData.setLegacyUIEnabled(option.isSelected()),
                 mMediaServiceData.isLegacyUIEnabled()));
 
-        showCheckedList(R.string.settings_fix_options, options);
+        rows.appendCheckedCategory(getContext().getString(R.string.settings_fix_options), options);
     }
 
     /**
      * The Button options card of the Player settings, in General: the player buttons and what OK does (was in General)
      */
     public void showButtons() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_button_options),
+                this::appendButtonsRows, mOnFinish);
+    }
 
+    /**
+     * The rows of the panel showButtons shows (see SettingsPanel)
+     */
+    public void appendButtonsRows(SettingsRows settingsPresenter) {
         appendPlayerButtonsCategory(settingsPresenter);
         appendOKButtonCategory(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.settings_button_options), mOnFinish);
     }
 
     /**
      * The Misc options card of the Player settings, in General (was Misc in General)
      */
     public void showMisc() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_misc_options),
+                this::appendMiscRows, mOnFinish);
+    }
 
+    /**
+     * The rows of the panel showMisc shows (see SettingsPanel)
+     */
+    public void appendMiscRows(SettingsRows settingsPresenter) {
         appendMiscCategory(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.settings_misc_options), mOnFinish);
     }
 
     /**
      * The Developer options card of the Player settings, in General (was Developer options in General)
      */
     public void showDeveloper() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.player_tweaks),
+                this::appendDeveloperRows, mOnFinish);
+    }
 
+    /**
+     * The rows of the panel showDeveloper shows (see SettingsPanel)
+     */
+    public void appendDeveloperRows(SettingsRows settingsPresenter) {
         appendDeveloperCategory(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.player_tweaks), mOnFinish);
     }
 
     /**
      * The Seek options card of the Player settings (was in General and its Misc)
      */
     public void showSeeks() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_seek_options),
+                this::appendSeeksRows, mOnFinish);
+    }
 
+    /**
+     * The rows of the panel showSeeks shows (see SettingsPanel)
+     */
+    public void appendSeeksRows(SettingsRows settingsPresenter) {
         appendSeekTypeCategory(settingsPresenter);
         appendSeekingPreviewCategory(settingsPresenter);
         AppDialogUtil.appendSeekIntervalDialogItems(getContext(), settingsPresenter, mPlayerData, false);
@@ -393,19 +505,9 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendSingleSwitch(UiOptionItem.from(getContext().getString(R.string.player_number_key_seek),
                 option -> mPlayerData.setNumberKeySeekEnabled(option.isSelected()),
                 mPlayerData.isNumberKeySeekEnabled()));
-
-        settingsPresenter.showDialog(getContext().getString(R.string.settings_seek_options), mOnFinish);
     }
 
-    private void showCheckedList(int titleResId, List<OptionItem> options) {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
-
-        String title = getContext().getString(titleResId);
-        settingsPresenter.appendCheckedCategory(title, options);
-        settingsPresenter.showDialog(title, mOnFinish);
-    }
-
-    private void appendAudioOptionsCategory(AppDialogPresenter settingsPresenter) {
+    private void appendAudioOptionsCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(UiOptionItem.from(getContext().getString(R.string.player_audio_focus),
@@ -433,7 +535,7 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendCheckedCategory(getContext().getString(R.string.settings_audio), options);
     }
 
-    private void appendOKButtonCategory(AppDialogPresenter settingsPresenter) {
+    private void appendOKButtonCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(UiOptionItem.from(
@@ -460,7 +562,7 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
     }
 
     @SuppressLint("StringFormatMatches")
-    private void appendUIAutoHideCategory(AppDialogPresenter settingsPresenter) {
+    private void appendUIAutoHideCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(UiOptionItem.from(
@@ -479,42 +581,42 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.player_ui_hide_behavior), options);
     }
 
-    private void appendVideoBufferCategory(AppDialogPresenter settingsPresenter) {
+    private void appendVideoBufferCategory(SettingsRows settingsPresenter) {
         OptionCategory category = AppDialogUtil.createVideoBufferCategory(getContext());
         settingsPresenter.appendCategory(category);
     }
 
-    private void appendVideoPresetsCategory(AppDialogPresenter settingsPresenter) {
+    private void appendVideoPresetsCategory(SettingsRows settingsPresenter) {
         OptionCategory category = AppDialogUtil.createVideoPresetsCategory(getContext());
         settingsPresenter.appendCategory(category);
     }
 
-    private void appendVideoZoomCategory(AppDialogPresenter settingsPresenter) {
+    private void appendVideoZoomCategory(SettingsRows settingsPresenter) {
         OptionCategory category = AppDialogUtil.createVideoZoomCategory(getContext());
         settingsPresenter.appendCategory(category);
     }
 
-    private void appendAudioFormatsCategory(AppDialogPresenter settingsPresenter) {
+    private void appendAudioFormatsCategory(SettingsRows settingsPresenter) {
         OptionCategory category = AppDialogUtil.createAudioFormatsCategory(getContext());
         settingsPresenter.appendCategory(category);
     }
 
-    private void appendAudioLanguageCategory(AppDialogPresenter settingsPresenter) {
+    private void appendAudioLanguageCategory(SettingsRows settingsPresenter) {
         OptionCategory category = AppDialogUtil.createAudioLanguageCategory(getContext());
         settingsPresenter.appendCategory(category);
     }
 
-    private void appendAudioDelayCategory(AppDialogPresenter settingsPresenter) {
+    private void appendAudioDelayCategory(SettingsRows settingsPresenter) {
         OptionCategory category = AppDialogUtil.createAudioDelayCategory(getContext());
         settingsPresenter.appendCategory(category);
     }
 
-    private void appendMasterVolumeCategory(AppDialogPresenter settingsPresenter) {
+    private void appendMasterVolumeCategory(SettingsRows settingsPresenter) {
         OptionCategory category = AppDialogUtil.createAudioVolumeCategory(getContext());
         settingsPresenter.appendCategory(category);
     }
 
-    private void appendSeekingPreviewCategory(AppDialogPresenter settingsPresenter) {
+    private void appendSeekingPreviewCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         for (int[] pair : new int[][] {
@@ -530,13 +632,13 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.player_seek_preview), options);
     }
 
-    private void appendRememberSpeedCategory(AppDialogPresenter settingsPresenter) {
+    private void appendRememberSpeedCategory(SettingsRows settingsPresenter) {
         OptionCategory category = AppDialogUtil.createRememberSpeedCategory(getContext());
 
         settingsPresenter.appendRadioCategory(category.title, category.options);
     }
 
-    private void appendVideoSpeedCategory(AppDialogPresenter settingsPresenter) {
+    private void appendVideoSpeedCategory(SettingsRows settingsPresenter) {
         settingsPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.video_speed), optionItem -> {
             AppDialogPresenter settingsPresenter2 = AppDialogPresenter.instance(getContext());
             settingsPresenter2.appendCategory(AppDialogUtil.createSpeedListCategory(getContext(), null));
@@ -546,13 +648,13 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
         }));
     }
 
-    private void appendScreenOffTimeoutCategory(AppDialogPresenter settingsPresenter) {
+    private void appendScreenOffTimeoutCategory(SettingsRows settingsPresenter) {
         OptionCategory category = AppDialogUtil.createPlayerScreenOffTimeoutCategory(getContext(), null);
 
         settingsPresenter.appendRadioCategory(category.title, category.options);
     }
 
-    private void appendPlayerButtonsCategory(AppDialogPresenter settingsPresenter) {
+    private void appendPlayerButtonsCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         for (long[] pair : new long[][] {
@@ -599,7 +701,7 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendCheckedCategory(getContext().getString(R.string.player_buttons), options);
     }
 
-    private void appendSeekTypeCategory(AppDialogPresenter settingsPresenter) {
+    private void appendSeekTypeCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(UiOptionItem.from(getContext().getString(R.string.player_seek_regular),
@@ -626,7 +728,7 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.player_seek_type), options);
     }
 
-    private void appendEndingTimeCategory(AppDialogPresenter settingsPresenter) {
+    private void appendEndingTimeCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(UiOptionItem.from(getContext().getString(R.string.option_disabled),
@@ -653,7 +755,7 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.player_show_ending_time), options);
     }
 
-    private void appendPixelRatioCategory(AppDialogPresenter settingsPresenter) {
+    private void appendPixelRatioCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         ArrayList<Pair<String, Float>> pairs = new ArrayList<>();
@@ -675,7 +777,7 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.player_pixel_ratio), options);
     }
 
-    private void appendPlaybackModeCategory(AppDialogPresenter settingsPresenter) {
+    private void appendPlaybackModeCategory(SettingsRows settingsPresenter) {
         OptionCategory category = AppDialogUtil.createPlaybackModeCategory(getContext());
         settingsPresenter.appendCategory(category);
     }
@@ -683,7 +785,7 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
     /**
      * Only with the user's own Data API key (see VideoCategoryManager), the option keeps its state without one
      */
-    private void appendMusicAutoplayCategory(AppDialogPresenter settingsPresenter) {
+    private void appendMusicAutoplayCategory(SettingsRows settingsPresenter) {
         MusicAutoplayData musicAutoplayData = MusicAutoplayData.instance(getContext());
         List<OptionItem> options = new ArrayList<>();
 
@@ -703,7 +805,7 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendCheckedCategory(getContext().getString(R.string.music_autoplay), options);
     }
 
-    private void appendNetworkEngineCategory(AppDialogPresenter settingsPresenter) {
+    private void appendNetworkEngineCategory(SettingsRows settingsPresenter) {
         OptionCategory category = AppDialogUtil.createNetworkEngineCategory(getContext());
         settingsPresenter.appendCategory(category);
     }
@@ -711,7 +813,7 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
     /**
      * The clients put in order with the remote (see OptionCategory.reorderList). Read again each time it's opened.
      */
-    private void appendClientOrderCategory(AppDialogPresenter settingsPresenter) {
+    private void appendClientOrderCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         for (String client : mMediaServiceData.getClientOrder()) {
@@ -729,7 +831,7 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
         });
     }
 
-    private void appendPlayerExitCategory(AppDialogPresenter settingsPresenter) {
+    private void appendPlayerExitCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         for (int[] pair : new int[][] {
@@ -743,12 +845,12 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.player_exit_shortcut), options);
     }
 
-    private void appendSleepTimerCategory(AppDialogPresenter settingsPresenter) {
+    private void appendSleepTimerCategory(SettingsRows settingsPresenter) {
         OptionCategory category = AppDialogUtil.createSleepTimerCategory(getContext());
         settingsPresenter.appendCategory(category);
     }
 
-    private void appendMiscCategory(AppDialogPresenter settingsPresenter) {
+    private void appendMiscCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(UiOptionItem.from(getContext().getString(R.string.suggestions_horizontally_scrolled),
@@ -830,7 +932,7 @@ public class PlayerSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendCheckedCategory(getContext().getString(R.string.settings_misc_options), options);
     }
 
-    private void appendDeveloperCategory(AppDialogPresenter settingsPresenter) {
+    private void appendDeveloperCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(UiOptionItem.from(getContext().getString(R.string.force_legacy_codecs),

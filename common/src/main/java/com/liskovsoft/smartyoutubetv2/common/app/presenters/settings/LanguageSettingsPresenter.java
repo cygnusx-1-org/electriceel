@@ -4,6 +4,7 @@ import android.content.Context;
 import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.locale.LocaleUtility;
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsRows;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
@@ -41,25 +42,33 @@ public class LanguageSettingsPresenter extends BasePresenter<Void> {
      * The Language card of the User interface settings
      */
     public void showLanguage() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.dialog_select_language),
+                this::appendLanguageRows, null);
+    }
 
+    /**
+     * The rows of the panel showLanguage shows (see SettingsPanel)
+     */
+    public void appendLanguageRows(SettingsRows settingsPresenter) {
         appendLanguageCategory(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.dialog_select_language));
     }
 
     /**
      * The Country card of the User interface settings
      */
     public void showCountry() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
-
-        appendCountryCategory(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.dialog_select_country));
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.dialog_select_country),
+                this::appendCountryRows, null);
     }
 
-    private void appendLanguageCategory(AppDialogPresenter settingsPresenter) {
+    /**
+     * The rows of the panel showCountry shows (see SettingsPanel)
+     */
+    public void appendCountryRows(SettingsRows settingsPresenter) {
+        appendCountryCategory(settingsPresenter);
+    }
+
+    private void appendLanguageCategory(SettingsRows settingsPresenter) {
         Map<String, String> languages = getSupportedLanguages();
         String language = mLocaleData.getLanguage();
         String languageTitle = "";
@@ -85,7 +94,7 @@ public class LanguageSettingsPresenter extends BasePresenter<Void> {
                 getContext().getString(R.string.dialog_select_language) + languageTitle, options);
     }
 
-    private void appendCountryCategory(AppDialogPresenter settingsPresenter) {
+    private void appendCountryCategory(SettingsRows settingsPresenter) {
         Map<String, String> countries = getSupportedCountries();
         String country = mLocaleData.getCountry();
         String countryTitle = "";

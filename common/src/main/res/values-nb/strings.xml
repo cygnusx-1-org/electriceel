@@ -1210,4 +1210,8 @@
     <string name="card_desc_api_keys">Din egen YouTube Data API-nøkkel, som trengs for automatisk musikkavspilling og for å skjule eller markere videoer etter kategori (musikk, spill, nyheter…) på Startside</string>
     <string name="card_desc_dns">Endrer hvordan appen finner YouTubes servere. Kan hjelpe når appen ikke lastes inn i det hele tatt.</string>
     <string name="card_desc_remote_control">Kobler sammen en telefon eller et nettbrett slik at YouTube-appen der kan styre avspillingen på denne TV-en</string>
+    <!-- Settings search -->
+    <string name="find_setting">Søk i innstillinger</string>
+    <string name="find_setting_none">Ingen innstilling samsvarer med «%s»</string>
+    <string name="find_setting_gone">Denne innstillingen finnes ikke lenger. Søk på nytt.</string>
 </resources>

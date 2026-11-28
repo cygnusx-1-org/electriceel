@@ -1229,4 +1229,8 @@ So, make a copy of values-he and name it values-iw. Keep both in your structure.
     <string name="card_desc_api_keys">מפתח YouTube Data API משלך, נדרש להפעלה אוטומטית של מוזיקה ולהסתרה או לסימון של סרטונים לפי קטגוריה (מוזיקה, משחקים, חדשות…) בדף הבית</string>
     <string name="card_desc_dns">משנה את האופן שבו האפליקציה מוצאת את השרתים של YouTube. יכול לעזור כשהאפליקציה לא נטענת בכלל.</string>
     <string name="card_desc_remote_control">מצמיד טלפון או טאבלט כך שאפליקציית YouTube שבו תוכל לשלוט בהפעלה בטלוויזיה הזו</string>
+    <!-- Settings search -->
+    <string name="find_setting">חיפוש בהגדרות</string>
+    <string name="find_setting_none">אין הגדרה שתואמת את \"%s\"</string>
+    <string name="find_setting_gone">ההגדרה הזו כבר לא קיימת. חפשו שוב.</string>
 </resources>

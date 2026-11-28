@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The search bar of the Settings section (see SettingsSearchBar), the settings found under it as it's typed in. Placed at the
+     end of the title's line by the screen that includes it: the classic cards (settings_cards) and the modern settings page. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/settings_search"
+    android:layout_width="@dimen/settings_search_width"
+    android:layout_height="wrap_content"
+    android:paddingEnd="?attr/browsePaddingEnd"
+    android:orientation="vertical"
+    android:visibility="gone">
+
+    <EditText
+        android:id="@+id/settings_search_field"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:autofillHints=""
+        android:background="@drawable/settings_search_field"
+        android:drawableStart="@drawable/settings_search_icon"
+        android:drawablePadding="10dp"
+        android:hint="@string/find_setting"
+        android:imeOptions="actionSearch|flagNoExtractUi"
+        android:inputType="text"
+        android:maxLines="1"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:textColor="@color/white"
+        android:textColorHint="@color/white_50"
+        android:textCursorDrawable="@null"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/settings_search_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/settings_search_results"
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="14dp"
+        android:textColor="@color/white_50"
+        android:textSize="17sp"
+        android:visibility="gone" />
+
+    <ListView
+        android:id="@+id/settings_search_results"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/settings_search_results"
+        android:divider="@null"
+        android:listSelector="@drawable/settings_search_row_focused"
+        android:drawSelectorOnTop="false"
+        android:padding="6dp"
+        android:visibility="gone" />
+</LinearLayout>

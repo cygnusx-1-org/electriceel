@@ -1210,4 +1210,8 @@
     <string name="card_desc_api_keys">Çelësi yt i YouTube Data API, i nevojshëm për luajtjen automatike të muzikës dhe për të fshehur ose shënuar videot sipas kategorisë (muzikë, lojëra, lajme…) në Kryefaqe</string>
     <string name="card_desc_dns">Ndryshon mënyrën si aplikacioni gjen serverët e YouTube. Mund të ndihmojë kur aplikacioni nuk ngarkohet fare.</string>
     <string name="card_desc_remote_control">Çifton një telefon ose tablet që aplikacioni i tij YouTube të kontrollojë luajtjen në këtë televizor</string>
+    <!-- Settings search -->
+    <string name="find_setting">Kërko në cilësime</string>
+    <string name="find_setting_none">Asnjë cilësim nuk përputhet me \"%s\"</string>
+    <string name="find_setting_gone">Ky cilësim nuk ekziston më. Kërko përsëri.</string>
 </resources>

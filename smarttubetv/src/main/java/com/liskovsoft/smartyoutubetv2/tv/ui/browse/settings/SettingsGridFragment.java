@@ -29,13 +29,15 @@ import com.liskovsoft.smartyoutubetv2.tv.ui.common.LeanbackActivity;
 import com.liskovsoft.smartyoutubetv2.tv.ui.common.UriBackgroundManager;
 import com.liskovsoft.smartyoutubetv2.tv.ui.mod.fragments.GridFragment;
 import com.liskovsoft.smartyoutubetv2.tv.ui.settingscards.SettingsCardsLayout;
+import com.liskovsoft.smartyoutubetv2.tv.ui.settingscards.SettingsSearchBar;
 import com.liskovsoft.smartyoutubetv2.tv.util.ViewUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The Settings section: its cards under its title, like a settings section on its own screen (see SettingsCardsLayout).
+ * The Settings section: its cards under its title, like a settings section on its own screen (see SettingsCardsLayout), and a
+ * search bar at the end of the title's line (see SettingsSearchBar).
  * The title of Browse is hidden over it (see BrowseFragment).
  */
 public class SettingsGridFragment extends GridFragment implements SettingsSection {
@@ -45,6 +47,7 @@ public class SettingsGridFragment extends GridFragment implements SettingsSectio
     private UriBackgroundManager mBackgroundManager;
     private final List<SettingsGroup> mPendingUpdates = new ArrayList<>();
     private SettingsCardsLayout mCardsLayout;
+    private SettingsSearchBar mSearchBar;
     private String mTitle;
 
     @Override
@@ -72,9 +75,13 @@ public class SettingsGridFragment extends GridFragment implements SettingsSectio
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        GridFragmentHelper.enableDownToShorterRow(getBrowseGrid(), getGridPresenter().getNumberOfColumns());
         mCardsLayout = SettingsCardsLayout.attach(view, getBrowseGrid());
         mCardsLayout.setTitle(mTitle);
+        mSearchBar = SettingsSearchBar.attach(view, view.findViewById(R.id.settings_cards_title), this::runWithPassword);
+        int columns = getGridPresenter().getNumberOfColumns();
+        // Up from the first row goes to the search bar
+        GridFragmentHelper.enableDownToShorterRow(getBrowseGrid(), columns, event -> mSearchBar != null
+                && mSearchBar.onGridKey(event, getBrowseGrid().getSelectedPosition() < columns));
     }
 
     @Override
@@ -82,6 +89,11 @@ public class SettingsGridFragment extends GridFragment implements SettingsSectio
         if (mCardsLayout != null) {
             mCardsLayout.detach();
             mCardsLayout = null;
+        }
+
+        if (mSearchBar != null) {
+            mSearchBar.detach();
+            mSearchBar = null;
         }
 
         super.onDestroyView();
@@ -172,15 +184,38 @@ public class SettingsGridFragment extends GridFragment implements SettingsSectio
         return GeneralData.instance(getContext());
     }
 
+    /**
+     * Runs it once the settings password is typed in, right away when there's none: before each card, and each setting the search
+     * opens (child mode is turned off in the settings)
+     */
+    private void runWithPassword(Runnable open) {
+        String password = getGeneralData().getSettingsPassword();
+
+        if (password == null) {
+            open.run();
+            return;
+        }
+
+        SimpleEditDialog.showPassword(
+                getContext(),
+                getContext().getString(R.string.enter_settings_password),
+                null,
+                newValue -> {
+                    if (Utils.passwordMatch(password, newValue)) {
+                        open.run();
+                        return true;
+                    }
+                    return false;
+                });
+    }
+
     private final class ItemViewClickedListener implements OnItemViewClickedListener {
         @Override
         public void onItemClicked(Presenter.ViewHolder itemViewHolder, Object item,
                                   RowPresenter.ViewHolder rowViewHolder, Row row) {
 
             if (item instanceof SettingsItem) {
-                String password = getGeneralData().getSettingsPassword();
-
-                if (password == null) {
+                runWithPassword(() -> {
                     // The lists inside the panel are titled "<Parent> - <List>", e.g. "About - Changelog"
                     AppDialogPresenter dialogPresenter = AppDialogPresenter.instance(getContext());
                     dialogPresenter.enableNestedTitles(true);
@@ -189,19 +224,7 @@ public class SettingsGridFragment extends GridFragment implements SettingsSectio
                     } finally {
                         dialogPresenter.enableNestedTitles(false);
                     }
-                } else {
-                    SimpleEditDialog.showPassword(
-                            getContext(),
-                            getContext().getString(R.string.enter_settings_password),
-                            null,
-                            newValue -> {
-                                if (Utils.passwordMatch(password, newValue)) {
-                                    ((SettingsItem) item).onClick.run();
-                                    return true;
-                                }
-                                return false;
-                            });
-                }
+                });
 
                 // Close PIP inside Settings section
                 //if (PlaybackPresenter.instance(getContext()).isInPipMode()) {

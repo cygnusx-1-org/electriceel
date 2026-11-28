@@ -1225,4 +1225,8 @@
     <string name="card_desc_api_keys">Ваш сопствени кључ за YouTube Data API, потребан за аутоматско пуштање музике и за скривање или означавање видео снимака по категорији (музика, игре, вести…) на Почетној</string>
     <string name="card_desc_dns">Мења начин на који апликација проналази YouTube сервере. Може да помогне када се апликација уопште не учитава.</string>
     <string name="card_desc_remote_control">Упарује телефон или таблет да би његова YouTube апликација могла да управља репродукцијом на овом телевизору</string>
+    <!-- Settings search -->
+    <string name="find_setting">Претражи подешавања</string>
+    <string name="find_setting_none">Ниједно подешавање не одговара „%s“</string>
+    <string name="find_setting_gone">Ово подешавање више не постоји. Претражите поново.</string>
 </resources>

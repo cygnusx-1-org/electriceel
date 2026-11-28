@@ -38,12 +38,25 @@ public class TypingCorrectionTest {
      */
     @Test
     public void theKeyboardIsToldAVisiblePassword() {
-        TypingCorrection.turnOff(mField);
+        TypingCorrection.turnOff(mField, false);
 
         EditorInfo editorInfo = new EditorInfo();
         mField.onCreateInputConnection(editorInfo);
 
         assertEquals(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD, editorInfo.inputType);
+    }
+
+    /**
+     * On a Fire TV: not a password, so its keyboard keeps voice typing
+     */
+    @Test
+    public void onAFireTV_theKeyboardIsToldPlainTextWithoutSuggestions() {
+        TypingCorrection.turnOff(mField, true);
+
+        EditorInfo editorInfo = new EditorInfo();
+        mField.onCreateInputConnection(editorInfo);
+
+        assertEquals(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS, editorInfo.inputType);
     }
 
     /**

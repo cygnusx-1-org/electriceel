@@ -7,6 +7,7 @@ import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.sharedutils.locale.LocaleUtility;
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsRows;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
@@ -36,12 +37,15 @@ public class AboutSettingsPresenter extends BasePresenter<Void> {
     }
 
     public void show() {
-        String mainTitle = String.format("%s %s",
+        AppDialogPresenter.instance(getContext()).showPanel(String.format("%s %s",
                 getContext().getString(R.string.app_name),
-                AppInfoHelpers.getAppVersionName(getContext()));
+                AppInfoHelpers.getAppVersionName(getContext())), this::appendRows, null);
+    }
 
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
-
+    /**
+     * The rows of the panel show shows (see SettingsPanel)
+     */
+    public void appendRows(SettingsRows settingsPresenter) {
         String country = LocaleUtility.getCurrentLocale(getContext()).getCountry();
 
         appendUpdateCheckButton(settingsPresenter);
@@ -59,11 +63,9 @@ public class AboutSettingsPresenter extends BasePresenter<Void> {
             appendFeedback(settingsPresenter);
             appendLinks(settingsPresenter);
         }
-
-        settingsPresenter.showDialog(mainTitle);
     }
 
-    private void appendAutoUpdateSwitch(AppDialogPresenter settingsPresenter) {
+    private void appendAutoUpdateSwitch(SettingsRows settingsPresenter) {
         GeneralData generalData = GeneralData.instance(getContext());
         List<OptionItem> items = new ArrayList<>();
 
@@ -84,7 +86,7 @@ public class AboutSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.check_updates_auto), items);
     }
 
-    private void appendUpdateCheckButton(AppDialogPresenter settingsPresenter) {
+    private void appendUpdateCheckButton(SettingsRows settingsPresenter) {
         OptionItem updateCheckOption = UiOptionItem.from(
                 getContext().getString(R.string.check_for_updates),
                 option -> AppUpdatePresenter.instance(getContext()).start(true));
@@ -92,7 +94,7 @@ public class AboutSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendSingleButton(updateCheckOption);
     }
 
-    private void appendUpdateChangelogButton(AppDialogPresenter settingsPresenter) {
+    private void appendUpdateChangelogButton(SettingsRows settingsPresenter) {
         List<String> changes = GeneralData.instance(getContext()).getChangelog();
 
         if (changes == null || changes.isEmpty()) {
@@ -112,7 +114,7 @@ public class AboutSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendStringsCategory(title, changelog);
     }
 
-    private void appendLinks(AppDialogPresenter settingsPresenter) {
+    private void appendLinks(SettingsRows settingsPresenter) {
         OptionItem releasesOption = UiOptionItem.from(getContext().getString(R.string.releases),
                 option -> Utils.openLink(getContext(), Utils.toQrCodeLink(getContext().getString(R.string.releases_url))));
 
@@ -127,7 +129,7 @@ public class AboutSettingsPresenter extends BasePresenter<Void> {
         //settingsPresenter.appendSingleButton(webSiteOption);
     }
 
-    private void appendDonation(AppDialogPresenter settingsPresenter) {
+    private void appendDonation(SettingsRows settingsPresenter) {
         List<OptionItem> donateOptions = new ArrayList<>();
 
         Map<String, String> donations = Helpers.getMap(getContext(), R.array.donations);
@@ -143,7 +145,7 @@ public class AboutSettingsPresenter extends BasePresenter<Void> {
         }
     }
 
-    private void appendUpdateSource(AppDialogPresenter settingsPresenter) {
+    private void appendUpdateSource(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         String[] updateUrls = getContext().getResources().getStringArray(R.array.update_urls);
@@ -166,7 +168,7 @@ public class AboutSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.preferred_update_source), options);
     }
 
-    private void appendFeedback(AppDialogPresenter settingsPresenter) {
+    private void appendFeedback(SettingsRows settingsPresenter) {
         List<OptionItem> feedbackOptions = new ArrayList<>();
 
         Map<String, String> feedback = Helpers.getMap(getContext(), R.array.feedback);
@@ -182,7 +184,7 @@ public class AboutSettingsPresenter extends BasePresenter<Void> {
         }
     }
 
-    private void appendInstallBridge(AppDialogPresenter settingsPresenter) {
+    private void appendInstallBridge(SettingsRows settingsPresenter) {
         OptionItem installBridgeOption = UiOptionItem.from(
                 getContext().getString(R.string.install_bridge),
                 option -> startBridgePresenter());

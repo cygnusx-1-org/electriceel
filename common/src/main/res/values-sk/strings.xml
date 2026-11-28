@@ -1240,4 +1240,8 @@
     <string name="card_desc_api_keys">Váš vlastný kľúč YouTube Data API, potrebný na automatické prehrávanie hudby a na skrývanie alebo označovanie videí podľa kategórie (hudba, hry, správy…) na stránke Domov</string>
     <string name="card_desc_dns">Mení, ako aplikácia hľadá servery YouTube. Môže pomôcť, keď sa aplikácia vôbec nenačíta.</string>
     <string name="card_desc_remote_control">Spáruje telefón alebo tablet, aby jeho aplikácia YouTube mohla ovládať prehrávanie na tomto televízore</string>
+    <!-- Settings search -->
+    <string name="find_setting">Hľadať v nastaveniach</string>
+    <string name="find_setting_none">Žiadne nastavenie nezodpovedá „%s“</string>
+    <string name="find_setting_gone">Toto nastavenie už neexistuje. Hľadajte znova.</string>
 </resources>

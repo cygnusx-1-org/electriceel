@@ -3,6 +3,7 @@ package com.liskovsoft.smartyoutubetv2.common.utils;
 import android.text.InputType;
 import android.widget.EditText;
 import androidx.annotation.VisibleForTesting;
+import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.smartyoutubetv2.common.prefs.SearchData;
 
 /**
@@ -15,6 +16,12 @@ public final class TypingCorrection {
      */
     @VisibleForTesting
     static final int OFF_INPUT_TYPE = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD;
+    /**
+     * On a Fire TV: plain text without suggestions. Its keyboard has no voice typing in a password field, so the remote's mic
+     * couldn't type the search.
+     */
+    @VisibleForTesting
+    static final int OFF_INPUT_TYPE_FIRE_TV = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
 
     private TypingCorrection() {
     }
@@ -33,6 +40,11 @@ public final class TypingCorrection {
      * setInputType would also switch the field's font to a plain monospace, a visible password's.
      */
     public static void turnOff(EditText field) {
-        field.setRawInputType(OFF_INPUT_TYPE);
+        turnOff(field, Helpers.isAmazonFireTVDevice());
+    }
+
+    @VisibleForTesting
+    static void turnOff(EditText field, boolean isFireTV) {
+        field.setRawInputType(isFireTV ? OFF_INPUT_TYPE_FIRE_TV : OFF_INPUT_TYPE);
     }
 }

@@ -1239,4 +1239,8 @@
     <string name="card_desc_api_keys">Jūsų paties YouTube Data API raktas, reikalingas muzikos automatiniam leidimui ir vaizdo įrašams slėpti ar pažymėti pagal kategoriją (muzika, žaidimai, naujienos…) Pagrindiniame</string>
     <string name="card_desc_dns">Keičia, kaip programa randa YouTube serverius. Gali padėti, kai programa visai neįsikelia.</string>
     <string name="card_desc_remote_control">Susieja telefoną ar planšetę, kad jo YouTube programa galėtų valdyti atkūrimą šiame televizoriuje</string>
+    <!-- Settings search -->
+    <string name="find_setting">Ieškoti nustatymuose</string>
+    <string name="find_setting_none">Nėra nustatymo, atitinkančio „%s“</string>
+    <string name="find_setting_gone">Šio nustatymo nebėra. Ieškokite dar kartą.</string>
 </resources>

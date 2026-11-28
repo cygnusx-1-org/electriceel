@@ -1195,4 +1195,8 @@
     <string name="card_desc_api_keys">ご自身の YouTube Data API キー。音楽の自動再生と、ホームでカテゴリ（音楽、ゲーム、ニュース…）ごとに動画を非表示にしたり印を付けたりするのに必要です</string>
     <string name="card_desc_dns">アプリが YouTube のサーバーを見つける方法を変更します。アプリがまったく読み込まれないときに役立つことがあります。</string>
     <string name="card_desc_remote_control">スマートフォンやタブレットをペア設定し、その YouTube アプリでこのテレビの再生を操作できるようにします</string>
+    <!-- Settings search -->
+    <string name="find_setting">設定を検索</string>
+    <string name="find_setting_none">「%s」に一致する設定はありません</string>
+    <string name="find_setting_gone">この設定はもうありません。もう一度検索してください。</string>
 </resources>

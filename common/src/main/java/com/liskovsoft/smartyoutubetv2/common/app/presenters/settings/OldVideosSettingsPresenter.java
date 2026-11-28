@@ -3,6 +3,7 @@ package com.liskovsoft.smartyoutubetv2.common.app.presenters.settings;
 import android.content.Context;
 
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsRows;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
@@ -34,8 +35,14 @@ public class OldVideosSettingsPresenter extends BasePresenter<Void> {
      * The periods are radio buttons. Pressing the checked one turns the filter off and keeps the period for the quick toggle.
      */
     public void show() {
-        AppDialogPresenter presenter = AppDialogPresenter.instance(getContext());
-        OldVideosData data = OldVideosData.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.hide_old_videos),
+                this::appendRows, null);
+    }
+
+    /**
+     * The rows of the panel show shows (see SettingsPanel)
+     */
+    public void appendRows(SettingsRows presenter) {        OldVideosData data = OldVideosData.instance(getContext());
 
         List<OptionItem> periods = new ArrayList<>();
 
@@ -75,7 +82,6 @@ public class OldVideosSettingsPresenter extends BasePresenter<Void> {
 
         String title = getContext().getString(R.string.hide_old_videos);
         presenter.appendCheckedCategory(title, options);
-        presenter.showDialog(title);
     }
 
     private void showOldVideosSectionsMenu() {

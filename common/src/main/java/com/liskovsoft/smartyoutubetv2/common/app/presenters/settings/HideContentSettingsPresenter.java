@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsPanel;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsRows;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
@@ -44,31 +46,46 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
      * A submenu per kind of content
      */
     public void show() {
-        AppDialogPresenter presenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.hide_unwanted_content),
+                this::appendRows, null);
+    }
 
+    /**
+     * The rows of the panel show shows (see SettingsPanel)
+     */
+    public void appendRows(SettingsRows presenter) {
         List<OptionItem> options = new ArrayList<>();
-        options.add(createMenuItem(R.string.header_shorts, this::showShortsMenu));
-        options.add(createMenuItem(R.string.hide_content_mixes, this::showMixesMenu));
-        options.add(createMenuItem(R.string.hide_content_watched, this::showWatchedMenu));
-        options.add(createMenuItem(R.string.hide_content_upcoming, this::showUpcomingMenu));
-        options.add(createMenuItem(R.string.hide_content_duplicates, this::showDuplicatesMenu));
-        options.add(createMenuItem(R.string.subscription_groups, this::showChannelGroupsMenu));
-        options.add(createMenuItem(R.string.hide_old_videos, () -> OldVideosSettingsPresenter.instance(getContext()).show()));
-        options.add(createMenuItem(R.string.keyword_filtering, () -> KeywordFilterSettingsPresenter.instance(getContext()).show()));
+        options.add(createMenuItem(R.string.header_shorts, this::showShortsMenu, this::appendShortsMenuRows));
+        options.add(createMenuItem(R.string.hide_content_mixes, this::showMixesMenu, this::appendMixesMenuRows));
+        options.add(createMenuItem(R.string.hide_content_watched, this::showWatchedMenu, this::appendWatchedMenuRows));
+        options.add(createMenuItem(R.string.hide_content_upcoming, this::showUpcomingMenu, this::appendUpcomingMenuRows));
+        options.add(createMenuItem(R.string.hide_content_duplicates, this::showDuplicatesMenu, this::appendDuplicatesMenuRows));
+        options.add(createMenuItem(R.string.subscription_groups, this::showChannelGroupsMenu, this::appendChannelGroupsMenuRows));
+        options.add(createMenuItem(R.string.hide_old_videos, () -> OldVideosSettingsPresenter.instance(getContext()).show(),
+                rows -> OldVideosSettingsPresenter.instance(getContext()).appendRows(rows)));
+        options.add(createMenuItem(R.string.keyword_filtering, () -> KeywordFilterSettingsPresenter.instance(getContext()).show(),
+                rows -> KeywordFilterSettingsPresenter.instance(getContext()).appendRows(rows)));
 
-        OptionItem categories = createMenuItem(R.string.hide_content_categories, this::showCategoriesMenu);
+        OptionItem categories = createMenuItem(R.string.hide_content_categories, this::showCategoriesMenu, this::appendCategoriesMenuRows);
         options.add(categories);
         FilteringSettingsPresenter.appendCategoriesKeyNote(getContext(), categories, options);
 
         String title = getContext().getString(R.string.hide_unwanted_content);
         presenter.appendCheckedCategory(title, options);
-        presenter.showDialog(title);
     }
 
     /**
      * With the quick toggle enabled, its button on the main screen turns the other options off and on, as they're set
      */
     private void showShortsMenu() {
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.header_shorts),
+                this::appendShortsMenuRows, null);
+    }
+
+    /**
+     * The rows of the menu showShortsMenu shows (see SettingsPanel)
+     */
+    private void appendShortsMenuRows(SettingsRows rows) {
         List<OptionItem> options = new ArrayList<>();
 
         OptionItem quickToggle = UiOptionItem.from(getContext().getString(R.string.quick_toggle),
@@ -108,18 +125,34 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
         options.add(createContentItem(R.string.hide_shorts_from_news, MediaServiceData.CONTENT_SHORTS_NEWS));
         options.add(createContentItem(R.string.hide_shorts_from_music, MediaServiceData.CONTENT_SHORTS_MUSIC));
 
-        showSubmenu(R.string.header_shorts, options);
+        rows.appendCheckedCategory(getContext().getString(R.string.header_shorts), options);
     }
 
     private void showMixesMenu() {
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.hide_content_mixes),
+                this::appendMixesMenuRows, null);
+    }
+
+    /**
+     * The rows of the menu showMixesMenu shows (see SettingsPanel)
+     */
+    private void appendMixesMenuRows(SettingsRows rows) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(createContentItem(R.string.hide_mixes, MediaServiceData.CONTENT_MIXES));
 
-        showSubmenu(R.string.hide_content_mixes, options);
+        rows.appendCheckedCategory(getContext().getString(R.string.hide_content_mixes), options);
     }
 
     private void showWatchedMenu() {
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.hide_content_watched),
+                this::appendWatchedMenuRows, null);
+    }
+
+    /**
+     * The rows of the menu showWatchedMenu shows (see SettingsPanel)
+     */
+    private void appendWatchedMenuRows(SettingsRows rows) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(createContentItem(R.string.hide_watched_from_home, MediaServiceData.CONTENT_WATCHED_HOME));
@@ -137,23 +170,39 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
                 option -> openedVideos.setHidden(option.isSelected()),
                 openedVideos.isHidden()));
 
-        showSubmenu(R.string.hide_content_watched, options);
+        rows.appendCheckedCategory(getContext().getString(R.string.hide_content_watched), options);
     }
 
     private void showUpcomingMenu() {
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.hide_content_upcoming),
+                this::appendUpcomingMenuRows, null);
+    }
+
+    /**
+     * The rows of the menu showUpcomingMenu shows (see SettingsPanel)
+     */
+    private void appendUpcomingMenuRows(SettingsRows rows) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(createContentItem(R.string.hide_upcoming, MediaServiceData.CONTENT_UPCOMING_SUBSCRIPTIONS));
         options.add(createContentItem(R.string.hide_upcoming_home, MediaServiceData.CONTENT_UPCOMING_HOME));
         options.add(createContentItem(R.string.hide_upcoming_channel, MediaServiceData.CONTENT_UPCOMING_CHANNEL));
 
-        showSubmenu(R.string.hide_content_upcoming, options);
+        rows.appendCheckedCategory(getContext().getString(R.string.hide_content_upcoming), options);
     }
 
     /**
      * The sections of rows from the feeds (see DuplicatesData), in the sidebar's order
      */
     private void showDuplicatesMenu() {
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.hide_content_duplicates),
+                this::appendDuplicatesMenuRows, null);
+    }
+
+    /**
+     * The rows of the menu showDuplicatesMenu shows (see SettingsPanel)
+     */
+    private void appendDuplicatesMenuRows(SettingsRows rows) {
         DuplicatesData data = DuplicatesData.instance(getContext());
         List<OptionItem> options = new ArrayList<>();
 
@@ -173,7 +222,7 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
         note.setNote(true);
         options.add(note);
 
-        showSubmenu(R.string.hide_content_duplicates, options);
+        rows.appendCheckedCategory(getContext().getString(R.string.hide_content_duplicates), options);
     }
 
     /**
@@ -181,6 +230,14 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
      * the Subscriptions row of Home after Home
      */
     private void showChannelGroupsMenu() {
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.subscription_groups),
+                this::appendChannelGroupsMenuRows, null);
+    }
+
+    /**
+     * The rows of the menu showChannelGroupsMenu shows (see SettingsPanel)
+     */
+    private void appendChannelGroupsMenuRows(SettingsRows rows) {
         ChannelGroupFilterData data = ChannelGroupFilterData.instance(getContext());
         List<OptionItem> options = new ArrayList<>();
 
@@ -203,7 +260,7 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
         note.setNote(true);
         options.add(note);
 
-        showSubmenu(R.string.subscription_groups, options);
+        rows.appendCheckedCategory(getContext().getString(R.string.subscription_groups), options);
     }
 
     private OptionItem createChannelGroupAreaItem(ChannelGroupFilterData data, int titleResId, int area) {
@@ -217,19 +274,19 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
      * Only with the user's own Data API key (see VideoCategoryManager).
      */
     private void showCategoriesMenu() {
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.hide_content_categories),
+                this::appendCategoriesMenuRows, null);
+    }
+
+    /**
+     * The rows of the menu showCategoriesMenu shows (see SettingsPanel)
+     */
+    private void appendCategoriesMenuRows(SettingsRows rows) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(createContentItem(R.string.hide_non_gaming_from_gaming, MediaServiceData.CONTENT_NON_GAMING_GAMING));
 
-        showSubmenu(R.string.hide_content_categories, options);
-    }
-
-    private void showSubmenu(int titleResId, List<OptionItem> options) {
-        AppDialogPresenter presenter = AppDialogPresenter.instance(getContext());
-
-        String title = getContext().getString(titleResId);
-        presenter.appendCheckedCategory(title, options);
-        presenter.showDialog(title);
+        rows.appendCheckedCategory(getContext().getString(R.string.hide_content_categories), options);
     }
 
     /**
@@ -241,9 +298,13 @@ public class HideContentSettingsPresenter extends BasePresenter<Void> {
                 mMediaServiceData.isContentHiddenInSettings(content));
     }
 
-    private OptionItem createMenuItem(int titleResId, Runnable onSelect) {
+    /**
+     * @param panel the rows of the menu, for the settings search
+     */
+    private OptionItem createMenuItem(int titleResId, Runnable onSelect, SettingsPanel panel) {
         OptionItem item = UiOptionItem.from(getContext().getString(titleResId), option -> onSelect.run());
         item.setMenu(true);
+        item.setPanel(panel);
         return item;
     }
 }

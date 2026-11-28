@@ -1195,4 +1195,8 @@
     <string name="card_desc_api_keys">Kunci YouTube Data API milik Anda sendiri, diperlukan untuk putar otomatis musik dan untuk menyembunyikan atau menandai video menurut kategori (musik, game, berita…) di Beranda</string>
     <string name="card_desc_dns">Mengubah cara aplikasi menemukan server YouTube. Dapat membantu saat aplikasi sama sekali tidak dimuat.</string>
     <string name="card_desc_remote_control">Menyambungkan ponsel atau tablet agar aplikasi YouTube-nya dapat mengontrol pemutaran di TV ini</string>
+    <!-- Settings search -->
+    <string name="find_setting">Cari setelan</string>
+    <string name="find_setting_none">Tidak ada setelan yang cocok dengan \"%s\"</string>
+    <string name="find_setting_gone">Setelan ini sudah tidak ada. Cari lagi.</string>
 </resources>

@@ -3,6 +3,7 @@ package com.liskovsoft.smartyoutubetv2.common.app.presenters.settings;
 import android.content.Context;
 import com.liskovsoft.sharedutils.helpers.AppInfoHelpers;
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsRows;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
@@ -25,25 +26,26 @@ public class AboutSimpleSettingsPresenter extends BasePresenter<Void> {
      * The updates are in Updates and the global search in Search|General
      */
     public void show() {
-        String mainTitle = String.format("%s %s",
+        AppDialogPresenter.instance(getContext()).showPanel(String.format("%s %s",
                 getContext().getString(R.string.app_name),
-                AppInfoHelpers.getAppVersionName(getContext()));
+                AppInfoHelpers.getAppVersionName(getContext())), this::appendRows, null);
+    }
 
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
-
+    /**
+     * The rows of the panel show shows (see SettingsPanel)
+     */
+    public void appendRows(SettingsRows settingsPresenter) {
         // In the order of the full About
         appendQrCode(settingsPresenter, R.string.donation, DONATION_URL);
         appendQrCode(settingsPresenter, R.string.feedback, FEEDBACK_URL);
         appendQrCode(settingsPresenter, R.string.releases, RELEASES_URL);
         appendQrCode(settingsPresenter, R.string.git_repository, GIT_REPOSITORY_URL);
-
-        settingsPresenter.showDialog(mainTitle);
     }
 
     /**
      * A row that opens a panel with a QR code of the address
      */
-    private void appendQrCode(AppDialogPresenter settingsPresenter, int titleResId, String url) {
+    private void appendQrCode(SettingsRows settingsPresenter, int titleResId, String url) {
         String title = getContext().getString(titleResId);
 
         settingsPresenter.appendSingleButton(UiOptionItem.from(title, option -> showQrCode(title, url)));

@@ -1210,4 +1210,8 @@
     <string name="card_desc_api_keys">Öz YouTube Data API açarınız; musiqinin avtomatik oynadılması və Ev səhifəsində videoları kateqoriyaya görə (musiqi, oyunlar, xəbərlər…) gizlətmək və ya işarələmək üçün lazımdır</string>
     <string name="card_desc_dns">Tətbiqin YouTube serverlərini necə tapdığını dəyişir. Tətbiq ümumiyyətlə yüklənmədikdə kömək edə bilər.</string>
     <string name="card_desc_remote_control">Telefonu və ya planşeti qoşur ki, onun YouTube tətbiqi bu televizorda oxutmanı idarə edə bilsin</string>
+    <!-- Settings search -->
+    <string name="find_setting">Ayarlarda axtar</string>
+    <string name="find_setting_none">\"%s\" ilə uyğun ayar yoxdur</string>
+    <string name="find_setting_gone">Bu ayar artıq yoxdur. Yenidən axtarın.</string>
 </resources>

@@ -1225,4 +1225,8 @@
     <string name="card_desc_api_keys">Propria dvs. cheie YouTube Data API, necesară pentru redarea automată a muzicii și pentru a ascunde sau marca videoclipurile după categorie (muzică, jocuri, știri…) în Acasă</string>
     <string name="card_desc_dns">Schimbă modul în care aplicația găsește serverele YouTube. Poate ajuta când aplicația nu se încarcă deloc.</string>
     <string name="card_desc_remote_control">Asociază un telefon sau o tabletă, astfel încât aplicația YouTube de pe acesta să controleze redarea pe acest televizor</string>
+    <!-- Settings search -->
+    <string name="find_setting">Caută în setări</string>
+    <string name="find_setting_none">Nicio setare nu corespunde cu „%s”</string>
+    <string name="find_setting_gone">Această setare nu mai există. Caută din nou.</string>
 </resources>

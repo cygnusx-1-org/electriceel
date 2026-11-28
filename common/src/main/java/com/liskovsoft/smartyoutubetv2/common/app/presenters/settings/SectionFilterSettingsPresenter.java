@@ -5,6 +5,7 @@ import android.util.Pair;
 
 import com.liskovsoft.mediaserviceinterfaces.data.MediaGroup;
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsRows;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
@@ -121,21 +122,24 @@ public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
     }
 
     public void show() {
-        AppDialogPresenter presenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(mTitleResId), this::appendRows, null);
+    }
 
+    /**
+     * The rows of the panel show shows (see SettingsPanel)
+     */
+    public void appendRows(SettingsRows presenter) {
         OptionItem[] modes = appendModeCategory(presenter);
         appendQuickToggleSwitch(presenter, modes[SectionFilterData.MODE_HIDE]);
         appendSectionsCategory(presenter);
         appendMarkColorCategory(presenter, modes[SectionFilterData.MODE_MARK]);
         appendExcludedChannelsCategory(presenter);
-
-        presenter.showDialog(getContext().getString(mTitleResId));
     }
 
     /**
      * @return the modes, by their value (SectionFilterData.MODE_*)
      */
-    private OptionItem[] appendModeCategory(AppDialogPresenter presenter) {
+    private OptionItem[] appendModeCategory(SettingsRows presenter) {
         List<OptionItem> options = new ArrayList<>();
         OptionItem[] modes = new OptionItem[mModes.length];
 
@@ -155,7 +159,7 @@ public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
     /**
      * The button on the main screen that turns the hiding off and on, only for a filter that has one. Greyed out while the mode isn't Hide.
      */
-    private void appendQuickToggleSwitch(AppDialogPresenter presenter, OptionItem hideMode) {
+    private void appendQuickToggleSwitch(SettingsRows presenter, OptionItem hideMode) {
         if (!mHasQuickToggle) {
             return;
         }
@@ -180,7 +184,7 @@ public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
      * All is first: it checks or unchecks the others, and it's checked while they all are.
      * None for a filter of a single section.
      */
-    private void appendSectionsCategory(AppDialogPresenter presenter) {
+    private void appendSectionsCategory(SettingsRows presenter) {
         if (mSectionsResId == 0) {
             return;
         }
@@ -227,7 +231,7 @@ public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
     /**
      * The colors of the AiSList marker. Greyed out while the mode isn't Mark.
      */
-    private void appendMarkColorCategory(AppDialogPresenter presenter, OptionItem markMode) {
+    private void appendMarkColorCategory(SettingsRows presenter, OptionItem markMode) {
         List<OptionItem> options = new ArrayList<>();
 
         for (int[] pair : AiSListSettingsPresenter.MARK_COLORS) {
@@ -245,7 +249,7 @@ public class SectionFilterSettingsPresenter extends BasePresenter<Void> {
      * The channels excluded from the hiding in the video context menu (see FilterExclusionSettingsPresenter), only when there's one.
      * Unchecking includes a channel again. It stays in the list until the list is opened again, so it can be checked back.
      */
-    private void appendExcludedChannelsCategory(AppDialogPresenter presenter) {
+    private void appendExcludedChannelsCategory(SettingsRows presenter) {
         if (mExclusionFilter == 0) {
             return;
         }

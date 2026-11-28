@@ -1210,4 +1210,8 @@
     <string name="card_desc_api_keys">आपकी अपनी YouTube Data API कुंजी, संगीत ऑटोप्ले के लिए और होम पर वीडियो को श्रेणी (संगीत, गेमिंग, समाचार…) के अनुसार छिपाने या चिह्नित करने के लिए ज़रूरी</string>
     <string name="card_desc_dns">बदलता है कि ऐप YouTube के सर्वर कैसे ढूँढता है। जब ऐप बिल्कुल लोड न हो, तब मदद कर सकता है।</string>
     <string name="card_desc_remote_control">किसी फ़ोन या टैबलेट को जोड़ता है ताकि उसका YouTube ऐप इस टीवी पर प्लेबैक नियंत्रित कर सके</string>
+    <!-- Settings search -->
+    <string name="find_setting">सेटिंग खोजें</string>
+    <string name="find_setting_none">\"%s\" से मेल खाने वाली कोई सेटिंग नहीं है</string>
+    <string name="find_setting_gone">यह सेटिंग अब मौजूद नहीं है। फिर से खोजें।</string>
 </resources>

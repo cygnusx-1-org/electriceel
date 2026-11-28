@@ -1210,4 +1210,8 @@
     <string name="card_desc_api_keys">Je eigen YouTube Data API-sleutel, nodig om muziek automatisch af te spelen en om video\'s per categorie (muziek, gaming, nieuws…) op Home te verbergen of te markeren</string>
     <string name="card_desc_dns">Wijzigt hoe de app de servers van YouTube vindt. Kan helpen als de app helemaal niet laadt.</string>
     <string name="card_desc_remote_control">Koppelt een telefoon of tablet zodat de YouTube-app daarop het afspelen op deze tv kan bedienen</string>
+    <!-- Settings search -->
+    <string name="find_setting">Instellingen doorzoeken</string>
+    <string name="find_setting_none">Geen instelling komt overeen met \"%s\"</string>
+    <string name="find_setting_gone">Deze instelling bestaat niet meer. Zoek opnieuw.</string>
 </resources>

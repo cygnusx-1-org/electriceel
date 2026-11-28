@@ -35,18 +35,23 @@ public class PlayerSectionSettingsPresenter extends BasePresenter<Void> implemen
     public List<SettingsItem> getItems(Context context) {
         List<SettingsItem> items = new ArrayList<>();
         items.add(new SettingsItem(context.getString(R.string.settings_general),
-                () -> PlayerGeneralSettingsPresenter.instance(context).show(), R.drawable.settings_general));
+                () -> PlayerGeneralSettingsPresenter.instance(context).show(), R.drawable.settings_general)
+                .setCards(PlayerGeneralSettingsPresenter.instance(context)));
         items.add(new SettingsItem(context.getString(R.string.settings_video),
-                () -> PlayerSettingsPresenter.instance(context).showVideo(), R.drawable.settings_video));
+                () -> PlayerSettingsPresenter.instance(context).showVideo(), R.drawable.settings_video)
+                .setPanel(rows -> PlayerSettingsPresenter.instance(context).appendVideoRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.settings_audio),
-                () -> PlayerSettingsPresenter.instance(context).showAudio(), R.drawable.settings_audio));
+                () -> PlayerSettingsPresenter.instance(context).showAudio(), R.drawable.settings_audio)
+                .setPanel(rows -> PlayerSettingsPresenter.instance(context).appendAudioRows(rows)));
         // Don't add afr support check here.
         // Users want even fake afr settings.
         items.add(new SettingsItem(context.getString(R.string.auto_frame_rate),
                 () -> AutoFrameRateSettingsPresenter.instance(context).show(), R.drawable.settings_afr)
+                .setPanel(rows -> AutoFrameRateSettingsPresenter.instance(context).appendRows(rows))
                 .setDescription(context.getString(R.string.card_desc_auto_frame_rate)));
         items.add(new SettingsItem(context.getString(R.string.subtitle_category_title),
-                () -> SubtitleSettingsPresenter.instance(context).show(), R.drawable.settings_subtitles));
+                () -> SubtitleSettingsPresenter.instance(context).show(), R.drawable.settings_subtitles)
+                .setPanel(rows -> SubtitleSettingsPresenter.instance(context).appendRows(rows)));
 
         return items;
     }

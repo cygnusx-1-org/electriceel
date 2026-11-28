@@ -36,45 +36,62 @@ public class PlayerGeneralSettingsPresenter extends BasePresenter<Void> implemen
     public List<SettingsItem> getItems(Context context) {
         List<SettingsItem> items = new ArrayList<>();
         items.add(new SettingsItem(context.getString(R.string.player_ui_hide_behavior),
-                () -> PlayerSettingsPresenter.instance(context).showUIAutoHide(), R.drawable.settings_auto_hide_ui));
+                () -> PlayerSettingsPresenter.instance(context).showUIAutoHide(), R.drawable.settings_auto_hide_ui)
+                .setPanel(rows -> PlayerSettingsPresenter.instance(context).appendUIAutoHideRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.settings_button_options),
-                () -> PlayerSettingsPresenter.instance(context).showButtons(), R.drawable.settings_player_buttons));
+                () -> PlayerSettingsPresenter.instance(context).showButtons(), R.drawable.settings_player_buttons)
+                .setPanel(rows -> PlayerSettingsPresenter.instance(context).appendButtonsRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.settings_show_options),
-                () -> PlayerSettingsPresenter.instance(context).showShows(), R.drawable.settings_show));
+                () -> PlayerSettingsPresenter.instance(context).showShows(), R.drawable.settings_show)
+                .setPanel(rows -> PlayerSettingsPresenter.instance(context).appendShowsRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.settings_places),
                 () -> PlayerSettingsPresenter.instance(context).showPlaces(), R.drawable.settings_place_left)
+                .setPanel(rows -> PlayerSettingsPresenter.instance(context).appendPlacesRows(rows))
                 .setDescription(context.getString(R.string.card_desc_places)));
         items.add(new SettingsItem(context.getString(R.string.settings_seek_options),
-                () -> PlayerSettingsPresenter.instance(context).showSeeks(), R.drawable.settings_seek));
+                () -> PlayerSettingsPresenter.instance(context).showSeeks(), R.drawable.settings_seek)
+                .setPanel(rows -> PlayerSettingsPresenter.instance(context).appendSeeksRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.settings_misc_options),
-                () -> PlayerSettingsPresenter.instance(context).showMisc(), R.drawable.settings_misc));
+                () -> PlayerSettingsPresenter.instance(context).showMisc(), R.drawable.settings_misc)
+                .setPanel(rows -> PlayerSettingsPresenter.instance(context).appendMiscRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.player_network_stack),
                 () -> PlayerSettingsPresenter.instance(context).showNetworkEngine(), R.drawable.settings_network_engine)
+                .setPanel(rows -> PlayerSettingsPresenter.instance(context).appendNetworkEngineRows(rows))
                 .setDescription(context.getString(R.string.card_desc_network_engine)));
         items.add(new SettingsItem(context.getString(R.string.client_order),
                 () -> PlayerSettingsPresenter.instance(context).showClientOrder(), R.drawable.settings_client_order)
+                .setPanel(rows -> PlayerSettingsPresenter.instance(context).appendClientOrderRows(rows))
                 .setDescription(context.getString(R.string.card_desc_client_order)));
         items.add(new SettingsItem(context.getString(R.string.player_pixel_ratio),
                 () -> PlayerSettingsPresenter.instance(context).showPixelRatio(), R.drawable.settings_pixel_ratio)
+                .setPanel(rows -> PlayerSettingsPresenter.instance(context).appendPixelRatioRows(rows))
                 .setDescription(context.getString(R.string.card_desc_pixel_ratio)));
         items.add(new SettingsItem(context.getString(R.string.action_repeat_mode),
-                () -> PlayerSettingsPresenter.instance(context).showPlaybackMode(), R.drawable.settings_playback_mode));
+                () -> PlayerSettingsPresenter.instance(context).showPlaybackMode(), R.drawable.settings_playback_mode)
+                .setPanel(rows -> PlayerSettingsPresenter.instance(context).appendPlaybackModeRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.music_autoplay),
-                () -> PlayerSettingsPresenter.instance(context).showMusicAutoplay(), R.drawable.settings_music_autoplay));
+                () -> PlayerSettingsPresenter.instance(context).showMusicAutoplay(), R.drawable.settings_music_autoplay)
+                .setPanel(rows -> PlayerSettingsPresenter.instance(context).appendMusicAutoplayRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.player_sleep_timer),
-                () -> PlayerSettingsPresenter.instance(context).showSleepTimer(), R.drawable.settings_sleep_timer));
+                () -> PlayerSettingsPresenter.instance(context).showSleepTimer(), R.drawable.settings_sleep_timer)
+                .setPanel(rows -> PlayerSettingsPresenter.instance(context).appendSleepTimerRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.player_tweaks),
-                () -> PlayerSettingsPresenter.instance(context).showDeveloper(), R.drawable.settings_developer));
+                () -> PlayerSettingsPresenter.instance(context).showDeveloper(), R.drawable.settings_developer)
+                .setPanel(rows -> PlayerSettingsPresenter.instance(context).appendDeveloperRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.settings_disable_options),
-                () -> PlayerSettingsPresenter.instance(context).showDisables(), R.drawable.settings_disable));
+                () -> PlayerSettingsPresenter.instance(context).showDisables(), R.drawable.settings_disable)
+                .setPanel(rows -> PlayerSettingsPresenter.instance(context).appendDisablesRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.settings_unlock_options),
                 () -> PlayerSettingsPresenter.instance(context).showUnlocks(), R.drawable.settings_unlock)
+                .setPanel(rows -> PlayerSettingsPresenter.instance(context).appendUnlocksRows(rows))
                 .setDescription(context.getString(R.string.card_desc_unlock)));
         items.add(new SettingsItem(context.getString(R.string.settings_frame_options),
                 () -> PlayerSettingsPresenter.instance(context).showFrameDrops(), R.drawable.settings_frame)
+                .setPanel(rows -> PlayerSettingsPresenter.instance(context).appendFrameDropsRows(rows))
                 .setDescription(context.getString(R.string.card_desc_frame)));
         items.add(new SettingsItem(context.getString(R.string.settings_fix_options),
                 () -> PlayerSettingsPresenter.instance(context).showFixes(), R.drawable.settings_fix)
+                .setPanel(rows -> PlayerSettingsPresenter.instance(context).appendFixesRows(rows))
                 .setDescription(context.getString(R.string.card_desc_fix)));
 
         return items;

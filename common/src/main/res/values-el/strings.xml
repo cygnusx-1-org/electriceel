@@ -1210,4 +1210,8 @@
     <string name="card_desc_api_keys">Το δικό σας κλειδί YouTube Data API, απαραίτητο για την αυτόματη αναπαραγωγή μουσικής και για να κρύβετε ή να επισημαίνετε βίντεο ανά κατηγορία (μουσική, παιχνίδια, ειδήσεις…) στην Αρχική</string>
     <string name="card_desc_dns">Αλλάζει τον τρόπο που η εφαρμογή βρίσκει τους διακομιστές του YouTube. Μπορεί να βοηθήσει όταν η εφαρμογή δεν φορτώνει καθόλου.</string>
     <string name="card_desc_remote_control">Συνδέει ένα τηλέφωνο ή tablet ώστε η εφαρμογή YouTube του να ελέγχει την αναπαραγωγή σε αυτή την τηλεόραση</string>
+    <!-- Settings search -->
+    <string name="find_setting">Αναζήτηση ρυθμίσεων</string>
+    <string name="find_setting_none">Καμία ρύθμιση δεν ταιριάζει με «%s»</string>
+    <string name="find_setting_gone">Αυτή η ρύθμιση δεν υπάρχει πια. Αναζητήστε ξανά.</string>
 </resources>

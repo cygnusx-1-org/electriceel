@@ -1210,4 +1210,8 @@
     <string name="card_desc_api_keys">თქვენი საკუთარი YouTube Data API გასაღები, საჭიროა მუსიკის ავტომატური დაკვრისთვის და მთავარზე ვიდეოების კატეგორიის (მუსიკა, თამაშები, სიახლეები…) მიხედვით დასამალად ან მოსანიშნად</string>
     <string name="card_desc_dns">ცვლის, როგორ პოულობს აპი YouTube-ის სერვერებს. შეიძლება დაგეხმაროთ, როცა აპი საერთოდ არ იტვირთება.</string>
     <string name="card_desc_remote_control">აწყვილებს ტელეფონს ან პლანშეტს, რომ მისმა YouTube აპმა ამ ტელევიზორზე დაკვრა მართოს</string>
+    <!-- Settings search -->
+    <string name="find_setting">პარამეტრებში ძიება</string>
+    <string name="find_setting_none">„%s“-ის შესაბამისი პარამეტრი არ არის</string>
+    <string name="find_setting_gone">ეს პარამეტრი აღარ არსებობს. მოძებნეთ ხელახლა.</string>
 </resources>

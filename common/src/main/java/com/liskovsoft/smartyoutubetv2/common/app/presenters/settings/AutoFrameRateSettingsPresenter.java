@@ -2,6 +2,7 @@ package com.liskovsoft.smartyoutubetv2.common.app.presenters.settings;
 
 import android.content.Context;
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsRows;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.controllers.AutoFrameRateController;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionCategory;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
@@ -25,26 +26,30 @@ public class AutoFrameRateSettingsPresenter extends BasePresenter<Void> {
     }
 
     public void show(Runnable onFinish) {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.auto_frame_rate),
+                this::appendRows, onFinish);
+    }
 
+    /**
+     * The rows of the panel show shows (see SettingsPanel)
+     */
+    public void appendRows(SettingsRows settingsPresenter) {
         appendAutoFrameRateCategory(settingsPresenter);
         appendAutoFrameRatePauseCategory(settingsPresenter);
         appendAutoFrameRateModesCategory(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.auto_frame_rate), onFinish);
     }
 
-    private void appendAutoFrameRateCategory(AppDialogPresenter settingsPresenter) {
+    private void appendAutoFrameRateCategory(SettingsRows settingsPresenter) {
         OptionCategory category = AutoFrameRateController.createAutoFrameRateCategory(getContext(), mPlayerData);
         settingsPresenter.appendCategory(category);
     }
 
-    private void appendAutoFrameRatePauseCategory(AppDialogPresenter settingsPresenter) {
+    private void appendAutoFrameRatePauseCategory(SettingsRows settingsPresenter) {
         OptionCategory category = AutoFrameRateController.createAutoFrameRatePauseCategory(getContext(), mPlayerData);
         settingsPresenter.appendCategory(category);
     }
 
-    private void appendAutoFrameRateModesCategory(AppDialogPresenter settingsPresenter) {
+    private void appendAutoFrameRateModesCategory(SettingsRows settingsPresenter) {
         OptionCategory category = AutoFrameRateController.createAutoFrameRateModesCategory(getContext());
         settingsPresenter.appendCategory(category);
     }

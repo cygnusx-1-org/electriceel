@@ -1195,4 +1195,8 @@
     <string name="card_desc_api_keys">你自己的 YouTube Data API 金鑰，用於音樂自動播放，以及在首頁依類別（音樂、遊戲、新聞…）隱藏或標示影片</string>
     <string name="card_desc_dns">變更應用程式尋找 YouTube 伺服器的方式。在應用程式完全無法載入時可能有幫助。</string>
     <string name="card_desc_remote_control">配對手機或平板電腦，讓其中的 YouTube 應用程式控制這台電視上的播放</string>
+    <!-- Settings search -->
+    <string name="find_setting">搜尋設定</string>
+    <string name="find_setting_none">沒有符合「%s」的設定</string>
+    <string name="find_setting_gone">此設定已不存在。請重新搜尋。</string>
 </resources>

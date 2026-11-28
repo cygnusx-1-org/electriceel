@@ -3,6 +3,7 @@ package com.liskovsoft.smartyoutubetv2.common.app.presenters.settings;
 import android.content.Context;
 
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsRows;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
@@ -57,16 +58,22 @@ public class AiSListSettingsPresenter extends BasePresenter<Void> {
     }
 
     public void show(Runnable onFinish) {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        // As it opens, not as its rows are made (the settings search makes them too): e.g. the download at start failed
+        AiSListManager.instance(getContext()).loadIfNeeded();
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.aislist_provider),
+                this::appendRows, onFinish);
+    }
 
+    /**
+     * The rows of the panel show shows (see SettingsPanel)
+     */
+    public void appendRows(SettingsRows settingsPresenter) {
         appendListMenu(settingsPresenter, AiSListFilterData.LIST_BLOCKLIST, R.string.aislist_blocklist);
         appendListMenu(settingsPresenter, AiSListFilterData.LIST_WARNLIST, R.string.aislist_warnlist);
         appendQuickToggleSwitch(settingsPresenter);
         appendReportsMenu(settingsPresenter);
         appendStatus(settingsPresenter);
         appendLinks(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.aislist_provider), onFinish);
     }
 
     public void show() {
@@ -76,16 +83,19 @@ public class AiSListSettingsPresenter extends BasePresenter<Void> {
     /**
      * A list's own menu: where it applies, whether it marks instead of hiding, and the marker color
      */
-    private void appendListMenu(AppDialogPresenter settingsPresenter, int list, int titleResId) {
+    private void appendListMenu(SettingsRows settingsPresenter, int list, int titleResId) {
         String title = getContext().getString(titleResId);
-        settingsPresenter.appendSingleButton(UiOptionItem.from(title, option -> showListMenu(list, title)));
+        OptionItem listMenu = UiOptionItem.from(title, option -> showListMenu(list, title));
+        // Opens a list: its rows are found by the settings search (see SettingsCatalog)
+        listMenu.setMenu(true);
+        settingsPresenter.appendSingleButton(listMenu);
     }
 
     /**
      * The button on the main screen that turns the hiding of both lists off and on (see QuickTogglePresenter).
      * Shown there while a list is set to hide.
      */
-    private void appendQuickToggleSwitch(AppDialogPresenter settingsPresenter) {
+    private void appendQuickToggleSwitch(SettingsRows settingsPresenter) {
         settingsPresenter.appendSingleSwitch(UiOptionItem.from(getContext().getString(R.string.quick_toggle),
                 option -> {
                     if (option.isSelected()) {
@@ -108,7 +118,7 @@ public class AiSListSettingsPresenter extends BasePresenter<Void> {
         dialogPresenter.showDialog(title);
     }
 
-    private void appendSectionsCategory(AppDialogPresenter settingsPresenter, int list) {
+    private void appendSectionsCategory(SettingsRows settingsPresenter, int list) {
         List<OptionItem> options = new ArrayList<>();
 
         // Everything is first. The other choices are greyed out while it's checked.
@@ -160,7 +170,7 @@ public class AiSListSettingsPresenter extends BasePresenter<Void> {
     /**
      * Greyed out while the list's marking is off
      */
-    private void appendMarkColor(AppDialogPresenter settingsPresenter, int list, OptionItem[] markModes) {
+    private void appendMarkColor(SettingsRows settingsPresenter, int list, OptionItem[] markModes) {
         List<OptionItem> options = new ArrayList<>();
 
         for (int[] pair : MARK_COLORS) {
@@ -177,9 +187,12 @@ public class AiSListSettingsPresenter extends BasePresenter<Void> {
     /**
      * How the channels reported from the context menu are sent (see AiSListReportPresenter)
      */
-    private void appendReportsMenu(AppDialogPresenter settingsPresenter) {
+    private void appendReportsMenu(SettingsRows settingsPresenter) {
         String title = getContext().getString(R.string.aislist_reports);
-        settingsPresenter.appendSingleButton(UiOptionItem.from(title, option -> showReportsMenu(title)));
+        OptionItem reportsMenu = UiOptionItem.from(title, option -> showReportsMenu(title));
+        // Opens a list: its rows are found by the settings search (see SettingsCatalog)
+        reportsMenu.setMenu(true);
+        settingsPresenter.appendSingleButton(reportsMenu);
     }
 
     private void showReportsMenu(String title) {
@@ -204,9 +217,8 @@ public class AiSListSettingsPresenter extends BasePresenter<Void> {
         dialogPresenter.showDialog(title);
     }
 
-    private void appendStatus(AppDialogPresenter settingsPresenter) {
+    private void appendStatus(SettingsRows settingsPresenter) {
         AiSListManager manager = AiSListManager.instance(getContext());
-        manager.loadIfNeeded(); // e.g. the download at start failed
 
         String status = manager.getUpdatedTimeMs() > 0 ?
                 getContext().getString(R.string.aislist_status, manager.getBlocklistSize(), manager.getWarnlistSize()) :
@@ -215,7 +227,7 @@ public class AiSListSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendSingleButton(UiOptionItem.from(status, option -> {}));
     }
 
-    private void appendLinks(AppDialogPresenter settingsPresenter) {
+    private void appendLinks(SettingsRows settingsPresenter) {
         OptionItem webSiteOption = UiOptionItem.from(getContext().getString(R.string.aislist_about),
                 option -> Utils.openLink(getContext(), getContext().getString(R.string.aislist_provider_url)));
 

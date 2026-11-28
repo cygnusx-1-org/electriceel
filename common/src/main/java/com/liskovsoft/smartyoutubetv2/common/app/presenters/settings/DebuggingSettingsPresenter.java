@@ -11,6 +11,7 @@ import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.sharedutils.rx.RxHelper;
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsRows;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
@@ -81,8 +82,27 @@ public class DebuggingSettingsPresenter extends BasePresenter<Void> {
             return;
         }
 
-        String host = Uri.parse(context.getString(R.string.submit_data_url)).getHost();
         AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(context);
+        appendRows(settingsPresenter, failureCount, videoStartCount);
+        settingsPresenter.enableReplace(submittedId != null);
+        settingsPresenter.setId(DEBUGGING_ID);
+        settingsPresenter.showDialog(context.getString(R.string.settings_debugging));
+
+        if (submittedId != null) {
+            showSubmitted(submittedId);
+        }
+    }
+
+    /**
+     * The rows of the panel, without the counts read in the background (see SettingsPanel)
+     */
+    public void appendRows(SettingsRows rows) {
+        appendRows(rows, 0, 0);
+    }
+
+    private void appendRows(SettingsRows settingsPresenter, int failureCount, int videoStartCount) {
+        Context context = getContext();
+        String host = Uri.parse(context.getString(R.string.submit_data_url)).getHost();
 
         // One line for both counts: the summary shows 4 lines at most, and the last submission's is below
         String description = context.getString(R.string.submit_data_desc, host)
@@ -125,14 +145,6 @@ public class DebuggingSettingsPresenter extends BasePresenter<Void> {
                     DataSubmitter.autoSubmit(context); // scheduled, or cancelled
                 },
                 mDebuggingData.isAutoSubmitEnabled()));
-
-        settingsPresenter.enableReplace(submittedId != null);
-        settingsPresenter.setId(DEBUGGING_ID);
-        settingsPresenter.showDialog(context.getString(R.string.settings_debugging));
-
-        if (submittedId != null) {
-            showSubmitted(submittedId);
-        }
     }
 
     private void submit() {

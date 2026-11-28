@@ -3,6 +3,7 @@ package com.liskovsoft.smartyoutubetv2.common.app.presenters.settings;
 import android.content.Context;
 
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsRows;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
@@ -30,20 +31,24 @@ public class DeArrowSettingsPresenter extends BasePresenter<Void> {
     }
 
     public void show(Runnable onFinish) {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
-        
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.dearrow_provider),
+                this::appendRows, onFinish);
+    }
+
+    /**
+     * The rows of the panel show shows (see SettingsPanel)
+     */
+    public void appendRows(SettingsRows settingsPresenter) {        
         appendSwitches(settingsPresenter);
         appendThumbQuality(settingsPresenter);
         appendLinks(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.dearrow_provider), onFinish);
     }
 
     public void show() {
         show(null);
     }
 
-    private void appendThumbQuality(AppDialogPresenter settingsPresenter) {
+    private void appendThumbQuality(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         for (int[] pair : new int[][] {
@@ -60,7 +65,7 @@ public class DeArrowSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.dearrow_not_submitted_thumbs), options);
     }
 
-    private void appendSwitches(AppDialogPresenter settingsPresenter) {
+    private void appendSwitches(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(UiOptionItem.from(getContext().getString(R.string.card_unlocalized_titles),
@@ -86,7 +91,7 @@ public class DeArrowSettingsPresenter extends BasePresenter<Void> {
         }
     }
 
-    private void appendLinks(AppDialogPresenter settingsPresenter) {
+    private void appendLinks(SettingsRows settingsPresenter) {
         OptionItem statsCheckOption = UiOptionItem.from(getContext().getString(R.string.dearrow_status),
                 option -> Utils.openLink(getContext(), getContext().getString(R.string.dearrow_status_url)));
 
@@ -97,7 +102,7 @@ public class DeArrowSettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendSingleButton(webSiteOption);
     }
 
-    private void appendDeArrowSwitch(AppDialogPresenter settingsPresenter) {
+    private void appendDeArrowSwitch(SettingsRows settingsPresenter) {
         String title = String.format(
                 "%s (%s)",
                 getContext().getString(R.string.dearrow_provider),

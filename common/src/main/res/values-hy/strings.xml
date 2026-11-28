@@ -1209,4 +1209,8 @@
     <string name="card_desc_api_keys">Ձեր սեփական YouTube Data API բանալին, որն անհրաժեշտ է երաժշտության ինքնանվագարկման և Գլխավոր էջում տեսանյութերը ըստ կատեգորիայի (երաժշտություն, խաղեր, լուրեր…) թաքցնելու կամ նշելու համար</string>
     <string name="card_desc_dns">Փոխում է, թե ինչպես է հավելվածը գտնում YouTube-ի սերվերները։ Կարող է օգնել, երբ հավելվածն ընդհանրապես չի բեռնվում։</string>
     <string name="card_desc_remote_control">Զուգակցում է հեռախոսը կամ պլանշետը, որպեսզի դրա YouTube հավելվածը կարողանա կառավարել նվագարկումը այս հեռուստացույցում</string>
+    <!-- Settings search -->
+    <string name="find_setting">Որոնել կարգավորումներում</string>
+    <string name="find_setting_none">«%s»-ին համապատասխանող կարգավորում չկա</string>
+    <string name="find_setting_gone">Այս կարգավորումն այլևս չկա։ Կրկին որոնեք։</string>
 </resources>

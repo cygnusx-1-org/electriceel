@@ -2,6 +2,7 @@ package com.liskovsoft.smartyoutubetv2.common.app.presenters.settings;
 
 import android.content.Context;
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsRows;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionCategory;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
@@ -23,8 +24,14 @@ public class SubtitleSettingsPresenter extends BasePresenter<Void> {
     }
 
     public void show() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.subtitle_category_title),
+                this::appendRows, null);
+    }
 
+    /**
+     * The rows of the panel show shows (see SettingsPanel)
+     */
+    public void appendRows(SettingsRows settingsPresenter) {
         settingsPresenter.appendSingleSwitch(AppDialogUtil.createSubtitleChannelOption(getContext()));
         settingsPresenter.appendSingleSwitch(AppDialogUtil.createSentenceSubtitlesOption(getContext()));
         // No video's captions here: off in general (see CaptionStylesData)
@@ -36,8 +43,6 @@ public class SubtitleSettingsPresenter extends BasePresenter<Void> {
         appendSubtitleStyleCategory(settingsPresenter);
         appendSubtitleSizeCategory(settingsPresenter);
         appendSubtitlePositionCategory(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.subtitle_category_title));
     }
 
     //private void appendSubtitleLanguageCategory(AppSettingsPresenter settingsPresenter) {
@@ -68,22 +73,22 @@ public class SubtitleSettingsPresenter extends BasePresenter<Void> {
     //    settingsPresenter.appendRadioCategory(subtitleLanguageTitle, options);
     //}
 
-    private void appendSubtitleStyleCategory(AppDialogPresenter settingsPresenter) {
+    private void appendSubtitleStyleCategory(SettingsRows settingsPresenter) {
         OptionCategory category = AppDialogUtil.createSubtitleStylesCategory(getContext());
         settingsPresenter.appendRadioCategory(category.title, category.options);
     }
 
-    private void appendSubtitleSizeCategory(AppDialogPresenter settingsPresenter) {
+    private void appendSubtitleSizeCategory(SettingsRows settingsPresenter) {
         OptionCategory category = AppDialogUtil.createSubtitleSizeCategory(getContext());
         settingsPresenter.appendRadioCategory(category.title, category.options);
     }
 
-    private void appendSubtitlePositionCategory(AppDialogPresenter settingsPresenter) {
+    private void appendSubtitlePositionCategory(SettingsRows settingsPresenter) {
         OptionCategory category = AppDialogUtil.createSubtitlePositionCategory(getContext());
         settingsPresenter.appendRadioCategory(category.title, category.options);
     }
 
-    private void appendMoreSubtitlesSwitch(AppDialogPresenter settingsPresenter) {
+    private void appendMoreSubtitlesSwitch(SettingsRows settingsPresenter) {
         settingsPresenter.appendSingleSwitch(UiOptionItem.from("Unlock more subtitles",
                 option -> MediaServiceData.instance().setMoreSubtitlesUnlocked(option.isSelected()),
                 MediaServiceData.instance().isMoreSubtitlesUnlocked()));

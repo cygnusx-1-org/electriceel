@@ -35,9 +35,11 @@ public class SearchSectionSettingsPresenter extends BasePresenter<Void> implemen
     public List<SettingsItem> getItems(Context context) {
         List<SettingsItem> items = new ArrayList<>();
         items.add(new SettingsItem(context.getString(R.string.settings_general),
-                () -> SearchSettingsPresenter.instance(context).showGeneral(), R.drawable.settings_general));
+                () -> SearchSettingsPresenter.instance(context).showGeneral(), R.drawable.settings_general)
+                .setPanel(rows -> SearchSettingsPresenter.instance(context).appendGeneralRows(rows)));
         items.add(new SettingsItem(context.getString(R.string.settings_voice_engine),
-                () -> SearchSettingsPresenter.instance(context).showVoiceEngine(), R.drawable.settings_search));
+                () -> SearchSettingsPresenter.instance(context).showVoiceEngine(), R.drawable.settings_search)
+                .setPanel(rows -> SearchSettingsPresenter.instance(context).appendVoiceEngineRows(rows)));
 
         return items;
     }

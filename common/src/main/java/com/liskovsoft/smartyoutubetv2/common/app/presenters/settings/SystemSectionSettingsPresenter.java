@@ -36,17 +36,22 @@ public class SystemSectionSettingsPresenter extends BasePresenter<Void> implemen
     public List<SettingsItem> getItems(Context context) {
         List<SettingsItem> items = new ArrayList<>();
         items.add(new SettingsItem(context.getString(R.string.settings_general),
-                () -> SystemGeneralSettingsPresenter.instance(context).show(), R.drawable.settings_general));
+                () -> SystemGeneralSettingsPresenter.instance(context).show(), R.drawable.settings_general)
+                .setCards(SystemGeneralSettingsPresenter.instance(context)));
         items.add(new SettingsItem(context.getString(R.string.settings_dns),
                 () -> GeneralSettingsPresenter.instance(context).showDns(), R.drawable.settings_dns)
+                .setPanel(rows -> GeneralSettingsPresenter.instance(context).appendDnsRows(rows))
                 .setDescription(context.getString(R.string.card_desc_dns)));
         items.add(new SettingsItem(context.getString(R.string.settings_remote_control),
                 () -> RemoteControlSettingsPresenter.instance(context).show(), R.drawable.settings_cast)
+                .setPanel(rows -> RemoteControlSettingsPresenter.appendRows(context, rows))
                 .setDescription(context.getString(R.string.card_desc_remote_control)));
         items.add(new SettingsItem(context.getString(R.string.app_backup_restore),
-                () -> BackupSettingsPresenter.instance(context).show(), R.drawable.settings_backup));
+                () -> BackupSettingsPresenter.instance(context).show(), R.drawable.settings_backup)
+                .setPanel(rows -> BackupSettingsPresenter.appendRows(context, rows)));
         items.add(new SettingsItem(context.getString(R.string.storage_sync),
                 () -> StorageSettingsPresenter.instance(context).show(), R.drawable.settings_storage_sync)
+                .setPanel(rows -> StorageSettingsPresenter.instance(context).appendRows(rows))
                 .setDescription(context.getString(R.string.storage_sync_desc)));
 
         return items;

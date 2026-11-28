@@ -1240,4 +1240,8 @@
     <string name="card_desc_api_keys">Tvoj lasten ključ YouTube Data API, potreben za samodejno predvajanje glasbe ter za skrivanje ali označevanje videoposnetkov po kategoriji (glasba, igre, novice…) na Domov</string>
     <string name="card_desc_dns">Spremeni, kako aplikacija najde strežnike YouTuba. Lahko pomaga, ko se aplikacija sploh ne naloži.</string>
     <string name="card_desc_remote_control">Seznani telefon ali tablični računalnik, da lahko njegova aplikacija YouTube upravlja predvajanje na tem televizorju</string>
+    <!-- Settings search -->
+    <string name="find_setting">Iskanje po nastavitvah</string>
+    <string name="find_setting_none">Nobena nastavitev se ne ujema z »%s«</string>
+    <string name="find_setting_gone">Te nastavitve ni več. Poiščite znova.</string>
 </resources>

@@ -43,27 +43,36 @@ public class AppDataSourceManager {
         settingItems.add(new SettingsItem(
                 context.getString(R.string.settings_accounts), () -> AccountSettingsPresenter.instance(context).show(), R.drawable.settings_account));
         settingItems.add(new SettingsItem(
-                context.getString(R.string.settings_system), () -> SystemSectionSettingsPresenter.instance(context).show(), R.drawable.settings_app));
+                context.getString(R.string.settings_system), () -> SystemSectionSettingsPresenter.instance(context).show(), R.drawable.settings_app)
+                .setCards(SystemSectionSettingsPresenter.instance(context)));
         settingItems.add(new SettingsItem(
-                context.getString(R.string.settings_main_ui), () -> MainUISectionSettingsPresenter.instance(context).show(), R.drawable.settings_main_ui));
+                context.getString(R.string.settings_main_ui), () -> MainUISectionSettingsPresenter.instance(context).show(), R.drawable.settings_main_ui)
+                .setCards(MainUISectionSettingsPresenter.instance(context)));
         settingItems.add(new SettingsItem(
-                context.getString(R.string.settings_content_filtering), () -> ContentFilteringSettingsPresenter.instance(context).show(), R.drawable.settings_content_filtering));
+                context.getString(R.string.settings_content_filtering), () -> ContentFilteringSettingsPresenter.instance(context).show(), R.drawable.settings_content_filtering)
+                .setCards(ContentFilteringSettingsPresenter.instance(context)));
         settingItems.add(new SettingsItem(
-                context.getString(R.string.settings_player), () -> PlayerSectionSettingsPresenter.instance(context).show(), R.drawable.settings_player));
+                context.getString(R.string.settings_player), () -> PlayerSectionSettingsPresenter.instance(context).show(), R.drawable.settings_player)
+                .setCards(PlayerSectionSettingsPresenter.instance(context)));
         settingItems.add(new SettingsItem(
-                context.getString(R.string.settings_search), () -> SearchSectionSettingsPresenter.instance(context).show(), R.drawable.settings_search));
+                context.getString(R.string.settings_search), () -> SearchSectionSettingsPresenter.instance(context).show(), R.drawable.settings_search)
+                .setCards(SearchSectionSettingsPresenter.instance(context)));
 
         settingItems.add(new SettingsItem(
-                context.getString(R.string.settings_updates), () -> UpdatesSettingsPresenter.instance(context).show(), R.drawable.settings_updates));
+                context.getString(R.string.settings_updates), () -> UpdatesSettingsPresenter.instance(context).show(), R.drawable.settings_updates)
+                .setPanel(rows -> UpdatesSettingsPresenter.instance(context).appendRows(rows)));
         settingItems.add(new SettingsItem(
-                context.getString(R.string.settings_debugging), () -> DebuggingSettingsPresenter.instance(context).show(), R.drawable.settings_debugging));
+                context.getString(R.string.settings_debugging), () -> DebuggingSettingsPresenter.instance(context).show(), R.drawable.settings_debugging)
+                .setPanel(rows -> DebuggingSettingsPresenter.instance(context).appendRows(rows)));
 
         if (Helpers.equalsAny(context.getPackageName(), Utils.KNOWN_PACKAGES)) {
             settingItems.add(new SettingsItem(
-                    context.getString(R.string.settings_about), () -> AboutSettingsPresenter.instance(context).show(), R.drawable.settings_about));
+                    context.getString(R.string.settings_about), () -> AboutSettingsPresenter.instance(context).show(), R.drawable.settings_about)
+                    .setPanel(rows -> AboutSettingsPresenter.instance(context).appendRows(rows)));
         } else {
             settingItems.add(new SettingsItem(
-                    context.getString(R.string.settings_about), () -> AboutSimpleSettingsPresenter.instance(context).show(), R.drawable.settings_about));
+                    context.getString(R.string.settings_about), () -> AboutSimpleSettingsPresenter.instance(context).show(), R.drawable.settings_about)
+                    .setPanel(rows -> AboutSimpleSettingsPresenter.instance(context).appendRows(rows)));
         }
 
         return settingItems;

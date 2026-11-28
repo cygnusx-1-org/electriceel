@@ -86,4 +86,13 @@
             android:textColor="@color/modern_text_secondary"
             android:textSize="@dimen/modern_dialog_page_preview_summary_size" />
     </LinearLayout>
+
+    <!-- The search bar of the Settings section, at the end of the title's line (see SettingsSearchBar): last, the settings
+         found drawn over the preview -->
+    <include
+        layout="@layout/settings_search_bar"
+        android:layout_width="@dimen/settings_search_width"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginEnd="@dimen/modern_settings_title_x" />
 </merge>

@@ -1195,4 +1195,8 @@
     <string name="card_desc_api_keys">Khóa YouTube Data API của riêng bạn, cần cho tự động phát nhạc và để ẩn hoặc đánh dấu video theo danh mục (âm nhạc, trò chơi, tin tức…) trên Trang chủ</string>
     <string name="card_desc_dns">Thay đổi cách ứng dụng tìm máy chủ của YouTube. Có thể giúp khi ứng dụng hoàn toàn không tải được.</string>
     <string name="card_desc_remote_control">Ghép nối điện thoại hoặc máy tính bảng để ứng dụng YouTube trên đó điều khiển việc phát trên TV này</string>
+    <!-- Settings search -->
+    <string name="find_setting">Tìm trong cài đặt</string>
+    <string name="find_setting_none">Không có cài đặt nào khớp với \"%s\"</string>
+    <string name="find_setting_gone">Cài đặt này không còn nữa. Hãy tìm lại.</string>
 </resources>

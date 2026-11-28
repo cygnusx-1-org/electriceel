@@ -11,6 +11,8 @@ import com.liskovsoft.sharedutils.helpers.Helpers;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.sharedutils.rx.RxHelper;
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsPanel;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsRows;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
@@ -81,66 +83,102 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
      * The Buttons options card of the User interface settings, in General: the buttons at the top of the main window (were in General)
      */
     public void showButtons() {
-        showCategory(R.string.settings_buttons_options, this::appendTopButtonsCategory);
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_buttons_options),
+                this::appendButtonsRows, mOnFinish);
+    }
+
+    /**
+     * The rows of the panel showButtons shows (see SettingsPanel)
+     */
+    public void appendButtonsRows(SettingsRows rows) {
+        appendTopButtonsCategory(rows);
     }
 
     /**
      * The Color scheme options card of the User interface settings, in General (was in General)
      */
     public void showColors() {
-        showCategory(R.string.settings_color_scheme_options, this::appendColorScheme);
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_color_scheme_options),
+                this::appendColorsRows, mOnFinish);
+    }
+
+    /**
+     * The rows of the panel showColors shows (see SettingsPanel)
+     */
+    public void appendColorsRows(SettingsRows rows) {
+        appendColorScheme(rows);
     }
 
     /**
      * The Skins card of the User interface settings: the look and navigation of the app (see Skins), and what's of one skin only
      */
     public void showSkins() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_skins),
+                this::appendSkinsRows, mOnFinish);
+    }
 
+    /**
+     * The rows of the panel showSkins shows (see SettingsPanel)
+     */
+    public void appendSkinsRows(SettingsRows settingsPresenter) {
         appendSkins(settingsPresenter);
         appendHideNoneAccount(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.settings_skins), mOnFinish);
     }
 
     /**
      * The Scale options card of the User interface settings, in General: the UI scale and the video grid scale (were in General)
      */
     public void showScale() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_scale_options),
+                this::appendScaleRows, mOnFinish);
+    }
 
+    /**
+     * The rows of the panel showScale shows (see SettingsPanel)
+     */
+    public void appendScaleRows(SettingsRows settingsPresenter) {
         appendScaleUI(settingsPresenter);
         if (Build.VERSION.SDK_INT > 19) {
             appendVideoGridScale(settingsPresenter);
         }
-
-        settingsPresenter.showDialog(getContext().getString(R.string.settings_scale_options), mOnFinish);
     }
 
     /**
      * The Cards options card of the User interface settings, in General: the cards and where their thumbnails come from (were in General)
      */
     public void showCards() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_cards_options),
+                this::appendCardsRows, mOnFinish);
+    }
 
+    /**
+     * The rows of the panel showCards shows (see SettingsPanel)
+     */
+    public void appendCardsRows(SettingsRows settingsPresenter) {
         if (Build.VERSION.SDK_INT > 19) {
             appendCardTextScrollSpeed(settingsPresenter);
         }
         appendCardPreviews(settingsPresenter);
         appendCardStyle(settingsPresenter);
         appendThumbSource(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.settings_cards_options), mOnFinish);
     }
 
     /**
      * The Time options card of the User interface settings, in General: the time format and the clocks (were in Misc)
      */
     public void showTime() {
-        showCategory(R.string.settings_time_options, this::appendTimeCategory);
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_time_options),
+                this::appendTimeRows, mOnFinish);
     }
 
-    private void appendTimeCategory(AppDialogPresenter settingsPresenter) {
+    /**
+     * The rows of the panel showTime shows (see SettingsPanel)
+     */
+    public void appendTimeRows(SettingsRows rows) {
+        appendTimeCategory(rows);
+    }
+
+    private void appendTimeCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(UiOptionItem.from(getContext().getString(R.string.time_format_24) + " " + getContext().getString(R.string.time_format),
@@ -173,7 +211,15 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
      * Misc). Its sorting is in Sort options (see showSorting).
      */
     public void showChannels() {
-        showCategory(R.string.settings_channels_options, this::appendChannelOptionsCategory);
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_channels_options),
+                this::appendChannelsRows, mOnFinish);
+    }
+
+    /**
+     * The rows of the panel showChannels shows (see SettingsPanel)
+     */
+    public void appendChannelsRows(SettingsRows rows) {
+        appendChannelOptionsCategory(rows);
     }
 
     /**
@@ -181,15 +227,19 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
      * and of the playlists of Add/Remove from playlist
      */
     public void showSorting() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
-
-        appendChannelSortingCategory(settingsPresenter);
-        appendAddToPlaylistSortingCategory(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(R.string.settings_sort_options), mOnFinish);
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_sort_options),
+                this::appendSortingRows, mOnFinish);
     }
 
-    private void appendChannelOptionsCategory(AppDialogPresenter settingsPresenter) {
+    /**
+     * The rows of the panel showSorting shows (see SettingsPanel)
+     */
+    public void appendSortingRows(SettingsRows rows) {
+        appendChannelSortingCategory(rows);
+        appendAddToPlaylistSortingCategory(rows);
+    }
+
+    private void appendChannelOptionsCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(UiOptionItem.from(getContext().getString(R.string.channels_old_look),
@@ -218,7 +268,15 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
      * The Misc options card of the User interface settings, in General (was Misc in the General panel)
      */
     public void showMisc() {
-        showCategory(R.string.settings_misc_options, this::appendMiscCategory);
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.settings_misc_options),
+                this::appendMiscRows, mOnFinish);
+    }
+
+    /**
+     * The rows of the panel showMisc shows (see SettingsPanel)
+     */
+    public void appendMiscRows(SettingsRows rows) {
+        appendMiscCategory(rows);
     }
 
     /**
@@ -226,13 +284,28 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
      * sections, their order and the one booted to
      */
     public void showSidebar() {
-        AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.sidebar),
+                this::appendSidebarRows, null);
+    }
 
-        dialog.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.side_panel_sections), option -> showEnabledSections()));
-        dialog.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.sidebar_order), option -> showSidebarOrder()));
-        dialog.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.boot_to_section), option -> showBootToSection()));
-
-        dialog.showDialog(getContext().getString(R.string.sidebar));
+    /**
+     * The rows of the panel showSidebar shows (see SettingsPanel)
+     */
+    public void appendSidebarRows(SettingsRows dialog) {
+        OptionItem sections = UiOptionItem.from(getContext().getString(R.string.side_panel_sections), option -> showEnabledSections());
+        // Opens a list: its rows are found by the settings search (see setPanel)
+        sections.setMenu(true);
+        sections.setPanel(this::appendEnabledSections);
+        dialog.appendSingleButton(sections);
+        OptionItem sidebarOrder = UiOptionItem.from(getContext().getString(R.string.sidebar_order), option -> showSidebarOrder());
+        // Opens a list: its items are found by the settings search (see setPanel)
+        sidebarOrder.setMenu(true);
+        sidebarOrder.setPanel(this::appendSidebarOrderRows);
+        dialog.appendSingleButton(sidebarOrder);
+        OptionItem bootTo = UiOptionItem.from(getContext().getString(R.string.boot_to_section), option -> showBootToSection());
+        bootTo.setMenu(true);
+        bootTo.setPanel(this::appendBootToSection);
+        dialog.appendSingleButton(bootTo);
     }
 
     private void showBootToSection() {
@@ -248,6 +321,12 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
      * each time it's opened. Not Settings: it's always last (see SidebarService.keepSettingsLast).
      */
     private void showSidebarOrder() {
+        AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
+        appendSidebarOrderRows(dialog);
+        dialog.showDialog();
+    }
+
+    private void appendSidebarOrderRows(SettingsRows dialog) {
         List<OptionItem> options = new ArrayList<>();
 
         // The ones without a title come after them (see SidebarService.setPinnedItemsOrder)
@@ -259,7 +338,6 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
             }
         }
 
-        AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
         dialog.appendReorderCategory(getContext().getString(R.string.sidebar_order), options, items -> {
             List<Video> pinnedItems = new ArrayList<>();
 
@@ -269,7 +347,6 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
 
             BrowsePresenter.instance(getContext()).setSectionsOrder(pinnedItems);
         });
-        dialog.showDialog();
     }
 
     /**
@@ -298,10 +375,22 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
      * Home is loaded again once it's closed.
      */
     public void showHome() {
-        HomeRowsData data = HomeRowsData.instance(getContext());
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.header_home),
+                this::appendHomeRows, () -> BrowsePresenter.instance(getContext()).updateHomeRows());
+    }
 
-        settingsPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.home_rows), option -> showHomeRows()));
+    /**
+     * The rows of the panel showHome shows (see SettingsPanel)
+     */
+    public void appendHomeRows(SettingsRows settingsPresenter) {
+        HomeRowsData data = HomeRowsData.instance(getContext());
+
+        OptionItem homeRows = UiOptionItem.from(getContext().getString(R.string.home_rows), option -> showHomeRows());
+        // Opens a list: its rows are found by the settings search (see setPanel)
+        homeRows.setMenu(true);
+        // Without the subscribed channels: they're loaded as it opens
+        homeRows.setPanel(rows -> appendHomeRowsMenuRows(rows, null));
+        settingsPresenter.appendSingleButton(homeRows);
 
         settingsPresenter.appendSingleSwitch(UiOptionItem.from(getContext().getString(R.string.home_rows_order_youtube),
                 getContext().getString(R.string.home_rows_order_youtube_desc),
@@ -314,9 +403,11 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
                 },
                 data.isYouTubeOrdered()));
 
-        settingsPresenter.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.home_rows_order), option -> showHomeRowsOrder()));
-
-        settingsPresenter.showDialog(getContext().getString(R.string.header_home), () -> BrowsePresenter.instance(getContext()).updateHomeRows());
+        OptionItem homeRowsOrder = UiOptionItem.from(getContext().getString(R.string.home_rows_order), option -> showHomeRowsOrder());
+        // Opens a list: its items are found by the settings search (see setPanel)
+        homeRowsOrder.setMenu(true);
+        homeRowsOrder.setPanel(this::appendHomeRowsOrderRows);
+        settingsPresenter.appendSingleButton(homeRowsOrder);
     }
 
     private void showHomeRows() {
@@ -336,6 +427,14 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
      * Each under its label, set apart by a line. One with nothing in it is left out.
      */
     private void showHomeRows(MediaGroup subscribedChannels) {
+        MessageHelpers.cancelToasts();
+
+        AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
+        appendHomeRowsMenuRows(dialog, subscribedChannels);
+        dialog.showDialog();
+    }
+
+    private void appendHomeRowsMenuRows(SettingsRows dialog, MediaGroup subscribedChannels) {
         HomeRowsData data = HomeRowsData.instance(getContext());
         List<OptionItem> rowOptions = new ArrayList<>();
         List<OptionItem> groupOptions = new ArrayList<>();
@@ -386,11 +485,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         appendHomeRowsSection(options, R.string.subscription_groups, groupOptions);
         appendHomeRowsSection(options, R.string.header_channels, channelOptions);
 
-        MessageHelpers.cancelToasts();
-
-        AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
         dialog.appendCheckedCategory(getContext().getString(R.string.home_rows), options);
-        dialog.showDialog();
     }
 
     /**
@@ -493,6 +588,12 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
      * The rows put in order with the remote (see OptionCategory.reorderList). Read again each time it's opened.
      */
     private void showHomeRowsOrder() {
+        AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
+        appendHomeRowsOrderRows(dialog);
+        dialog.showDialog();
+    }
+
+    private void appendHomeRowsOrderRows(SettingsRows dialog) {
         HomeRowsData data = HomeRowsData.instance(getContext());
         List<OptionItem> options = new ArrayList<>();
 
@@ -503,7 +604,6 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
             }
         }
 
-        AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
         dialog.appendReorderCategory(getContext().getString(R.string.home_rows_order), options, items -> {
             List<Row> rows = new ArrayList<>();
 
@@ -513,7 +613,6 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
 
             data.setRows(rows);
         });
-        dialog.showDialog();
     }
 
     private String getHomeRowTitle(Row row, HomeRowsData data) {
@@ -561,8 +660,14 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
      * items and their order (see MainUIData.MENU_VIDEOS...)
      */
     public void showContextMenuItems() {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(R.string.context_menu),
+                this::appendContextMenuItemsRows, null);
+    }
 
+    /**
+     * The rows of the panel showContextMenuItems shows (see SettingsPanel)
+     */
+    public void appendContextMenuItemsRows(SettingsRows settingsPresenter) {
         for (int[] menu : new int[][] {
                 {MainUIData.MENU_VIDEOS, R.string.context_menu_videos, R.string.context_menu_videos_desc},
                 {MainUIData.MENU_SUBSCRIPTIONS, R.string.header_subscriptions, R.string.context_menu_subscriptions_desc},
@@ -572,19 +677,26 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         }) {
             String title = getContext().getString(menu[1]);
             String description = menu[2] != 0 ? getContext().getString(menu[2]) : null;
-            settingsPresenter.appendSingleButton(UiOptionItem.from(title, description, option -> showContextMenu(menu[0], title)));
+            OptionItem contextMenu = UiOptionItem.from(title, description, option -> showContextMenu(menu[0], title));
+            // Opens a list: its rows are found by the settings search (see setPanel)
+            contextMenu.setMenu(true);
+            contextMenu.setPanel(rows -> appendContextMenuRows(rows, menu[0]));
+            settingsPresenter.appendSingleButton(contextMenu);
         }
-
-        settingsPresenter.showDialog(getContext().getString(R.string.context_menu));
     }
 
     private void showContextMenu(int menu, String title) {
         AppDialogPresenter dialog = AppDialogPresenter.instance(getContext());
-
-        dialog.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.context_menu_items), option -> showContextMenuItemsList(menu)));
-        dialog.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.context_menu_order), option -> showContextMenuOrder(menu)));
-
+        appendContextMenuRows(dialog, menu);
         dialog.showDialog(title);
+    }
+
+    private void appendContextMenuRows(SettingsRows dialog, int menu) {
+        dialog.appendSingleButton(UiOptionItem.from(getContext().getString(R.string.context_menu_items), option -> showContextMenuItemsList(menu)));
+        OptionItem menuOrder = UiOptionItem.from(getContext().getString(R.string.context_menu_order), option -> showContextMenuOrder(menu));
+        // Opens a list: its items are found by the settings search (see setPanel)
+        menuOrder.setMenu(true);
+        dialog.appendSingleButton(menuOrder);
     }
 
     private void showContextMenuItemsList(int menu) {
@@ -722,22 +834,14 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         }, data.isChannelEnabled(providerId)));
     }
 
-    private interface CategoryAppender {
-        void append(AppDialogPresenter settingsPresenter);
-    }
-
-    private void showCategory(int titleResId, CategoryAppender appender) {
-        AppDialogPresenter settingsPresenter = AppDialogPresenter.instance(getContext());
-
-        appender.append(settingsPresenter);
-
-        settingsPresenter.showDialog(getContext().getString(titleResId), mOnFinish);
+    private void showCategory(int titleResId, SettingsPanel panel) {
+        AppDialogPresenter.instance(getContext()).showPanel(getContext().getString(titleResId), panel, mOnFinish);
     }
 
     /**
      * The sections, then the subscription groups: unchecked, a group is out of the sidebar but kept
      */
-    private void appendEnabledSections(AppDialogPresenter settingsPresenter) {
+    private void appendEnabledSections(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         Map<Integer, Integer> sections = mSidebarService.getDefaultSections();
@@ -780,7 +884,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
     /**
      * Only the items the menu can have
      */
-    private void appendContextMenuItemsCategory(AppDialogPresenter settingsPresenter, int menu) {
+    private void appendContextMenuItemsCategory(SettingsRows settingsPresenter, int menu) {
         List<OptionItem> options = new ArrayList<>();
 
         Map<Long, Integer> menuNames = getMenuNames();
@@ -808,7 +912,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
      * First section, then the sections and pinned items in the order of the sidebar. First section is checked when the boot
      * section isn't in the sidebar too: it's booted to then (see BrowsePresenter.refreshSections).
      */
-    private void appendBootToSection(AppDialogPresenter settingsPresenter) {
+    private void appendBootToSection(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         int bootSectionId = mSidebarService.getBootSectionId();
@@ -891,7 +995,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         return menuNames;
     }
 
-    private void appendTopButtonsCategory(AppDialogPresenter settingsPresenter) {
+    private void appendTopButtonsCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         for (int[] pair : new int[][] {
@@ -910,7 +1014,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendCheckedCategory(getContext().getString(R.string.settings_buttons_options), options);
     }
 
-    private void appendColorScheme(AppDialogPresenter settingsPresenter) {
+    private void appendColorScheme(SettingsRows settingsPresenter) {
         List<ColorScheme> colorSchemes = mMainUIData.getColorSchemes();
 
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.settings_color_scheme_options), fromColorSchemes(colorSchemes));
@@ -933,7 +1037,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         return styleOptions;
     }
 
-    private void appendSkins(AppDialogPresenter settingsPresenter) {
+    private void appendSkins(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         for (int skinId : Skins.getSkinIds()) {
@@ -953,7 +1057,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
     /**
      * The account button of the classic skin (top left) goes from the last account back to the first, never to None
      */
-    private void appendHideNoneAccount(AppDialogPresenter settingsPresenter) {
+    private void appendHideNoneAccount(SettingsRows settingsPresenter) {
         AccountsData accountsData = AccountsData.instance(getContext());
 
         settingsPresenter.appendSingleSwitch(UiOptionItem.from(getContext().getString(R.string.hide_none_account,
@@ -961,7 +1065,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
                 option -> accountsData.setNoneAccountHidden(option.isSelected()), accountsData.isNoneAccountHidden()));
     }
 
-    private void appendCardPreviews(AppDialogPresenter settingsPresenter) {
+    private void appendCardPreviews(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         for (int[] pair : new int[][] {
@@ -976,7 +1080,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.card_preview), options);
     }
 
-    private void appendCardStyle(AppDialogPresenter settingsPresenter) {
+    private void appendCardStyle(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         OptionItem multilineTitle = UiOptionItem.from(getContext().getString(R.string.card_multiline_title),
@@ -1020,7 +1124,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendCheckedCategory(getContext().getString(R.string.cards_style), options);
     }
 
-    private void appendCardTitleLines(AppDialogPresenter settingsPresenter) {
+    private void appendCardTitleLines(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         for (int linesNum : new int[] {1, 2, 3, 4}) {
@@ -1032,7 +1136,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.card_title_lines_num), options);
     }
 
-    private void appendThumbSource(AppDialogPresenter settingsPresenter) {
+    private void appendThumbSource(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         for (int[] pair : new int[][] {
@@ -1049,7 +1153,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.card_content), options);
     }
 
-    private void appendChannelSortingCategory(AppDialogPresenter settingsPresenter) {
+    private void appendChannelSortingCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         for (int[] pair : new int[][] {
@@ -1068,7 +1172,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
     /**
      * By title, so that they don't move around, or as YouTube gives them, the latest edited first (see AppDialogUtil.createPlaylistOptions)
      */
-    private void appendAddToPlaylistSortingCategory(AppDialogPresenter settingsPresenter) {
+    private void appendAddToPlaylistSortingCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         for (int[] pair : new int[][] {
@@ -1081,7 +1185,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.add_to_playlist_sorting), options);
     }
 
-    private void appendPlaylistsCategoryStyle(AppDialogPresenter settingsPresenter) {
+    private void appendPlaylistsCategoryStyle(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         for (int[] pair : new int[][] {
@@ -1096,7 +1200,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.playlists_style), options);
     }
 
-    private void appendScaleUI(AppDialogPresenter settingsPresenter) {
+    private void appendScaleUI(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         for (float scale : new float[] {0.4f, 0.5f, 0.6f, 0.65f, 0.7f, 0.75f, 0.8f, 0.85f, 0.9f, 0.95f, 1.0f, 1.05f, 1.1f, 1.15f, 1.2f, 1.25f, 1.3f, 1.35f, 1.4f}) {
@@ -1111,7 +1215,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.scale_ui), options);
     }
 
-    private void appendCardTextScrollSpeed(AppDialogPresenter settingsPresenter) {
+    private void appendCardTextScrollSpeed(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         for (float factor : new float[] {1, 1.5f, 2, 2.5f, 3, 3.5f, 4, 4.5f, 5, 5.5f, 6, 6.5f, 7, 7.5f, 8}) {
@@ -1123,7 +1227,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.card_text_scroll_factor), options);
     }
 
-    private void appendVideoGridScale(AppDialogPresenter settingsPresenter) {
+    private void appendVideoGridScale(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         for (float scale : new float[] {0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 1.0f, 1.1f, 1.2f, 1.25f, 1.3f, 1.35f, 1.4f, 1.5f}) {
@@ -1138,7 +1242,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.video_grid_scale), options);
     }
 
-    private void appendTimeFormatCategory(AppDialogPresenter settingsPresenter) {
+    private void appendTimeFormatCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
 
         options.add(UiOptionItem.from(
@@ -1160,7 +1264,7 @@ public class MainUISettingsPresenter extends BasePresenter<Void> {
         settingsPresenter.appendRadioCategory(getContext().getString(R.string.time_format), options);
     }
 
-    private void appendMiscCategory(AppDialogPresenter settingsPresenter) {
+    private void appendMiscCategory(SettingsRows settingsPresenter) {
         List<OptionItem> options = new ArrayList<>();
         
         options.add(UiOptionItem.from(getContext().getString(R.string.card_unlocalized_titles),

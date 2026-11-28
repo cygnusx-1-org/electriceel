@@ -71,6 +71,33 @@ public class SettingsCardsPresenter extends BasePresenter<SettingsCardsView> {
     }
 
     /**
+     * Sections opened one in another: the last one is shown, Back goes to the ones before (e.g. System, then General, for a
+     * card the settings search found in General). Instead of the sections shown.
+     *
+     * @param openers of each section but the first, the index of the card that opens it in the cards of the section before
+     * @param focusedCard the index of the card to focus in the cards of the last section, -1 for the first one shown
+     */
+    public void showPath(List<Cards> sections, List<Integer> openers, int focusedCard) {
+        if (sections.isEmpty() || openers.size() != sections.size() - 1) {
+            return;
+        }
+
+        mStack.clear();
+        mStack.addAll(sections);
+        mSelectedCards.clear();
+        mSelectedCards.addAll(openers);
+
+        if (getView() != null) {
+            updateView(focusedCard);
+            return;
+        }
+
+        mSavedCard = focusedCard;
+
+        getViewManager().startView(SettingsCardsView.class);
+    }
+
+    /**
      * @return went back to the section before, the screen stays
      */
     public boolean goBack() {

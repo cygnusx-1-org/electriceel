@@ -8,6 +8,7 @@ import com.liskovsoft.mediaserviceinterfaces.oauth.Account;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.sharedutils.rx.RxHelper;
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.SettingsRows;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
@@ -63,11 +64,40 @@ public class StorageSettingsPresenter extends BasePresenter<Void> {
             return;
         }
 
-        StorageConfig config = mSync.getConfig();
         StorageSync.Status status = mSync.getStatus();
         mShownState = status.state;
         mShownDetail = status.detail;
         AppDialogPresenter dialog = AppDialogPresenter.instance(context);
+        appendRows(dialog);
+        mSync.addListener(mListener);
+
+        // With sync off the switch is its only row: a single row would be opened as a dialog of its own, empty
+        dialog.enableExpandable(false);
+        dialog.enableReplace(replace);
+        dialog.setId(STORAGE_ID);
+
+        if (replace) {
+            // Built again: titled as the System card opens it, "System - Storage sync" (see SettingsCardsFragment)
+            dialog.setTitlePrefix(context.getString(R.string.settings_system));
+            dialog.enableNestedTitles(true);
+        }
+
+        dialog.showDialog(context.getString(R.string.storage_sync), () -> mSync.removeListener(mListener));
+
+        if (replace) {
+            // Only this panel
+            dialog.setTitlePrefix(null);
+            dialog.enableNestedTitles(false);
+        }
+    }
+
+    /**
+     * The rows of the panel (see SettingsPanel)
+     */
+    public void appendRows(SettingsRows dialog) {
+        Context context = getContext();
+        StorageConfig config = mSync.getConfig();
+        StorageSync.Status status = mSync.getStatus();
 
         dialog.appendSingleSwitch(UiOptionItem.from(context.getString(R.string.storage_sync),
                 config.isEnabled() ? statusText(context, status) : context.getString(R.string.storage_sync_desc),
@@ -98,29 +128,9 @@ public class StorageSettingsPresenter extends BasePresenter<Void> {
                         option -> mSync.wake()));
             }
         }
-
-        mSync.addListener(mListener);
-        // With sync off the switch is its only row: a single row would be opened as a dialog of its own, empty
-        dialog.enableExpandable(false);
-        dialog.enableReplace(replace);
-        dialog.setId(STORAGE_ID);
-
-        if (replace) {
-            // Built again: titled as the System card opens it, "System - Storage sync" (see SettingsCardsFragment)
-            dialog.setTitlePrefix(context.getString(R.string.settings_system));
-            dialog.enableNestedTitles(true);
-        }
-
-        dialog.showDialog(context.getString(R.string.storage_sync), () -> mSync.removeListener(mListener));
-
-        if (replace) {
-            // Only this panel
-            dialog.setTitlePrefix(null);
-            dialog.enableNestedTitles(false);
-        }
     }
 
-    private void appendAuthorization(Context context, AppDialogPresenter dialog, StorageConfig config) {
+    private void appendAuthorization(Context context, SettingsRows dialog, StorageConfig config) {
         if (config.isAuthorized()) {
             dialog.appendSingleButton(UiOptionItem.from(context.getString(R.string.storage_group, config.getGroupName()),
                     context.getString(R.string.storage_forget_desc) + "\n" + context.getString(R.string.storage_forget),
